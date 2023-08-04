@@ -7,5 +7,4 @@ export default function Home() {
 		<div className="w-1/6">Users</div>
   	</div>
   )
-
 }
