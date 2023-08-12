@@ -9,7 +9,7 @@ export type Users = {
 }
 
 export default function Chat() {
-	const context = useContext(PS_context);
+	const { room, client } = useContext(PS_context);
 	const [users, setUsers] = useState<Users[]>([]);
 	const addUser = (user: Users) => {
 		setUsers([...users, user]);

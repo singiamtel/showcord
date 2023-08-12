@@ -2,14 +2,14 @@ import { Message } from "./message";
 
 export class Room {
   ID: string;
-  title: string;
+  name: string;
   type: "chat" | "battle";
   messages: Message[] = [];
   constructor(
-    { ID, title, type }: { ID: string; title: string; type: "chat" | "battle" },
+    { ID, name, type }: { ID: string; name: string; type: "chat" | "battle" },
   ) {
     this.ID = ID;
-    this.title = title;
+    this.name = name;
     this.type = type;
   }
   add_message(message: Message) {

@@ -45,18 +45,15 @@ export class Client {
         switch (cmd) {
           case "c:":
             // th
-            this.events.dispatchEvent(
-              new CustomEvent("chat", { detail: { room_id: roomID, args } }),
-            );
-            const room = this.rooms.find((room) => room.ID === roomID);
+            const room = this.room(roomID);
             if(!room){
               console.log("room not found (" + roomID + ")");
               return;
             }
-            room?.add_message(
-              new Message({ roomID, type: "chat", content: args[3] }),
+            this.addMessage(roomID,
+              new Message({ ID: roomID, type: "chat", content: args[2], user: args[1] })
             );
-            console.log("room", room);
+            console.log("added to ", roomID);
         }
       } else {
         /*
@@ -67,7 +64,7 @@ export class Client {
         */
         switch (cmd) {
           case "init":
-            let type = '', didType = false, title = '', didTitle = false, id = '', didID = false, room = null;
+            let type = '', didType = false, name = '', didName = false, id = '', didID = false, room = null;
             for (let i = 2; i < splitted_message.length; i++) { // start at 2 because first line is room id and second line is cmd
               if (splitted_message[i] === "") continue;
               if (!didType && splitted_message[i].startsWith("|init|")) {
@@ -78,17 +75,27 @@ export class Client {
                 didType = true;
                 continue;
               }
-              if (!didTitle && splitted_message[i].startsWith("|title|")) {
-                title = splitted_message[i].slice(7);
-                didTitle = true;
+              if (!didName && splitted_message[i].startsWith("|title|")) {
+                name = splitted_message[i].slice(7);
+                didName = true;
+                continue;
+              }
+              if (!didName && splitted_message[i].startsWith("|users|")) {
                 continue;
               }
               if(!didID && splitted_message[i].startsWith('|:|')){
                 id = splitted_message[i].slice(3);
                 didID = true;
-                room = new Room({ID: id, title, type: (type as "chat" | "battle")})
-                this.rooms.push(room)
+                room = new Room({ID: roomID, name: name, type: (type as "chat" | "battle")})
+                this.addRoom(room)
                 continue;
+              }
+              if(splitted_message[i].startsWith('|c:|')){
+                const [_, _2, msgID, user, message] = splitted_message[i].split("|")
+                this.addMessage(roomID, new Message({user, type: "chat", content: message, ID: msgID}))
+              }
+              else{
+                console.log("unknown init message: " + splitted_message[i]);
               }
             }
         }
@@ -98,9 +105,27 @@ export class Client {
     }
   }
 
-  roomExists(room_id: string) {
-    return this.rooms.some((room) => room.ID === room_id);
+  room(room_id: string) {
+    return this.rooms.find((room) => room.ID === room_id);
   }
+
+  addRoom(room: Room) {
+    console.log("adding room: " + room.name);
+    this.rooms.push(room);
+    const eventio = new CustomEvent("room", { detail: room })
+    this.events.dispatchEvent(eventio);
+  }
+
+  addMessage(room_id: string, message: Message) {
+    console.log("adding message to room (" + room_id + "): " + message.content);
+    const room = this.room(room_id);
+    if (room === undefined){
+      console.log("room (" + room_id + ") does not exist");
+    }
+    room?.add_message(message);
+    this.events.dispatchEvent(new CustomEvent("message", { detail: message }));
+  }
+   
 
   async login({ username, password }: { username: string; password: string }) {
     while (!this.challstr) {
@@ -119,5 +144,6 @@ export class Client {
     console.log("response_json", response_json);
     this.socket.send(`|/trn ${username},0,${response_json.assertion}`);
     this.socket.send(`|/join botdevelopment`);
+    this.socket.send(`|/join techcode`);
   }
 }

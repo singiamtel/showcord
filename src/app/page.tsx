@@ -7,7 +7,14 @@ export default function Home() {
   	<div className="h-full flex bg-gray-300 w-full">
 		{/* JSX comment*/}
 		<div className="w-1/6"><Rooms/></div>
-		<div className="w-full bg-gray-300"><Messages/></div>
+		<div className="w-full bg-gray-300">
+      <div className="h-[90%] " >
+        <Messages/>
+      </div>
+      <div className="h-[10%]" >
+          chatbox here
+      </div>
+    </div>
 		<div className="w-1/6"><Users/></div>
   	</div>
   )

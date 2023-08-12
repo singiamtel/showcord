@@ -1,11 +1,16 @@
 'use client';
 import { Client } from "@/client/client";
+import { password, username } from "@/utils/secrets";
 //dotenv
 import dotenv from "dotenv";
 import { createContext, useEffect, useState } from "react";
 dotenv.config();
 
-export const PS_context = createContext({});
+export const PS_context = createContext<{client: Client | null, room: string | null, setRoom: (room:string) => void}>({
+  client: null,
+  room: null,
+  setRoom: () => {}
+});
 
 export default function PS_contextProvider (props: any) {
  //  console.log(Client);
@@ -20,16 +25,19 @@ export default function PS_contextProvider (props: any) {
 	};
 
   const setRoom = (room: string) => {
-    if(client?.roomExists(room)) {
+    console.log('set room to ' + room);
+    if(client?.room(room)) {
+      console.log('room exists');
       setSelectedRoom(room);
     }
     else {
+      console.log('room does not exist');
       console.log('Trying to set room that does not exist (' + room + ')');
     }
   }
 
   useEffect(() => {
-    // login('wydy', 'thewydypass')
+    login(username, password);
   }, [])
 
 	return (
