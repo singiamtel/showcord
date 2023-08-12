@@ -1,6 +1,4 @@
 /** @type {import('next').NextConfig} */
-const nextConfig = {}
-
 // module.exports = nextConfig
 module.exports = {
 	webpack(config) {
@@ -30,6 +28,5 @@ module.exports = {
 
 		return config
 	},
-	nextConfig,
 }
 

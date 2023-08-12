@@ -12,9 +12,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="h-full">
-	<PS_contextProvider>
-      <body className={inter.className + ' h-full'}>{children}</body>
-	</PS_contextProvider>
+      <PS_contextProvider>
+          <body className={inter.className + ' h-full'}>{children}</body>
+      </PS_contextProvider>
     </html>
   )
 }
