@@ -16,3 +16,8 @@
       }
     }
   }
+
+input{background-color: transparent;}
+textarea:focus, input:focus{
+    outline: none;
+}

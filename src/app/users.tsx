@@ -3,7 +3,6 @@ import { useContext } from "react";
 import { PS_context } from "./PS_context";
 import { useState, useEffect  } from "react";
 import { userColor } from "../utils/namecolour";
-import { debounce } from "lodash";
 
 export type Users = { 
 	name: string,
@@ -46,7 +45,7 @@ export default function Chat() {
   }, [Nusers, room])
 
 	return (
-		<div className="bg-gray-600 h-full">
+		<div className="bg-gray-600 h-full p-2 overflow-y-scroll">
 			{users.map((user, index) => (
 				<MessageComponent key={index} user={user}/>
 			))

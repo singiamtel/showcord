@@ -16,12 +16,15 @@ export default function PS_contextProvider (props: any) {
 	const [ client, setClient ] = useState<Client | null>(null);
   const [ selectedRoom, setSelectedRoom ] = useState<string | null>(null);
 
-	const login = async (username: string, password: string) => {
-		const client = new Client();
-		client.login({username, password});
-    console.log('logged in');
-		setClient(client);
-	};
+  const lastRooms = () => {
+    const rooms = localStorage.getItem('rooms');
+    const defaultRooms = ['lobby', 'help', 'botdevelopment']
+    if(rooms) {
+      return JSON.parse(rooms);
+    }
+    return defaultRooms;
+  }
+
 
   const setRoom = (room: string) => {
     if(client?.room(room)) {
@@ -33,8 +36,20 @@ export default function PS_contextProvider (props: any) {
   }
 
   useEffect(() => {
-    login(username, password);
+		const client = new Client();
+    client.socket.onopen = () => {
+      console.log('websocket opened');
+      setClient(client);
+    }
   }, [])
+
+  useEffect(() => {
+    console.log('refreshed');
+    if(!client) { return; }
+    console.log('with client');
+    client.join(lastRooms());
+		client.login({username, password});
+  }, [client])
 
 	return (
 		// <PS_context.Provider value={{ client, login }}
