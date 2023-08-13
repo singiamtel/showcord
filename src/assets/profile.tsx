@@ -1,7 +1,7 @@
 // icon:profile | CSS Icons https://css.gg/ | Astrit
 import * as React from "react";
 
-function IconProfile(props) {
+function IconProfile(props:any) {
   return (
     <svg fill="none" viewBox="0 0 24 24" height="1em" width="1em" {...props}>
       <path

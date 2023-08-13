@@ -1,18 +1,16 @@
-import { RefObject, useEffect, useMemo, useState } from "react"
+"use client";
+import { RefObject, useEffect, useMemo, useState } from "react";
 
 export default function useOnScreen(ref: RefObject<HTMLElement>) {
-
-  const [isIntersecting, setIntersecting] = useState(false)
-
-  const observer = useMemo(() => new IntersectionObserver(
-    ([entry]) => setIntersecting(entry.isIntersecting)
-  ), [ref])
-
+  const [isIntersecting, setIntersecting] = useState(false);
 
   useEffect(() => {
-    observer.observe((ref as any).current)
-    return () => observer.disconnect()
-  }, [])
+    const observer = new IntersectionObserver(
+      ([entry]) => setIntersecting(entry.isIntersecting),
+    );
+    observer.observe((ref as any).current);
+    return () => observer.disconnect();
+  }, []);
 
-  return isIntersecting
+  return isIntersecting;
 }

@@ -29,6 +29,7 @@
     "typescript": "5.1.6"
   },
   "devDependencies": {
-    "@svgr/webpack": "^8.0.1"
+    "@svgr/webpack": "^8.0.1",
+    "@types/sanitize-html": "^2.9.0"
   }
 }
