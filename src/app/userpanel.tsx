@@ -33,36 +33,77 @@ export default function UserPanel() {
   }, [client, setUsername]);
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
-    console.log('submitted login')
+    console.log("submitted login");
     e.preventDefault();
     const formD = new FormData(e.currentTarget);
     const username = formD.get("username");
     const password = formD.get("password");
-    if(client) client.login({username: username as string, password: password as string});
-    else console.log('no client')
-  }
+    if (client) {
+      client.login({
+        username: username as string,
+        password: password as string,
+      });
+    } else console.log("no client");
+  };
 
   useEffect(() => {
-    console.log('loggedIn was updated', loggedIn)
-    if(loggedIn) setShowModal(false);
-  }, [loggedIn, setShowModal])
-
+    console.log("loggedIn was updated", loggedIn);
+    if (loggedIn) setShowModal(false);
+  }, [loggedIn, setShowModal]);
 
   return (
     <div className="h-20 text-white p-3 flex items-center">
       {showModal &&
         (
           <Modal onClose={() => setShowModal(false)}>
-            <form onSubmit={onSubmit}>
-              <label className="text-white" htmlFor="username">Username</label>
-              <input className="w-full" type="text" id="username" name="username" />
-              <label className="text-white" htmlFor="password">Password</label>
-              <input className="w-full" type="password" id="password" name="password" />
-              <button type="submit">Login</button>
-            </form>
+            <div className="flex flex-col items-center p-12">
+              <form onSubmit={onSubmit}>
+                <div className="flex flex-col w-full mt-2">
+                  <label className="text-white pr-2" htmlFor="username">
+                    Username
+                  </label>
+                  <input
+                    className="w-auto bg-white"
+                    type="text"
+                    id="username"
+                    name="username"
+                  />
+                </div>
+                <div className="flex flex-col w-fullmt-2">
+                  <label className="text-white pr-3" htmlFor="password">
+                    Password
+                  </label>
+                <input
+                  className="w-auto bg-white"
+                  type="password"
+                  id="password"
+                  name="password"
+                />
+                </div>
+                <div className="flex flex-row w-full items-center justify-between mt-2">
+                  <button
+                    type="submit"
+                    className="bg-blue-200 text-white p-2 rounded font-bold"
+                  >
+                    Login
+                  </button>
+                  <button
+                    onClick={() => setShowModal(false)}
+                    className="bg-white p-2 rounded font-bold"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
           </Modal>
         )}
-      <span className={"rounded text-lg flex flex-row items-center h-auto " + (username ? "bg-gray-600 w-auto p-2 " : "bg-gray-600 w-full font-bold ") } >
+      <span
+        className={"rounded text-lg flex flex-row items-center h-auto " +
+          (username
+            ? "bg-gray-600 w-auto p-2 "
+            : "bg-gray-600 w-full font-bold ")}
+      >
         {username
           ? (
             <>

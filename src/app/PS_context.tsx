@@ -25,7 +25,7 @@ export default function PS_contextProvider(props: any) {
 
   const lastRooms = () => {
     const rooms = localStorage.getItem("rooms");
-    const defaultRooms = ["botdevelopment"];
+    const defaultRooms = ["lobby", "help", "overused"]
     if (rooms) {
       return JSON.parse(rooms);
     }

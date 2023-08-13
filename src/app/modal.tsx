@@ -12,9 +12,6 @@ const Modal = ({ onClose, children, title } : any) => {
             <div className="modal-wrapper">
                 <div className="bg-gray-200" onClick={(e) => e.stopPropagation()}>
                     <div className="modal-header">
-                        <a href="#" onClick={handleCloseClick}>
-                            x
-                        </a>
                     </div>
                     {title && <h1>{title}</h1>}
                     <div className="modal-body">{children}</div>
