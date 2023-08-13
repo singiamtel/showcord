@@ -12,6 +12,7 @@ export class Client {
   events: EventTarget = new EventTarget();
   private joinAfterLogin: string[] = [];
   username: string = "";
+  loggedIn: boolean = false;
 
   constructor() {
     this.socket = new WebSocket(this.server_url);
@@ -130,16 +131,32 @@ export class Client {
             continue;
           }
           if (splitted_message[i].startsWith("|c:|")) {
-            const [_, _2, msgID, user, message] = splitted_message[i].split(
+            let [_, _2, msgID, user, message] = splitted_message[i].split(
               "|",
             );
+            let type: "raw" | "chat" = "chat";
+            if (message.startsWith("/raw")) {
+              type = "raw";
+              message = message.slice(4);
+            }
             this.addMessage(
               roomID,
               new Message({
                 user,
-                type: "chat",
+                type,
                 content: message,
                 ID: msgID,
+              }),
+            );
+          } else if (splitted_message[i].startsWith("|raw|")) {
+            const [_, _2, ...data] = splitted_message[i].split("|");
+            this.addMessage(
+              roomID,
+              new Message({
+                user: "",
+                type: "raw",
+                content: data.join("|"),
+                ID: "",
               }),
             );
           } else {
@@ -157,9 +174,15 @@ export class Client {
         break;
       case "updateuser":
         console.log("joined rooms after login", args);
-        if (!args[0].toLowerCase().startsWith('guest')) {
+        if (!args[0].trim().toLowerCase().startsWith("guest")) {
           this.join(this.joinAfterLogin);
+          console.log("logged in as " + args[0]);
+          this.events.dispatchEvent(new CustomEvent("login"));
+          this.loggedIn = true;
         }
+        break;
+      default:
+        console.log("unknown cmd: " + cmd);
     }
   }
 
@@ -224,7 +247,7 @@ export class Client {
   }
 
   async send(room: string, message: string) {
-    console.log(`${room}|${message}`)
+    console.log(`${room}|${message}`);
     this.socket.send(`${room}|${message}`);
   }
 }

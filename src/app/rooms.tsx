@@ -6,15 +6,16 @@ import HashtagIcon from "../../public/hashtag.svg";
 import { Room } from "@/client/room";
 import { debounce } from "lodash";
 
-export default function Rooms() {
+export default function Rooms({className}: {className: string}){
   const { client, room: selectRoom, setRoom} = useContext(PS_context);
   const [rooms, setRooms] = useState<Room[]>([]);
   useEffect(() => {
     if (!client) {
       return;
     }
-    const handleRoomEvent = debounce(async (rooms) => {
+    const handleRoomEvent = debounce(async (rooms: Room[]) => {
       setRooms(rooms);
+      localStorage.setItem("rooms", JSON.stringify(rooms.map((e:Room) => e.name)))
     }, 200); // Not sure how long the debounce should be. Without it, we overlap events
 
     const eventListener = (room: any) => {
@@ -38,9 +39,9 @@ export default function Rooms() {
   }, [rooms]);
 
   return (
-    <div className="bg-gray-600 h-full">
+    <div className={"bg-gray-600 h-full " + className}>
       {/** big fat text */}
-      <div className="flex flex-row items-center p-2 text-white font-bold text-xl">
+      <div className="flex flex-row items-center p-2 text-white font-bold text-lg h-16 ">
         Pokémon Showdown!
       </div>
       {rooms.map((room, idx) => (
@@ -57,7 +58,7 @@ export function RoomComponent({ name, ID }: { name: string; ID: string }) {
   };
   return (
     <div>
-      <span className={'flex flex-row items-center text-white hover:bg-gray-350 w-auto h-auto ml-2 ' + (ID === room ? "bg-gray-350" : "") } onClick={selectRoom}>
+      <span className={'rounded p-1 flex flex-row items-center  w-auto h-auto mr-2 ml-2 ' + (ID === room ? "bg-gray-450 hover:bg-gray-450 text-white" : "hover:bg-gray-350 text-gray-150 ") } onClick={selectRoom}>
         <HashtagIcon height={16} width={16}/>
       <span className="ml-2">
         {name}

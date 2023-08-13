@@ -2,6 +2,9 @@
 import { createRef, useContext } from "react";
 import { PS_context } from "./PS_context";
 import { useEffect, useState } from "react";
+import parse from 'html-react-parser';
+import sanitizeHtml from 'sanitize-html';
+
 import { userColor } from "../utils/namecolour";
 import { Message } from "@/client/message";
 import useOnScreen from "@/utils/isOnScreen";
@@ -72,6 +75,7 @@ export default function Chat() {
           key={index}
           user={message.user}
           message={message.content}
+          type={message.type}
         />
       ))}
       <div>
@@ -82,8 +86,17 @@ export default function Chat() {
 }
 
 export function MessageComponent(
-  { message, user }: { message: string; user: string | undefined },
+  { message, user, type }: { message: string; user: string | undefined, type: string }
 ) {
+  if(type === "raw"){
+    return (
+      <div className="p-0.5">
+        <span className="text-white">
+          {parse(sanitizeHtml(message))}
+        </span>
+      </div>
+      )
+  }
   return (
     <div className="p-0.5">
       <span className="text-white">
