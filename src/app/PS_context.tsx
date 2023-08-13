@@ -13,7 +13,6 @@ export const PS_context = createContext<{client: Client | null, room: string | n
 });
 
 export default function PS_contextProvider (props: any) {
- //  console.log(Client);
 	const [ client, setClient ] = useState<Client | null>(null);
   const [ selectedRoom, setSelectedRoom ] = useState<string | null>(null);
 
@@ -25,13 +24,10 @@ export default function PS_contextProvider (props: any) {
 	};
 
   const setRoom = (room: string) => {
-    console.log('set room to ' + room);
     if(client?.room(room)) {
-      console.log('room exists');
       setSelectedRoom(room);
     }
     else {
-      console.log('room does not exist');
       console.log('Trying to set room that does not exist (' + room + ')');
     }
   }

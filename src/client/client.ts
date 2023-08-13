@@ -1,5 +1,6 @@
 import { Message } from "./message";
 import { Room } from "./room";
+import { User } from "./user";
 
 export class Client {
   // socket
@@ -16,12 +17,10 @@ export class Client {
     };
     this.socket.onmessage = (event) => {
       this.parse_message(event.data);
-      console.log("this.rooms", this.rooms);
     };
   }
 
   async parse_message(message: string) {
-    // console.log(message);
     if (message.startsWith("|challstr|")) {
       const splitted_challstr = message.split("|");
       splitted_challstr.shift();
@@ -29,8 +28,6 @@ export class Client {
       this.challstr = splitted_challstr.join("|");
     }
     if (/\n/g.test(message)) {
-      console.log("message is multiline");
-      console.log(message);
       const splitted_message = message.split("\n");
       const roomID = splitted_message[0];
       const [_, cmd, ...args] = splitted_message[1].split("|");
@@ -39,9 +36,6 @@ export class Client {
           Messages that are two lines:
             - any message linked to a room
         */
-        console.log("room_id", roomID);
-        console.log("cmd", cmd);
-        console.log("args", args);
         switch (cmd) {
           case "c:":
             // th
@@ -53,7 +47,6 @@ export class Client {
             this.addMessage(roomID,
               new Message({ ID: roomID, type: "chat", content: args[2], user: args[1] })
             );
-            console.log("added to ", roomID);
         }
       } else {
         /*
@@ -65,6 +58,7 @@ export class Client {
         switch (cmd) {
           case "init":
             let type = '', didType = false, name = '', didName = false, id = '', didID = false, room = null;
+            let users : User[] = [];
             for (let i = 2; i < splitted_message.length; i++) { // start at 2 because first line is room id and second line is cmd
               if (splitted_message[i] === "") continue;
               if (!didType && splitted_message[i].startsWith("|init|")) {
@@ -80,7 +74,13 @@ export class Client {
                 didName = true;
                 continue;
               }
-              if (!didName && splitted_message[i].startsWith("|users|")) {
+              if (splitted_message[i].startsWith("|users|")) {
+                const parsedUsers = splitted_message[i].split("|")[2].split(",");
+                users = parsedUsers.map((tmpuser) => {
+                  const [user, status] = tmpuser.slice(1).split("@");
+                  return new User({ name: tmpuser.slice(0,1) + user, status })
+                })
+                users.shift();
                 continue;
               }
               if(!didID && splitted_message[i].startsWith('|:|')){
@@ -88,6 +88,7 @@ export class Client {
                 didID = true;
                 room = new Room({ID: roomID, name: name, type: (type as "chat" | "battle")})
                 this.addRoom(room)
+                this.addUsers(roomID, users)
                 continue;
               }
               if(splitted_message[i].startsWith('|c:|')){
@@ -109,27 +110,36 @@ export class Client {
     return this.rooms.find((room) => room.ID === room_id);
   }
 
+
   addRoom(room: Room) {
-    console.log("adding room: " + room.name);
     this.rooms.push(room);
     const eventio = new CustomEvent("room", { detail: room })
     this.events.dispatchEvent(eventio);
   }
 
   addMessage(room_id: string, message: Message) {
-    console.log("adding message to room (" + room_id + "): " + message.content);
     const room = this.room(room_id);
-    if (room === undefined){
-      console.log("room (" + room_id + ") does not exist");
+    if (room){
+      room.addMessage(message);
+      this.events.dispatchEvent(new CustomEvent("message", { detail: message }));
+      return
     }
-    room?.add_message(message);
-    this.events.dispatchEvent(new CustomEvent("message", { detail: message }));
+    console.log("room (" + room_id + ") does not exist");
   }
-   
+
+  addUsers(room_id: string, users: User[]) {
+    const room = this.room(room_id);
+    if (room) {
+      room.addUsers(users);
+      this.events.dispatchEvent(new CustomEvent("users", { detail: users }));
+      return
+    }
+    console.log("room (" + room_id + ") does not exist");
+  }
+
 
   async login({ username, password }: { username: string; password: string }) {
     while (!this.challstr) {
-      console.log("waiting for challstr");
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
     const response = await fetch(
@@ -141,7 +151,6 @@ export class Client {
     const response_test = await response.text();
     const response_json = JSON.parse(response_test.slice(1));
 
-    console.log("response_json", response_json);
     this.socket.send(`|/trn ${username},0,${response_json.assertion}`);
     this.socket.send(`|/join botdevelopment`);
     this.socket.send(`|/join techcode`);

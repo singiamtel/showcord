@@ -53,7 +53,6 @@ export default function Rooms() {
 export function RoomComponent({ name, ID }: { name: string; ID: string }) {
   const { setRoom, room } = useContext(PS_context);
   const selectRoom = () => {
-    console.log("set room to " + name);
     setRoom(ID);
   };
   return (

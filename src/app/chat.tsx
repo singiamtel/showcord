@@ -4,12 +4,11 @@ import { PS_context } from "./PS_context";
 import { useEffect, useState } from "react";
 import { userColor } from "../utils/namecolour";
 import { Message } from "@/client/message";
-import { debounce } from "lodash";
 
 export default function Chat() {
   const { client, room } = useContext(PS_context);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [juan, setJuan] = useState<number>(0);
+  const [update, setUpdate] = useState<number>(0);
   const messagesEndRef = createRef<HTMLDivElement>();
 
   const handleMsgEvent = async () => {
@@ -20,13 +19,9 @@ export default function Chat() {
       return;
     }
     const msgs = client.room(room)?.messages ?? [];
-    if (!msgs || !msgs.length) {
-      console.log("no updated messages");
-    }
-    console.log("updated messages ", JSON.stringify(msgs));
-    console.log("update debounce");
     setMessages(msgs);
-  }; //, 400); // Not sure how long the debounce should be. Without it, we overlap events
+  }; 
+
   useEffect(() => {
     if (!client) {
       return;
@@ -37,9 +32,9 @@ export default function Chat() {
 
     setMessages(client.room(room)?.messages ?? []);
 
-    const eventListener = (msg: any) => {
+    const eventListener = () => {
       // handleMsgEvent();
-      setJuan(juan + 1);
+      setUpdate(update + 1);
     };
 
     client.events.addEventListener("message", eventListener);
@@ -48,17 +43,11 @@ export default function Chat() {
       // Clean up the event listener when the component unmounts
       client.events.removeEventListener("message", eventListener);
     };
-  }, [client, room, setMessages, juan]);
+  }, [client, room, setMessages, update]);
 
-  //print messages when they change
   useEffect(() => {
-    console.log("juan is now ", juan);
     handleMsgEvent();
-  }, [juan]);
-
-  useEffect(() => {
-    console.log("actually updated messages ", messages);
-  }, [messages]);
+  }, [update]);
 
   return ( //no-scrollbar
     <div className="p-5 flex flex-col overflow-auto overflow-x-hidden break-words overflow-y-scroll h-full ">
@@ -80,7 +69,7 @@ export function MessageComponent(
   return (
     <div>
       <span className="text-white">
-        <span style={{ color: userColor(user) }}>
+        <span style={{ color: userColor(user) }} className="font-bold">
           {user}:
         </span>{" "}
         {message}
