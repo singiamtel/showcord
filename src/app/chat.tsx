@@ -24,7 +24,6 @@ export default function Chat() {
       return;
     }
     const msgs = client.room(room)?.messages ?? [];
-    console.log('msgs', msgs.length)
     setMessages(msgs);
   };
 
@@ -61,7 +60,6 @@ export default function Chat() {
 
   useEffect(() => {
     if (isIntersecting){
-      console.log("scrolling", messagesEndRef.current);
       messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
     } else {
       console.log("not on screen, refusing to scroll");

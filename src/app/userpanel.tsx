@@ -49,7 +49,8 @@ export default function UserPanel() {
   useEffect(() => {
     console.log("loggedIn was updated", loggedIn);
     if (loggedIn) setShowModal(false);
-  }, [loggedIn, setShowModal]);
+    setUsername(client?.username ?? '')
+  }, [loggedIn, setShowModal, setUsername]);
 
   return (
     <div className="h-20 text-white p-3 flex items-center">

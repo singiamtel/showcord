@@ -19,15 +19,22 @@ export class Client {
     this.socket.onopen = function () {
     };
     this.socket.onmessage = (event) => {
-      console.log(event.data);
       this.parse_message(event.data);
     };
     this.socket.onerror = (event) => {
       console.error(event);
     };
+
+    this.socket.onclose = (event) => {
+      console.error("Socket closed", event);
+    }
   }
 
   private async parse_message(message: string) {
+    const spammy_messages = [ '|J|', '|L|', "|c:|" ]
+    if(!spammy_messages.some(spammy_message => message.startsWith(spammy_message))) {
+      console.log("received ", message)
+    }
     if (message.startsWith("|challstr|")) {
       const splitted_challstr = message.split("|");
       splitted_challstr.shift();
@@ -46,9 +53,9 @@ export class Client {
     }
     const [_, cmd, ...args] = splitted_message[i].split("|");
     i++;
-    console.log("cmd", cmd);
-    console.log("args", args);
-    console.log("roomID", roomID);
+    // console.log("cmd", cmd);
+    // console.log("args", args);
+    // console.log("roomID", roomID);
     /*
           Messages that are two lines:
             - any message linked to a room
@@ -173,7 +180,7 @@ export class Client {
         }
         break;
       case "updateuser":
-        console.log("joined rooms after login", args);
+        console.log("updateuser", args);
         if (!args[0].trim().toLowerCase().startsWith("guest")) {
           this.join(this.joinAfterLogin);
           console.log("logged in as " + args[0]);
@@ -231,7 +238,9 @@ export class Client {
     );
     const response_test = await response.text();
     const response_json = JSON.parse(response_test.slice(1));
+    console.log("loginserver response", response_json);
 
+    console.log("sending assertion");
     this.socket.send(`|/trn ${username},0,${response_json.assertion}`);
   }
 

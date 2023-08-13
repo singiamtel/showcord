@@ -9,23 +9,23 @@ export const PS_context = createContext<
     client: Client | null;
     room: string | null;
     setRoom: (room: string) => void;
-    loggedIn: boolean;
+    loggedIn: number;
   }
 >({
   client: null,
   room: null,
   setRoom: () => {},
-  loggedIn: false,
+  loggedIn: 0,
 });
 
 export default function PS_contextProvider(props: any) {
   const [client, setClient] = useState<Client | null>(null);
-  const [loggedIn, setLoggedIn] = useState<boolean>(false);
+  const [loggedIn, setLoggedIn] = useState<number>(0);
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
 
   const lastRooms = () => {
     const rooms = localStorage.getItem("rooms");
-    const defaultRooms = ["lobby", "help", "overused"]
+    const defaultRooms = ["techcode"]
     if (rooms) {
       return JSON.parse(rooms);
     }
@@ -47,9 +47,9 @@ export default function PS_contextProvider(props: any) {
     };
     client.events.addEventListener("login", (username) => {
       console.log("logged in as", username);
-      setLoggedIn(true);
+      setLoggedIn(loggedIn + 1)
     });
-  }, []);
+  }, [loggedIn, setLoggedIn]);
 
   useEffect(() => {
     if (!client) return;
