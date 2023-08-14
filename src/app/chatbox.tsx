@@ -14,7 +14,7 @@ import useAutosizeTextArea from "@/utils/useAutosizeTextArea";
 
 export default function ChatBox() {
   const [input, setInput] = useState<string>("");
-  const { client, room } = useContext(PS_context);
+  const { client, room, setRoom } = useContext(PS_context);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const formRef = createRef<HTMLFormElement>();
   useAutosizeTextArea(textAreaRef.current, input);
@@ -26,7 +26,7 @@ export default function ChatBox() {
     setInput("");
   };
 
-  const enterSubmit: KeyboardEventHandler = (e) => {
+  const manageKeybinds: KeyboardEventHandler = (e) => {
     // if user pressed enter, submit form
     // don't submit if user pressed shift+enter
     if (e.key === "Enter" && !e.shiftKey) {
@@ -36,11 +36,28 @@ export default function ChatBox() {
       // submit form
       formRef.current?.requestSubmit();
       e.preventDefault();
+      return
     }
+    if((e.key === "Tab" && !e.shiftKey) || e.key === "ArrowRight") {
+      setRoom(1);
+      e.preventDefault();
+      return;
+    }
+    if((e.key === "Tab" && e.shiftKey) || e.key === "ArrowLeft") {
+      setRoom(-1);
+      e.preventDefault();
+      return;
+    }
+
   };
 
   useEffect(() => {
-  }, [input]);
+    textAreaRef.current?.focus();
+  }, []);
+
+  useEffect(() => {
+    textAreaRef.current?.focus();
+  }, [room]);
 
   return (
     <div className="w-full">
@@ -50,7 +67,7 @@ export default function ChatBox() {
             className="mr-5 ml-5 p-2 rounded-lg flex-grow bg-gray-375 text-white"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            onKeyDown={enterSubmit}
+            onKeyDown={manageKeybinds}
             ref={textAreaRef}
           >
           </textarea>

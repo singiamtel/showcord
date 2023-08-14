@@ -240,7 +240,6 @@ export class Client {
     );
     const response_test = await response.text();
     const response_json = JSON.parse(response_test.slice(1));
-
     this.socket.send(`|/trn ${username},0,${response_json.assertion}`);
   }
 

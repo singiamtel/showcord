@@ -92,7 +92,9 @@ export function MessageComponent(
     return (
       <div className="p-0.5">
         <span className="text-white">
-          {parse(sanitizeHtml(message))}
+          {
+            parse(sanitizeHtml(message))
+          }
         </span>
       </div>
       )

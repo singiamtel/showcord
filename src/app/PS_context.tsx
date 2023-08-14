@@ -8,7 +8,7 @@ export const PS_context = createContext<
   {
     client: Client | null;
     room: string | null;
-    setRoom: (room: string) => void;
+    setRoom: (room: string | number) => void;
     loggedIn: boolean;
   }
 >({
@@ -33,7 +33,28 @@ export default function PS_contextProvider(props: any) {
     return defaultRooms;
   };
 
-  const setRoom = (room: string) => {
+  const setRoom = (room: string | number) => {
+    if (typeof room === "number") {
+      // number is either 1 or -1
+      //find the adjacent room in client.rooms, and set it
+      // if the room is the first/last, loop around
+      // if there is no adjacent room, do nothing
+      const rooms = client?.rooms;
+      if (rooms) {
+        if (!selectedRoom) return;
+        const roomNames = rooms.map((r) => r.ID)
+        console.log(roomNames)
+        console.log(selectedRoom)
+        const index = roomNames.indexOf(selectedRoom);
+        console.log(index)
+        const newIndex = index + room;
+        if (newIndex >= roomNames.length) room = roomNames[0];
+        else room = roomNames[newIndex];
+      } else {
+        console.log("No rooms found");
+        return;
+      }
+    }
     if (client?.room(room)) {
       const tmpPR = previousRooms;
       if (tmpPR.includes(room)) {
