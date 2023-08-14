@@ -24,10 +24,12 @@ export default function Rooms({className}: {className: string}){
     };
 
     client.events.addEventListener("room", eventListener);
+    client.events.addEventListener("leaveroom", eventListener);
 
     return () => {
       // Clean up the event listener when the component unmounts
       client.events.removeEventListener("room", eventListener);
+      client.events.removeEventListener("leaveroom", eventListener);
     };
   }, [client]);
 

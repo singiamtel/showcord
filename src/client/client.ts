@@ -37,7 +37,7 @@ export class Client {
     let i = 0;
     const splitted_message = message.split("\n");
     const isGlobalOrLobby = splitted_message[0][0] !== ">";
-    let roomID;
+    let roomID: string;
     if (isGlobalOrLobby) {
       roomID = "lobby";
     } else {
@@ -181,6 +181,11 @@ export class Client {
           this.loggedIn = true;
         }
         break;
+      case "deinit":
+        // leave room
+        this.rooms = this.rooms.filter((room) => room.ID !== roomID);
+        this.events.dispatchEvent(new CustomEvent("leaveroom", { detail: roomID }));
+        break
       default:
         console.log("unknown cmd: " + cmd);
     }
@@ -188,6 +193,10 @@ export class Client {
 
   room(room_id: string) {
     return this.rooms.find((room) => room.ID === room_id);
+  }
+
+  leaveRoom(room_id: string){
+    this.socket.send(`|/leave ${room_id}`);
   }
 
   private _addRoom(room: Room) {

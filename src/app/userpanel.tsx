@@ -25,10 +25,12 @@ export default function UserPanel() {
     };
 
     client.events.addEventListener("room", eventListener);
+    client.events.addEventListener("leaveroom", eventListener);
 
     return () => {
       // Clean up the event listener when the component unmounts
       client.events.removeEventListener("room", eventListener);
+      client.events.removeEventListener("leaveroom", eventListener);
     };
   }, [client, setUsername]);
 
@@ -49,6 +51,7 @@ export default function UserPanel() {
   useEffect(() => {
     console.log("loggedIn was updated", loggedIn);
     if (loggedIn) setShowModal(false);
+    setUsername(client?.username || "");
   }, [loggedIn, setShowModal]);
 
   return (
