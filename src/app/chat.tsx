@@ -2,12 +2,11 @@
 import { createRef, useContext } from "react";
 import { PS_context } from "./PS_context";
 import { useEffect, useState } from "react";
-import parse from 'html-react-parser';
-import sanitizeHtml from 'sanitize-html';
 
 import { userColor } from "../utils/namecolour";
 import { Message } from "@/client/message";
 import useOnScreen from "@/utils/isOnScreen";
+import HTML from "@/commands/html"
 
 export default function Chat() {
   const { client, room } = useContext(PS_context);
@@ -90,13 +89,7 @@ export function MessageComponent(
 ) {
   if(type === "raw"){
     return (
-      <div className="p-0.5">
-        <span className="text-white">
-          {
-            parse(sanitizeHtml(message))
-          }
-        </span>
-      </div>
+    <HTML message={message} />
       )
   }
   return (
