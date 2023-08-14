@@ -19,6 +19,7 @@ export class Client {
     this.socket.onopen = function () {
     };
     this.socket.onmessage = (event) => {
+      console.log('SOCKET < ' + event.data.split('|')[1])
       this.parse_message(event.data);
     };
     this.socket.onerror = (event) => {
@@ -33,7 +34,7 @@ export class Client {
   private async parse_message(message: string) {
     const spammy_messages = [ '|J|', '|L|', "|c:|" ]
     if(!spammy_messages.some(spammy_message => message.startsWith(spammy_message))) {
-      console.log("received ", message)
+      // console.log("received ", message)
     }
     if (message.startsWith("|challstr|")) {
       const splitted_challstr = message.split("|");
@@ -241,22 +242,27 @@ export class Client {
     console.log("loginserver response", response_json);
 
     console.log("sending assertion");
-    this.socket.send(`|/trn ${username},0,${response_json.assertion}`);
+    this.sendRaw(`|/trn ${username},0,${response_json.assertion}`);
   }
 
   async join(rooms: string | string[]) {
     console.log("joining rooms...", rooms);
     if (typeof rooms === "string") {
-      this.socket.send(`|/join ${rooms}`);
+      this.sendRaw(`|/join ${rooms}`);
     } else {
       for (let room of rooms) {
-        this.socket.send(`|/join ${room}`);
+        this.sendRaw(`|/join ${room}`);
       }
     }
   }
 
-  async send(room: string, message: string) {
+  async sendMessage(room: string, message: string) {
     console.log(`${room}|${message}`);
-    this.socket.send(`${room}|${message}`);
+    this.sendRaw(`${room}|${message}`);
+  }
+
+  private async sendRaw(message: string) {
+    console.log(`SOCKET ${new Date()}> ` + message);
+    this.socket.send(message);
   }
 }

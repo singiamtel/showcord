@@ -22,7 +22,7 @@ export default function ChatBox() {
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!client || !room) return;
-    client.send(room, input);
+    client.sendMessage(room, input);
     setInput("");
   };
 
