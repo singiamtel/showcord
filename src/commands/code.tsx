@@ -21,7 +21,6 @@ export const isCode = (message: string) => {
 export default function Code({ message }: any) {
   return (
   <code>
-      we codin'
       {message}
   </code>
   )
