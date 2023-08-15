@@ -49,6 +49,7 @@ export default function PS_contextProvider(props: any) {
         console.log(index)
         const newIndex = index + room;
         if (newIndex >= roomNames.length) room = roomNames[0];
+        else if (newIndex < 0) room = roomNames[roomNames.length - 1];
         else room = roomNames[newIndex];
       } else {
         console.log("No rooms found");
