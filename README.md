@@ -18,7 +18,6 @@ The client should always be:
 
 ## Installation
 
-To get started with PS-cord
 If you want to self-host PS-cord, follow these steps:
 
 1. Clone the repository: `git clone https://github.com/yourusername/ps-cord.git`
