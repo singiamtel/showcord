@@ -16,6 +16,7 @@ export class Client {
 
   constructor() {
     this.socket = new WebSocket(this.server_url);
+    this.__setupSocketListeners();
   }
 
   private __setupSocketListeners() {
