@@ -53,10 +53,6 @@ export default function ChatBox() {
 
   useEffect(() => {
     textAreaRef.current?.focus();
-  }, []);
-
-  useEffect(() => {
-    textAreaRef.current?.focus();
   }, [room]);
 
   return (

@@ -20,7 +20,9 @@ export default function UserPanel() {
         username: username as string,
         password: password as string,
       });
-    } else console.log("no client");
+    } else {
+      console.error("Tried to login before the client was ready")
+    }
   };
 
   useEffect(() => {

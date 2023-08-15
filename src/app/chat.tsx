@@ -1,17 +1,14 @@
 "use client";
 import { createRef, useContext } from "react";
 import { PS_context } from "./PS_context";
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 
 import { userColor } from "../utils/namecolour";
-import { Message } from "@/client/message";
 import useOnScreen from "@/utils/isOnScreen";
 import HTML from "@/commands/html"
 
 export default function Chat() {
-  const { client, selectedRoom: room, messages } = useContext(PS_context);
-  // const [messages, setMessages] = useState<Message[]>([]);
-  const [update, setUpdate] = useState<number>(0);
+  const { selectedRoom: room, messages } = useContext(PS_context);
   const messagesEndRef = createRef<HTMLDivElement>();
   const isIntersecting = useOnScreen(messagesEndRef);
 
@@ -27,7 +24,7 @@ export default function Chat() {
     } else {
       console.log("not on screen, refusing to scroll");
     }
-  }, [messages, messagesEndRef, isIntersecting, update]);
+  }, [messages, messagesEndRef, isIntersecting]);
 
   return ( //no-scrollbar
     <div className="p-5 flex flex-col overflow-auto overflow-x-hidden break-words overflow-y-scroll h-full ">

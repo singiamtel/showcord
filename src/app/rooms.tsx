@@ -1,13 +1,10 @@
 "use client";
 import { useContext } from "react";
 import { PS_context } from "./PS_context";
-import { useEffect, useState } from "react";
 import HashtagIcon from "../../public/hashtag.svg";
-import { Room } from "@/client/room";
-import { debounce } from "lodash";
 
 export default function Rooms({className}: {className: string}){
-  const { client, selectedRoom: selectRoom, setRoom, rooms} = useContext(PS_context);
+  const { rooms} = useContext(PS_context);
 
   return (
     <div className={"bg-gray-600 h-full " + className}>

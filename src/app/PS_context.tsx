@@ -3,7 +3,7 @@ import { Client } from "@/client/client";
 import { Message } from "@/client/message";
 import { Room } from "@/client/room";
 import dotenv from "dotenv";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useCallback, useEffect, useState } from "react";
 dotenv.config();
 
 export const PS_context = createContext<
@@ -32,7 +32,6 @@ export default function PS_contextProvider(props: any) {
   const [previousRooms, setPreviousRooms] = useState<string[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [updateMessages, setUpdateMessages] = useState<number>(0);
-  const [lastUpdate, setLastUpdate] = useState<Date>();
 
   const lastRooms = () => {
     const rooms = localStorage.getItem("rooms");
@@ -45,28 +44,7 @@ export default function PS_contextProvider(props: any) {
 
   /* --- Room handling --- */
 
-  useEffect(() => {
-    if (!client) {
-      return;
-    }
-    const eventListener = () => {
-      setRooms(client.rooms);
-      localStorage.setItem("rooms", JSON.stringify(client.rooms.map((r) => r.ID)));
-      if (!selectedRoom && client.rooms.length > 0) {
-        setRoom(client.rooms[0].ID);
-      }
-    };
-
-    client.events.addEventListener("room", eventListener);
-    client.events.addEventListener("leaveroom", eventListener);
-
-    return () => {
-      client.events.removeEventListener("room", eventListener);
-      client.events.removeEventListener("leaveroom", eventListener);
-    };
-  }, [client, setRooms]);
-
-  const setRoom = (room: string | 1 | -1) => {
+  const setRoom = useCallback((room: string | 1 | -1) => {
     if (typeof room === "number") {
       if (rooms) {
         if (!selectedRoom) return;
@@ -97,11 +75,32 @@ export default function PS_contextProvider(props: any) {
     } else {
       console.log("Trying to set room that does not exist (" + room + ")");
     }
-  };
+  }, [client, rooms, selectedRoom, previousRooms]);
+
+  useEffect(() => {
+    if (!client) {
+      return;
+    }
+    const eventListener = () => {
+      setRooms(client.rooms);
+      localStorage.setItem("rooms", JSON.stringify(client.rooms.map((r) => r.ID)));
+      if (!selectedRoom && client.rooms.length > 0) {
+        setRoom(client.rooms[0].ID);
+      }
+    };
+
+    client.events.addEventListener("room", eventListener);
+    client.events.addEventListener("leaveroom", eventListener);
+
+    return () => {
+      client.events.removeEventListener("room", eventListener);
+      client.events.removeEventListener("leaveroom", eventListener);
+    };
+  }, [client, setRooms, selectedRoom, setRoom])
 
   useEffect(() => {
     if (!client) return;
-    client.events.addEventListener("leaveroom", (room) => {
+    client.events.addEventListener("leaveroom", (_) => {
       // if the current room was deleted, go to the last room
       if (selectedRoom && !client.room(selectedRoom)) {
         const lastRoom = previousRooms[previousRooms.length - 2];
@@ -110,7 +109,7 @@ export default function PS_contextProvider(props: any) {
         }
       }
     });
-  }, [client, previousRooms, selectedRoom]);
+  }, [client, previousRooms, selectedRoom, setRoom]);
 
   useEffect(() => {
     if (!client) return;
@@ -158,7 +157,7 @@ export default function PS_contextProvider(props: any) {
 
   useEffect(() => {
     handleMsgEvent(setMessages);
-  }, [updateMessages, setMessages]);
+  }, [handleMsgEvent, setMessages]);
 
   /* --- End message handling --- */
 
