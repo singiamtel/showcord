@@ -16,6 +16,9 @@ export class Client {
 
   constructor() {
     this.socket = new WebSocket(this.server_url);
+  }
+
+  private __setupSocketListeners() {
     this.socket.onopen = function () {
     };
     this.socket.onmessage = (event) => {
@@ -25,6 +28,11 @@ export class Client {
     this.socket.onerror = (event) => {
       console.error(event);
     };
+    this.socket.onclose = (event) => {
+      // https://www.youtube.com/watch?v=u5k_arVcqR8
+      this.socket = new WebSocket(this.server_url);
+      this.__setupSocketListeners();
+    }
   }
 
   private async parse_message(message: string) {
