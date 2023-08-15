@@ -14,7 +14,7 @@ import useAutosizeTextArea from "@/utils/useAutosizeTextArea";
 
 export default function ChatBox() {
   const [input, setInput] = useState<string>("");
-  const { client, room, setRoom } = useContext(PS_context);
+  const { client, selectedRoom: room, setRoom } = useContext(PS_context);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const formRef = createRef<HTMLFormElement>();
   useAutosizeTextArea(textAreaRef.current, input);

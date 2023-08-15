@@ -9,51 +9,13 @@ import useOnScreen from "@/utils/isOnScreen";
 import HTML from "@/commands/html"
 
 export default function Chat() {
-  const { client, room } = useContext(PS_context);
-  const [messages, setMessages] = useState<Message[]>([]);
+  const { client, selectedRoom: room, messages } = useContext(PS_context);
+  // const [messages, setMessages] = useState<Message[]>([]);
   const [update, setUpdate] = useState<number>(0);
   const messagesEndRef = createRef<HTMLDivElement>();
   const isIntersecting = useOnScreen(messagesEndRef);
 
-  const handleMsgEvent = async (setMessages: any) => {
-    if (!client) {
-      return;
-    }
-    if (!room) {
-      return;
-    }
-    const msgs = client.room(room)?.messages ?? [];
-    console.log('msgs', msgs.length)
-    setMessages(msgs);
-  };
-
-  useEffect(() => {
-    if (!client) {
-      return;
-    }
-    if (!room) {
-      return;
-    }
-
-    setMessages(client.room(room)?.messages ?? []);
-
-    const eventListener = () => {
-      // handleMsgEvent();
-      setUpdate(update + 1);
-    };
-
-    client.events.addEventListener("message", eventListener);
-
-    return () => {
-      // Clean up the event listener when the component unmounts
-      client.events.removeEventListener("message", eventListener);
-    };
-  }, [client, room, setMessages, update]);
-
-  useEffect(() => {
-    handleMsgEvent(setMessages)
-  }, [update, setMessages])
-
+  
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
   }, [room]);

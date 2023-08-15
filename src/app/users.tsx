@@ -8,10 +8,9 @@ export type Users = {
 	name: string,
 }
 
-export default function Chat() {
-	const { room, client } = useContext(PS_context);
+export default function Users() {
+	const { selectedRoom: room, client } = useContext(PS_context);
 	const [users, setUsers] = useState<Users[]>([]);
-	const [Nusers, setNUsers] = useState<number>(0);
 
 	const refreshUsers = () => {
     if(!room) { return; }
@@ -24,25 +23,8 @@ export default function Chat() {
 	}
 
   useEffect(() => {
-    if (!client) {
-      return;
-    }
-
-    const eventListener = (_: any) => {
-      setNUsers(Nusers + 1);
-    };
-
-    client.events.addEventListener("users", eventListener);
-
-    return () => {
-      // Clean up the event listener when the component unmounts
-      client.events.removeEventListener("users", eventListener);
-    };
-  }, [client,setNUsers]);
-		
-  useEffect(() => {
     refreshUsers()
-  }, [Nusers, room])
+  }, [room])
 
 	return (
 		<div className="bg-gray-600 h-full p-2 overflow-y-scroll">

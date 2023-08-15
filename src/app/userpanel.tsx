@@ -6,33 +6,8 @@ import { userColor } from "@/utils/namecolour";
 import Modal from "./modal";
 
 export default function UserPanel() {
-  const [username, setUsername] = useState<string>(""); // [username, setUsername
   const [showModal, setShowModal] = useState<boolean>(false); // [username, setUsername
-  const { client, loggedIn } = useContext(PS_context);
-
-  useEffect(() => {
-    if (!client) {
-      return;
-    }
-    const handleUserEvent = async (username: string) => {
-      setUsername(username);
-      // localStorage.setItem("", JSON.stringify())
-    };
-
-    const eventListener = (room: any) => {
-      const username = client.username;
-      handleUserEvent(username);
-    };
-
-    client.events.addEventListener("room", eventListener);
-    client.events.addEventListener("leaveroom", eventListener);
-
-    return () => {
-      // Clean up the event listener when the component unmounts
-      client.events.removeEventListener("room", eventListener);
-      client.events.removeEventListener("leaveroom", eventListener);
-    };
-  }, [client, setUsername]);
+  const { client, user } = useContext(PS_context);
 
   const onSubmit = (e: FormEvent<HTMLFormElement>) => {
     console.log("submitted login");
@@ -49,10 +24,8 @@ export default function UserPanel() {
   };
 
   useEffect(() => {
-    console.log("loggedIn was updated", loggedIn);
-    if (loggedIn) setShowModal(false);
-    setUsername(client?.username || "");
-  }, [loggedIn, setShowModal]);
+    setShowModal(false);
+  }, [user, setShowModal]);
 
   return (
     <div className="h-20 text-white p-3 flex items-center">
@@ -76,12 +49,12 @@ export default function UserPanel() {
                   <label className="text-white pr-3" htmlFor="password">
                     Password
                   </label>
-                <input
-                  className="w-auto bg-white"
-                  type="password"
-                  id="password"
-                  name="password"
-                />
+                  <input
+                    className="w-auto bg-white"
+                    type="password"
+                    id="password"
+                    name="password"
+                  />
                 </div>
                 <div className="flex flex-row w-full items-center justify-between mt-2">
                   <button
@@ -103,19 +76,17 @@ export default function UserPanel() {
         )}
       <span
         className={"rounded text-lg flex flex-row items-center h-auto " +
-          (username
-            ? "bg-gray-600 w-auto p-2 "
-            : "bg-gray-600 w-full font-bold ")}
+          (user ? "bg-gray-600 w-auto p-2 " : "bg-gray-600 w-full font-bold ")}
       >
-        {username
+        {user
           ? (
             <>
               <IconProfile className="mr-2 m-auto" />
               <span
-                style={{ color: userColor(username) }}
+                style={{ color: userColor(user) }}
                 className="font-bold"
               >
-                {username}
+                {user}
               </span>
             </>
           )

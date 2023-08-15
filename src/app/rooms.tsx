@@ -7,38 +7,7 @@ import { Room } from "@/client/room";
 import { debounce } from "lodash";
 
 export default function Rooms({className}: {className: string}){
-  const { client, room: selectRoom, setRoom} = useContext(PS_context);
-  const [rooms, setRooms] = useState<Room[]>([]);
-  useEffect(() => {
-    if (!client) {
-      return;
-    }
-    const handleRoomEvent = debounce(async (rooms: Room[]) => {
-      setRooms(rooms);
-      localStorage.setItem("rooms", JSON.stringify(rooms.map((e:Room) => e.name)))
-    }, 200); // Not sure how long the debounce should be. Without it, we overlap events
-
-    const eventListener = (room: any) => {
-      const updatedRooms = [...client.rooms];
-      handleRoomEvent(updatedRooms);
-    };
-
-    client.events.addEventListener("room", eventListener);
-    client.events.addEventListener("leaveroom", eventListener);
-
-    return () => {
-      // Clean up the event listener when the component unmounts
-      client.events.removeEventListener("room", eventListener);
-      client.events.removeEventListener("leaveroom", eventListener);
-    };
-  }, [client]);
-
-  // select the first room by default
-  useEffect(() => {
-    if (rooms.length && !selectRoom) {
-      setRoom(rooms[0].ID);
-    }
-  }, [rooms]);
+  const { client, selectedRoom: selectRoom, setRoom, rooms} = useContext(PS_context);
 
   return (
     <div className={"bg-gray-600 h-full " + className}>
@@ -54,7 +23,7 @@ export default function Rooms({className}: {className: string}){
 }
 
 export function RoomComponent({ name, ID }: { name: string; ID: string }) {
-  const { setRoom, room } = useContext(PS_context);
+  const { setRoom, selectedRoom: room } = useContext(PS_context);
   const selectRoom = () => {
     setRoom(ID);
   };

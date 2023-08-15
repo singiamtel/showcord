@@ -1,5 +1,7 @@
 "use client";
 import { Client } from "@/client/client";
+import { Message } from "@/client/message";
+import { Room } from "@/client/room";
 import dotenv from "dotenv";
 import { createContext, useEffect, useState } from "react";
 dotenv.config();
@@ -7,22 +9,30 @@ dotenv.config();
 export const PS_context = createContext<
   {
     client: Client | null;
-    room: string | null;
-    setRoom: (room: string | number) => void;
-    loggedIn: boolean;
+    selectedRoom: string | null;
+    setRoom: (room: string | 1 | -1) => void;
+    messages: Message[];
+    user?: string; // Will be an object with user info
+    rooms: Room[];
   }
 >({
   client: null,
-  room: null,
+  selectedRoom: null,
   setRoom: () => {},
-  loggedIn: false,
+  messages: [],
+  user: undefined,
+  rooms: [],
 });
 
 export default function PS_contextProvider(props: any) {
   const [client, setClient] = useState<Client | null>(null);
-  const [loggedIn, setLoggedIn] = useState<boolean>(false);
+  const [user, setUser] = useState<string | undefined>();
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
+  const [rooms, setRooms] = useState<Room[]>([]);
   const [previousRooms, setPreviousRooms] = useState<string[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [updateMessages, setUpdateMessages] = useState<number>(0);
+  const [lastUpdate, setLastUpdate] = useState<Date>();
 
   const lastRooms = () => {
     const rooms = localStorage.getItem("rooms");
@@ -33,20 +43,38 @@ export default function PS_contextProvider(props: any) {
     return defaultRooms;
   };
 
-  const setRoom = (room: string | number) => {
+  /* --- Room handling --- */
+
+  useEffect(() => {
+    if (!client) {
+      return;
+    }
+    const eventListener = () => {
+      setRooms(client.rooms);
+      localStorage.setItem("rooms", JSON.stringify(client.rooms.map((r) => r.ID)));
+      if (!selectedRoom && client.rooms.length > 0) {
+        setRoom(client.rooms[0].ID);
+      }
+    };
+
+    client.events.addEventListener("room", eventListener);
+    client.events.addEventListener("leaveroom", eventListener);
+
+    return () => {
+      client.events.removeEventListener("room", eventListener);
+      client.events.removeEventListener("leaveroom", eventListener);
+    };
+  }, [client, setRooms]);
+
+  const setRoom = (room: string | 1 | -1) => {
     if (typeof room === "number") {
-      // number is either 1 or -1
-      //find the adjacent room in client.rooms, and set it
-      // if the room is the first/last, loop around
-      // if there is no adjacent room, do nothing
-      const rooms = client?.rooms;
       if (rooms) {
         if (!selectedRoom) return;
-        const roomNames = rooms.map((r) => r.ID)
-        console.log(roomNames)
-        console.log(selectedRoom)
+        const roomNames = rooms.map((r) => r.ID);
+        console.log(roomNames);
+        console.log(selectedRoom);
         const index = roomNames.indexOf(selectedRoom);
-        console.log(index)
+        console.log(index);
         const newIndex = index + room;
         if (newIndex >= roomNames.length) room = roomNames[0];
         else if (newIndex < 0) room = roomNames[roomNames.length - 1];
@@ -72,17 +100,6 @@ export default function PS_contextProvider(props: any) {
   };
 
   useEffect(() => {
-    const client = new Client();
-    client.socket.onopen = () => {
-      setClient(client);
-    };
-    client.events.addEventListener("login", (username) => {
-      console.log("logged in as", username);
-      setLoggedIn(true);
-    });
-  }, []);
-
-  useEffect(() => {
     if (!client) return;
     client.events.addEventListener("leaveroom", (room) => {
       // if the current room was deleted, go to the last room
@@ -101,10 +118,73 @@ export default function PS_contextProvider(props: any) {
     // client.login({username, password});
   }, [client]);
 
+  /* --- End room handling --- */
+
+  /* --- Message handling --- */
+  const handleMsgEvent = async (setMessages: any) => {
+    if (!client) {
+      return;
+    }
+    if (!selectedRoom) {
+      return;
+    }
+    const msgs = client.room(selectedRoom)?.messages ?? [];
+    console.log("msgs", msgs.length);
+    setMessages(msgs);
+  };
+
+  useEffect(() => {
+    if (!client) {
+      return;
+    }
+    if (!selectedRoom) {
+      return;
+    }
+
+    setMessages(client.room(selectedRoom)?.messages ?? []);
+
+    const eventListener = () => {
+      // handleMsgEvent();
+      setUpdateMessages(updateMessages + 1);
+    };
+
+    client.events.addEventListener("message", eventListener);
+
+    return () => {
+      // Clean up the event listener when the component unmounts
+      client.events.removeEventListener("message", eventListener);
+    };
+  }, [client, selectedRoom, setMessages, updateMessages]);
+
+  useEffect(() => {
+    handleMsgEvent(setMessages);
+  }, [updateMessages, setMessages]);
+
+  /* --- End message handling --- */
+
+  useEffect(() => {
+    const client = new Client();
+    client.socket.onopen = () => {
+      setClient(client);
+    };
+    client.events.addEventListener("login", (username) => {
+      console.log("logged in as", username);
+      setUser((username as CustomEvent).detail);
+    });
+  }, []);
+
+  /* --- End user handling --- */
+
   return (
-    // <PS_context.Provider value={{ client, login }}
     <PS_context.Provider
-      value={{ client: client, room: selectedRoom, setRoom, loggedIn }}
+      value={{
+        client: client,
+        selectedRoom,
+        setRoom,
+        user,
+        messages,
+        rooms,
+      }}
     >
       {props.children}
     </PS_context.Provider>

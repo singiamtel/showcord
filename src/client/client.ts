@@ -29,7 +29,7 @@ export class Client {
     this.socket.onerror = (event) => {
       console.error(event);
     };
-    this.socket.onclose = (event) => {
+    this.socket.onclose = (_) => {
       // https://www.youtube.com/watch?v=u5k_arVcqR8
       this.socket = new WebSocket(this.server_url);
       this.__setupSocketListeners();
@@ -42,6 +42,7 @@ export class Client {
       splitted_challstr.shift();
       splitted_challstr.shift();
       this.challstr = splitted_challstr.join("|");
+      return
     }
     let i = 0;
     const splitted_message = message.split("\n");
@@ -67,8 +68,8 @@ export class Client {
       didType = false,
       name = "",
       didName = false,
-      id = "",
-      didID = false,
+      timestamp = "",
+      didTimestamp = false,
       room = null;
     switch (cmd) {
       case "c:":
@@ -127,9 +128,9 @@ export class Client {
             users.shift();
             continue;
           }
-          if (!didID && splitted_message[i].startsWith("|:|")) {
-            id = splitted_message[i].slice(3);
-            didID = true;
+          if (!didTimestamp && splitted_message[i].startsWith("|:|")) {
+            timestamp = splitted_message[i].slice(3);
+            didTimestamp = true;
             room = new Room({
               ID: roomID,
               name: name,
@@ -186,7 +187,7 @@ export class Client {
         if (!args[0].trim().toLowerCase().startsWith("guest")) {
           this.join(this.joinAfterLogin);
           console.log("logged in as " + args[0]);
-          this.events.dispatchEvent(new CustomEvent("login"));
+          this.events.dispatchEvent(new CustomEvent("login", { detail: this.username}))
           this.loggedIn = true;
         }
         break;
