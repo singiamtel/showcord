@@ -29,6 +29,7 @@ export default function PS_contextProvider(props: any) {
   const [user, setUser] = useState<string | undefined>();
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [update, setUpdate] = useState<number>(0); // Used to force update on rooms change
   const [previousRooms, setPreviousRooms] = useState<string[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
   const [updateMessages, setUpdateMessages] = useState<number>(0);
@@ -81,11 +82,24 @@ export default function PS_contextProvider(props: any) {
     if (!client) {
       return;
     }
+    setRooms(client.rooms);
+  }, [client, update])
+ 
+
+  useEffect(() => {
+    if (!client) {
+      return;
+    }
     const eventListener = () => {
-      setRooms(client.rooms);
-      localStorage.setItem("rooms", JSON.stringify(client.rooms.map((r) => r.ID)));
-      if (!selectedRoom && client.rooms.length > 0) {
-        setRoom(client.rooms[0].ID);
+      setUpdate(update + 1)
+      if (client.rooms.length > 0) {
+        localStorage.setItem(
+          "rooms",
+          JSON.stringify(client.rooms.map((r) => r.ID)),
+        );
+        if (!selectedRoom) {
+          setRoom(client.rooms[0].ID);
+        }
       }
     };
 
@@ -96,7 +110,7 @@ export default function PS_contextProvider(props: any) {
       client.events.removeEventListener("room", eventListener);
       client.events.removeEventListener("leaveroom", eventListener);
     };
-  }, [client, setRooms, selectedRoom, setRoom])
+  }, [client, setRooms, selectedRoom, setRoom, update, setUpdate]);
 
   useEffect(() => {
     if (!client) return;
@@ -120,7 +134,7 @@ export default function PS_contextProvider(props: any) {
   /* --- End room handling --- */
 
   /* --- Message handling --- */
-  const handleMsgEvent = async (setMessages: any) => {
+  const handleMsgEvent = useCallback(async (setMessages: any) => {
     if (!client) {
       return;
     }
@@ -130,7 +144,7 @@ export default function PS_contextProvider(props: any) {
     const msgs = client.room(selectedRoom)?.messages ?? [];
     console.log("msgs", msgs.length);
     setMessages(msgs);
-  };
+  }, [client, selectedRoom])
 
   useEffect(() => {
     if (!client) {
@@ -143,8 +157,8 @@ export default function PS_contextProvider(props: any) {
     setMessages(client.room(selectedRoom)?.messages ?? []);
 
     const eventListener = () => {
-      // handleMsgEvent();
-      setUpdateMessages(updateMessages + 1);
+      handleMsgEvent(setMessages)
+      // setUpdateMessages(updateMessages + 1);
     };
 
     client.events.addEventListener("message", eventListener);
@@ -153,7 +167,7 @@ export default function PS_contextProvider(props: any) {
       // Clean up the event listener when the component unmounts
       client.events.removeEventListener("message", eventListener);
     };
-  }, [client, selectedRoom, setMessages, updateMessages]);
+  }, [client, selectedRoom, setMessages, handleMsgEvent])
 
   useEffect(() => {
     handleMsgEvent(setMessages);

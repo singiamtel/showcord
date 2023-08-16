@@ -1,10 +1,14 @@
 "use client";
-import { useContext } from "react";
+import { useContext, useEffect } from "react";
 import { PS_context } from "./PS_context";
 import HashtagIcon from "../../public/hashtag.svg";
 
 export default function Rooms({className}: {className: string}){
   const { rooms} = useContext(PS_context);
+
+  useEffect(() => {
+      console.log("rooms changed:", rooms);
+  }, [rooms])
 
   return (
     <div className={"bg-gray-600 h-full " + className}>
@@ -21,12 +25,9 @@ export default function Rooms({className}: {className: string}){
 
 export function RoomComponent({ name, ID }: { name: string; ID: string }) {
   const { setRoom, selectedRoom: room } = useContext(PS_context);
-  const selectRoom = () => {
-    setRoom(ID);
-  };
   return (
     <div>
-      <span className={'rounded p-1 flex flex-row items-center  w-auto h-auto mr-2 ml-2 ' + (ID === room ? "bg-gray-450 hover:bg-gray-450 text-white" : "hover:bg-gray-350 text-gray-150 ") } onClick={selectRoom}>
+      <span className={'rounded p-1 flex flex-row items-center  w-auto h-auto mr-2 ml-2 ' + (ID === room ? "bg-gray-450 hover:bg-gray-450 text-white" : "hover:bg-gray-350 text-gray-150 ") } onClick={() => setRoom(ID)}>
         <HashtagIcon height={16} width={16}/>
       <span className="ml-2">
         {name}

@@ -5,7 +5,7 @@ import { User } from "./user";
 export class Client {
   // socket
   socket: WebSocket;
-  server_url: string = "wss://sim3.psim.us/showdown/websocket";
+  server_url: string = "wss://sim3.psim.us/showdown/websocket/";
   loginserver_url: string = "https://play.pokemonshowdown.com/api/";
   challstr: string = "";
   rooms: Room[] = [];
@@ -17,6 +17,7 @@ export class Client {
   constructor() {
     this.socket = new WebSocket(this.server_url);
     this.__setupSocketListeners();
+    this.send_login();
   }
 
   private __setupSocketListeners() {
@@ -37,6 +38,7 @@ export class Client {
   }
 
   private async parse_message(message: string) {
+    console.log("received message", message)
     if (message.startsWith("|challstr|")) {
       const splitted_challstr = message.split("|");
       splitted_challstr.shift();
@@ -82,6 +84,7 @@ export class Client {
         this.addMessage(
           roomID,
           new Message({
+            timestamp,
             ID: roomID,
             type: "chat",
             content: args[2],
@@ -97,7 +100,6 @@ export class Client {
             - update user
         */
       case "init":
-        console.log("init room");
         let users: User[] = [];
         for (; i < splitted_message.length; i++) { // start at 2 because first line is room id and second line is cmd
           if (splitted_message[i] === "") continue;
@@ -152,6 +154,7 @@ export class Client {
             this.addMessage(
               roomID,
               new Message({
+                timestamp,
                 user,
                 type,
                 content: message,
@@ -163,6 +166,7 @@ export class Client {
             this.addMessage(
               roomID,
               new Message({
+                timestamp,
                 user: "",
                 type: "raw",
                 content: data.join("|"),
@@ -187,8 +191,8 @@ export class Client {
         if (!args[0].trim().toLowerCase().startsWith("guest")) {
           this.join(this.joinAfterLogin);
           console.log("logged in as " + args[0]);
-          this.events.dispatchEvent(new CustomEvent("login", { detail: this.username}))
           this.loggedIn = true;
+          this.events.dispatchEvent(new CustomEvent("login", { detail: this.username}))
         }
         break;
       case "deinit":
@@ -237,6 +241,21 @@ export class Client {
     console.log("room (" + room_id + ") does not exist");
   }
 
+  private async send_login() {
+    while (!this.challstr) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+    // if there's an assertion in the URL, log in using that
+    const URLParams = new URLSearchParams(window.location.search);
+    const assertion = URLParams.get("assertion");
+    if (assertion) {
+      console.log("logging in with assertion");
+      console.log("assertion", assertion);
+      this.socket.send(`|/trn itszxc,0,${assertion}`);
+    }
+  }
+
+  // async login() {
   async login({ username, password }: { username: string; password: string }) {
     this.username = username;
     while (!this.challstr) {
@@ -251,6 +270,11 @@ export class Client {
     const response_test = await response.text();
     const response_json = JSON.parse(response_test.slice(1));
     this.socket.send(`|/trn ${username},0,${response_json.assertion}`);
+    // Oauth login method
+    // console.log("process.env", process.env);
+    // console.log("process.env.NEXT_PUBLIC_OAUTH_ID", process.env.NEXT_PUBLIC_OAUTH_ID);
+    // location.push(`https://play.pokemonshowdown.com/api/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}&redirect_uri=${location.origin}`);
+    // const res = await fetch(`${this.loginserver_url}oauth/api/authorize?client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}`)
   }
 
   async join(rooms: string | string[]) {

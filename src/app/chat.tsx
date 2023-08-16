@@ -5,20 +5,22 @@ import { useEffect } from "react";
 
 import { userColor } from "../utils/namecolour";
 import useOnScreen from "@/utils/isOnScreen";
-import HTML from "@/commands/html"
+import HTML from "@/commands/html";
+import { HHMMSS } from "@/utils/date";
 
 export default function Chat() {
-  const { selectedRoom: room, messages } = useContext(PS_context);
+  const { messages } = useContext(PS_context);
   const messagesEndRef = createRef<HTMLDivElement>();
   const isIntersecting = useOnScreen(messagesEndRef);
 
-  
   useEffect(() => {
+    console.log("messagesEndRef", messagesEndRef);
     messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
-  }, [room]);
+  }, [])
 
   useEffect(() => {
-    if (isIntersecting){
+    console.log("messages changed:", messages);
+    if (isIntersecting) {
       console.log("scrolling", messagesEndRef.current);
       messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
     } else {
@@ -31,6 +33,7 @@ export default function Chat() {
       {messages.map((message, index) => (
         <MessageComponent
           key={index}
+          time={message.timestamp}
           user={message.user}
           message={message.content}
           type={message.type}
@@ -44,16 +47,20 @@ export default function Chat() {
 }
 
 export function MessageComponent(
-  { message, user, type }: { message: string; user: string | undefined, type: string }
+  { message, user, type, time }: {
+    message: string;
+    user: string | undefined;
+    type: string;
+    time: Date;
+  },
 ) {
-  if(type === "raw"){
-    return (
-    <HTML message={message} />
-      )
+  if (type === "raw") {
+    return <HTML message={message} />;
   }
   return (
     <div className="p-0.5">
       <span className="text-white">
+        {HHMMSS(time)}
         <span className="text-[#9D9488]">
           {user?.slice(0, 1)}
         </span>
