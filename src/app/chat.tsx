@@ -3,7 +3,6 @@ import { createRef, useContext } from "react";
 import { PS_context } from "./PS_context";
 import { useEffect } from "react";
 
-import { userColor } from "../utils/namecolour";
 import useOnScreen from "@/utils/isOnScreen";
 import HTML from "@/commands/html";
 import { HHMMSS } from "@/utils/date";
@@ -15,8 +14,8 @@ export default function Chat() {
   const isIntersecting = useOnScreen(messagesEndRef);
 
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
-  }, [])
+    messagesEndRef.current!.scrollIntoView({ behavior: "auto"});
+  }, [messages])
 
   useEffect(() => {
     if (isIntersecting) {
@@ -47,16 +46,27 @@ export function MessageComponent(
     message: string;
     user: string;
     type: string;
-    time: Date;
+    time?: Date;
   },
 ) {
   if (type === "raw") {
     return <HTML message={message} />;
   }
+  if(type === "log") {
+    console.log('LOGMSG', message);
+    return (
+      <div className="p-0.5 text-white">
+      <span className="text-gray-125 font-mono">
+        {time ? HHMMSS(time) : ""}
+        </span>
+        {" " + message}
+      </div>
+    )
+  }
   return (
     <div className="p-0.5">
       <span className="text-gray-125 font-mono">
-        {HHMMSS(time)}
+        {time ? HHMMSS(time) : ""}
         </span>
       <span className="text-white">
         <UserComponent user={user} />

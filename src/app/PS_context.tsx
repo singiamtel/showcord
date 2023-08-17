@@ -34,15 +34,6 @@ export default function PS_contextProvider(props: any) {
   const [messages, setMessages] = useState<Message[]>([]);
   const [updateMsgs, setUpdateMsgs] = useState<number>(0); // Used to force update on rooms change
 
-  const lastRooms = () => {
-    const rooms = localStorage.getItem("rooms");
-    const defaultRooms = ["lobby", "help", "overused"];
-    if (rooms) {
-      return JSON.parse(rooms);
-    }
-    return defaultRooms;
-  };
-
   /* --- Room handling --- */
 
   const setRoom = useCallback((room: string | 1 | -1) => {
@@ -90,7 +81,6 @@ export default function PS_contextProvider(props: any) {
     const eventListener = () => {
       setUpdate(update + 1)
       if (client.rooms.length > 0) {
-        localStorage.setItem( "rooms", JSON.stringify(client.rooms.map((r) => r.ID)));
         if (!selectedRoom || !client.room(selectedRoom)){
           setRoom(client.rooms[0].ID);
         }
@@ -121,7 +111,7 @@ export default function PS_contextProvider(props: any) {
 
   useEffect(() => {
     if (!client) return;
-    client.join(lastRooms());
+    client.join(client.settings.rooms, true);
     // client.login({username, password});
   }, [client]);
 

@@ -63,11 +63,12 @@ export default function ChatBox() {
       <form onSubmit={submit} ref={formRef} className="w-full">
         <div className="flex flex-row">
           <TextareaAutosize
-            className="mr-5 ml-5 p-2 rounded-lg flex-grow bg-gray-375 text-white"
+            className="mr-5 ml-5 p-2 rounded-lg flex-grow bg-gray-375 text-white resize-none"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={manageKeybinds}
             ref={textAreaRef}
+
           >
           </TextareaAutosize>
         </div>

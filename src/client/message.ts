@@ -1,20 +1,23 @@
 export class Message {
   content: string;
-  type: "chat" | "raw";
+  type: "chat" | "raw" | "log";
   user?: string;
-  timestamp: Date;
+  timestamp?: Date;
+  hld?: boolean;
   constructor(
-    { content, type, user, timestamp }: {
+    { content, type, user, timestamp, hld }: {
       content: string;
-      type: "chat" | "raw";
+      type: "chat" | "raw" | "log"
       user?: string;
-      timestamp: string;
+      timestamp?: string;
+      hld?: boolean;
     },
   ) {
     this.content = content;
     this.type = type;
     this.user = user;
     // this.timestamp = timestamp ? new Date(timestamp) : undefined;
-    this.timestamp = new Date(Number(timestamp) * 1000);
+    if(timestamp) this.timestamp = new Date(Number(timestamp) * 1000);
+    this.hld = hld;
   }
 }

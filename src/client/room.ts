@@ -20,25 +20,35 @@ export class Room {
     }
     this.messages.push(message);
   }
+
   addUser(user: User) {
     this.addUsers([user]);
   }
+  removeUser(username: string) {
+    this.users = this.users.filter((u) => u.name !== username);
+  }
 
   private rankOrder: any = {
-    '&': 8,
-    '#': 7,
-    '\u00a7': 6,
-    '@': 5,
-    '%': 4,
-    '*': 3,
-    '+': 2,
-    '^': 1,
+    '&': 9,
+    '#': 8,
+    '\u00a7': 7,
+    '@': 6,
+    '%': 5,
+    '*': 4,
+    '+': 3,
+    '^': 2,
+    ' ': 1,
+    '‽': 0,
   }
 
   private rankSorter = (a:User, b:User) => {
-    const parsedA = this.rankOrder[a.name.slice(0,1)] || a.name[0]
-    const parsedB = this.rankOrder[b.name.slice(0,1)] || b.name[0]
-    return parsedB - parsedA ? parsedB - parsedA : a.name.localeCompare(b.name)
+    // the symbols should go first, then the spaces, then the interrobangs
+    const aSymbol = a.name.charAt(0)
+    const bSymbol = b.name.charAt(0)
+    if (this.rankOrder[aSymbol] !== this.rankOrder[bSymbol]) {
+      return this.rankOrder[bSymbol] - this.rankOrder[aSymbol]
+    }
+    return a.name.localeCompare(b.name, 'en', { sensitivity: 'base' })
   }
 
   addUsers(users: User[]) {

@@ -1,3 +1,4 @@
+import { Settings } from "@/settings";
 import { Message } from "./message";
 import { Room } from "./room";
 import { User } from "./user";
@@ -13,6 +14,7 @@ export class Client {
   private joinAfterLogin: string[] = [];
   username: string = "";
   loggedIn: boolean = false;
+  settings : Settings = new Settings();
 
   constructor() {
     this.socket = new WebSocket(this.server_url);
@@ -24,7 +26,7 @@ export class Client {
     this.socket.onopen = function () {
     };
     this.socket.onmessage = (event) => {
-      console.log(event.data);
+      console.log('msg:', event.data);
       this.parse_message(event.data);
     };
     this.socket.onerror = (event) => {
@@ -68,7 +70,7 @@ export class Client {
       didType = false,
       name = "",
       didName = false,
-      timestamp = "",
+      timestamp: string | undefined = "",
       didTimestamp = false,
       room = null;
     switch (cmd) {
@@ -80,10 +82,14 @@ export class Client {
           console.log("room not found (" + roomID + ")");
           return;
         }
-        let user, content, msgType: "raw" | "chat";
+        let user, content, msgType: "raw" | "chat" | "log" = "chat";
         if (args[1]?.startsWith("/raw") || args[2]?.startsWith("/raw")) {
           msgType = "raw";
           content = args[1].slice(4);
+        }else if (args[1]?.startsWith("/log")) {
+          msgType = "log";
+          content = args[1].slice(4);
+          timestamp = undefined;
         } else {
           msgType = "chat";
           timestamp = args[0];
@@ -106,7 +112,7 @@ export class Client {
         let room = this.room(roomID);
         if (!room) {
           console.error(
-            "Received join message for room that doesn't exist",
+            "Received |J| from untracked room",
             roomID,
           );
           return;
@@ -114,6 +120,19 @@ export class Client {
         room.addUser(new User({ name: args[0] }));
         break;
       }
+      case "L": {
+        console.log("user left room", roomID, args);
+        let room = this.room(roomID);
+        if (!room) {
+          console.error(
+            "Received |L| from untracked room",
+            roomID,
+          );
+          return;
+        }
+        room.removeUser(args[0]);
+      }
+
       /*
           Messages that can be more than two lines:
             - init room
@@ -168,11 +187,15 @@ export class Client {
             let [_, _2, msgTime, user, message] = splitted_message[i].split(
               "|",
             );
-            let type: "raw" | "chat" = "chat";
+            let type: "raw" | "chat" | "log" = "chat";
             if (message.startsWith("/raw")) {
               type = "raw";
               message = message.slice(4);
+            } else if (message.startsWith("/log")) {
+              type = "log";
+              message = message.slice(4);
             }
+
             this.addMessage(
               roomID,
               new Message({
@@ -241,6 +264,7 @@ export class Client {
     this.rooms.push(room);
     const eventio = new CustomEvent("room", { detail: room });
     this.events.dispatchEvent(eventio);
+    this.settings.changeRooms(this.rooms);
   }
 
   private addMessage(room_id: string, message: Message) {
@@ -301,8 +325,15 @@ export class Client {
     // const res = await fetch(`${this.loginserver_url}oauth/api/authorize?client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}`)
   }
 
-  async join(rooms: string | string[]) {
+  async join(rooms: string | string[], useDefaultRooms = false){
     console.log("joining rooms...", rooms);
+    if(useDefaultRooms && (!rooms || rooms.length === 0)) {
+      for (let room of this.settings.defaultRooms) {
+        this.socket.send(`|/join ${room}`);
+      }
+      return;
+    }
+
     if (typeof rooms === "string") {
       this.socket.send(`|/join ${rooms}`);
     } else {
