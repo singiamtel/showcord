@@ -33,7 +33,7 @@ export class Client {
     this.socket.onclose = (_) => {
       this.__setupSocketListeners();
       this.events.dispatchEvent(new CustomEvent("disconnect"));
-    }
+    };
   }
 
   private async parse_message(message: string) {
@@ -42,7 +42,7 @@ export class Client {
       splitted_challstr.shift();
       splitted_challstr.shift();
       this.challstr = splitted_challstr.join("|");
-      return
+      return;
     }
     let i = 0;
     const splitted_message = message.split("\n");
@@ -80,12 +80,11 @@ export class Client {
           console.log("room not found (" + roomID + ")");
           return;
         }
-        let user, content, msgType : "raw" | "chat";
-        if (args[1]?.startsWith("/raw") || args[2]?.startsWith('/raw')) {
+        let user, content, msgType: "raw" | "chat";
+        if (args[1]?.startsWith("/raw") || args[2]?.startsWith("/raw")) {
           msgType = "raw";
           content = args[1].slice(4);
-        }
-        else {
+        } else {
           msgType = "chat";
           timestamp = args[0];
           user = args[1];
@@ -102,6 +101,19 @@ export class Client {
           }),
         );
         break;
+      case "J": {
+        console.log("user joined room", roomID, args);
+        let room = this.room(roomID);
+        if (!room) {
+          console.error(
+            "Received join message for room that doesn't exist",
+            roomID,
+          );
+          return;
+        }
+        room.addUser(new User({ name: args[0] }));
+        break;
+      }
       /*
           Messages that can be more than two lines:
             - init room
@@ -200,14 +212,18 @@ export class Client {
           this.join(this.joinAfterLogin);
           console.log("logged in as " + args[0]);
           this.loggedIn = true;
-          this.events.dispatchEvent(new CustomEvent("login", { detail: this.username}))
+          this.events.dispatchEvent(
+            new CustomEvent("login", { detail: this.username }),
+          );
         }
         break;
       case "deinit":
         // leave room
         this.rooms = this.rooms.filter((room) => room.ID !== roomID);
-        this.events.dispatchEvent(new CustomEvent("leaveroom", { detail: roomID }));
-        break
+        this.events.dispatchEvent(
+          new CustomEvent("leaveroom", { detail: roomID }),
+        );
+        break;
       default:
         console.log("unknown cmd: " + cmd);
     }
@@ -217,7 +233,7 @@ export class Client {
     return this.rooms.find((room) => room.ID === room_id);
   }
 
-  leaveRoom(room_id: string){
+  leaveRoom(room_id: string) {
     this.socket.send(`|/leave ${room_id}`);
   }
 
