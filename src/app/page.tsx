@@ -1,8 +1,7 @@
 import Rooms from "./rooms";
-import ChatBox from "./chatbox";
-import Messages from "./chat";
 import Users from "./users";
 import UserPanel from "./userpanel";
+import BigPanel from "./BigPanel";
 
 export default function Home() {
   return (
@@ -12,14 +11,7 @@ export default function Home() {
         <Rooms className="flex-grow" />
         <UserPanel />
       </div>
-      <div className="w-full bg-gray-300 flex flex-col">
-        <div className="max-h-[90%] flex-shrink min-h-0">
-          <Messages />
-        </div>
-        <div className="flex-grow">
-          <ChatBox />
-        </div>
-      </div>
+          <BigPanel />
       <div className="w-1/6">
         <Users />
       </div>
