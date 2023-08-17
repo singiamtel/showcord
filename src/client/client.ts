@@ -38,7 +38,6 @@ export class Client {
   }
 
   private async parse_message(message: string) {
-    console.log("received message", message)
     if (message.startsWith("|challstr|")) {
       const splitted_challstr = message.split("|");
       splitted_challstr.shift();
@@ -58,9 +57,9 @@ export class Client {
     }
     const [_, cmd, ...args] = splitted_message[i].split("|");
     i++;
-    console.log("cmd", cmd);
-    console.log("args", args);
-    console.log("roomID", roomID);
+    // console.log("cmd", cmd);
+    // console.log("args", args);
+    // console.log("roomID", roomID);
     /*
           Messages that are two lines:
             - any message linked to a room
@@ -84,8 +83,7 @@ export class Client {
         this.addMessage(
           roomID,
           new Message({
-            timestamp,
-            ID: roomID,
+            timestamp: args[0],
             type: "chat",
             content: args[2],
             user: args[1],
@@ -143,7 +141,7 @@ export class Client {
             continue;
           }
           if (splitted_message[i].startsWith("|c:|")) {
-            let [_, _2, msgID, user, message] = splitted_message[i].split(
+            let [_, _2, msgTime, user, message] = splitted_message[i].split(
               "|",
             );
             let type: "raw" | "chat" = "chat";
@@ -154,11 +152,10 @@ export class Client {
             this.addMessage(
               roomID,
               new Message({
-                timestamp,
+                timestamp: msgTime,
                 user,
                 type,
                 content: message,
-                ID: msgID,
               }),
             );
           } else if (splitted_message[i].startsWith("|raw|")) {
@@ -170,7 +167,6 @@ export class Client {
                 user: "",
                 type: "raw",
                 content: data.join("|"),
-                ID: "",
               }),
             );
           } else {

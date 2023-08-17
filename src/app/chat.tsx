@@ -57,12 +57,16 @@ export function MessageComponent(
   if (type === "raw") {
     return <HTML message={message} />;
   }
+  const rank = user?.charAt(0);
   return (
     <div className="p-0.5">
-      <span className="text-white">
+      <span className="text-gray-125 font-mono">
         {HHMMSS(time)}
+        </span>
+      <span className="text-white">
         <span className="text-[#9D9488]">
-          {user?.slice(0, 1)}
+          &nbsp;
+          {rank === " " ? "" : rank}
         </span>
         <span style={{ color: userColor(user) }} className="font-bold">
           {user?.slice(1)}:

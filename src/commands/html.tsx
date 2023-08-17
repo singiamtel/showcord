@@ -6,16 +6,14 @@ import sanitizeHtml from "sanitize-html";
 import Code, { isCode } from "./code";
 
 export default function HTML({ message }: any) {
-  if(isCode(message)) {
-    return (
-      <Code message={message} />
-    )
-  }
+  console.log("message", message);
   return (
-    <div className="p-0.5">
-      <span className="text-white">
-        {parse(sanitizeHtml(message))}
-      </span>
+    <div className="p-2 ml-14 mr-14 m-2 text-white border border-solid border-gray-border bg-gray-600 rounded">
+      {isCode(message) ? <Code message={message} /> : (
+        <span className="">
+          {parse(sanitizeHtml(message))}
+        </span>
+      )}
     </div>
   );
 }
