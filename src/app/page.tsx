@@ -13,10 +13,10 @@ export default function Home() {
         <UserPanel />
       </div>
       <div className="w-full bg-gray-300 flex flex-col">
-        <div className="h-[90%]">
+        <div className="max-h-[90%] flex-shrink min-h-0">
           <Messages />
         </div>
-        <div className="h-[10%]">
+        <div className="flex-grow">
           <ChatBox />
         </div>
       </div>

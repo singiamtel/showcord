@@ -10,14 +10,13 @@ import {
   useState,
 } from "react";
 import { PS_context } from "./PS_context";
-import useAutosizeTextArea from "@/utils/useAutosizeTextArea";
+import TextareaAutosize from 'react-textarea-autosize';
 
 export default function ChatBox() {
   const [input, setInput] = useState<string>("");
   const { client, selectedRoom: room, setRoom } = useContext(PS_context);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const formRef = createRef<HTMLFormElement>();
-  useAutosizeTextArea(textAreaRef.current, input);
 
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -63,14 +62,14 @@ export default function ChatBox() {
     <div className="w-full">
       <form onSubmit={submit} ref={formRef} className="w-full">
         <div className="flex flex-row">
-          <textarea
+          <TextareaAutosize
             className="mr-5 ml-5 p-2 rounded-lg flex-grow bg-gray-375 text-white"
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={manageKeybinds}
             ref={textAreaRef}
           >
-          </textarea>
+          </TextareaAutosize>
         </div>
       </form>
     </div>
