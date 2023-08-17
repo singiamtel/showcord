@@ -30,23 +30,23 @@ export default function Users() {
     <div className="bg-gray-600 h-full p-2 overflow-y-scroll">
       {users.map((user, index) => 
         <div key={index}>
-          <UserComponent user={user.name} />
+          <UserComponent user={user.name} alignRight />
         </div>
       )}
     </div>
   );
 }
 
-export function UserComponent({ user }: { user?: string }) {
-  const rank = user?.charAt(0);
+export function UserComponent({ user, alignRight }: { user: string, alignRight?: boolean }){
+  const rank = user.charAt(0);
   return (
     <>
       <span className="text-[#9D9488]">
         &nbsp;
-        {rank === " " ? "" : rank}
+        {rank + (alignRight ? " " : "")}
       </span>
       <span style={{ color: userColor(user) }} className="font-bold">
-        {user?.slice(1)}
+        {user.slice(1)}
       </span>
     </>
   );

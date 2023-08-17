@@ -32,7 +32,6 @@ export default function PS_contextProvider(props: any) {
   const [update, setUpdate] = useState<number>(0); // Used to force update on rooms change
   const [previousRooms, setPreviousRooms] = useState<string[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
-  const [updateMessages, setUpdateMessages] = useState<number>(0);
 
   const lastRooms = () => {
     const rooms = localStorage.getItem("rooms");
@@ -50,10 +49,7 @@ export default function PS_contextProvider(props: any) {
       if (rooms) {
         if (!selectedRoom) return;
         const roomNames = rooms.map((r) => r.ID);
-        console.log(roomNames);
-        console.log(selectedRoom);
         const index = roomNames.indexOf(selectedRoom);
-        console.log(index);
         const newIndex = index + room;
         if (newIndex >= roomNames.length) room = roomNames[0];
         else if (newIndex < 0) room = roomNames[roomNames.length - 1];
@@ -93,11 +89,8 @@ export default function PS_contextProvider(props: any) {
     const eventListener = () => {
       setUpdate(update + 1)
       if (client.rooms.length > 0) {
-        localStorage.setItem(
-          "rooms",
-          JSON.stringify(client.rooms.map((r) => r.ID)),
-        );
-        if (!selectedRoom) {
+        localStorage.setItem( "rooms", JSON.stringify(client.rooms.map((r) => r.ID)));
+        if (!selectedRoom || !client.room(selectedRoom)){
           setRoom(client.rooms[0].ID);
         }
       }
@@ -184,9 +177,28 @@ export default function PS_contextProvider(props: any) {
       console.log("logged in as", username);
       setUser((username as CustomEvent).detail);
     });
+
+    client.events.addEventListener("login", (username) => {
+      console.log("logged in as", username);
+      setUser((username as CustomEvent).detail);
+    });
+
   }, []);
 
+  // Try to recover on socket death
+  // TODO: It doesn't work very well
+  // useEffect(() => {
+  //   if(!client) return;
+  //   client.socket.onclose = () => {
+  //     const newClient = new Client();
+  //     newClient.socket.onopen = () => {
+  //       setClient(newClient);
+  //     };
+  //   }
+  // }, [client])
+
   /* --- End user handling --- */
+
 
   return (
     <PS_context.Provider

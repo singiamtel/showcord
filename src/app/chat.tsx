@@ -15,18 +15,13 @@ export default function Chat() {
   const isIntersecting = useOnScreen(messagesEndRef);
 
   useEffect(() => {
-    console.log("messagesEndRef", messagesEndRef);
     messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
   }, [])
 
   useEffect(() => {
-    console.log("messages changed:", messages);
     if (isIntersecting) {
-      console.log("scrolling", messagesEndRef.current);
       messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
-    } else {
-      console.log("not on screen, refusing to scroll");
-    }
+    } 
   }, [messages, messagesEndRef, isIntersecting]);
 
   return ( //no-scrollbar
@@ -35,7 +30,7 @@ export default function Chat() {
         <MessageComponent
           key={index}
           time={message.timestamp}
-          user={message.user}
+          user={message.user || ""}
           message={message.content}
           type={message.type}
         />
@@ -50,7 +45,7 @@ export default function Chat() {
 export function MessageComponent(
   { message, user, type, time }: {
     message: string;
-    user: string | undefined;
+    user: string;
     type: string;
     time: Date;
   },

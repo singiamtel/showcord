@@ -31,9 +31,8 @@ export class Client {
       console.error(event);
     };
     this.socket.onclose = (_) => {
-      // https://www.youtube.com/watch?v=u5k_arVcqR8
-      this.socket = new WebSocket(this.server_url);
       this.__setupSocketListeners();
+      this.events.dispatchEvent(new CustomEvent("disconnect"));
     }
   }
 
