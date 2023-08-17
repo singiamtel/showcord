@@ -32,6 +32,7 @@ export default function PS_contextProvider(props: any) {
   const [update, setUpdate] = useState<number>(0); // Used to force update on rooms change
   const [previousRooms, setPreviousRooms] = useState<string[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
+  const [updateMsgs, setUpdateMsgs] = useState<number>(0); // Used to force update on rooms change
 
   const lastRooms = () => {
     const rooms = localStorage.getItem("rooms");
@@ -150,8 +151,7 @@ export default function PS_contextProvider(props: any) {
     setMessages(client.room(selectedRoom)?.messages ?? []);
 
     const eventListener = () => {
-      handleMsgEvent(setMessages)
-      // setUpdateMessages(updateMessages + 1);
+      setUpdateMsgs(updateMsgs + 1);
     };
 
     client.events.addEventListener("message", eventListener);
@@ -160,11 +160,11 @@ export default function PS_contextProvider(props: any) {
       // Clean up the event listener when the component unmounts
       client.events.removeEventListener("message", eventListener);
     };
-  }, [client, selectedRoom, setMessages, handleMsgEvent])
+  }, [client, selectedRoom, setMessages, handleMsgEvent, updateMsgs]);
 
   useEffect(() => {
     handleMsgEvent(setMessages);
-  }, [handleMsgEvent, setMessages]);
+  }, [handleMsgEvent, setMessages, updateMsgs])
 
   /* --- End message handling --- */
 

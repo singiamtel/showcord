@@ -72,6 +72,7 @@ export class Client {
       didTimestamp = false,
       room = null;
     switch (cmd) {
+      case "c":
       case "c:":
         // th
         room = this.room(roomID);
@@ -79,13 +80,25 @@ export class Client {
           console.log("room not found (" + roomID + ")");
           return;
         }
+        let user, content, msgType : "raw" | "chat";
+        if (args[1]?.startsWith("/raw")) {
+          msgType = "raw";
+          content = args[1].slice(4);
+        }
+        else {
+          msgType = "chat";
+          timestamp = args[0];
+          user = args[1];
+          content = args[2];
+        }
+
         this.addMessage(
           roomID,
           new Message({
-            timestamp: args[0],
-            type: "chat",
-            content: args[2],
-            user: args[1],
+            timestamp,
+            type: msgType,
+            content,
+            user,
           }),
         );
         break;

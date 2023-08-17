@@ -41,11 +41,11 @@ export function UserComponent({ user, alignRight }: { user: string, alignRight?:
   const rank = user.charAt(0);
   return (
     <>
-      <span className="text-[#9D9488]">
+      <span className="text-[#9D9488] whitespace-nowrap">
         &nbsp;
         {rank + (alignRight ? " " : "")}
       </span>
-      <span style={{ color: userColor(user) }} className="font-bold">
+      <span style={{ color: userColor(user) }} className="font-bold ">
         {user.slice(1)}
       </span>
     </>

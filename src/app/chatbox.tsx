@@ -36,19 +36,23 @@ export default function ChatBox() {
       // submit form
       formRef.current?.requestSubmit();
       e.preventDefault();
-      return
-    }
-    if((e.key === "Tab" && !e.shiftKey) || e.key === "ArrowRight") {
-      setRoom(1);
-      e.preventDefault();
       return;
     }
-    if((e.key === "Tab" && e.shiftKey) || e.key === "ArrowLeft") {
-      setRoom(-1);
-      e.preventDefault();
-      return;
+    if ((e.key === "Tab" && !e.shiftKey) || e.key === "ArrowRight") {
+      if (!formRef.current?.textContent) {
+        setRoom(1);
+        e.preventDefault();
+        return;
+      }
     }
-
+    if ((e.key === "Tab" && e.shiftKey) || e.key === "ArrowLeft") {
+      console.log(formRef.current?.textContent);
+      if (!formRef.current?.textContent) {
+        setRoom(-1);
+        e.preventDefault();
+        return;
+      }
+    }
   };
 
   useEffect(() => {

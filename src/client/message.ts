@@ -15,7 +15,6 @@ export class Message {
     this.type = type;
     this.user = user;
     // this.timestamp = timestamp ? new Date(timestamp) : undefined;
-    console.log('converted timestamp: ' + timestamp)
     this.timestamp = new Date(Number(timestamp) * 1000);
   }
 }
