@@ -81,7 +81,7 @@ export class Client {
           return;
         }
         let user, content, msgType : "raw" | "chat";
-        if (args[1]?.startsWith("/raw")) {
+        if (args[1]?.startsWith("/raw") || args[2]?.startsWith('/raw')) {
           msgType = "raw";
           content = args[1].slice(4);
         }
