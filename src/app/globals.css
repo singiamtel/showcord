@@ -2,24 +2,24 @@
 @tailwind components;
 @tailwind utilities;
 
-/* @layer utilities { */
-/*     @variants responsive { */
-/*       /* Hide scrollbar for Chrome, Safari and Opera */ */
-/*       .no-scrollbar::-webkit-scrollbar { */
-/*           display: none; */
-/*       } */
-/**/
-/*       /* Hide scrollbar for IE, Edge and Firefox */ */
-/*       .no-scrollbar { */
-/*           -ms-overflow-style: none;  /* IE and Edge */ */
-/*           scrollbar-width: none;  /* Firefox */ */
-/*       } */
-/*     } */
-/*   } */
+@layer utilities {
+  @variants responsive {
+    hide scrollbar for chrome, safari and opera 
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    hide scrollbar for ie, edge and firefox 
+    .no-scrollbar {
+      -ms-overflow-style: none; 
+      scrollbar-width: none; 
+    }
+  }
+}
 
 input{background-color: transparent;}
 textarea:focus, input:focus{
-    outline: none;
+  outline: none;
 }
 
 .modal-wrapper {
@@ -58,5 +58,5 @@ textarea:focus, input:focus{
 }
 
 a {
-
+  color: #05A8FC;
 }

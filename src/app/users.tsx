@@ -1,48 +1,53 @@
-"use client"
+"use client";
 import { useContext } from "react";
 import { PS_context } from "./PS_context";
-import { useState, useEffect  } from "react";
+import { useEffect, useState } from "react";
 import { userColor } from "../utils/namecolour";
 
-export type Users = { 
-	name: string,
-}
+export type Users = {
+  name: string;
+};
 
 export default function Users() {
-	const { selectedRoom: room, client } = useContext(PS_context);
-	const [users, setUsers] = useState<Users[]>([]);
+  const { selectedRoom: room, client } = useContext(PS_context);
+  const [users, setUsers] = useState<Users[]>([]);
 
-	const refreshUsers = () => {
-    if(!room) { return; }
+  const refreshUsers = () => {
+    if (!room) return;
     const selectedRoom = client?.room(room);
-    if(!selectedRoom) {
-      console.log('room does not exist');
+    if (!selectedRoom) {
+      console.log("room does not exist");
       return;
     }
-		setUsers(selectedRoom.users);
-	}
+    setUsers(selectedRoom.users);
+  };
 
   useEffect(() => {
-    refreshUsers()
-  }, [room])
+    refreshUsers();
+  }, [room]);
 
-	return (
-		<div className="bg-gray-600 h-full p-2 overflow-y-scroll">
-			{users.map((user, index) => (
-				<MessageComponent key={index} user={user}/>
-			))
-			}
-		</div>
-	);
+  return (
+    <div className="bg-gray-600 h-full p-2 overflow-y-scroll">
+      {users.map((user, index) => 
+        <div key={index}>
+          <UserComponent user={user.name} />
+        </div>
+      )}
+    </div>
+  );
 }
 
-export function MessageComponent({user}: {user: Users}) {
-	return (
-		<div>
-			<span style={{color: userColor(user.name)}}>
-				{user.name}
-			</span>
-		</div>
-	);
+export function UserComponent({ user }: { user?: string }) {
+  const rank = user?.charAt(0);
+  return (
+    <>
+      <span className="text-[#9D9488]">
+        &nbsp;
+        {rank === " " ? "" : rank}
+      </span>
+      <span style={{ color: userColor(user) }} className="font-bold">
+        {user?.slice(1)}
+      </span>
+    </>
+  );
 }
-	

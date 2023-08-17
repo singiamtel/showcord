@@ -7,6 +7,7 @@ import { userColor } from "../utils/namecolour";
 import useOnScreen from "@/utils/isOnScreen";
 import HTML from "@/commands/html";
 import { HHMMSS } from "@/utils/date";
+import { UserComponent } from "./users";
 
 export default function Chat() {
   const { messages } = useContext(PS_context);
@@ -57,21 +58,14 @@ export function MessageComponent(
   if (type === "raw") {
     return <HTML message={message} />;
   }
-  const rank = user?.charAt(0);
   return (
     <div className="p-0.5">
       <span className="text-gray-125 font-mono">
         {HHMMSS(time)}
         </span>
       <span className="text-white">
-        <span className="text-[#9D9488]">
-          &nbsp;
-          {rank === " " ? "" : rank}
-        </span>
-        <span style={{ color: userColor(user) }} className="font-bold">
-          {user?.slice(1)}:
-        </span>{" "}
-        {message}
+        <UserComponent user={user} />
+        {" " + message}
       </span>
     </div>
   );
