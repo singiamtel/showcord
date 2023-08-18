@@ -1,7 +1,9 @@
 import { Settings } from "@/settings";
+import { toID } from "@/utils/generic";
 import { Message } from "./message";
 import { Room } from "./room";
 import { User } from "./user";
+import { Play } from "next/font/google";
 
 export class Client {
   // socket
@@ -14,7 +16,7 @@ export class Client {
   private joinAfterLogin: string[] = [];
   username: string = "";
   loggedIn: boolean = false;
-  settings : Settings = new Settings();
+  settings: Settings = new Settings();
 
   constructor() {
     this.socket = new WebSocket(this.server_url);
@@ -26,7 +28,7 @@ export class Client {
     this.socket.onopen = function () {
     };
     this.socket.onmessage = (event) => {
-      console.log('msg:', event.data);
+      console.log("msg:", event.data);
       this.parse_message(event.data);
     };
     this.socket.onerror = (event) => {
@@ -86,7 +88,7 @@ export class Client {
         if (args[1]?.startsWith("/raw") || args[2]?.startsWith("/raw")) {
           msgType = "raw";
           content = args[1].slice(4);
-        }else if (args[1]?.startsWith("/log")) {
+        } else if (args[1]?.startsWith("/log")) {
           msgType = "log";
           content = args[1].slice(4);
           timestamp = undefined;
@@ -235,9 +237,7 @@ export class Client {
           this.join(this.joinAfterLogin);
           console.log("logged in as " + args[0]);
           this.loggedIn = true;
-          this.events.dispatchEvent(
-            new CustomEvent("login", { detail: this.username }),
-          );
+          this.setUsername(args[0]);
         }
         break;
       case "deinit":
@@ -269,6 +269,9 @@ export class Client {
 
   private addMessage(room_id: string, message: Message) {
     const room = this.room(room_id);
+    if (this.highlightMsg(room_id, message.content)) {
+      message.hld = true;
+    }
     if (room) {
       room.addMessage(message);
       this.events.dispatchEvent(
@@ -325,9 +328,9 @@ export class Client {
     // const res = await fetch(`${this.loginserver_url}oauth/api/authorize?client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}`)
   }
 
-  async join(rooms: string | string[], useDefaultRooms = false){
+  async join(rooms: string | string[], useDefaultRooms = false) {
     console.log("joining rooms...", rooms);
-    if(useDefaultRooms && (!rooms || rooms.length === 0)) {
+    if (useDefaultRooms && (!rooms || rooms.length === 0)) {
       for (let room of this.settings.defaultRooms) {
         this.socket.send(`|/join ${room}`);
       }
@@ -346,5 +349,40 @@ export class Client {
   async send(room: string, message: string) {
     console.log(`${room}|${message}`);
     this.socket.send(`${room}|${message}`);
+  }
+
+  highlightMsg(roomid: string, message: string) {
+    console.log("highlightMsg", roomid, message, this.username);
+    if(
+      this.username && (message.includes(this.username) ||
+      message.includes(toID(this.username))
+      )
+    ){
+      return true;
+    }
+    if (
+      this.settings.highlightMsg(roomid, message)
+    ) {
+      console.log("highlighted message", message);
+      return true;
+    }
+    return false;
+  }
+
+  private setUsername(username: string) {
+    // gotta re-run highlightMsg on all messages
+    this.rooms.forEach(async (room) => {
+      room.messages.forEach((msg) => {
+        if (this.highlightMsg(room.ID, msg.content)) {
+          msg.hld = true;
+        } else {
+          msg.hld = false;
+        }
+      });
+    });
+    this.username = username;
+    this.events.dispatchEvent(
+      new CustomEvent("login", { detail: this.username }),
+    );
   }
 }

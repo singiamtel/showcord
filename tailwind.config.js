@@ -31,6 +31,11 @@ module.exports = {
         700: "#1F2023",
         "border": "#1E1F22",
       },
+      yellow: {
+        "hl-body": "#444039",
+        "hl-mark": "#EFB132",
+
+      }
     },
     fontFamily: {
       sans: ["Inter", "sans-serif"],
@@ -46,6 +51,7 @@ module.exports = {
     "ml-14",
     "mr-14",
     "p-2",
+    "p-5.5",
     "m-2",
   ],
 };

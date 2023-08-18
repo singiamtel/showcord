@@ -5,12 +5,12 @@ export class Message {
   timestamp?: Date;
   hld?: boolean;
   constructor(
-    { content, type, user, timestamp, hld }: {
+    { content, type, user, timestamp, hld = false }: {
       content: string;
       type: "chat" | "raw" | "log"
       user?: string;
       timestamp?: string;
-      hld?: boolean;
+      hld?: boolean 
     },
   ) {
     this.content = content;

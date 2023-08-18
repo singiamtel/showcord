@@ -32,6 +32,7 @@ export default function Chat() {
           user={message.user || ""}
           message={message.content}
           type={message.type}
+          hld={message.hld}
         />
       ))}
       <div>
@@ -42,11 +43,12 @@ export default function Chat() {
 }
 
 export function MessageComponent(
-  { message, user, type, time }: {
+  { message, user, type, time, hld }: {
     message: string;
     user: string;
     type: string;
     time?: Date;
+    hld?: boolean;
   },
 ) {
   if (type === "raw") {
@@ -64,7 +66,7 @@ export function MessageComponent(
     )
   }
   return (
-    <div className="p-0.5">
+    <div className={"p-5.5 " + (hld ? "bg-yellow-hl-body" : "")}>
       <span className="text-gray-125 font-mono">
         {time ? HHMMSS(time) : ""}
         </span>
