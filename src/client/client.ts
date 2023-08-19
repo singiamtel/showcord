@@ -332,7 +332,8 @@ export class Client {
   private async send_assertion(assertion: string) {
     // 
     console.log("sending assertion", assertion);
-    const username = assertion.split(",")[0];
+    const username = assertion.split(",")[1];
+    this.socket.send(`|/trn ${username},0,${assertion}`);
   }
 
 
