@@ -4,6 +4,7 @@ import { Message } from "./message";
 import { Room } from "./room";
 import { User } from "./user";
 import { Play } from "next/font/google";
+import localforage from "localforage";
 
 export class Client {
   // socket
@@ -21,12 +22,25 @@ export class Client {
   constructor() {
     this.socket = new WebSocket(this.server_url);
     this.__setupSocketListeners();
-    this.send_login();
+    this.tryLogin();
   }
 
+    // Order of login methods:
+    // 1. Assertion in URL (from oauth login)
+    // - This happens right after oauth login
+    // - We also need to store the token in localforage
+    //
+    // 2. Assertion from token
+    // - This happens when we have a token stored in localforage
+    // - We try to get an assertion from the token, and send it to the server
+    // - If it fails we drop the token and go to #3
+    //
+    // 3. Normal login
+    // Redirect to oauth login page
+
   private __setupSocketListeners() {
-    this.socket.onopen = function () {
-    };
+    // this.socket.onopen = function () {
+    // };
     this.socket.onmessage = (event) => {
       console.log("msg:", event.data);
       this.parse_message(event.data);
@@ -242,10 +256,7 @@ export class Client {
         break;
       case "deinit":
         // leave room
-        this.rooms = this.rooms.filter((room) => room.ID !== roomID);
-        this.events.dispatchEvent(
-          new CustomEvent("leaveroom", { detail: roomID }),
-        );
+        this._removeRoom(roomID);
         break;
       default:
         console.log("unknown cmd: " + cmd);
@@ -263,6 +274,13 @@ export class Client {
   private _addRoom(room: Room) {
     this.rooms.push(room);
     const eventio = new CustomEvent("room", { detail: room });
+    this.events.dispatchEvent(eventio);
+    this.settings.changeRooms(this.rooms);
+  }
+
+  private _removeRoom(room_id: string) {
+    this.rooms = this.rooms.filter((room) => room.ID !== room_id);
+    const eventio = new CustomEvent("leaveroom", { detail: room_id });
     this.events.dispatchEvent(eventio);
     this.settings.changeRooms(this.rooms);
   }
@@ -292,40 +310,74 @@ export class Client {
     console.log("room (" + room_id + ") does not exist");
   }
 
-  private async send_login() {
-    while (!this.challstr) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+  private async tryLogin() {
+    const urlParams = new URLSearchParams(window.location.search);
+    let assertion = urlParams.get("assertion");
+    if (assertion && assertion !== "undefined") {
+      console.log("logging in with assertion", assertion);
+      await this.send_assertion(assertion);
+      const token = urlParams.get("token");
+      if (token) {
+        await localforage.setItem("ps-token", token);
+      }
+      return;
     }
-    // if there's an assertion in the URL, log in using that
-    const URLParams = new URLSearchParams(window.location.search);
-    const assertion = URLParams.get("assertion");
-    if (assertion) {
-      console.log("logging in with assertion");
-      console.log("assertion", assertion);
-      this.socket.send(`|/trn itszxc,0,${assertion}`);
+    else if ((assertion = await this.assertionFromToken(this.challstr)) ) {
+      console.log("logging in with token+assertion", assertion);
+      await this.send_assertion(assertion);
+      return;
     }
   }
 
-  // async login() {
-  async login({ username, password }: { username: string; password: string }) {
-    this.username = username;
+  private async send_assertion(assertion: string) {
+    // 
+    console.log("sending assertion", assertion);
+    const username = assertion.split(",")[0];
+  }
+
+
+  private async assertionFromToken(challstr: string): Promise<string | null> {
+    const token = await localforage.getItem("ps-token");
+    if (!token || token === "undefined") {
+      console.log("no token");
+      return null;
+    }
+    try {
+      const response = await fetch(
+        `${this.loginserver_url}oauth/api/getassertion?challenge=${challstr}&token=${token}&client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}&sid=1`,
+      );
+      const response_test = await response.text();
+      const response_json = JSON.parse(response_test.slice(1));
+      if(response_json.success === false){
+        console.error(`token ${token} is invalid`);
+        return null
+      }
+      return response_json.assertion;
+    } catch (e) {
+      console.error(e);
+      return null
+    }
+  }
+
+  async login() {
     while (!this.challstr) {
       await new Promise((resolve) => setTimeout(resolve, 1000));
     }
-    const response = await fetch(
-      `${this.loginserver_url}login?name=${username}&pass=${password}&challstr=${this.challstr}&sid=1`,
-      {
-        method: "POST",
-      },
-    );
-    const response_test = await response.text();
-    const response_json = JSON.parse(response_test.slice(1));
-    this.socket.send(`|/trn ${username},0,${response_json.assertion}`);
+
+    console.log("using oauth redirect");
     // Oauth login method
-    // console.log("process.env", process.env);
-    // console.log("process.env.NEXT_PUBLIC_OAUTH_ID", process.env.NEXT_PUBLIC_OAUTH_ID);
-    // location.push(`https://play.pokemonshowdown.com/api/oauth/authorize?client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}&redirect_uri=${location.origin}`);
+    location.assign(`${this.loginserver_url}oauth/authorize?client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}&redirect_uri=${location.origin}`);
     // const res = await fetch(`${this.loginserver_url}oauth/api/authorize?client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}`)
+
+    // const response = await fetch(
+    //   `${this.loginserver_url}login?name=${username}&pass=${password}&challstr=${this.challstr}&sid=1`,
+    //   {
+    //     method: "POST",
+    //   },
+    // );
+    // const response_test = await response.text();
+    // const response_json = JSON.parse(response_test.slice(1));
+    // this.socket.send(`|/trn ${username},0,${response_json.assertion}`);
   }
 
   async join(rooms: string | string[], useDefaultRooms = false) {
@@ -352,12 +404,10 @@ export class Client {
   }
 
   highlightMsg(roomid: string, message: string) {
-    console.log("highlightMsg", roomid, message, this.username);
-    if(
+    if (
       this.username && (message.includes(this.username) ||
-      message.includes(toID(this.username))
-      )
-    ){
+        message.includes(toID(this.username)))
+    ) {
       return true;
     }
     if (

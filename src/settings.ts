@@ -5,6 +5,7 @@ export class Settings {
   rooms: string[] = [];
   highlightWords: Map<string, RegExp[]> = new Map(); // roomid -> highlightWords
   defaultRooms = ["lobby", "help", "overused"];
+  URL = location.origin;
   private timeout: any;
 
   constructor() {

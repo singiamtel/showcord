@@ -41,7 +41,7 @@ export function UserComponent({ user, alignRight }: { user: string, alignRight?:
   const rank = user.charAt(0);
   return (
     <>
-      <span className="text-[#9D9488] whitespace-nowrap">
+      <span className="text-[#9D9488] whitespace-nowrap font-mono">
         &nbsp;
         {rank + (alignRight ? " " : "")}
       </span>
