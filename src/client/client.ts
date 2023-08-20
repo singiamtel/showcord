@@ -359,6 +359,7 @@ export class Client {
         // DomException means that the window wasn't redirected yet
         // so we just wait a bit more
         if(e instanceof DOMException){
+          console.log('DOMException', e);
           setTimeout(checkIfUpdated, 500);
           return;
         }
