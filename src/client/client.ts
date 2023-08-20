@@ -95,7 +95,7 @@ export class Client {
           console.log("room not found (" + roomID + ")");
           return;
         }
-        const chatMessage = this.parseCMessage(splitted_message[0]);
+        const chatMessage = this.parseCMessage(splitted_message[isGlobalOrLobby ? 0 : 1])
         this.addMessage(roomID, chatMessage);
         break;
       case "J": {
