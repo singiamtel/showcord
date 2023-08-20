@@ -3,7 +3,6 @@ import { toID } from "@/utils/generic";
 import { Message } from "./message";
 import { Room } from "./room";
 import { User } from "./user";
-import { Play } from "next/font/google";
 import localforage from "localforage";
 
 export class Client {
@@ -18,32 +17,37 @@ export class Client {
   username: string = "";
   loggedIn: boolean = false;
   settings: Settings = new Settings();
+  onOpen: (() => void)[] = [];
 
   constructor() {
     this.socket = new WebSocket(this.server_url);
     this.__setupSocketListeners();
-    this.tryLogin();
   }
 
-    // Order of login methods:
-    // 1. Assertion in URL (from oauth login)
-    // - This happens right after oauth login
-    // - We also need to store the token in localforage
-    //
-    // 2. Assertion from token
-    // - This happens when we have a token stored in localforage
-    // - We try to get an assertion from the token, and send it to the server
-    // - If it fails we drop the token and go to #3
-    //
-    // 3. Normal login
-    // Redirect to oauth login page
+  // Order of login methods:
+  // 1. Assertion in URL (from oauth login)
+  // - This happens right after oauth login
+  // - We also need to store the token in localforage
+  //
+  // 2. Assertion from token
+  // - This happens when we have a token stored in localforage
+  // - We try to get an assertion from the token, and send it to the server
+  // - If it fails we drop the token and go to #3
+  //
+  // 3. Normal login
+  // Redirect to oauth login page
 
   private __setupSocketListeners() {
-    // this.socket.onopen = function () {
-    // };
+    this.socket.onopen = () => {
+      console.log("socket connected");
+      for (let cb of this.onOpen) {
+        cb();
+      }
+      this.tryLogin();
+    };
     this.socket.onmessage = (event) => {
       console.log("msg:", event.data);
-      this.parse_message(event.data);
+      this.parseSocketMsg(event.data);
     };
     this.socket.onerror = (event) => {
       console.error(event);
@@ -54,7 +58,7 @@ export class Client {
     };
   }
 
-  private async parse_message(message: string) {
+  private async parseSocketMsg(message: string) {
     if (message.startsWith("|challstr|")) {
       const splitted_challstr = message.split("|");
       splitted_challstr.shift();
@@ -73,15 +77,8 @@ export class Client {
       roomID = splitted_message[0].slice(1);
     }
     const [_, cmd, ...args] = splitted_message[i].split("|");
+    console.log("cmd:", cmd, "args:", args);
     i++;
-    // console.log("cmd", cmd);
-    // console.log("args", args);
-    // console.log("roomID", roomID);
-    /*
-          Messages that are two lines:
-            - any message linked to a room
-        */
-
     let type = "",
       didType = false,
       name = "",
@@ -98,30 +95,8 @@ export class Client {
           console.log("room not found (" + roomID + ")");
           return;
         }
-        let user, content, msgType: "raw" | "chat" | "log" = "chat";
-        if (args[1]?.startsWith("/raw") || args[2]?.startsWith("/raw")) {
-          msgType = "raw";
-          content = args[1].slice(4);
-        } else if (args[1]?.startsWith("/log")) {
-          msgType = "log";
-          content = args[1].slice(4);
-          timestamp = undefined;
-        } else {
-          msgType = "chat";
-          timestamp = args[0];
-          user = args[1];
-          content = args[2];
-        }
-
-        this.addMessage(
-          roomID,
-          new Message({
-            timestamp,
-            type: msgType,
-            content,
-            user,
-          }),
-        );
+        const chatMessage = this.parseCMessage(splitted_message[0]);
+        this.addMessage(roomID, chatMessage);
         break;
       case "J": {
         console.log("user joined room", roomID, args);
@@ -148,14 +123,8 @@ export class Client {
         }
         room.removeUser(args[0]);
       }
-
-      /*
-          Messages that can be more than two lines:
-            - init room
-            - noinit room
-            - chat message
-            - update user
-        */
+      case "N": {
+      }
       case "init":
         let users: User[] = [];
         for (; i < splitted_message.length; i++) { // start at 2 because first line is room id and second line is cmd
@@ -200,27 +169,8 @@ export class Client {
             continue;
           }
           if (splitted_message[i].startsWith("|c:|")) {
-            let [_, _2, msgTime, user, message] = splitted_message[i].split(
-              "|",
-            );
-            let type: "raw" | "chat" | "log" = "chat";
-            if (message.startsWith("/raw")) {
-              type = "raw";
-              message = message.slice(4);
-            } else if (message.startsWith("/log")) {
-              type = "log";
-              message = message.slice(4);
-            }
-
-            this.addMessage(
-              roomID,
-              new Message({
-                timestamp: msgTime,
-                user,
-                type,
-                content: message,
-              }),
-            );
+            const parsedMessage = this.parseCMessage(splitted_message[i]);
+            this.addMessage(roomID, parsedMessage);
           } else if (splitted_message[i].startsWith("|raw|")) {
             const [_, _2, ...data] = splitted_message[i].split("|");
             this.addMessage(
@@ -246,7 +196,6 @@ export class Client {
         }
         break;
       case "updateuser":
-        console.log("joined rooms after login", args);
         if (!args[0].trim().toLowerCase().startsWith("guest")) {
           this.join(this.joinAfterLogin);
           console.log("logged in as " + args[0]);
@@ -261,6 +210,25 @@ export class Client {
       default:
         console.log("unknown cmd: " + cmd);
     }
+  }
+
+  private parseCMessage(message: string): Message {
+    let [_, _2, msgTime, user, ...tmpcontent] = message.split("|");
+    let content = tmpcontent.join("|");
+    let type: "raw" | "chat" | "log" = "chat";
+    if (content.startsWith("/raw")) {
+      type = "raw";
+      content = content.slice(4);
+    } else if (content.startsWith("/log")) {
+      type = "log";
+      content = content.slice(4);
+    }
+    return new Message({
+      timestamp: msgTime,
+      user,
+      type,
+      content: content,
+    });
   }
 
   room(room_id: string) {
@@ -311,6 +279,7 @@ export class Client {
   }
 
   private async tryLogin() {
+    console.log("trying to login");
     const urlParams = new URLSearchParams(window.location.search);
     let assertion = urlParams.get("assertion");
     if (assertion && assertion !== "undefined") {
@@ -321,8 +290,7 @@ export class Client {
         await localforage.setItem("ps-token", token);
       }
       return;
-    }
-    else if ((assertion = await this.assertionFromToken(this.challstr)) ) {
+    } else if ((assertion = await this.assertionFromToken(this.challstr))) {
       console.log("logging in with token+assertion", assertion);
       await this.send_assertion(assertion);
       return;
@@ -330,12 +298,11 @@ export class Client {
   }
 
   private async send_assertion(assertion: string) {
-    // 
+    //
     console.log("sending assertion", assertion);
     const username = assertion.split(",")[1];
     this.socket.send(`|/trn ${username},0,${assertion}`);
   }
-
 
   private async assertionFromToken(challstr: string): Promise<string | null> {
     const token = await localforage.getItem("ps-token");
@@ -349,14 +316,14 @@ export class Client {
       );
       const response_test = await response.text();
       const response_json = JSON.parse(response_test.slice(1));
-      if(response_json.success === false){
-        console.error(`token ${token} is invalid`);
-        return null
+      if (response_json.success === false) {
+        console.error(`Couldn't login with token ${token}`, response_json)
+        return null;
       }
       return response_json.assertion;
     } catch (e) {
       console.error(e);
-      return null
+      return null;
     }
   }
 
@@ -367,18 +334,38 @@ export class Client {
 
     console.log("using oauth redirect");
     // Oauth login method
-    location.assign(`${this.loginserver_url}oauth/authorize?client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}&redirect_uri=${location.origin}`);
-    // const res = await fetch(`${this.loginserver_url}oauth/api/authorize?client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}`)
-
-    // const response = await fetch(
-    //   `${this.loginserver_url}login?name=${username}&pass=${password}&challstr=${this.challstr}&sid=1`,
-    //   {
-    //     method: "POST",
-    //   },
-    // );
-    // const response_test = await response.text();
-    // const response_json = JSON.parse(response_test.slice(1));
-    // this.socket.send(`|/trn ${username},0,${response_json.assertion}`);
+    const url =
+      `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}&challenge=${this.challstr}`;
+    const nWindow = (window as any).n = open(url, undefined, "popup=1");
+    const checkIfUpdated = async () => {
+      try{
+      if (nWindow?.location.host === "localhost:60123") {
+        const url = new URL(nWindow.location.href);
+        console.log('URL', url);
+        const assertion = url.searchParams.get("assertion");
+        if (assertion) {
+          this.send_assertion(assertion);
+        }
+        const token = url.searchParams.get("token");
+        if (token) {
+          await localforage.setItem("ps-token", url.searchParams.get("token"));
+        }
+        nWindow.close();
+      } else {
+        setTimeout(checkIfUpdated, 500);
+      }
+      }
+      catch(e){
+        // DomException means that the window wasn't redirected yet
+        // so we just wait a bit more
+        if(e instanceof DOMException){
+          setTimeout(checkIfUpdated, 500);
+          return;
+        }
+        throw e;
+      }
+    };
+    setTimeout(checkIfUpdated, 1000);
   }
 
   async join(rooms: string | string[], useDefaultRooms = false) {

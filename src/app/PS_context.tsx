@@ -160,9 +160,9 @@ export default function PS_contextProvider(props: any) {
 
   useEffect(() => {
     const client = new Client();
-    client.socket.onopen = () => {
+    client.onOpen.push(() => {
       setClient(client);
-    };
+    });
     client.events.addEventListener("login", (username) => {
       console.log("logged in as", username);
       setUser((username as CustomEvent).detail);
