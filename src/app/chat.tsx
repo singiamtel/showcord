@@ -8,6 +8,8 @@ import HTML from "@/commands/html";
 import { HHMMSS } from "@/utils/date";
 import { UserComponent } from "./users";
 
+import Linkify from 'linkify-react';
+
 export default function Chat() {
   const { messages } = useContext(PS_context);
   const messagesEndRef = createRef<HTMLDivElement>();
@@ -42,6 +44,8 @@ export default function Chat() {
   );
 }
 
+const options = { defaultProtocol: 'https' };
+
 export function MessageComponent(
   { message, user, type, time, hld }: {
     message: string;
@@ -72,7 +76,10 @@ export function MessageComponent(
         </span>
       <span className="text-white">
         <UserComponent user={user} />
-        {" " + message}
+        {/* https://linkify.js.org/docs/linkify-react.html#custom-link-components */}
+        <Linkify options={options}>
+        {' ' + message}
+        </Linkify>
       </span>
     </div>
   );
