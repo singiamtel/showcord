@@ -339,7 +339,7 @@ export class Client {
     const nWindow = (window as any).n = open(url, undefined, "popup=1");
     const checkIfUpdated = async () => {
       try{
-      if (nWindow?.location.host === "localhost:60123") {
+      if (nWindow?.location.host === location.host){
         const url = new URL(nWindow.location.href);
         console.log('URL', url);
         const assertion = url.searchParams.get("assertion");
