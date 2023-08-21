@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ChangeEventHandler,
   createRef,
   FormEvent,
   KeyboardEventHandler,
@@ -10,10 +11,14 @@ import {
   useState,
 } from "react";
 import { PS_context } from "./PS_context";
-import TextareaAutosize from 'react-textarea-autosize';
+import TextareaAutosize from "react-textarea-autosize";
 
 export default function ChatBox() {
   const [input, setInput] = useState<string>("");
+  const [displaySearchbox, setDisplaySearchbox] = useState<boolean>(false);
+  const [searchBoxOffset, setSearchBoxOffset] = useState<
+    { width: number; marginBottom: number }
+  >({ width: 0, marginBottom: 0 });
   const { client, selectedRoom: room, setRoom } = useContext(PS_context);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const formRef = createRef<HTMLFormElement>();
@@ -54,25 +59,68 @@ export default function ChatBox() {
     }
   };
 
+  const manageChanges: ChangeEventHandler<HTMLTextAreaElement> = (e) => {
+    // if (!formRef.current?.textContent) {
+    // }
+    if (e.target.value.startsWith("/")) {
+      setDisplaySearchbox(true);
+      // calculate vertical offset
+    } else {
+      setDisplaySearchbox(false);
+    }
+    setInput(e.target.value);
+  };
+
+  useEffect(() => {
+    const size = formRef.current?.getBoundingClientRect();
+    if (
+      searchBoxOffset.width === size?.width &&
+      searchBoxOffset.marginBottom === size?.height
+    ) return;
+    setSearchBoxOffset({
+      width: size?.width || 0,
+      marginBottom: size?.height || 0,
+    });
+  }, [formRef, searchBoxOffset.width, searchBoxOffset.marginBottom]);
+
   useEffect(() => {
     textAreaRef.current?.focus();
   }, [room]);
 
   return (
-    <div className="w-full">
-      <form onSubmit={submit} ref={formRef} className="w-full">
-        <div className="flex flex-row">
-          <TextareaAutosize
-            className="mr-5 ml-5 p-2 rounded-lg flex-grow bg-gray-375 text-white resize-none"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={manageKeybinds}
-            ref={textAreaRef}
-
+    <>
+      <div className="w-full">
+        <form onSubmit={submit} ref={formRef} className="w-full">
+          <div
+            style={{
+              bottom: `${searchBoxOffset.marginBottom}px`,
+              width: `${searchBoxOffset.width}px`,
+            }}
+            className={"absolute mr-5 ml-5 mb-2 rounded-lg text-white bg-gray-600 " +
+              (displaySearchbox ? `` : "hidden")}
           >
-          </TextareaAutosize>
-        </div>
-      </form>
-    </div>
+            <SearchBox />
+          </div>
+          <div className="flex flex-row">
+            <TextareaAutosize
+              className="mr-5 ml-5 p-2 rounded-lg flex-grow bg-gray-375 text-white resize-none"
+              value={input}
+              onChange={manageChanges}
+              onKeyDown={manageKeybinds}
+              ref={textAreaRef}
+            >
+            </TextareaAutosize>
+          </div>
+        </form>
+      </div>
+    </>
   );
 }
+
+const SearchBox = () => {
+  return (
+    <div>
+      awdawd
+    </div>
+  );
+};
