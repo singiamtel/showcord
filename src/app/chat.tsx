@@ -44,7 +44,10 @@ export default function Chat() {
   );
 }
 
-const options = { defaultProtocol: 'https' };
+const options = {
+  defaultProtocol: 'https',
+  target: '_blank',
+};
 
 export function MessageComponent(
   { message, user, type, time, hld }: {
