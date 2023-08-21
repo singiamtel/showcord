@@ -62,7 +62,6 @@ export function MessageComponent(
     return <HTML message={message} />;
   }
   if(type === "log") {
-    console.log('LOGMSG', message);
     return (
       <div className="p-0.5 text-white">
       <span className="text-gray-125 font-mono">
@@ -73,7 +72,7 @@ export function MessageComponent(
     )
   }
   return (
-    <div className={"p-5.5 " + (hld ? "bg-yellow-hl-body" : "")}>
+    <div className={"p-0.5 " + (hld ? "bg-yellow-hl-body" : "")}>
       <span className="text-gray-125 font-mono">
         {time ? HHMMSS(time) : ""}
         </span>

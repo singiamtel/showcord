@@ -214,13 +214,22 @@ export class Client {
   }
 
   private parseCMessage(message: string): Message {
-    let [_, _2, msgTime, user, ...tmpcontent] = message.split("|");
-    let content = tmpcontent.join("|");
+    const splitted_message = message.split("|");
+    let content
     let type: "raw" | "chat" | "log" = "chat";
+    let [_, _2, msgTime, user, ...tmpcontent] : (string | undefined)[] = splitted_message
+    content = tmpcontent.join("|");
     if (content.startsWith("/raw")) {
       type = "raw";
       content = content.slice(4);
-    } else if (content.startsWith("/log")) {
+    } 
+    else if(splitted_message[3]?.startsWith("/log")){
+      type = "log";
+      content = splitted_message[3].slice(4);
+      // msgTime = undefined;
+      msgTime = Math.floor(Date.now() / 1000).toString();
+    }
+    if(content.startsWith("/log")){
       type = "log";
       content = content.slice(4);
     }
