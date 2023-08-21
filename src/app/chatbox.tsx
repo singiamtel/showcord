@@ -13,12 +13,15 @@ import {
 import { PS_context } from "./PS_context";
 import TextareaAutosize from "react-textarea-autosize";
 
+type SearchBoxOffset = {
+  width: number;
+  marginBottom: number;
+}
+
 export default function ChatBox() {
   const [input, setInput] = useState<string>("");
   const [displaySearchbox, setDisplaySearchbox] = useState<boolean>(false);
-  const [searchBoxOffset, setSearchBoxOffset] = useState<
-    { width: number; marginBottom: number }
-  >({ width: 0, marginBottom: 0 });
+  const [searchBoxOffset, setSearchBoxOffset] = useState<SearchBoxOffset>({ width: 0, marginBottom: 0 });
   const { client, selectedRoom: room, setRoom } = useContext(PS_context);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const formRef = createRef<HTMLFormElement>();
@@ -91,16 +94,7 @@ export default function ChatBox() {
     <>
       <div className="w-full">
         <form onSubmit={submit} ref={formRef} className="w-full">
-          <div
-            style={{
-              bottom: `${searchBoxOffset.marginBottom}px`,
-              width: `${searchBoxOffset.width}px`,
-            }}
-            className={"absolute mr-5 ml-5 mb-2 rounded-lg text-white bg-gray-600 " +
-              (displaySearchbox ? `` : "hidden")}
-          >
-            <SearchBox />
-          </div>
+            <SearchBox offset={searchBoxOffset} display={displaySearchbox} />
           <div className="flex flex-row">
             <TextareaAutosize
               className="mr-5 ml-5 p-2 rounded-lg flex-grow bg-gray-375 text-white resize-none"
@@ -117,10 +111,19 @@ export default function ChatBox() {
   );
 }
 
-const SearchBox = () => {
+const SearchBox = ({offset, display} : { offset: SearchBoxOffset, display: boolean }) => {
   return (
+          <div
+            style={{
+              bottom: `${offset.marginBottom}px`,
+              width: `${offset.width}px`,
+            }}
+            className={"absolute mr-5 ml-5 mb-2 rounded-lg text-white bg-gray-600 " +
+              (display ? `` : "hidden")}
+          >
     <div>
       awdawd
     </div>
+          </div>
   );
 };

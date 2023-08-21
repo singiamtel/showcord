@@ -7,6 +7,10 @@ export class Room {
   type: "chat" | "battle";
   messages: Message[] = [];
   users: User[] = [];
+  unread = 0;
+  mention = false;
+  private messageLimit = 300;
+
   constructor(
     { ID, name, type }: { ID: string; name: string; type: "chat" | "battle" },
   ) {
@@ -15,7 +19,7 @@ export class Room {
     this.type = type;
   }
   addMessage(message: Message) {
-    if (this.messages.length > 100) {
+    if (this.messages.length > this.messageLimit){
       this.messages.shift();
     }
     this.messages.push(message);
@@ -53,5 +57,10 @@ export class Room {
 
   addUsers(users: User[]) {
     this.users = this.users.concat(users).sort(this.rankSorter)
+  }
+
+  select() {
+    this.unread = 0;
+    this.mention = false;
   }
 }

@@ -61,6 +61,7 @@ export default function PS_contextProvider(props: any) {
       if (tmpPR.length > 5) tmpPR.shift();
       setPreviousRooms(tmpPR);
       setSelectedRoom(room);
+      client.selectRoom(room);
     } else {
       console.log("Trying to set room that does not exist (" + room + ")");
     }

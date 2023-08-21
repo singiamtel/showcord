@@ -18,6 +18,7 @@ export class Client {
   loggedIn: boolean = false;
   settings: Settings = new Settings();
   onOpen: (() => void)[] = [];
+  private selectedRoom: string = "";
 
   constructor() {
     this.socket = new WebSocket(this.server_url);
@@ -280,6 +281,9 @@ export class Client {
 
   private async tryLogin() {
     console.log("trying to login");
+    while (!this.challstr) {
+      await new Promise((resolve) => setTimeout(resolve, 500));
+    }
     const urlParams = new URLSearchParams(window.location.search);
     let assertion = urlParams.get("assertion");
     if (assertion && assertion !== "undefined") {
@@ -301,6 +305,7 @@ export class Client {
     //
     console.log("sending assertion", assertion);
     const username = assertion.split(",")[1];
+    console.log("trn", username, assertion);
     this.socket.send(`|/trn ${username},0,${assertion}`);
   }
 
@@ -312,7 +317,8 @@ export class Client {
     }
     try {
       const response = await fetch(
-        `${this.loginserver_url}oauth/api/getassertion?challenge=${challstr}&token=${token}&client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}&sid=1`,
+        `${this.loginserver_url}oauth/api/getassertion?challenge=${challstr}&token=${token}&client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}`,
+        { headers: { "Origin": "https://play.pokemonshowdown.com" } },
       );
       const response_test = await response.text();
       const response_json = JSON.parse(response_test.slice(1));
@@ -329,13 +335,13 @@ export class Client {
 
   async login() {
     while (!this.challstr) {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
-
     console.log("using oauth redirect");
     // Oauth login method
     const url =
       `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}&challenge=${this.challstr}`;
+    console.log("url", url);
     const nWindow = (window as any).n = open(url, undefined, "popup=1");
     const checkIfUpdated = async () => {
       try{
@@ -351,6 +357,7 @@ export class Client {
           await localforage.setItem("ps-token", url.searchParams.get("token"));
         }
         nWindow.close();
+          console.log('got token', token);
       } else {
         setTimeout(checkIfUpdated, 500);
       }
@@ -423,5 +430,10 @@ export class Client {
     this.events.dispatchEvent(
       new CustomEvent("login", { detail: this.username }),
     );
+  }
+
+  selectRoom(roomid: string) {
+    this.selectedRoom = roomid;
+    this.room(roomid)?.select();
   }
 }
