@@ -317,8 +317,7 @@ export class Client {
     }
     try {
       const response = await fetch(
-        `${this.loginserver_url}oauth/api/getassertion?challenge=${challstr}&token=${token}&client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}`,
-        { headers: { "Origin": "https://play.pokemonshowdown.com" } },
+        `${this.loginserver_url}oauth/api/getassertion?challenge=${challstr}&token=${token}&client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}`
       );
       const response_test = await response.text();
       const response_json = JSON.parse(response_test.slice(1));
