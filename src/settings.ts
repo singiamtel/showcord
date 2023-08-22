@@ -7,6 +7,8 @@ export class Settings {
   defaultRooms = ["lobby", "help", "overused"];
   URL = location.origin;
   private timeout: any;
+  status = ""; // if status is set, it will be restored on login
+  notes: Map<string, string> = new Map(); // user -> note
 
   constructor() {
     this.loadSettings();

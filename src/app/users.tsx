@@ -1,8 +1,8 @@
-"use client";
+"use client"
 import { useContext } from "react";
 import { PS_context } from "./PS_context";
 import { useEffect, useState } from "react";
-import { userColor } from "../utils/namecolour";
+import { UsernameComponent } from "./usercomponents";
 
 export type Users = {
   name: string;
@@ -22,6 +22,9 @@ export default function Users() {
     setUsers(selectedRoom.users);
   };
 
+  const onClick = () => {
+  }
+
   useEffect(() => {
     refreshUsers();
   }, [room]);
@@ -30,24 +33,9 @@ export default function Users() {
     <div className="bg-gray-600 h-full p-2 overflow-y-scroll">
       {users.map((user, index) => 
         <div key={index}>
-          <UserComponent user={user.name} alignRight />
+          <UsernameComponent user={user.name} alignRight onClick={onClick} />
         </div>
       )}
     </div>
-  );
-}
-
-export function UserComponent({ user, alignRight }: { user: string, alignRight?: boolean }){
-  const rank = user.charAt(0);
-  return (
-    <>
-      <span className="text-[#9D9488] whitespace-nowrap font-mono">
-        &nbsp;
-        {rank + (alignRight ? " " : "")}
-      </span>
-      <span style={{ color: userColor(user) }} className="font-bold ">
-        {user.slice(1)}
-      </span>
-    </>
   );
 }

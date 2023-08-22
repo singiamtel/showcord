@@ -79,8 +79,8 @@ export default function ChatBox() {
     // if (!formRef.current?.textContent) {
     // }
     if (e.target.value.startsWith("/")) {
-      setDisplaySearchbox(true);
-      // calculate vertical offset
+      // calculate vertical offset including the size of the box
+      // setDisplaySearchbox(true);
     } else {
       setDisplaySearchbox(false);
     }

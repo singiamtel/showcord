@@ -6,11 +6,11 @@ import { useEffect } from "react";
 import useOnScreen from "@/utils/isOnScreen";
 import HTML from "@/commands/html";
 import { HHMMSS } from "@/utils/date";
-import { UserComponent } from "./users";
 
 import Linkify from 'linkify-react';
 import { Message } from "@/client/message";
 import Code from "@/commands/code";
+import { UsernameComponent } from "./usercomponents";
 
 export default function Chat() {
   const { messages } = useContext(PS_context);
@@ -84,7 +84,7 @@ export function MessageComponent(
         {time ? HHMMSS(time) : ""}
         </span>
       <span className="text-white">
-        <UserComponent user={user} />
+        <UsernameComponent user={user} />
         {/* https://linkify.js.org/docs/linkify-react.html#custom-link-components */}
         <Linkify options={options}>
         {' ' + message}

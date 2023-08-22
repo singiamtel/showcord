@@ -15,6 +15,7 @@ export class Client {
   events: EventTarget = new EventTarget();
   private joinAfterLogin: string[] = [];
   username: string = "";
+  private cleanUsername: string = "";
   loggedIn: boolean = false;
   settings: Settings = new Settings();
   onOpen: (() => void)[] = [];
@@ -93,7 +94,7 @@ export class Client {
         // th
         room = this.room(roomID);
         if (!room) {
-          console.log("room not found (" + roomID + ")");
+          console.warn("room not found (" + roomID + ")");
           return;
         }
         const chatMessage = this.parseCMessage(splitted_message[isGlobalOrLobby ? 0 : 1])
@@ -408,9 +409,10 @@ export class Client {
 
   highlightMsg(roomid: string, message: string) {
     if (
-      this.username && (message.includes(this.username) ||
+      this.cleanUsername && (message.includes(this.cleanUsername) ||
         message.includes(toID(this.username)))
     ) {
+      console.log('trueee')
       return true;
     }
     if (
@@ -424,8 +426,11 @@ export class Client {
 
   private setUsername(username: string) {
     // gotta re-run highlightMsg on all messages
+    this.username = username;
+    this.cleanUsername = username.replace(/[\u{0080}-\u{FFFF}]/gu,"").trim();
     this.rooms.forEach(async (room) => {
       room.messages.forEach((msg) => {
+        console.log('trying to hl', msg)
         if (this.highlightMsg(room.ID, msg.content)) {
           msg.hld = true;
         } else {
@@ -433,7 +438,6 @@ export class Client {
         }
       });
     });
-    this.username = username;
     this.events.dispatchEvent(
       new CustomEvent("login", { detail: this.username }),
     );
