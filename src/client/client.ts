@@ -350,7 +350,7 @@ export class Client {
     const url =
       `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}&challenge=${this.challstr}`;
     console.log("url", url);
-    const nWindow = (window as any).n = open(url, undefined, "popup=1");
+    const nWindow = (window as any).n = open(url, undefined, "popup=1,width=700,height=700");
     const checkIfUpdated = async () => {
       try{
       if (nWindow?.location.host === location.host){
@@ -374,7 +374,6 @@ export class Client {
         // DomException means that the window wasn't redirected yet
         // so we just wait a bit more
         if(e instanceof DOMException){
-          console.log('DOMException', e);
           setTimeout(checkIfUpdated, 500);
           return;
         }
