@@ -1,8 +1,9 @@
 import { User } from "@/client/user";
 import { userColor } from "@/utils/namecolour";
-import { MouseEventHandler } from "react";
+import { MouseEventHandler, useState } from "react";
 
 export function UsernameComponent({ user, alignRight, onClick }: { user: string, alignRight?: boolean, onClick?: MouseEventHandler<HTMLButtonElement> }){
+  const [display, setDisplay] = useState<string>("");
   const rank = user.charAt(0);
   const onclick = onClick ? onClick : () => {};
   return (

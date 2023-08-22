@@ -330,12 +330,21 @@ export class Client {
         `${this.loginserver_url}oauth/api/getassertion?challenge=${challstr}&token=${token}&client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}`
       );
       const response_test = await response.text();
-      const response_json = JSON.parse(response_test.slice(1));
-      if (response_json.success === false) {
-        console.error(`Couldn't login with token ${token}`, response_json)
-        return null;
+      console.log("response_test", response_test)
+      if(response_test[0] === ';'){
+        console.error("Received ; from loginserver")
+        return null
       }
-      return response_json.assertion;
+      try{
+        const response_json = JSON.parse(response_test.slice(1));
+        if (response_json.success === false) {
+          console.error(`Couldn't login with token ${token}`, response_json)
+          return null;
+        }
+      }
+      catch(e){
+      }
+      return response_test
     } catch (e) {
       console.error(e);
       return null;
