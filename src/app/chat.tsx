@@ -9,6 +9,8 @@ import { HHMMSS } from "@/utils/date";
 import { UserComponent } from "./users";
 
 import Linkify from 'linkify-react';
+import { Message } from "@/client/message";
+import Code from "@/commands/code";
 
 export default function Chat() {
   const { messages } = useContext(PS_context);
@@ -27,7 +29,7 @@ export default function Chat() {
 
   return ( //no-scrollbar
     <div className="p-5 flex flex-col overflow-auto overflow-x-hidden break-words overflow-y-scroll h-full ">
-      {messages.map((message, index) => (
+      {messages.map((message, index, arr) => (
         <MessageComponent
           key={index}
           time={message.timestamp}
@@ -35,6 +37,7 @@ export default function Chat() {
           message={message.content}
           type={message.type}
           hld={message.hld}
+          prev={arr[index - 1]}
         />
       ))}
       <div>
@@ -50,15 +53,19 @@ const options = {
 };
 
 export function MessageComponent(
-  { message, user, type, time, hld }: {
+  { message, user, type, time, hld, prev }: {
     message: string;
     user: string;
     type: string;
     time?: Date;
     hld?: boolean;
+    prev?: Message;
   },
 ) {
   if (type === "raw") {
+    if(prev?.content.startsWith("!code")) {
+      return <Code message={message} />;
+    }
     return <HTML message={message} />;
   }
   if(type === "log") {

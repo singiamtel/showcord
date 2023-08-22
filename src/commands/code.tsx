@@ -1,27 +1,21 @@
-"use client"
-import Highlight from 'react-highlight'
+"use client";
+import Highlight from "react-highlight";
 
-export const isCode = (message: string) => {
-  // const parser = new DOMParser();
-  // const doc = parser.parseFromString(message, "text/xml");
-  // const root = doc.documentElement;
-  // // code blocks are wrapped in <div class="infobox"> <code> </code> </div>, so we check for that
-  // if (root.tagName === "div" && root.classList.contains("infobox")) {
-  //   console.log("div", root);
-  //   const code = root.firstElementChild;
-  //   if (code && code.tagName === "code"){
-  //     console.log("code", code.textContent)
-  //     return true
-  //     }
-  // }
-  // console.log("not code");
-  return false
+export function HTMLtoPlain(html: string) {
+  const tmp = document.createElement("DIV");
+  tmp.innerHTML = html;
+  return tmp.innerText || "";
 }
 
+const brRegex = /<br\s*[\/]?>/gi;
+
 export default function Code({ message }: any) {
+  const str = HTMLtoPlain(message.replace(brRegex, "\n").slice(1));
   return (
-  <code>
-      {message}
-  </code>
-  )
+    <div className="ml-14 mr-14 m-2 text-white border border-solid border-gray-border bg-gray-600 rounded">
+      <Highlight>
+        {str}
+      </Highlight>
+    </div>
+  );
 }
