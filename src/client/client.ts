@@ -97,7 +97,9 @@ export class Client {
           console.warn("room not found (" + roomID + ")");
           return;
         }
-        const chatMessage = this.parseCMessage(splitted_message[isGlobalOrLobby ? 0 : 1])
+        const chatMessage = this.parseCMessage(
+          splitted_message[isGlobalOrLobby ? 0 : 1],
+        );
         this.addMessage(roomID, chatMessage);
         break;
       case "J": {
@@ -216,21 +218,21 @@ export class Client {
 
   private parseCMessage(message: string): Message {
     const splitted_message = message.split("|");
-    let content
+    let content;
     let type: "raw" | "chat" | "log" = "chat";
-    let [_, _2, msgTime, user, ...tmpcontent] : (string | undefined)[] = splitted_message
+    let [_, _2, msgTime, user, ...tmpcontent]: (string | undefined)[] =
+      splitted_message;
     content = tmpcontent.join("|");
     if (content.startsWith("/raw")) {
       type = "raw";
       content = content.slice(4);
-    } 
-    else if(splitted_message[3]?.startsWith("/log")){
+    } else if (splitted_message[3]?.startsWith("/log")) {
       type = "log";
       content = splitted_message[3].slice(4);
       // msgTime = undefined;
       msgTime = Math.floor(Date.now() / 1000).toString();
     }
-    if(content.startsWith("/log")){
+    if (content.startsWith("/log")) {
       type = "log";
       content = content.slice(4);
     }
@@ -304,7 +306,9 @@ export class Client {
         await localforage.setItem("ps-token", token);
       }
       return;
-    } else if ((assertion = await this.assertionFromToken(this.challstr))) {
+    } else if (
+      (assertion = await this.assertionFromToken(this.challstr) || null)
+    ) {
       console.log("logging in with token+assertion", assertion);
       await this.send_assertion(assertion);
       return;
@@ -319,7 +323,44 @@ export class Client {
     this.socket.send(`|/trn ${username},0,${assertion}`);
   }
 
-  private async assertionFromToken(challstr: string): Promise<string | null> {
+  private async parseLoginserverResponse(
+    response: Response,
+  ): Promise<string | false> {
+    // Loginserver responses are just weird
+    const response_test = await response.text();
+    console.log("response_test", response_test);
+    if (response_test[0] === ";") {
+      console.error("AssertionError: Received ; from loginserver");
+      return false;
+    }
+    try {
+      const response_json = JSON.parse(response_test.slice(1));
+      console.log("token response_json", response_json);
+      if (response_json.success === false) {
+        console.error(`Couldn't login`, response_json);
+        return false;
+      } else if (response_json.success) {
+        return response_json.success;
+      }
+    } catch (e) {
+    }
+    return response_test;
+  }
+
+  private async assertionFromToken(challstr: string): Promise<string | false> {
+    const token = await localforage.getItem("ps-token");
+    if (!token || token === "undefined") {
+      console.log("no token");
+      return false;
+    }
+    const response = await fetch(
+      `${this.loginserver_url}oauth/api/getassertion?challenge=${challstr}&token=${token}&client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}`,
+    );
+    return await this.parseLoginserverResponse(response);
+  }
+
+  // TODO: Actually use this
+  private async refreshToken() {
     const token = await localforage.getItem("ps-token");
     if (!token || token === "undefined") {
       console.log("no token");
@@ -327,24 +368,12 @@ export class Client {
     }
     try {
       const response = await fetch(
-        `${this.loginserver_url}oauth/api/getassertion?challenge=${challstr}&token=${token}&client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}`
+        `${this.loginserver_url}oauth/api/refreshtoken?token=${token}&client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}`,
       );
-      const response_test = await response.text();
-      console.log("response_test", response_test)
-      if(response_test[0] === ';'){
-        console.error("Received ; from loginserver")
-        return null
-      }
-      try{
-        const response_json = JSON.parse(response_test.slice(1));
-        if (response_json.success === false) {
-          console.error(`Couldn't login with token ${token}`, response_json)
-          return null;
-        }
-      }
-      catch(e){
-      }
-      return response_test
+      const result = await this.parseLoginserverResponse(response);
+      console.log("refreshed token", result);
+      if (result) await localforage.setItem("ps-token", result);
+      return result;
     } catch (e) {
       console.error(e);
       return null;
@@ -355,35 +384,40 @@ export class Client {
     while (!this.challstr) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
-    console.log("using oauth redirect");
     // Oauth login method
     const url =
       `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}&challenge=${this.challstr}`;
     console.log("url", url);
-    const nWindow = (window as any).n = open(url, undefined, "popup=1,width=700,height=700");
+    const nWindow = (window as any).n = open(
+      url,
+      undefined,
+      "popup=1,width=700,height=700",
+    );
     const checkIfUpdated = async () => {
-      try{
-      if (nWindow?.location.host === location.host){
-        const url = new URL(nWindow.location.href);
-        console.log('URL', url);
-        const assertion = url.searchParams.get("assertion");
-        if (assertion) {
-          this.send_assertion(assertion);
+      try {
+        if (nWindow?.location.host === location.host) {
+          const url = new URL(nWindow.location.href);
+          console.log("URL", url);
+          const assertion = url.searchParams.get("assertion");
+          if (assertion) {
+            this.send_assertion(assertion);
+          }
+          const token = url.searchParams.get("token");
+          if (token) {
+            await localforage.setItem(
+              "ps-token",
+              url.searchParams.get("token"),
+            );
+          }
+          nWindow.close();
+          console.log("got token", token);
+        } else {
+          setTimeout(checkIfUpdated, 500);
         }
-        const token = url.searchParams.get("token");
-        if (token) {
-          await localforage.setItem("ps-token", url.searchParams.get("token"));
-        }
-        nWindow.close();
-          console.log('got token', token);
-      } else {
-        setTimeout(checkIfUpdated, 500);
-      }
-      }
-      catch(e){
+      } catch (e) {
         // DomException means that the window wasn't redirected yet
         // so we just wait a bit more
-        if(e instanceof DOMException){
+        if (e instanceof DOMException) {
           setTimeout(checkIfUpdated, 500);
           return;
         }
@@ -421,7 +455,7 @@ export class Client {
       this.cleanUsername && (message.includes(this.cleanUsername) ||
         message.includes(toID(this.username)))
     ) {
-      console.log('trueee')
+      console.log("trueee");
       return true;
     }
     if (
@@ -436,10 +470,10 @@ export class Client {
   private setUsername(username: string) {
     // gotta re-run highlightMsg on all messages
     this.username = username;
-    this.cleanUsername = username.replace(/[\u{0080}-\u{FFFF}]/gu,"").trim();
+    this.cleanUsername = username.replace(/[\u{0080}-\u{FFFF}]/gu, "").trim();
     this.rooms.forEach(async (room) => {
       room.messages.forEach((msg) => {
-        console.log('trying to hl', msg)
+        console.log("trying to hl", msg);
         if (this.highlightMsg(room.ID, msg.content)) {
           msg.hld = true;
         } else {
