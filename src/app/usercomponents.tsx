@@ -3,9 +3,11 @@ import { userColor } from "@/utils/namecolour";
 import { MouseEventHandler, useState } from "react";
 
 export function UsernameComponent({ user, alignRight, onClick }: { user: string, alignRight?: boolean, onClick?: MouseEventHandler<HTMLButtonElement> }){
-  const [display, setDisplay] = useState<string>("");
+  const [display, setDisplay] = useState<string>("hidden");
   const rank = user.charAt(0);
-  const onclick = onClick ? onClick : () => {};
+  const onclick = onClick ? onClick : () => {
+    setDisplay('')
+  };
   return (
     <button onClick={onclick}>
       <span className="text-[#9D9488] whitespace-nowrap font-mono">
@@ -17,6 +19,7 @@ export function UsernameComponent({ user, alignRight, onClick }: { user: string,
       </span>
     </button>
   );
+      // <UserCard user={user} />
 }
 
 export function UserCard({ user }: { user: User }) {

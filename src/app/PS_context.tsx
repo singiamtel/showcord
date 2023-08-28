@@ -72,28 +72,44 @@ export default function PS_contextProvider(props: any) {
       return;
     }
     setRooms(client.rooms);
-  }, [client, update])
- 
+  }, [client, update]);
 
   useEffect(() => {
     if (!client) {
       return;
     }
-    const eventListener = () => {
-      setUpdate(update + 1)
+    const newEventListener = async (e: Event) => {
+      setUpdate(update + 1);
+      const roomID = (e as CustomEvent)?.detail?.ID;
+      if (roomID) {
+        // We don't switch to the room if it's in the settings as it probably means we're doing the initial join
+        // console.log("settings", await client.settings.getSavedRooms());
+        const rooms = await client.settings.getSavedRooms()
+        if (!rooms.includes(roomID)) {
+          setRoom(roomID);
+        }
+        else if(!selectedRoom){
+          // Well okay, but only once
+          setRoom(roomID);
+        }
+      }
+    };
+
+    const removedEventListener = () => {
+      setUpdate(update + 1);
       if (client.rooms.length > 0) {
-        if (!selectedRoom || !client.room(selectedRoom)){
+        if (!selectedRoom || !client.room(selectedRoom)) {
           setRoom(client.rooms[0].ID);
         }
       }
     };
 
-    client.events.addEventListener("room", eventListener);
-    client.events.addEventListener("leaveroom", eventListener);
+    client.events.addEventListener("room", newEventListener);
+    client.events.addEventListener("leaveroom", removedEventListener);
 
     return () => {
-      client.events.removeEventListener("room", eventListener);
-      client.events.removeEventListener("leaveroom", eventListener);
+      client.events.removeEventListener("room", newEventListener);
+      client.events.removeEventListener("leaveroom", removedEventListener);
     };
   }, [client, setRooms, selectedRoom, setRoom, update, setUpdate]);
 
@@ -104,6 +120,7 @@ export default function PS_contextProvider(props: any) {
       if (selectedRoom && !client.room(selectedRoom)) {
         const lastRoom = previousRooms[previousRooms.length - 2];
         if (lastRoom) {
+          console.log("setting room to lastRoom", lastRoom);
           setRoom(lastRoom);
         }
       }
@@ -129,7 +146,7 @@ export default function PS_contextProvider(props: any) {
     const msgs = client.room(selectedRoom)?.messages ?? [];
     console.log("msgs", msgs.length);
     setMessages(msgs);
-  }, [client, selectedRoom])
+  }, [client, selectedRoom]);
 
   useEffect(() => {
     if (!client) {
@@ -155,7 +172,7 @@ export default function PS_contextProvider(props: any) {
 
   useEffect(() => {
     handleMsgEvent(setMessages);
-  }, [handleMsgEvent, setMessages, updateMsgs])
+  }, [handleMsgEvent, setMessages, updateMsgs]);
 
   /* --- End message handling --- */
 
@@ -173,7 +190,6 @@ export default function PS_contextProvider(props: any) {
       console.log("logged in as", username);
       setUser((username as CustomEvent).detail);
     });
-
   }, []);
 
   // Try to recover on socket death
@@ -189,7 +205,6 @@ export default function PS_contextProvider(props: any) {
   // }, [client])
 
   /* --- End user handling --- */
-
 
   return (
     <PS_context.Provider

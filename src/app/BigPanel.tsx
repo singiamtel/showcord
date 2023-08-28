@@ -8,7 +8,7 @@ export default function BigPanel() {
   const { selectedRoom: room, rooms } = useContext(PS_context);
   if (!room) return null;
   return (
-      <div className="w-full bg-gray-300 flex flex-col">
+      <div className="bg-gray-300 flex flex-col  w-[70%]">
         <div className="max-h-[90%] flex-shrink min-h-0">
           <Messages />
         </div>

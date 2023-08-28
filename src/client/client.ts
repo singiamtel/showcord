@@ -492,7 +492,6 @@ export class Client {
       console.error(event);
     };
     this.socket.onclose = (_) => {
-      this.__setupSocketListeners();
       this.events.dispatchEvent(new CustomEvent("disconnect"));
     };
   }

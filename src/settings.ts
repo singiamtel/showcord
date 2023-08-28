@@ -19,6 +19,10 @@ export class Settings {
     this.saveSettings();
   }
 
+  async getSavedRooms() {
+    return (await localForage.getItem("settings") as any)?.rooms;
+  }
+
   async saveSettings() {
     const settings = {
       highlightWords: this.highlightWords,
@@ -30,7 +34,7 @@ export class Settings {
     this.timeout = setTimeout(async () => {
       console.log("saveSettings", settings);
       await localForage.setItem("settings", settings);
-    }, 1000);
+    }, 2500);
   }
 
   async loadSettings() {
