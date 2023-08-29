@@ -11,6 +11,7 @@ import Linkify from 'linkify-react';
 import { Message } from "@/client/message";
 import Code from "@/commands/code";
 import { UsernameComponent } from "./usercomponents";
+import manageURL from "@/utils/manageURL";
 
 export default function Chat() {
   const { messages } = useContext(PS_context);
@@ -50,6 +51,10 @@ export default function Chat() {
 const options = {
   defaultProtocol: 'https',
   target: '_blank',
+  attributes: {
+    onClick: manageURL,
+    className: 'text-blue-500 underline cursor-pointer',
+  }
 };
 
 export function MessageComponent(

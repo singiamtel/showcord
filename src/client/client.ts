@@ -460,11 +460,15 @@ export class Client {
       content = content.slice(4);
     } else if (splitted_message[3]?.startsWith("/log")) {
       type = "log";
-      content = splitted_message[3].slice(4);
-      // msgTime = undefined;
+      // content = splitted_message[3].slice(4);
+      content = splitted_message.slice(3).join("|").slice(4);
+      msgTime = Math.floor(Date.now() / 1000).toString();
+    } else if (splitted_message[3]?.startsWith("/raw")) {
+      type = "raw";
+      content = splitted_message.slice(3).join("|").slice(4);
       msgTime = Math.floor(Date.now() / 1000).toString();
     }
-    if (content.startsWith("/log")) {
+    else if (content.startsWith("/log")) {
       type = "log";
       content = content.slice(4);
     }
