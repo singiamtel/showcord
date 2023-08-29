@@ -11,7 +11,7 @@ const options = {
       return;
     }
     if (attribs.href) {
-      return <a onClick={manageURL} style={{cursor: "pointer"}}>{domToReact(children, options)}</a>;
+      return <a href={attribs.href} target="_blank" onClick={manageURL} style={{cursor: "pointer"}}>{domToReact(children, options)}</a>;
     }
   },
 };
