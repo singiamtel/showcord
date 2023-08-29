@@ -23,6 +23,7 @@ export default function Users() {
   };
 
   const onClick = () => {
+    console.log("clicked");
   }
 
   useEffect(() => {
