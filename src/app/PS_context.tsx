@@ -85,7 +85,7 @@ export default function PS_contextProvider(props: any) {
         // We don't switch to the room if it's in the settings as it probably means we're doing the initial join
         // console.log("settings", await client.settings.getSavedRooms());
         const rooms = await client.settings.getSavedRooms()
-        if (!rooms?.includes(roomID)) {
+        if (rooms && !rooms.includes(roomID)) {
           setRoom(roomID);
         }
         else if(!selectedRoom){
