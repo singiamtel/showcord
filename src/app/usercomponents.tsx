@@ -1,6 +1,6 @@
-import { User } from "@/client/user";
 import { userColor } from "@/utils/namecolour";
-import { MouseEventHandler, useState } from "react";
+import { MouseEventHandler, MutableRefObject } from "react";
+import { clamp, toID } from "@/utils/generic";
 
 export function UsernameComponent(
   { user, alignRight, onClick }: {
@@ -9,33 +9,44 @@ export function UsernameComponent(
     onClick?: MouseEventHandler<HTMLAnchorElement>;
   },
 ) {
-  const [display, setDisplay] = useState<string>("hidden");
   const rank = user.charAt(0);
-  const onclick = onClick ? onClick : () => {
-    setDisplay("");
-  };
   return (
     <>
       <span className="text-[#9D9488] whitespace-nowrap font-mono">
         &nbsp;
         {rank + (alignRight ? " " : "")}
       </span>
-      <a onClick={onclick} style={{ cursor: "pointer" }}>
+      <a onClick={onClick} style={onClick && { cursor: "pointer" } }>
         <span style={{ color: userColor(user) }} className="font-bold ">
           {user.slice(1)}
         </span>
       </a>
     </>
   );
-  // <UserCard user={user} />
 }
 
-export function UserCard({ user }: { user: User }) {
+const margin = 15;
+export function UserCard(
+  { user, name, position, forwardRef }: {
+    user: any;
+    name: string;
+    position: { x: number; y: number };
+    forwardRef: MutableRefObject<any>;
+  },
+) { // user is a json
+  console.log("rendering usercard for", user);
   return (
-    <div className="bg-gray-600 rounded-lg p-2">
-      <UsernameComponent user={user.name} />
-      <div className="text-xs text-gray-400">
-        {user.status} Hellooo helooooo
+    <div
+      ref={forwardRef}
+      className="absolute bg-gray-600 rounded-lg p-2 w-[500px] h-[300px] text-white"
+      style={{
+        left: clamp(position.x, 0, window.innerWidth - 500 - margin),
+        top: clamp(position.y, 0, window.innerHeight - 300 - margin)
+      }}
+    >
+      <strong><a target="_blank" href={"https://pokemonshowdown.com/users/"+toID(name)}>{name}</a></strong>
+      <div className="text-xs text-gray-100">
+        {user ? user.status : ""}
       </div>
     </div>
   );

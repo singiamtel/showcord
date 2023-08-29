@@ -20,6 +20,7 @@ export class Client {
   private joinAfterLogin: string[] = [];
   private cleanUsername: string = "";
   private selectedRoom: string = "";
+  private userListener: ((json: any) => any) | undefined // Returns the JSON
 
   constructor() {
     this.socket = new WebSocket(this.server_url);
@@ -43,6 +44,11 @@ export class Client {
 
   leaveRoom(room_id: string) {
     this.socket.send(`|/leave ${room_id}`);
+  }
+
+  async getUser(user: string, callback: (json: any) => void) {
+    this.socket.send(`|/cmd userdetails ${user}`);
+    this.userListener = callback;
   }
 
   async join(rooms: string | string[], useDefaultRooms = false) {
@@ -361,6 +367,27 @@ export class Client {
       }
       case "N": {
       }
+      case "queryresponse": {
+        if(args[0] === 'userdetails'){
+          try{
+            const tmpjson = JSON.parse(args.slice(1).join("|"));
+            if(this.userListener){
+              this.userListener(tmpjson);
+              this.userListener = undefined;
+            }
+            else{
+              console.warn("received userdetails but nobody asked for it", args);
+            }
+          }
+          catch(e){
+            console.error("Error parsing userdetails", args);
+          }
+        }
+        else {
+          console.log("unknown queryresponse", args);
+        }
+      }
+// << |queryresponse|userdetails|{"id":"zestar75","userid":"zestar75","name":"zestar75","avatar":266,"group":" ","autoconfirmed":true,"rooms":{"@techcode":{},"@scholastic":{},"sports":{},"@twilightzone":{"isPrivate":true}},"friended":true}
       case "init":
         let users: User[] = [];
         for (; i < splitted_message.length; i++) { // start at 2 because first line is room id and second line is cmd
