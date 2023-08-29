@@ -1,35 +1,61 @@
-# PS-cord
+# Project Title
 
-_Not quite PS, but not quite Discord either_
+This project is aimed at making a PR to make the code more readable.
 
-The client is still in early development, but feel free to try it! [Website](https://ps-cord.vercel.app/)
+## Getting Started
 
-Custom client for [Pokémon Showdown](play.pokemonshowdown.com) built in Next.js with a modern and user-friendly design
+These instructions will get you a copy of the project up and running on your local machine for development and testing purposes.
 
+### Prerequisites
 
-## Design philosophies
+What things you need to install the software and how to install them
 
-The client should always be:
+```
+Give examples
+```
 
-- Simple and easy to use
-- Safe (never manage any credentials, or put your account at risk)
-- Compliant with Showdown's policies
+### Installing
 
+A step by step series of examples that tell you how to get a development env running
 
-## Installation
+```
+Give the example
+```
 
-If you want to self-host PS-cord, follow these steps:
+## Running the tests
 
-1. Clone the repository: `git clone https://github.com/yourusername/ps-cord.git`
-2. Navigate to the project directory: `cd ps-cord`
-3. Install dependencies: `npm install`
-4. Start the development server: `npm run dev`
-5. Open your browser and visit: `http://localhost:3000`
+Explain how to run the automated tests for this system
+
+### Break down into end to end tests
+
+Explain what these tests test and why
+
+```
+Give an example
+```
+
+## Deployment
+
+Add additional notes about how to deploy this on a live system
+
+## Built With
+
+* [Python](https://www.python.org/) - The programming language used
 
 ## Contributing
 
-We welcome contributions to make PS-cord even better! If you'd like to contribute, make sure to check our [feature tracker](https://github.com/users/singiamtel/projects/1)
+Please read [CONTRIBUTING.md](https://gist.github.com/PurpleBooth/b24679402957c63ec426) for details on our code of conduct, and the process for submitting pull requests to us.
+
+## Authors
+
+* **Your Name** - *Initial work* - [YourName](https://github.com/yourname)
 
 ## License
 
-PS-cord is [MIT](https://opensource.org/licenses/MIT).
+This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md) file for details
+
+## Acknowledgments
+
+* Hat tip to anyone whose code was used
+* Inspiration
+* etc
