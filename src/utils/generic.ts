@@ -1,6 +1,5 @@
 export function toID(s: unknown) {
     if (typeof s === 'string') {
-    console.log(s);
         return s.toLowerCase().replace(/[^a-z0-9]/g, '');
     }
     return '';

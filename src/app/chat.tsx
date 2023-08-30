@@ -25,7 +25,6 @@ export default function Chat() {
 
   const wrapperRef = useRef(null);
   const {isOutside} = useClickOutside(wrapperRef);
-  // if(clickedOutside) return null
 
   useEffect(() => {
     console.log('clickedOutside', isOutside)
@@ -54,6 +53,7 @@ export default function Chat() {
   const clickUsername = (e: MouseEvent) => {
     const username = (e.target as HTMLAnchorElement).innerText;
     console.log("clicky", username);
+    // setIsOutside(null);
     setUsername(username);
     setPosition({x: e.clientX, y: e.clientY});
     client?.getUser(username, (user: any) => {

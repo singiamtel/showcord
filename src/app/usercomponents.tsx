@@ -17,7 +17,7 @@ export function UsernameComponent(
         {rank + (alignRight ? " " : "")}
       </span>
       <a onClick={onClick} style={onClick && { cursor: "pointer" } }>
-        <span style={{ color: userColor(user) }} className="font-bold ">
+        <span style={{ color: userColor(user) }} className="font-bold " data-message='true'>
           {user.slice(1)}
         </span>
       </a>
