@@ -1,13 +1,12 @@
 import { RefObject, useEffect, useState } from "react";
 
 export default function useClickOutside(ref: RefObject<HTMLElement>) {
-  const [isOutside, setIsOutside] = useState(false);
+  const [isOutside, setIsOutside] = useState<boolean | null>(false);
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (!event.target) return;
-      console.log("clicked on", event.target, "ref", ref.current);
       if (ref.current && !ref.current.contains(event.target as Node)) {
-        console.log("it was outside");
+if ((event.target as HTMLElement)?.attributes?.getNamedItem('data-message')) return
         setIsOutside(true);
       } else {
         setIsOutside(false);
@@ -17,7 +16,7 @@ export default function useClickOutside(ref: RefObject<HTMLElement>) {
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };
-  }, [ref, ref.current]);
+  }, [ref.current]);
 
-  return { isOutside };
+  return { isOutside, setIsOutside }
 }

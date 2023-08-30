@@ -1,5 +1,8 @@
+import axios from "axios";
+import { toID } from "@/utils/generic";
+
 // Author: Felucia
-export function userColor(name) {
+function userColorHash(name) {
   let MD5 = function (f) {
     function i(b, c) {
       var d, e, f, g, h;
@@ -11,9 +14,7 @@ export function userColor(name) {
       return d & e
         ? h ^ 2147483648 ^ f ^ g
         : d | e
-        ? h & 1073741824
-          ? h ^ 3221225472 ^ f ^ g
-          : h ^ 1073741824 ^ f ^ g
+        ? h & 1073741824 ? h ^ 3221225472 ^ f ^ g : h ^ 1073741824 ^ f ^ g
         : h ^ f ^ g;
     }
 
@@ -41,10 +42,11 @@ export function userColor(name) {
       var c = "",
         e = "",
         d;
-      for (d = 0; d <= 3; d++)
+      for (d = 0; d <= 3; d++) {
         (e = (b >>> (d * 8)) & 255),
           (e = "0" + e.toString(16)),
           (c += e.substr(e.length - 2, 2));
+      }
       return c;
     }
     var g = [],
@@ -66,9 +68,9 @@ export function userColor(name) {
           d < 128
             ? (c += String.fromCharCode(d))
             : (d > 127 && d < 2048
-                ? (c += String.fromCharCode((d >> 6) | 192))
-                : ((c += String.fromCharCode((d >> 12) | 224)),
-                  (c += String.fromCharCode(((d >> 6) & 63) | 128))),
+              ? (c += String.fromCharCode((d >> 6) | 192))
+              : ((c += String.fromCharCode((d >> 12) | 224)),
+                (c += String.fromCharCode(((d >> 6) & 63) | 128))),
               (c += String.fromCharCode((d & 63) | 128)));
         }
         return c;
@@ -83,12 +85,12 @@ export function userColor(name) {
             g = 0,
             h = 0;
           h < d;
-
-        )
+        ) {
           (c = (h - (h % 4)) / 4),
             (g = (h % 4) * 8),
             (f[c] |= b.charCodeAt(h) << g),
             h++;
+        }
         f[(h - (h % 4)) / 4] |= 128 << ((h % 4) * 8);
         f[e - 2] = d << 3;
         f[e - 1] = d >>> 29;
@@ -98,7 +100,7 @@ export function userColor(name) {
     c = 4023233417;
     d = 2562383102;
     e = 271733878;
-    for (f = 0; f < g.length; f += 16)
+    for (f = 0; f < g.length; f += 16) {
       (o = b),
         (p = c),
         (q = d),
@@ -171,6 +173,7 @@ export function userColor(name) {
         (c = i(c, p)),
         (d = i(d, q)),
         (e = i(e, r));
+    }
     return (n(b) + n(c) + n(d) + n(e)).toLowerCase();
   };
   // This MD5 function was directly taken from the PS client source code.
@@ -323,3 +326,34 @@ export function userColor(name) {
   }
   return a;
 }
+
+export let customColors = {};
+
+async function loadCustomColors() {
+  const res = await axios.get(
+    "http://play.pokemonshowdown.com/config/colors.json",
+    {
+      withCredentials: false,
+    }
+  );
+  // no CORS
+  // const configStr = await axios.get(
+  //   "https://play.pokemonshowdown.com/config/config.js",
+  //   {
+  //     withCredentials: false,
+  //   }
+  // );
+  // const pairs = configStr.data.match(/(?<=')[a-z0-9]+': '[a-z0-9]*(?=')/g).map( // Blame partman
+  //   (match) => match.split(`': '`)
+  // );
+  // customColors = Object.assign(Object.fromEntries(pairs), res.data);
+  customColors = res.data;
+}
+
+loadCustomColors();
+
+export function userColor(name) {
+  // console.log(customColors);
+  return customColors[toID(name)] || userColorHash(name);
+}
+
