@@ -34,11 +34,10 @@ export function UserCard(
     forwardRef: MutableRefObject<any>;
   },
 ) { // user is a json
-  console.log("rendering usercard for", user);
   return (
     <div
       ref={forwardRef}
-      className="absolute bg-gray-600 rounded-lg p-2 w-[500px] h-[300px] text-white"
+      className="absolute bg-gray-600 rounded-lg p-2 w-[500px] h-[300px] text-white border-gray-125"
       style={{
         left: clamp(position.x, 0, window.innerWidth - 500 - margin),
         top: clamp(position.y, 0, window.innerHeight - 300 - margin)

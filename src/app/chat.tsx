@@ -27,14 +27,9 @@ export default function Chat() {
   const {isOutside} = useClickOutside(wrapperRef);
 
   useEffect(() => {
-    console.log('clickedOutside', isOutside)
     setUser(null)
     setUsername(null)
   }, [isOutside]);
-
-  useEffect(() => {
-    console.log('messagesEndRef', messagesEndRef)
-  }, [messagesEndRef]);
 
   useEffect(() => {
     messagesEndRef.current!.scrollIntoView({ behavior: "auto" });
@@ -52,12 +47,10 @@ export default function Chat() {
 
   const clickUsername = (e: MouseEvent) => {
     const username = (e.target as HTMLAnchorElement).innerText;
-    console.log("clicky", username);
     // setIsOutside(null);
     setUsername(username);
     setPosition({x: e.clientX, y: e.clientY});
     client?.getUser(username, (user: any) => {
-      console.log("got user", user);
       setUser(user);
     });
   };
@@ -83,7 +76,6 @@ export default function Chat() {
       </div>
     </div>
   );
-  // <UserCard user={user}/>
 }
 
 const options = {
