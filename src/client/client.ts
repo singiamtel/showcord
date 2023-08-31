@@ -20,7 +20,7 @@ export class Client {
   private joinAfterLogin: string[] = [];
   private cleanUsername: string = "";
   private selectedRoom: string = "";
-  private userListener: ((json: any) => any) | undefined // Returns the JSON
+  private userListener: ((json: any) => any) | undefined; // Returns the JSON
 
   constructor() {
     this.socket = new WebSocket(this.server_url);
@@ -82,7 +82,6 @@ export class Client {
     }
     return false;
   }
-
 
   // --- Login ---
 
@@ -224,7 +223,6 @@ export class Client {
     }
   }
 
-
   // --- Room management ---
   private _addRoom(room: Room) {
     this.rooms.push(room);
@@ -264,7 +262,6 @@ export class Client {
     }
     console.log("room (" + room_id + ") does not exist");
   }
-
 
   private setUsername(username: string) {
     // gotta re-run highlightMsg on all messages
@@ -324,7 +321,7 @@ export class Client {
           return;
         }
         const chatMessage = this.parseCMessage(
-          splitted_message[isGlobalOrLobby ? 0 : 1],
+          splitted_message[isGlobalOrLobby ? 0 : 1], cmd === "c:",
         );
         this.addMessage(roomID, chatMessage);
         break;
@@ -350,30 +347,33 @@ export class Client {
           return;
         }
         room.removeUser(args[0]);
+        break;
       }
       case "N": {
+        break;
       }
       case "queryresponse": {
-        if(args[0] === 'userdetails'){
-          try{
+        if (args[0] === "userdetails") {
+          try {
             const tmpjson = JSON.parse(args.slice(1).join("|"));
-            if(this.userListener){
+            if (this.userListener) {
               this.userListener(tmpjson);
               this.userListener = undefined;
+            } else {
+              console.warn(
+                "received userdetails but nobody asked for it",
+                args,
+              );
             }
-            else{
-              console.warn("received userdetails but nobody asked for it", args);
-            }
-          }
-          catch(e){
+          } catch (e) {
             console.error("Error parsing userdetails", args);
           }
-        }
-        else {
+        } else {
           console.warn("Unknown queryresponse", args);
         }
+        break;
       }
-// << |queryresponse|userdetails|{"id":"zestar75","userid":"zestar75","name":"zestar75","avatar":266,"group":" ","autoconfirmed":true,"rooms":{"@techcode":{},"@scholastic":{},"sports":{},"@twilightzone":{"isPrivate":true}},"friended":true}
+      // << |queryresponse|userdetails|{"id":"zestar75","userid":"zestar75","name":"zestar75","avatar":266,"group":" ","autoconfirmed":true,"rooms":{"@techcode":{},"@scholastic":{},"sports":{},"@twilightzone":{"isPrivate":true}},"friended":true}
       case "init":
         let users: User[] = [];
         for (; i < splitted_message.length; i++) { // start at 2 because first line is room id and second line is cmd
@@ -417,8 +417,8 @@ export class Client {
             this.addUsers(roomID, users);
             continue;
           }
-          if (splitted_message[i].startsWith("|c:|")) {
-            const parsedMessage = this.parseCMessage(splitted_message[i]);
+          if (splitted_message[i].startsWith("|c:|") || splitted_message[i].startsWith("|c|")) {
+            const parsedMessage = this.parseCMessage(splitted_message[i], splitted_message[i].startsWith("|c:|"));
             this.addMessage(roomID, parsedMessage);
           } else if (splitted_message[i].startsWith("|raw|")) {
             const [_, _2, ...data] = splitted_message[i].split("|");
@@ -456,32 +456,52 @@ export class Client {
         // leave room
         this._removeRoom(roomID);
         break;
+      case "uhtml":
+        console.log("uhtml", args);
+        const uhtml = args.slice(1).join("|");
+        this.addMessage(
+          roomID,
+          new Message({
+            timestamp,
+            user: "",
+            type: "raw",
+            content: uhtml,
+          }),
+        );
+        break;
       default:
         console.warn("Unknown cmd: " + cmd);
     }
   }
 
-  private parseCMessage(message: string): Message {
+  private parseCMessage(message: string, hasTimestamp: boolean): Message {
     const splitted_message = message.split("|");
     let content;
     let type: "raw" | "chat" | "log" = "chat";
-    let [_, _2, msgTime, user, ...tmpcontent]: (string | undefined)[] =
-      splitted_message;
+    let _, _2, msgTime, user, tmpcontent: (string | undefined)[];
+    if(hasTimestamp){
+      console.log("has timestamp", splitted_message);
+      [_, _2, msgTime, user, ...tmpcontent] = splitted_message;
+    }
+    else{
+      console.log("doesn't have timestamp", splitted_message);
+      [_, _2, user, ...tmpcontent] = splitted_message;
+      msgTime = Math.floor(Date.now() / 1000).toString();
+    }
     content = tmpcontent.join("|");
     if (content.startsWith("/raw")) {
       type = "raw";
       content = content.slice(4);
-    } else if (splitted_message[3]?.startsWith("/log")) {
-      type = "log";
-      // content = splitted_message[3].slice(4);
-      content = splitted_message.slice(3).join("|").slice(4);
-      msgTime = Math.floor(Date.now() / 1000).toString();
-    } else if (splitted_message[3]?.startsWith("/raw")) {
-      type = "raw";
-      content = splitted_message.slice(3).join("|").slice(4);
-      msgTime = Math.floor(Date.now() / 1000).toString();
-    }
-    else if (content.startsWith("/log")) {
+    // } else if (splitted_message[3]?.startsWith("/log")) {
+    //   type = "log";
+    //   // content = splitted_message[3].slice(4);
+    //   content = splitted_message.slice(3).join("|").slice(4);
+    //   msgTime = Math.floor(Date.now() / 1000).toString();
+    // } else if (splitted_message[3]?.startsWith("/raw")) {
+    //   type = "raw";
+    //   content = splitted_message.slice(3).join("|").slice(4);
+    //   msgTime = Math.floor(Date.now() / 1000).toString();
+    } else if (content.startsWith("/log")) {
       type = "log";
       content = content.slice(4);
     }

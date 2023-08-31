@@ -60,3 +60,11 @@ textarea:focus, input:focus{
 a {
   color: #05A8FC;
 }
+
+a:visited{
+  color: #C589F9;
+}
+
+.novisited:visited{
+  color: #05A8FC;
+}

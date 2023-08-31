@@ -9,6 +9,8 @@ export class Room {
   users: User[] = [];
   unread = 0;
   mention = false;
+  lastReadTime : Date | null = null;
+  mentions = 0;
   private messageLimit = 300;
 
   constructor(
@@ -60,7 +62,7 @@ export class Room {
   }
 
   select() {
-    this.unread = 0;
-    this.mention = false;
+    this.lastReadTime = new Date();
+    this.mentions = 0;
   }
 }

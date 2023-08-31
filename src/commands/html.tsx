@@ -6,7 +6,9 @@ import parse, { domToReact } from "html-react-parser";
 import sanitizeHtml from "sanitize-html-react";
 
 const parserOptions = {
-  replace: ({ attribs, children }: any) => {
+  replace: (domNode: any) => {
+    const { attribs, children } = domNode;
+    console.log("BUTTON attribs", attribs, domNode)
     if (!attribs) {
       return;
     }
@@ -17,10 +19,18 @@ const parserOptions = {
           target="_blank"
           onClick={manageURL}
           style={{ cursor: "pointer" }}
+          className="novisited"
         >
           {domToReact(children, parserOptions)}
         </a>
       );
+    }
+    if(domNode.name === "button" && attribs.value) {
+      return (
+        <button className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" data-parsed="true">
+          {domToReact(children, parserOptions)}
+        </button>
+      )
     }
   },
 };
@@ -39,9 +49,11 @@ const sanitizeOptions = {
     "br",
     "a",
     "div",
+    "button",
   ],
   allowedAttributes: {
     "img": ["src", "height", "width"],
+    "button": ["value"],
     "a": ["href"],
     "*": ["style"],
   },
@@ -52,9 +64,9 @@ const sanitizeOptions = {
         /^rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*\)$/,
         /hsl\(\s*(\d+)\s*,\s*([\d.]+)%\s*,\s*([\d.]+)%\s*\)/,
       ],
-      "background-image": [
-        /^url\((.*?)\)$/i,
-      ],
+      // "background-image": [
+      //   /^url\((.*?)\)$/i,
+      // ],
     },
   },
 };
