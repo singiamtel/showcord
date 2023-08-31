@@ -9,7 +9,7 @@ export type Users = {
 };
 
 export default function Users() {
-  const { selectedRoom: room, client } = useContext(PS_context);
+  const { selectedPage: room, client } = useContext(PS_context);
   const [users, setUsers] = useState<Users[]>([]);
 
   const refreshUsers = () => {
@@ -31,7 +31,7 @@ export default function Users() {
 
   return (
     <div className="bg-gray-600 h-full p-2 overflow-y-scroll">
-      {users.map((user, index) => 
+      {users.map((user, index) =>
         <div key={index}>
           <UsernameComponent user={user.name} alignRight onClick={onClick} />
         </div>

@@ -34,7 +34,7 @@ export default function ChatBox() {
     width: 0,
     marginBottom: 0,
   });
-  const { client, selectedRoom: room, setRoom } = useContext(PS_context);
+  const { client, selectedPage: room, setRoom } = useContext(PS_context);
   const textAreaRef = useRef<HTMLTextAreaElement>(null);
   const formRef = createRef<HTMLFormElement>();
 
