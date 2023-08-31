@@ -28,7 +28,7 @@ export class Client {
   }
 
   async send(room: string, message: string) {
-    console.log(`${room}|${message}`);
+    console.log(`>>${room}|${message}`);
     this.socket.send(`${room}|${message}`);
   }
 
@@ -52,7 +52,6 @@ export class Client {
   }
 
   async join(rooms: string | string[], useDefaultRooms = false) {
-    console.log("joining rooms...", rooms);
     if (useDefaultRooms && (!rooms || rooms.length === 0)) {
       for (let room of this.settings.defaultRooms) {
         this.socket.send(`|/join ${room}`);
@@ -106,7 +105,6 @@ export class Client {
     // Oauth login method
     const url =
       `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}&challenge=${this.challstr}`;
-    console.log("url", url);
     const nWindow = (window as any).n = open(
       url,
       undefined,
@@ -116,7 +114,6 @@ export class Client {
       try {
         if (nWindow?.location.host === location.host) {
           const url = new URL(nWindow.location.href);
-          console.log("URL", url);
           const assertion = url.searchParams.get("assertion");
           if (assertion) {
             this.send_assertion(assertion);
@@ -129,7 +126,6 @@ export class Client {
             );
           }
           nWindow.close();
-          console.log("got token", token);
         } else {
           setTimeout(checkIfUpdated, 500);
         }
@@ -147,14 +143,12 @@ export class Client {
   }
 
   private async tryLogin() {
-    console.log("trying to login");
     while (!this.challstr) {
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
     const urlParams = new URLSearchParams(window.location.search);
     let assertion = urlParams.get("assertion");
     if (assertion && assertion !== "undefined") {
-      console.log("logging in with assertion", assertion);
       await this.send_assertion(assertion);
       const token = urlParams.get("token");
       if (token) {
@@ -164,7 +158,6 @@ export class Client {
     } else if (
       (assertion = await this.assertionFromToken(this.challstr) || null)
     ) {
-      console.log("logging in with token+assertion", assertion);
       await this.send_assertion(assertion);
       return;
     }
@@ -172,9 +165,7 @@ export class Client {
 
   private async send_assertion(assertion: string) {
     //
-    console.log("sending assertion", assertion);
     const username = assertion.split(",")[1];
-    console.log("trn", username, assertion);
     this.socket.send(`|/trn ${username},0,${assertion}`);
   }
 
@@ -183,14 +174,12 @@ export class Client {
   ): Promise<string | false> {
     // Loginserver responses are just weird
     const response_test = await response.text();
-    console.log("response_test", response_test);
     if (response_test[0] === ";") {
       console.error("AssertionError: Received ; from loginserver");
       return false;
     }
     try {
       const response_json = JSON.parse(response_test.slice(1));
-      console.log("token response_json", response_json);
       if (response_json.success === false) {
         console.error(`Couldn't login`, response_json);
         return false;
@@ -283,7 +272,6 @@ export class Client {
     this.cleanUsername = username.replace(/[\u{0080}-\u{FFFF}]/gu, "").trim();
     this.rooms.forEach(async (room) => {
       room.messages.forEach((msg) => {
-        console.log("trying to hl", msg);
         if (this.highlightMsg(room.ID, msg.content)) {
           msg.hld = true;
         } else {
@@ -341,7 +329,6 @@ export class Client {
         this.addMessage(roomID, chatMessage);
         break;
       case "J": {
-        console.log("user joined room", roomID, args);
         let room = this.room(roomID);
         if (!room) {
           console.error(
@@ -354,7 +341,6 @@ export class Client {
         break;
       }
       case "L": {
-        console.log("user left room", roomID, args);
         let room = this.room(roomID);
         if (!room) {
           console.error(
@@ -384,7 +370,7 @@ export class Client {
           }
         }
         else {
-          console.log("unknown queryresponse", args);
+          console.warn("Unknown queryresponse", args);
         }
       }
 // << |queryresponse|userdetails|{"id":"zestar75","userid":"zestar75","name":"zestar75","avatar":266,"group":" ","autoconfirmed":true,"rooms":{"@techcode":{},"@scholastic":{},"sports":{},"@twilightzone":{"isPrivate":true}},"friended":true}
@@ -395,8 +381,8 @@ export class Client {
           if (!didType && splitted_message[i].startsWith("|init|")) {
             type = splitted_message[i].split("|")[2];
             if (type !== "chat" && type !== "battle") {
-              console.log(
-                "room type not supported (" + type + "), room id: " +
+              console.warn(
+                "Room type not supported (" + type + "), room id: " +
                   roomID,
               );
             }
@@ -446,7 +432,7 @@ export class Client {
               }),
             );
           } else {
-            console.log("unknown init message: " + splitted_message[i]);
+            console.warn("unknown init message: " + splitted_message[i]);
           }
         }
         break;
@@ -461,7 +447,7 @@ export class Client {
       case "updateuser":
         if (!args[0].trim().toLowerCase().startsWith("guest")) {
           this.join(this.joinAfterLogin);
-          console.log("logged in as " + args[0]);
+          console.log("Logged in as " + args[0]);
           this.loggedIn = true;
           this.setUsername(args[0]);
         }
@@ -471,7 +457,7 @@ export class Client {
         this._removeRoom(roomID);
         break;
       default:
-        console.log("unknown cmd: " + cmd);
+        console.warn("Unknown cmd: " + cmd);
     }
   }
 
@@ -509,14 +495,13 @@ export class Client {
 
   private __setupSocketListeners() {
     this.socket.onopen = () => {
-      console.log("socket connected");
       for (let cb of this.onOpen) {
         cb();
       }
       this.tryLogin();
     };
     this.socket.onmessage = (event) => {
-      console.log("msg:", event.data);
+      console.log("<<", event.data);
       this.parseSocketMsg(event.data);
     };
     this.socket.onerror = (event) => {

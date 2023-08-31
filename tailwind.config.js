@@ -41,7 +41,7 @@ module.exports = {
     fontFamily: {
       sans: ["Inter", "sans-serif"],
       serif: ["Inter", "sans-serif"],
-      mono: ["Inter", "sans-serif"],
+      mono: ["Verdana", "sans-serif"],
     },
   },
   plugins: [],

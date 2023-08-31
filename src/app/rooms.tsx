@@ -6,10 +6,6 @@ import HashtagIcon from "../../public/hashtag.svg";
 export default function Rooms({className}: {className: string}){
   const { rooms} = useContext(PS_context);
 
-  useEffect(() => {
-      console.log("rooms changed:", rooms);
-  }, [rooms])
-
   return (
     <div className={"bg-gray-600 h-full " + className}>
       {/** big fat text */}

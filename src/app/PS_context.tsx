@@ -144,7 +144,6 @@ export default function PS_contextProvider(props: any) {
       return;
     }
     const msgs = client.room(selectedRoom)?.messages ?? [];
-    console.log("msgs", msgs.length);
     setMessages(msgs);
   }, [client, selectedRoom]);
 
@@ -180,10 +179,6 @@ export default function PS_contextProvider(props: any) {
     const client = new Client();
     client.onOpen.push(() => {
       setClient(client);
-    });
-    client.events.addEventListener("login", (username) => {
-      console.log("logged in as", username);
-      setUser((username as CustomEvent).detail);
     });
 
     client.events.addEventListener("login", (username) => {

@@ -21,7 +21,6 @@ export default function Chat() {
   const [user, setUser] = useState<any | null>(null);
   const [username, setUsername] = useState<string | null>(null);
   const [position, setPosition] = useState<{x:number, y:number}>({x:0, y:0});
-  console.log("chat", messages.map((m) => m.user))
 
   const wrapperRef = useRef(null);
   const {isOutside} = useClickOutside(wrapperRef);
