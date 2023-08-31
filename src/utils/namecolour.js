@@ -331,7 +331,7 @@ export let customColors = {};
 
 async function loadCustomColors() {
   const res = await axios.get(
-    "http://play.pokemonshowdown.com/config/colors.json",
+    "https://play.pokemonshowdown.com/config/colors.json",
     {
       withCredentials: false,
     }
