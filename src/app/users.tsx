@@ -16,7 +16,6 @@ export default function Users() {
     if (!room) return;
     const selectedRoom = client?.room(room);
     if (!selectedRoom) {
-      console.log("room does not exist");
       return;
     }
     setUsers(selectedRoom.users);

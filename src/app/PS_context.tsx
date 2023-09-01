@@ -123,7 +123,6 @@ export default function PS_contextProvider(props: any) {
       if (selectedRoom && !client.room(selectedRoom)) {
         const lastRoom = previousRooms[previousRooms.length - 2];
         if (lastRoom) {
-          console.log("setting room to lastRoom", lastRoom);
           setRoom(lastRoom);
         }
       }

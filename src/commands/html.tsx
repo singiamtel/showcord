@@ -71,10 +71,10 @@ const sanitizeOptions = {
 };
 
 export default function HTML({ message }: any) {
-  // console.log("awdmessage", message);
-  // console.log("awdsanitized", sanitizeHtml(message, sanitizeOptions));
+  // console.log("HTMLmessage", message);
+  // console.log("HTMLsanitized", sanitizeHtml(message, sanitizeOptions));
   // console.log(
-  //   "awdparsed",
+  //   "HTMLparsed",
   //   parse(sanitizeHtml(message, sanitizeOptions), parserOptions),
   // );
   return (

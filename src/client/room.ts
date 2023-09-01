@@ -74,6 +74,5 @@ export class Room {
     this.lastReadTime = new Date();
     this.mentions = 0;
     this.unread = 0;
-    console.log("select", this.lastReadTime);
   }
 }

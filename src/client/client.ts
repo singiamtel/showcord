@@ -261,7 +261,7 @@ export class Client {
       );
       return;
     }
-    console.log("room (" + room_id + ") does not exist");
+    console.warn("addMessage: room (" + room_id + ") is unknown");
   }
 
   private addUsers(room_id: string, users: User[]) {
@@ -271,7 +271,7 @@ export class Client {
       this.events.dispatchEvent(new CustomEvent("users", { detail: users }));
       return;
     }
-    console.log("room (" + room_id + ") does not exist");
+    console.warn("addUsers: room (" + room_id + ") is unknown");
   }
 
   private setUsername(username: string) {
@@ -313,7 +313,7 @@ export class Client {
       roomID = splitted_message[0].slice(1);
     }
     const [_, cmd, ...args] = splitted_message[i].split("|");
-    console.log("cmd:", cmd, "args:", args);
+    // console.log("cmd:", cmd, "args:", args);
     i++;
     let type = "",
       didType = false,
@@ -475,7 +475,7 @@ export class Client {
         this._removeRoom(roomID);
         break;
       case "uhtml":
-        console.log("uhtml", args);
+        // console.log("uhtml", args);
         const uhtml = args.slice(1).join("|");
         this.addMessage(
           roomID,

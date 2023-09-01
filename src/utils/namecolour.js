@@ -608,34 +608,23 @@ export let customColors = {
 };
 
 async function loadCustomColors() {
+  try{
   const res = await axios.get(
     "https://play.pokemonshowdown.com/config/colors.json",
     {
       withCredentials: false,
     },
   );
-  // no CORS
-  // const configStr = await axios.get(
-  //   "https://play.pokemonshowdown.com/config/config.js",
-  //   {
-  //     withCredentials: false,
-  //   }
-  // );
-  // const pairs = configStr.data.match(/(?<=')[a-z0-9]+': '[a-z0-9]*(?=')/g).map( // Blame partman
-  //   (match) => match.split(`': '`)
-  // );
-  // customColors = Object.assign(Object.fromEntries(pairs), res.data);
   customColors = res.data;
+  }
+  catch(e){
+    console.error("Couldn't fetch custom colours:", e)
+  }
 }
 
 loadCustomColors();
 
 export function userColor(name) {
-  if (/two/i.test(name)) {
-    console.log("HLTWO", name);
-    console.log("HLTWO", customColors[toID(name)]);
-    console.log("HLTWO", userColorHash(name));
-  }
   return userColorHash(customColors[toID(name)] || toID(name));
 }
 
