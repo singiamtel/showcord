@@ -4,6 +4,7 @@ import { Message } from "./message";
 import { Room } from "./room";
 import { User } from "./user";
 import localforage from "localforage";
+import { Notification } from "./notifications";
 
 export class Client {
   // socket
@@ -40,6 +41,8 @@ export class Client {
   selectRoom(roomid: string) {
     this.selectedRoom = roomid;
     this.room(roomid)?.select();
+    console.log("select room", this.rooms);
+    this.settings.changeRooms(this.rooms);
   }
 
   leaveRoom(room_id: string) {
@@ -81,6 +84,14 @@ export class Client {
       return true;
     }
     return false;
+  }
+
+  getNotifications() : Notification[] {
+    return this.rooms.map((room) => ({
+      room: room.ID,
+      mentions: room.mentions,
+      unread: room.unread,
+    }));
   }
 
   // --- Login ---
@@ -240,11 +251,11 @@ export class Client {
 
   private addMessage(room_id: string, message: Message) {
     const room = this.room(room_id);
-    if (this.highlightMsg(room_id, message.content)) {
+    if (toID(message.user) !== toID(this.username) && this.highlightMsg(room_id, message.content)) {
       message.hld = true;
     }
     if (room) {
-      room.addMessage(message);
+      room.addMessage(message, this.selectedRoom === room_id);
       this.events.dispatchEvent(
         new CustomEvent("message", { detail: message }),
       );
@@ -321,7 +332,8 @@ export class Client {
           return;
         }
         const chatMessage = this.parseCMessage(
-          splitted_message[isGlobalOrLobby ? 0 : 1], cmd === "c:",
+          splitted_message[isGlobalOrLobby ? 0 : 1],
+          cmd === "c:",
         );
         this.addMessage(roomID, chatMessage);
         break;
@@ -417,8 +429,14 @@ export class Client {
             this.addUsers(roomID, users);
             continue;
           }
-          if (splitted_message[i].startsWith("|c:|") || splitted_message[i].startsWith("|c|")) {
-            const parsedMessage = this.parseCMessage(splitted_message[i], splitted_message[i].startsWith("|c:|"));
+          if (
+            splitted_message[i].startsWith("|c:|") ||
+            splitted_message[i].startsWith("|c|")
+          ) {
+            const parsedMessage = this.parseCMessage(
+              splitted_message[i],
+              splitted_message[i].startsWith("|c:|"),
+            );
             this.addMessage(roomID, parsedMessage);
           } else if (splitted_message[i].startsWith("|raw|")) {
             const [_, _2, ...data] = splitted_message[i].split("|");
@@ -479,12 +497,9 @@ export class Client {
     let content;
     let type: "raw" | "chat" | "log" = "chat";
     let _, _2, msgTime, user, tmpcontent: (string | undefined)[];
-    if(hasTimestamp){
-      console.log("has timestamp", splitted_message);
+    if (hasTimestamp) {
       [_, _2, msgTime, user, ...tmpcontent] = splitted_message;
-    }
-    else{
-      console.log("doesn't have timestamp", splitted_message);
+    } else {
       [_, _2, user, ...tmpcontent] = splitted_message;
       msgTime = Math.floor(Date.now() / 1000).toString();
     }
@@ -492,15 +507,15 @@ export class Client {
     if (content.startsWith("/raw")) {
       type = "raw";
       content = content.slice(4);
-    // } else if (splitted_message[3]?.startsWith("/log")) {
-    //   type = "log";
-    //   // content = splitted_message[3].slice(4);
-    //   content = splitted_message.slice(3).join("|").slice(4);
-    //   msgTime = Math.floor(Date.now() / 1000).toString();
-    // } else if (splitted_message[3]?.startsWith("/raw")) {
-    //   type = "raw";
-    //   content = splitted_message.slice(3).join("|").slice(4);
-    //   msgTime = Math.floor(Date.now() / 1000).toString();
+      // } else if (splitted_message[3]?.startsWith("/log")) {
+      //   type = "log";
+      //   // content = splitted_message[3].slice(4);
+      //   content = splitted_message.slice(3).join("|").slice(4);
+      //   msgTime = Math.floor(Date.now() / 1000).toString();
+      // } else if (splitted_message[3]?.startsWith("/raw")) {
+      //   type = "raw";
+      //   content = splitted_message.slice(3).join("|").slice(4);
+      //   msgTime = Math.floor(Date.now() / 1000).toString();
     } else if (content.startsWith("/log")) {
       type = "log";
       content = content.slice(4);

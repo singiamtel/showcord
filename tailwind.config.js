@@ -35,8 +35,10 @@ module.exports = {
       yellow: {
         "hl-body": "#444039",
         "hl-mark": "#EFB132",
-
-      }
+      },
+      red: {
+        400: "#F54343",
+      },
     },
     fontFamily: {
       sans: ["Inter", "sans-serif"],
@@ -56,5 +58,6 @@ module.exports = {
     "m-2",
     "w-[500px]",
     "h-[300px]",
+    "text-sm",
   ],
 };

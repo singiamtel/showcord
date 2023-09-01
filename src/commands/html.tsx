@@ -8,7 +8,6 @@ import sanitizeHtml from "sanitize-html-react";
 const parserOptions = {
   replace: (domNode: any) => {
     const { attribs, children } = domNode;
-    console.log("BUTTON attribs", attribs, domNode)
     if (!attribs) {
       return;
     }
@@ -55,7 +54,7 @@ const sanitizeOptions = {
     "img": ["src", "height", "width"],
     "button": ["value"],
     "a": ["href"],
-    "*": ["style"],
+    // "*": ["style"],
   },
   allowedStyles: {
     "*": {
@@ -72,12 +71,12 @@ const sanitizeOptions = {
 };
 
 export default function HTML({ message }: any) {
-  console.log("awdmessage", message);
-  console.log("awdsanitized", sanitizeHtml(message, sanitizeOptions));
-  console.log(
-    "awdparsed",
-    parse(sanitizeHtml(message, sanitizeOptions), parserOptions),
-  );
+  // console.log("awdmessage", message);
+  // console.log("awdsanitized", sanitizeHtml(message, sanitizeOptions));
+  // console.log(
+  //   "awdparsed",
+  //   parse(sanitizeHtml(message, sanitizeOptions), parserOptions),
+  // );
   return (
     <div className="p-2 ml-14 mr-14 m-2 text-white border border-solid border-gray-border bg-gray-600 rounded">
       <span className="">

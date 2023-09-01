@@ -1,6 +1,7 @@
 "use client";
 import { Client } from "@/client/client";
 import { Message } from "@/client/message";
+import { Notification } from "@/client/notifications";
 import { Room } from "@/client/room";
 import dotenv from "dotenv";
 import { createContext, useCallback, useEffect, useState } from "react";
@@ -14,6 +15,7 @@ export const PS_context = createContext<
     messages: Message[];
     user?: string; // Will be an object with user info
     rooms: Room[];
+    notifications: Notification[];
   }
 >({
   client: null,
@@ -22,6 +24,7 @@ export const PS_context = createContext<
   messages: [],
   user: undefined,
   rooms: [],
+  notifications: [],
 });
 
 export default function PS_contextProvider(props: any) {
@@ -29,6 +32,7 @@ export default function PS_contextProvider(props: any) {
   const [user, setUser] = useState<string | undefined>();
   const [selectedRoom, setSelectedRoom] = useState<string | null>(null);
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [update, setUpdate] = useState<number>(0); // Used to force update on rooms change
   const [previousRooms, setPreviousRooms] = useState<string[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -84,11 +88,10 @@ export default function PS_contextProvider(props: any) {
       if (roomID) {
         // We don't switch to the room if it's in the settings as it probably means we're doing the initial join
         // console.log("settings", await client.settings.getSavedRooms());
-        const rooms = await client.settings.getSavedRooms()
-        if (rooms && !rooms.includes(roomID)) {
+        const rooms = await client.settings.getSavedRooms();
+        if (rooms && !rooms.map(e =>e.ID).includes(roomID)) {
           setRoom(roomID);
-        }
-        else if(!selectedRoom){
+        } else if (!selectedRoom) {
           // Well okay, but only once
           setRoom(roomID);
         }
@@ -129,7 +132,7 @@ export default function PS_contextProvider(props: any) {
 
   useEffect(() => {
     if (!client) return;
-    client.join(client.settings.rooms, true);
+    client.join(client.settings.rooms.map(e => e.ID), true);
     // client.login({username, password});
   }, [client]);
 
@@ -145,6 +148,7 @@ export default function PS_contextProvider(props: any) {
     }
     const msgs = client.room(selectedRoom)?.messages ?? [];
     setMessages(msgs);
+    setNotifications(client.getNotifications()); // Manage notifications
   }, [client, selectedRoom]);
 
   useEffect(() => {
@@ -210,6 +214,7 @@ export default function PS_contextProvider(props: any) {
         user,
         messages,
         rooms,
+        notifications,
       }}
     >
       {props.children}

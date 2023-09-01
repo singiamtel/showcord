@@ -8,21 +8,30 @@ export class Room {
   messages: Message[] = [];
   users: User[] = [];
   unread = 0;
-  mention = false;
-  lastReadTime : Date | null = null;
+  lastReadTime : Date = new Date();
   mentions = 0;
-  private messageLimit = 300;
+  private messageLimit = 600;
 
   constructor(
-    { ID, name, type }: { ID: string; name: string; type: "chat" | "battle" },
+    { ID, name, type }: { ID: string; name: string; type: "chat" | "battle"} 
   ) {
     this.ID = ID;
     this.name = name;
     this.type = type;
   }
-  addMessage(message: Message) {
+
+  addMessage(message: Message, selected: boolean) {
     if (this.messages.length > this.messageLimit){
       this.messages.shift();
+    }
+    if(selected){
+      this.lastReadTime = new Date();
+    }
+    if(message.timestamp && message.timestamp > this.lastReadTime){
+      this.unread++;
+      if(message.hld){
+        this.mentions++;
+      }
     }
     this.messages.push(message);
   }
@@ -64,5 +73,7 @@ export class Room {
   select() {
     this.lastReadTime = new Date();
     this.mentions = 0;
+    this.unread = 0;
+    console.log("select", this.lastReadTime);
   }
 }
