@@ -289,6 +289,16 @@ export class Client {
     console.warn("addUsers: room (" + room_id + ") is unknown");
   }
 
+  private removeUser(room_id: string, user: string) {
+    const room = this.room(room_id);
+    if (room) {
+      room.removeUser(user)
+      this.events.dispatchEvent(new CustomEvent("users", { detail: user }));
+      return;
+    }
+    console.warn("removeUsers: room (" + room_id + ") is unknown");
+  }
+
   private setUsername(username: string) {
     // gotta re-run highlightMsg on all messages
     this.username = username;
@@ -361,7 +371,7 @@ export class Client {
           );
           return;
         }
-        room.addUser(new User({ name: args[0] }));
+        this.addUsers(roomID, [new User({ name: args[0] })]);
         break;
       }
       case "L": {
@@ -373,7 +383,7 @@ export class Client {
           );
           return;
         }
-        room.removeUser(args[0]);
+        this.removeUser(roomID, args[0]);
         break;
       }
       case "N": {
