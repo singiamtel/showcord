@@ -3,6 +3,7 @@ import { Client } from "@/client/client";
 import { Message } from "@/client/message";
 import { Notification } from "@/client/notifications";
 import { Room } from "@/client/room";
+import { loadCustomColors } from "@/utils/namecolour";
 import dotenv from "dotenv";
 import { createContext, useCallback, useEffect, useState } from "react";
 dotenv.config();
@@ -89,7 +90,7 @@ export default function PS_contextProvider(props: any) {
         // We don't switch to the room if it's in the settings as it probably means we're doing the initial join
         // console.log("settings", await client.settings.getSavedRooms());
         const rooms = await client.settings.getSavedRooms();
-        if (rooms && !rooms.map(e =>e.ID).includes(roomID)) {
+        if (rooms && !rooms.map((e) => e.ID).includes(roomID)) {
           setRoom(roomID);
         } else if (!selectedRoom) {
           // Well okay, but only once
@@ -131,7 +132,7 @@ export default function PS_contextProvider(props: any) {
 
   useEffect(() => {
     if (!client) return;
-    client.join(client.settings.rooms.map(e => e.ID), true);
+    client.join(client.settings.rooms.map((e) => e.ID), true);
     // client.login({username, password});
   }, [client]);
 
@@ -179,15 +180,21 @@ export default function PS_contextProvider(props: any) {
   /* --- End message handling --- */
 
   useEffect(() => {
-    const client = new Client();
-    client.onOpen.push(() => {
-      setClient(client);
-    });
+    // TODO: This logic should clearly be in the client (issue #9)
+    const init = async () => {
+      await loadCustomColors();
+      console.log("loaded custom colors");
+      const client = new Client();
+      client.onOpen.push(() => {
+        setClient(client);
+      });
 
-    client.events.addEventListener("login", (username) => {
-      console.log("logged in as", username);
-      setUser((username as CustomEvent).detail);
-    });
+      client.events.addEventListener("login", (username) => {
+        console.log("logged in as", username);
+        setUser((username as CustomEvent).detail);
+      });
+    };
+    init();
   }, []);
 
   // Try to recover on socket death

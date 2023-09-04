@@ -20,14 +20,14 @@ export class Room {
     this.type = type;
   }
 
-  addMessage(message: Message, selected: boolean) {
+  addMessage(message: Message, {selected, selfSent} : {selected: boolean, selfSent: boolean}){
     if (this.messages.length > this.messageLimit){
       this.messages.shift();
     }
     if(selected){
       this.lastReadTime = new Date();
     }
-    if(message.timestamp && message.timestamp > this.lastReadTime){
+    if(message.type === "chat" && !selfSent && message.timestamp && message.timestamp > this.lastReadTime){
       this.unread++;
       if(message.hld){
         this.mentions++;

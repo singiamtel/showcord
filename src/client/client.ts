@@ -7,8 +7,7 @@ import localforage from "localforage";
 import { Notification } from "./notifications";
 
 export class Client {
-  // socket
-  socket: WebSocket;
+  socket: WebSocket | undefined;
   server_url: string = "wss://sim3.psim.us/showdown/websocket/";
   loginserver_url: string = "https://play.pokemonshowdown.com/api/";
   challstr: string = "";
@@ -28,9 +27,14 @@ export class Client {
     this.__setupSocketListeners();
   }
 
-  async send(room: string, message: string) {
+  async send(message: string, room: string | false) {
+    if (!this.socket) {
+      throw new Error(
+        `Sending message before socket initialization ${room} ${message}`,
+      );
+    }
     console.log(`>>${room}|${message}`);
-    this.socket.send(`${room}|${message}`);
+    this.socket.send(`${room || ''}|${message}`);
   }
 
   room(room_id: string) {
@@ -46,15 +50,24 @@ export class Client {
   }
 
   leaveRoom(room_id: string) {
+    if (!this.socket) {
+      throw new Error("Leaving room before socket initialization " + room_id);
+    }
     this.socket.send(`|/leave ${room_id}`);
   }
 
   async getUser(user: string, callback: (json: any) => void) {
+    if (!this.socket) {
+      throw new Error("Getting user before socket initialization " + user);
+    }
     this.socket.send(`|/cmd userdetails ${user}`);
     this.userListener = callback;
   }
 
   async join(rooms: string | string[], useDefaultRooms = false) {
+    if (!this.socket) {
+      throw new Error("Joining room(s) before socket initialization " + rooms);
+    }
     if (useDefaultRooms && (!rooms || rooms.length === 0)) {
       for (let room of this.settings.defaultRooms) {
         this.socket.send(`|/join ${room}`);
@@ -86,7 +99,7 @@ export class Client {
     return false;
   }
 
-  getNotifications() : Notification[] {
+  getNotifications(): Notification[] {
     return this.rooms.map((room) => ({
       room: room.ID,
       mentions: room.mentions,
@@ -174,9 +187,8 @@ export class Client {
   }
 
   private async send_assertion(assertion: string) {
-    //
     const username = assertion.split(",")[1];
-    this.socket.send(`|/trn ${username},0,${assertion}`);
+    this.send(`/trn ${username},0,${assertion}`, false);
   }
 
   private async parseLoginserverResponse(
@@ -251,11 +263,14 @@ export class Client {
 
   private addMessage(room_id: string, message: Message) {
     const room = this.room(room_id);
-    if (toID(message.user) !== toID(this.username) && this.highlightMsg(room_id, message.content)) {
+    if (
+      toID(message.user) !== toID(this.username) &&
+      this.highlightMsg(room_id, message.content)
+    ) {
       message.hld = true;
     }
     if (room) {
-      room.addMessage(message, this.selectedRoom === room_id);
+      room.addMessage(message, {selected: this.selectedRoom === room_id, selfSent : toID(this.username) === toID(message.user)} );
       this.events.dispatchEvent(
         new CustomEvent("message", { detail: message }),
       );
@@ -529,6 +544,7 @@ export class Client {
   }
 
   private __setupSocketListeners() {
+    if(!this.socket) throw new Error("__setupSocketListeners: Socket not initialized")
     this.socket.onopen = () => {
       for (let cb of this.onOpen) {
         cb();

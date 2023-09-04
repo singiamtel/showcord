@@ -327,6 +327,7 @@ function userColorHash(name) {
   return a;
 }
 
+export let loadedCustomColors = false
 export let customColors = {
 	'theimmortal': 'taco',
 	'bmelts': 'testmelts',
@@ -374,7 +375,7 @@ export let customColors = {
 	'bumbadadabum': 'styrofoamboots',
 	'yuihirasawa': 'weeabookiller',
 	'monohearted': 'nighthearted',
-	'prem': 'erinanakiri', // second color change
+	'prem': 'erinanakiri',
 	'clefairy': 'fuckes',
 	'morfent': 'aaaa',
 	'crobat': 'supergaycrobat4',
@@ -383,11 +384,11 @@ export let customColors = {
 	'raoulsteve247': 'raoulbuildingpc',
 	'thedeceiver': 'colourtest011',
 	'darnell': 'ggggggg',
-	'shamethat': 'qpwkfklkjpskllj', // second color change
+	'shamethat': 'qpwkfklkjpskllj',
 	'aipom': 'wdsddsdadas',
 	'alter': 'spakling',
 	'biggie': 'aoedoedad',
-	'osiris': 'osiris12', // second color change
+	'osiris': 'osiris12',
 	'azumarill': 'azumarill69',
 	'redew': 'redeww',
 	'sapphire': 'masquerains',
@@ -395,7 +396,7 @@ export let customColors = {
 	'kiracookie': 'kracookie',
 	'blitz': 'hikaruhitachii',
 	'skitty': 'shckieei',
-	'sweep': 'jgjjfgdfg', // second color change
+	'sweep': 'jgjjfgdfg',
 	'panpawn': 'crowt',
 	'val': 'pleasegivemecolorr',
 	'valentine': 'pleasegivemecolorr',
@@ -425,7 +426,7 @@ export let customColors = {
 	'macle': 'flogged',
 	'ashiemore': 'poncp',
 	'charles': 'charlescarmichael',
-	'sigilyph': 'diving', // second color change
+	'sigilyph': 'diving',
 	'spy': 'spydreigon',
 	'kinguu': 'dodmen',
 	'dodmen': 'kinguu',
@@ -456,7 +457,7 @@ export let customColors = {
 	'nerd': 'eee4444444',
 	'blaziken': 'knmfksdnf',
 	'andy': 'agkoemv',
-	'kris': 'likj9ajz', // THIRD color change >:|
+	'kris': 'likj9ajz',
 	'nv': 'larvitar',
 	'iyarito': '8f40n',
 	'paris': 'goojna',
@@ -505,7 +506,7 @@ export let customColors = {
 	'gimmick': 'gimm1ck',
 	'pichus': 'up1gat8f',
 	'pigeons': 'pigeonsvgc',
-	'clefable': '147x0', // +HiMyNamesL, former gstaff - apparently cleared with Zarel via Discord PM
+	'clefable': '147x0',
 	'splash': 'mitsukokongou',
 	'talah': '2b',
 	'vexen': 'vexeniv',
@@ -607,25 +608,23 @@ export let customColors = {
 	'cathy': '' //{color: '#ff5cb6'}
 };
 
-async function loadCustomColors() {
+export async function loadCustomColors() {
   try{
   const res = await axios.get(
     "https://play.pokemonshowdown.com/config/colors.json",
     {
       withCredentials: false,
+      timeout: 5000,
     },
   );
-  customColors = res.data;
+  Object.assign(customColors, res.data);
+  loadedCustomColors = true;
   }
   catch(e){
     console.error("Couldn't fetch custom colours:", e)
   }
 }
 
-loadCustomColors();
-
 export function userColor(name) {
   return userColorHash(customColors[toID(name)] || toID(name));
 }
-
-

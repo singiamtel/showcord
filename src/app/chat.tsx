@@ -106,7 +106,7 @@ export function MessageComponent(
   if (type === "log") {
     return (
       <div className="p-0.5 text-white">
-        <span className="text-gray-125 font-mono">
+        <span className="text-gray-125 font-mono text-xs">
           {time ? HHMMSS(time) : ""}
         </span>
         {" " + message}
