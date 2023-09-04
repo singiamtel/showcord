@@ -37,10 +37,10 @@ export function UserCard(
   return (
     <div
       ref={forwardRef}
-      className="absolute bg-gray-600 rounded-lg p-2 w-[500px] h-[300px] text-white border-gray-125"
+      className="absolute bg-gray-600 rounded-lg p-2 w-[500px] h-[300px] text-white shadow-sm shadow-black"
       style={{
-        left: clamp(position.x, 0, window.innerWidth - 500 - margin),
-        top: clamp(position.y, 0, window.innerHeight - 300 - margin)
+        left: clamp(position.x, margin, window.innerWidth - 500 - margin),
+        top: clamp(position.y, margin, window.innerHeight - 300 - margin)
       }}
     >
       <strong><a target="_blank" href={"https://pokemonshowdown.com/users/"+toID(name)}>{name}</a></strong>
