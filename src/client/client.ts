@@ -549,15 +549,11 @@ export class Client {
     if (content.startsWith("/raw")) {
       type = "raw";
       content = content.slice(4);
-      // } else if (splitted_message[3]?.startsWith("/log")) {
-      //   type = "log";
-      //   // content = splitted_message[3].slice(4);
-      //   content = splitted_message.slice(3).join("|").slice(4);
-      //   msgTime = Math.floor(Date.now() / 1000).toString();
-      // } else if (splitted_message[3]?.startsWith("/raw")) {
-      //   type = "raw";
-      //   content = splitted_message.slice(3).join("|").slice(4);
-      //   msgTime = Math.floor(Date.now() / 1000).toString();
+    } else if (content.startsWith("/uhtml")) {
+      let [name, ...html] = content.split(",")
+      // TODO: Use the name and parse uhtmlchange
+      type = "raw";
+      content = html.join(",");
     } else if (content.startsWith("/log")) {
       type = "log";
       content = content.slice(4);
