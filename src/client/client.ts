@@ -34,7 +34,7 @@ export class Client {
       );
     }
     console.log(`>>${room}|${message}`);
-    this.socket.send(`${room || ''}|${message}`);
+    this.socket.send(`${room || ""}|${message}`);
   }
 
   room(room_id: string) {
@@ -183,6 +183,15 @@ export class Client {
     ) {
       await this.send_assertion(assertion);
       return;
+    } else {
+      if (!await this.refreshToken()) {
+        console.error("Couldn't refresh token");
+        return;
+      }
+      const assertion = await this.assertionFromToken(this.challstr);
+      if (assertion) {
+        await this.send_assertion(assertion);
+      }
     }
   }
 
@@ -230,7 +239,7 @@ export class Client {
     const token = await localforage.getItem("ps-token");
     if (!token || token === "undefined") {
       console.log("no token");
-      return null;
+      return false;
     }
     try {
       const response = await fetch(
@@ -242,7 +251,7 @@ export class Client {
       return result;
     } catch (e) {
       console.error(e);
-      return null;
+      return false;
     }
   }
 
@@ -270,7 +279,10 @@ export class Client {
       message.hld = true;
     }
     if (room) {
-      room.addMessage(message, {selected: this.selectedRoom === room_id, selfSent : toID(this.username) === toID(message.user)} );
+      room.addMessage(message, {
+        selected: this.selectedRoom === room_id,
+        selfSent: toID(this.username) === toID(message.user),
+      });
       this.events.dispatchEvent(
         new CustomEvent("message", { detail: message }),
       );
@@ -292,7 +304,7 @@ export class Client {
   private removeUser(room_id: string, user: string) {
     const room = this.room(room_id);
     if (room) {
-      room.removeUser(user)
+      room.removeUser(user);
       this.events.dispatchEvent(new CustomEvent("users", { detail: user }));
       return;
     }
@@ -356,11 +368,15 @@ export class Client {
           console.warn("room not found (" + roomID + ")");
           return;
         }
-        const chatMessage = this.parseCMessage(
-          splitted_message[isGlobalOrLobby ? 0 : 1],
-          cmd === "c:",
-        );
-        this.addMessage(roomID, chatMessage);
+        for (
+          let j = isGlobalOrLobby ? 0 : 1; j < splitted_message.length; j++
+        ) {
+          const chatMessage = this.parseCMessage(
+            splitted_message[j],
+            cmd === "c:",
+          );
+          this.addMessage(roomID, chatMessage);
+        }
         break;
       case "J": {
         let room = this.room(roomID);
@@ -529,6 +545,7 @@ export class Client {
       msgTime = Math.floor(Date.now() / 1000).toString();
     }
     content = tmpcontent.join("|");
+    console.log("content", content);
     if (content.startsWith("/raw")) {
       type = "raw";
       content = content.slice(4);
@@ -554,7 +571,9 @@ export class Client {
   }
 
   private __setupSocketListeners() {
-    if(!this.socket) throw new Error("__setupSocketListeners: Socket not initialized")
+    if (!this.socket) {
+      throw new Error("__setupSocketListeners: Socket not initialized");
+    }
     this.socket.onopen = () => {
       for (let cb of this.onOpen) {
         cb();
