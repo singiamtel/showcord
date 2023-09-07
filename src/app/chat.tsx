@@ -1,5 +1,12 @@
 "use client";
-import { createRef, MouseEvent, MouseEventHandler, useContext, useRef, useState } from "react";
+import {
+  createRef,
+  MouseEvent,
+  MouseEventHandler,
+  useContext,
+  useRef,
+  useState,
+} from "react";
 import { PS_context } from "./PS_context";
 import { useEffect } from "react";
 
@@ -20,14 +27,17 @@ export default function Chat() {
   const isIntersecting = useOnScreen(messagesEndRef);
   const [user, setUser] = useState<any | null>(null);
   const [username, setUsername] = useState<string | null>(null);
-  const [position, setPosition] = useState<{x:number, y:number}>({x:0, y:0});
+  const [position, setPosition] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
 
   const wrapperRef = useRef(null);
-  const {isOutside} = useClickOutside(wrapperRef);
+  const { isOutside } = useClickOutside(wrapperRef);
 
   useEffect(() => {
-    setUser(null)
-    setUsername(null)
+    setUser(null);
+    setUsername(null);
   }, [isOutside]);
 
   useEffect(() => {
@@ -36,7 +46,7 @@ export default function Chat() {
 
   useEffect(() => {
     setUser(null);
-  }, [selectedRoom])
+  }, [selectedRoom]);
 
   useEffect(() => {
     if (isIntersecting) {
@@ -48,7 +58,7 @@ export default function Chat() {
     const username = (e.target as HTMLAnchorElement).innerText;
     // setIsOutside(null);
     setUsername(username);
-    setPosition({x: e.clientX, y: e.clientY});
+    setPosition({ x: e.clientX, y: e.clientY });
     client?.getUser(username, (user: any) => {
       setUser(user);
     });
@@ -56,7 +66,16 @@ export default function Chat() {
 
   return (
     <div className="p-5 flex flex-col overflow-auto overflow-x-hidden break-words overflow-y-scroll h-full ">
-      {username ? <UserCard user={user} name={username} position={position} forwardRef={wrapperRef} /> : null}
+      {username
+        ? (
+          <UserCard
+            user={user}
+            name={username}
+            position={position}
+            forwardRef={wrapperRef}
+          />
+        )
+        : null}
       {messages.map((message, index, arr) => (
         <MessageComponent
           key={index}
@@ -108,6 +127,8 @@ export function MessageComponent(
       <div className="p-0.5 text-white">
         <span className="text-gray-125 font-mono text-xs">
           {time ? HHMMSS(time) : ""}
+
+          &nbsp;
         </span>
         {" " + message}
       </div>
@@ -117,9 +138,13 @@ export function MessageComponent(
     <div className={"p-0.5 " + (hld ? "bg-yellow-hl-body" : "")}>
       <span className="text-gray-125 font-mono text-xs">
         {time ? HHMMSS(time) : ""}
+        &nbsp;
       </span>
       <span className="text-white">
-        <UsernameComponent user={user} onClick={(e) => onNameClick && onNameClick(e)} />
+        <UsernameComponent
+          user={user}
+          onClick={(e) => onNameClick && onNameClick(e)}
+        />
         {/* https://linkify.js.org/docs/linkify-react.html#custom-link-components */}
         <Linkify options={options}>
           {" " + message}

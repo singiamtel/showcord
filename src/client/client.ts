@@ -270,7 +270,7 @@ export class Client {
     this.settings.changeRooms(this.rooms);
   }
 
-  private addMessage(room_id: string, message: Message) {
+  private addMessage(room_id: string, message: Message, retry = true){
     const room = this.room(room_id);
     if (
       toID(message.user) !== toID(this.username) &&
@@ -288,7 +288,10 @@ export class Client {
       );
       return;
     }
-    console.warn("addMessage: room (" + room_id + ") is unknown");
+    else console.warn("addMessage: room (" + room_id + ") is unknown. Message:", message);
+    // else if(retry){
+      // setTimeout(() => this.addMessage(room_id, message, false), 1000);
+    // }
   }
 
   private addUsers(room_id: string, users: User[]) {
@@ -298,7 +301,7 @@ export class Client {
       this.events.dispatchEvent(new CustomEvent("users", { detail: users }));
       return;
     }
-    console.warn("addUsers: room (" + room_id + ") is unknown");
+    console.warn("addUsers: room (" + room_id + ") is unknown. Users:", users);
   }
 
   private removeUser(room_id: string, user: string) {
@@ -369,7 +372,9 @@ export class Client {
           return;
         }
         for (
-          let j = isGlobalOrLobby ? 0 : 1; j < splitted_message.length; j++
+          let j = isGlobalOrLobby ? 0 : 1;
+          j < splitted_message.length;
+          j++
         ) {
           const chatMessage = this.parseCMessage(
             splitted_message[j],
@@ -490,6 +495,39 @@ export class Client {
                 content: data.join("|"),
               }),
             );
+          } else if (splitted_message[i].startsWith("|html|")) {
+            const [_, _2, ...data] = splitted_message[i].split("|");
+            this.addMessage(
+              roomID,
+              new Message({
+                timestamp,
+                user: "",
+                type: "raw",
+                content: data.join("|"),
+              }),
+            );
+          } else if (splitted_message[i].startsWith("|uhtml|")) {
+            const [_, _2, name, ...data] = splitted_message[i].split("|");
+            // TODO: Use the name
+            this.addMessage(
+              roomID,
+              new Message({
+                timestamp,
+                user: "",
+                type: "raw",
+                content: data.join("|"),
+              }),
+            );
+          } else if (splitted_message[i].startsWith("|uhtmlchange|")) {
+            const room = this.room(roomID);
+            if (!room) {
+              console.error(
+                "Received |uhtmlchange| from untracked room",
+                roomID,
+              );
+              break;
+            }
+            room.changeUHTML(args[0], args.slice(1).join("|"));
           } else {
             console.warn("unknown init message: " + splitted_message[i]);
           }
@@ -550,7 +588,7 @@ export class Client {
       type = "raw";
       content = content.slice(4);
     } else if (content.startsWith("/uhtml")) {
-      let [name, ...html] = content.split(",")
+      let [name, ...html] = content.split(",");
       // TODO: Use the name and parse uhtmlchange
       type = "raw";
       content = html.join(",");
