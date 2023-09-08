@@ -11,7 +11,7 @@ export class Client {
   server_url: string = "wss://sim3.psim.us/showdown/websocket/";
   loginserver_url: string = "https://play.pokemonshowdown.com/api/";
   challstr: string = "";
-  rooms: Room[] = [];
+  rooms: Map<string, Room> = new Map();
   events: EventTarget = new EventTarget();
   username: string = "";
   loggedIn: boolean = false;
@@ -38,7 +38,8 @@ export class Client {
   }
 
   room(room_id: string) {
-    return this.rooms.find((room) => room.ID === room_id);
+    // rooms is a map
+    return this.rooms.get(room_id);
   }
 
   // Used to remove highlights and mentions
@@ -108,7 +109,7 @@ export class Client {
   }
 
   getNotifications(): Notification[] {
-    return this.rooms.map((room) => ({
+    return Array.from(this.rooms).map(([_, room]) => ({
       room: room.ID,
       mentions: room.mentions,
       unread: room.unread,
@@ -265,14 +266,14 @@ export class Client {
 
   // --- Room management ---
   private _addRoom(room: Room) {
-    this.rooms.push(room);
+    this.rooms.set(room.ID, room);
     const eventio = new CustomEvent("room", { detail: room });
     this.events.dispatchEvent(eventio);
     this.settings.changeRooms(this.rooms);
   }
 
   private _removeRoom(room_id: string) {
-    this.rooms = this.rooms.filter((room) => room.ID !== room_id);
+    this.rooms.delete(room_id);
     const eventio = new CustomEvent("leaveroom", { detail: room_id });
     this.events.dispatchEvent(eventio);
     this.settings.changeRooms(this.rooms);

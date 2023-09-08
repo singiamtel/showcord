@@ -76,7 +76,7 @@ export default function PS_contextProvider(props: any) {
     if (!client) {
       return;
     }
-    setRooms(client.rooms);
+    setRooms(Array.from(client.rooms).map(e => e[1]));
   }, [client, update]);
 
   useEffect(() => {
@@ -101,9 +101,9 @@ export default function PS_contextProvider(props: any) {
 
     const removedEventListener = () => {
       setUpdate(update + 1);
-      if (client.rooms.length > 0) {
+      if(client.rooms.size > 0){
         if (!selectedRoom || !client.room(selectedRoom)) {
-          setRoom(client.rooms[0].ID);
+          setRoom(client.rooms.values().next().value.ID);
         }
       }
     };

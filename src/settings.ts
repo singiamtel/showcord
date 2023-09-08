@@ -2,7 +2,7 @@ import localForage from "localforage";
 import { Room } from "./client/room";
 
 export class Settings {
-  rooms: {ID: string, lastReadTime: Date}[] = [];
+  rooms: {ID: string, lastReadTime: Date}[] = []
   highlightWords: Map<string, RegExp[]> = new Map(); // roomid -> highlightWords
   defaultRooms = ["lobby", "help", "overused"];
   URL = location.origin;
@@ -14,8 +14,8 @@ export class Settings {
     this.loadSettings();
   }
 
-  changeRooms(rooms: Room[]) {
-    this.rooms = rooms.map((r) => ({ID: r.ID, lastReadTime: r.lastReadTime}));
+  changeRooms(rooms: Map<string, Room>) {
+    this.rooms = Array.from(rooms).map((r) => ({ID: r[1].ID, lastReadTime: r[1].lastReadTime}));
     this.saveSettings();
   }
 
