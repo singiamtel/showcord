@@ -5,7 +5,7 @@ import Messages from "./chat";
 import { PS_context } from "./PS_context";
 
 export default function BigPanel() {
-  const { selectedRoom: room, rooms } = useContext(PS_context);
+  const { selectedPage: room, rooms } = useContext(PS_context);
   if (!room) return null;
   return (
       <div className="bg-gray-300 flex flex-col  w-[70%]">

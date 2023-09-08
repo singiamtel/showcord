@@ -12,6 +12,7 @@ export class Client {
   loginserver_url: string = "https://play.pokemonshowdown.com/api/";
   challstr: string = "";
   rooms: Map<string, Room> = new Map();
+  users: User[] = [];
   events: EventTarget = new EventTarget();
   username: string = "";
   loggedIn: boolean = false;
@@ -279,7 +280,7 @@ export class Client {
     this.settings.changeRooms(this.rooms);
   }
 
-  private addMessage(room_id: string, message: Message, retry = true) {
+  private addMessageToRoom(room_id: string, message: Message, retry = true) {
     const room = this.room(room_id);
     if (
       toID(message.user) !== toID(this.username) &&
@@ -331,11 +332,7 @@ export class Client {
     this.cleanUsername = username.replace(/[\u{0080}-\u{FFFF}]/gu, "").trim();
     this.rooms.forEach(async (room) => {
       room.messages.forEach((msg) => {
-        if (this.highlightMsg(room.ID, msg.content)) {
-          msg.hld = true;
-        } else {
-          msg.hld = false;
-        }
+        msg.hld = this.highlightMsg(room.ID, msg.content);
       });
     });
     this.events.dispatchEvent(
@@ -391,7 +388,7 @@ export class Client {
             splitted_message[j],
             cmd === "c:",
           );
-          this.addMessage(roomID, chatMessage);
+          this.addMessageToRoom(roomID, chatMessage);
         }
         break;
       case "J": {
@@ -494,10 +491,10 @@ export class Client {
               splitted_message[i],
               splitted_message[i].startsWith("|c:|"),
             );
-            this.addMessage(roomID, parsedMessage);
+            this.addMessageToRoom(roomID, parsedMessage);
           } else if (splitted_message[i].startsWith("|raw|")) {
             const [_, _2, ...data] = splitted_message[i].split("|");
-            this.addMessage(
+            this.addMessageToRoom(
               roomID,
               new Message({
                 timestamp,

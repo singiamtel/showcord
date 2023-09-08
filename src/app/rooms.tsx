@@ -4,25 +4,26 @@ import { PS_context } from "./PS_context";
 import HashtagIcon from "../../public/hashtag.svg";
 import Circle from "./components/circle";
 
-export default function Rooms({ className }: { className: string }) {
-  const { rooms } = useContext(PS_context);
-  return (
-    <div className={"bg-gray-600 h-full " + className}>
-      {/** big fat text */}
-      <div className="flex flex-row items-center p-2 text-white font-bold text-lg h-16 ">
-        Pokémon Showdown!
-      </div>
-      {rooms.map((room, idx) => (
-        <RoomComponent
-          key={idx}
-          name={room.name}
-          ID={room.ID}
-          notifications={{ mentions: room.mentions, unread: room.unread }}
-        />
-      ))}
-    </div>
-  );
-}
+
+// export default function Rooms({ className }: { className: string }) {
+//   const { rooms } = useContext(PS_context);
+//   return (
+//     <div className={"bg-gray-600 h-full " + className}>
+//       {/** big fat text */}
+//       <div className="flex flex-row items-center p-2 text-white font-bold text-lg h-16 ">
+//         Pokémon Showdown!
+//       </div>
+//       {rooms.map((room, idx) => (
+//         <RoomComponent
+//           key={idx}
+//           name={room.name}
+//           ID={room.ID}
+//           notifications={{ mentions: room.mentions, unread: room.unread }}
+//         />
+//       ))}
+//     </div>
+//   );
+// }
 
 export function RoomComponent(
   { name, ID, notifications: { unread, mentions } }: {
