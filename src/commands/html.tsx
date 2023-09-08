@@ -116,7 +116,7 @@ export default function HTML({ message }: any) {
   // console.log("HTMLmessage", sanitizeHtml(message, sanitizeOptions));
   // console.log("testHTML", sanitizeHtml("<test>lol", sanitizeOptions));
   return (
-    <div className="p-2 ml-14 mr-14 m-2 text-white border border-solid border-gray-border bg-gray-600 rounded">
+    <div className="p-2 ml-10 mr-10 m-2 text-white border border-solid border-gray-border bg-gray-600 rounded">
       <span className="">
         {parse(
           sanitizeHtml(message, sanitizeOptions),

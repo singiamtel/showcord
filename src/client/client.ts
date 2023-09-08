@@ -270,7 +270,7 @@ export class Client {
     this.settings.changeRooms(this.rooms);
   }
 
-  private addMessage(room_id: string, message: Message, retry = true){
+  private addMessage(room_id: string, message: Message, retry = true) {
     const room = this.room(room_id);
     if (
       toID(message.user) !== toID(this.username) &&
@@ -287,10 +287,12 @@ export class Client {
         new CustomEvent("message", { detail: message }),
       );
       return;
-    }
-    else console.warn("addMessage: room (" + room_id + ") is unknown. Message:", message);
+    } else {console.warn(
+        "addMessage: room (" + room_id + ") is unknown. Message:",
+        message,
+      );}
     // else if(retry){
-      // setTimeout(() => this.addMessage(room_id, message, false), 1000);
+    // setTimeout(() => this.addMessage(room_id, message, false), 1000);
     // }
   }
 
@@ -566,6 +568,16 @@ export class Client {
           }),
         );
         break;
+      case "uhtmlchange":
+        const room = this.room(roomID);
+        if (!room) {
+          console.error(
+            "Received |uhtmlchange| from untracked room",
+            roomID,
+          );
+          break;
+        }
+        room.changeUHTML(args[0], args.slice(1).join("|"));
       default:
         console.warn("Unknown cmd: " + cmd);
     }
@@ -583,7 +595,6 @@ export class Client {
       msgTime = Math.floor(Date.now() / 1000).toString();
     }
     content = tmpcontent.join("|");
-    console.log("content", content);
     if (content.startsWith("/raw")) {
       type = "raw";
       content = content.slice(4);

@@ -69,5 +69,6 @@ module.exports = {
     "py-2",
     "px-4",
     "rounded",
+    "whitespace-pre-wrap",
   ],
 };
