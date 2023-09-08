@@ -9,7 +9,7 @@ export default function BigPanel() {
   if (!room) return null;
   return (
       <div className="bg-gray-300 flex flex-col  w-[70%]">
-        <div className="max-h-[90%] flex-shrink min-h-0">
+        <div className="h-[90%] max-h-[90%] flex-shrink min-h-0">
           <Messages />
         </div>
         <div className="flex-grow">

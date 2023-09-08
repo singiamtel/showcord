@@ -4,14 +4,14 @@ import { Message } from "./message";
 import { Room } from "./room";
 import { User } from "./user";
 import localforage from "localforage";
+import { Notification } from "./notifications";
 
 export class Client {
-  // socket
-  socket: WebSocket;
+  socket: WebSocket | undefined;
   server_url: string = "wss://sim3.psim.us/showdown/websocket/";
   loginserver_url: string = "https://play.pokemonshowdown.com/api/";
   challstr: string = "";
-  rooms: Room[] = [];
+  rooms: Map<string, Room> = new Map();
   users: User[] = [];
   events: EventTarget = new EventTarget();
   username: string = "";
@@ -21,33 +21,55 @@ export class Client {
   private joinAfterLogin: string[] = [];
   private cleanUsername: string = "";
   private selectedRoom: string = "";
+  private userListener: ((json: any) => any) | undefined; // Returns the JSON
 
   constructor() {
     this.socket = new WebSocket(this.server_url);
     this.__setupSocketListeners();
   }
 
-  async send(room: string, message: string) {
-    console.log(`${room}|${message}`);
-    this.socket.send(`${room}|${message}`);
+  async send(message: string, room: string | false) {
+    if (!this.socket) {
+      throw new Error(
+        `Sending message before socket initialization ${room} ${message}`,
+      );
+    }
+    console.log(`>>${room}|${message}`);
+    this.socket.send(`${room || ""}|${message}`);
   }
 
   room(room_id: string) {
-    return this.rooms.find((room) => room.ID === room_id);
+    // rooms is a map
+    return this.rooms.get(room_id);
   }
 
   // Used to remove highlights and mentions
   selectRoom(roomid: string) {
     this.selectedRoom = roomid;
     this.room(roomid)?.select();
+    console.log("select room", this.rooms);
+    this.settings.changeRooms(this.rooms);
   }
 
   leaveRoom(room_id: string) {
+    if (!this.socket) {
+      throw new Error("Leaving room before socket initialization " + room_id);
+    }
     this.socket.send(`|/leave ${room_id}`);
   }
 
+  async getUser(user: string, callback: (json: any) => void) {
+    if (!this.socket) {
+      throw new Error("Getting user before socket initialization " + user);
+    }
+    this.socket.send(`|/cmd userdetails ${user}`);
+    this.userListener = callback;
+  }
+
   async join(rooms: string | string[], useDefaultRooms = false) {
-    console.log("joining rooms...", rooms);
+    if (!this.socket) {
+      throw new Error("Joining room(s) before socket initialization " + rooms);
+    }
     if (useDefaultRooms && (!rooms || rooms.length === 0)) {
       for (let room of this.settings.defaultRooms) {
         this.socket.send(`|/join ${room}`);
@@ -62,6 +84,14 @@ export class Client {
         this.socket.send(`|/join ${room}`);
       }
     }
+  }
+
+  async autojoin(rooms: string[]){
+    if (!this.socket) {
+      throw new Error("Auto-joining rooms before socket initialization ");
+    }
+    if(!rooms) return
+    this.socket.send(`|/autojoin ${rooms.join(",")}`);
   }
 
   private highlightMsg(roomid: string, message: string) {
@@ -79,6 +109,13 @@ export class Client {
     return false;
   }
 
+  getNotifications(): Notification[] {
+    return Array.from(this.rooms).map(([_, room]) => ({
+      room: room.ID,
+      mentions: room.mentions,
+      unread: room.unread,
+    }));
+  }
 
   // --- Login ---
 
@@ -101,7 +138,6 @@ export class Client {
     // Oauth login method
     const url =
       `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}&challenge=${this.challstr}`;
-    console.log("url", url);
     const nWindow = (window as any).n = open(
       url,
       undefined,
@@ -111,7 +147,6 @@ export class Client {
       try {
         if (nWindow?.location.host === location.host) {
           const url = new URL(nWindow.location.href);
-          console.log("URL", url);
           const assertion = url.searchParams.get("assertion");
           if (assertion) {
             this.send_assertion(assertion);
@@ -124,7 +159,6 @@ export class Client {
             );
           }
           nWindow.close();
-          console.log("got token", token);
         } else {
           setTimeout(checkIfUpdated, 500);
         }
@@ -142,14 +176,12 @@ export class Client {
   }
 
   private async tryLogin() {
-    console.log("trying to login");
     while (!this.challstr) {
       await new Promise((resolve) => setTimeout(resolve, 500));
     }
     const urlParams = new URLSearchParams(window.location.search);
     let assertion = urlParams.get("assertion");
     if (assertion && assertion !== "undefined") {
-      console.log("logging in with assertion", assertion);
       await this.send_assertion(assertion);
       const token = urlParams.get("token");
       if (token) {
@@ -159,18 +191,23 @@ export class Client {
     } else if (
       (assertion = await this.assertionFromToken(this.challstr) || null)
     ) {
-      console.log("logging in with token+assertion", assertion);
       await this.send_assertion(assertion);
       return;
+    } else {
+      if (!await this.refreshToken()) {
+        console.error("Couldn't refresh token");
+        return;
+      }
+      const assertion = await this.assertionFromToken(this.challstr);
+      if (assertion) {
+        await this.send_assertion(assertion);
+      }
     }
   }
 
   private async send_assertion(assertion: string) {
-    //
-    console.log("sending assertion", assertion);
     const username = assertion.split(",")[1];
-    console.log("trn", username, assertion);
-    this.socket.send(`|/trn ${username},0,${assertion}`);
+    this.send(`/trn ${username},0,${assertion}`, false);
   }
 
   private async parseLoginserverResponse(
@@ -178,14 +215,12 @@ export class Client {
   ): Promise<string | false> {
     // Loginserver responses are just weird
     const response_test = await response.text();
-    console.log("response_test", response_test);
     if (response_test[0] === ";") {
       console.error("AssertionError: Received ; from loginserver");
       return false;
     }
     try {
       const response_json = JSON.parse(response_test.slice(1));
-      console.log("token response_json", response_json);
       if (response_json.success === false) {
         console.error(`Couldn't login`, response_json);
         return false;
@@ -214,7 +249,7 @@ export class Client {
     const token = await localforage.getItem("ps-token");
     if (!token || token === "undefined") {
       console.log("no token");
-      return null;
+      return false;
     }
     try {
       const response = await fetch(
@@ -226,39 +261,49 @@ export class Client {
       return result;
     } catch (e) {
       console.error(e);
-      return null;
+      return false;
     }
   }
 
-
   // --- Room management ---
   private _addRoom(room: Room) {
-    this.rooms.push(room);
+    this.rooms.set(room.ID, room);
     const eventio = new CustomEvent("room", { detail: room });
     this.events.dispatchEvent(eventio);
     this.settings.changeRooms(this.rooms);
   }
 
   private _removeRoom(room_id: string) {
-    this.rooms = this.rooms.filter((room) => room.ID !== room_id);
+    this.rooms.delete(room_id);
     const eventio = new CustomEvent("leaveroom", { detail: room_id });
     this.events.dispatchEvent(eventio);
     this.settings.changeRooms(this.rooms);
   }
 
-  private addMessageToRoom(room_id: string, message: Message) {
+  private addMessageToRoom(room_id: string, message: Message, retry = true) {
     const room = this.room(room_id);
-    if (this.highlightMsg(room_id, message.content)) {
+    if (
+      toID(message.user) !== toID(this.username) &&
+      this.highlightMsg(room_id, message.content)
+    ) {
       message.hld = true;
     }
     if (room) {
-      room.addMessage(message);
+      room.addMessage(message, {
+        selected: this.selectedRoom === room_id,
+        selfSent: toID(this.username) === toID(message.user),
+      });
       this.events.dispatchEvent(
         new CustomEvent("message", { detail: message }),
       );
       return;
+    } else if (retry) {
+      setTimeout(() => this.addMessage(room_id, message, false), 1000);
     }
-    console.log("room (" + room_id + ") does not exist");
+    console.warn(
+      "addMessage: room (" + room_id + ") is unknown. Message:",
+      message,
+    );
   }
 
   private addUsers(room_id: string, users: User[]) {
@@ -268,9 +313,18 @@ export class Client {
       this.events.dispatchEvent(new CustomEvent("users", { detail: users }));
       return;
     }
-    console.log("room (" + room_id + ") does not exist");
+    console.warn("addUsers: room (" + room_id + ") is unknown. Users:", users);
   }
 
+  private removeUser(room_id: string, user: string) {
+    const room = this.room(room_id);
+    if (room) {
+      room.removeUser(user);
+      this.events.dispatchEvent(new CustomEvent("users", { detail: user }));
+      return;
+    }
+    console.warn("removeUsers: room (" + room_id + ") is unknown");
+  }
 
   private setUsername(username: string) {
     // gotta re-run highlightMsg on all messages
@@ -278,7 +332,6 @@ export class Client {
     this.cleanUsername = username.replace(/[\u{0080}-\u{FFFF}]/gu, "").trim();
     this.rooms.forEach(async (room) => {
       room.messages.forEach((msg) => {
-        console.log("trying to hl", msg);
         msg.hld = this.highlightMsg(room.ID, msg.content);
       });
     });
@@ -308,7 +361,7 @@ export class Client {
       roomID = splitted_message[0].slice(1);
     }
     const [_, cmd, ...args] = splitted_message[i].split("|");
-    console.log("cmd:", cmd, "args:", args);
+    // console.log("cmd:", cmd, "args:", args);
     i++;
     let type = "",
       didType = false,
@@ -326,13 +379,19 @@ export class Client {
           console.warn("room not found (" + roomID + ")");
           return;
         }
-        const chatMessage = this.parseCMessage(
-          splitted_message[isGlobalOrLobby ? 0 : 1],
-        );
-        this.addMessageToRoom(roomID, chatMessage);
+        for (
+          let j = isGlobalOrLobby ? 0 : 1;
+          j < splitted_message.length;
+          j++
+        ) {
+          const chatMessage = this.parseCMessage(
+            splitted_message[j],
+            cmd === "c:",
+          );
+          this.addMessageToRoom(roomID, chatMessage);
+        }
         break;
       case "J": {
-        console.log("user joined room", roomID, args);
         let room = this.room(roomID);
         if (!room) {
           console.error(
@@ -341,11 +400,10 @@ export class Client {
           );
           return;
         }
-        room.addUser(new User({ name: args[0] }));
+        this.addUsers(roomID, [new User({ name: args[0] })]);
         break;
       }
       case "L": {
-        console.log("user left room", roomID, args);
         let room = this.room(roomID);
         if (!room) {
           console.error(
@@ -354,10 +412,34 @@ export class Client {
           );
           return;
         }
-        room.removeUser(args[0]);
+        this.removeUser(roomID, args[0]);
+        break;
       }
       case "N": {
+        break;
       }
+      case "queryresponse": {
+        if (args[0] === "userdetails") {
+          try {
+            const tmpjson = JSON.parse(args.slice(1).join("|"));
+            if (this.userListener) {
+              this.userListener(tmpjson);
+              this.userListener = undefined;
+            } else {
+              console.warn(
+                "received userdetails but nobody asked for it",
+                args,
+              );
+            }
+          } catch (e) {
+            console.error("Error parsing userdetails", args);
+          }
+        } else {
+          console.warn("Unknown queryresponse", args);
+        }
+        break;
+      }
+      // << |queryresponse|userdetails|{"id":"zestar75","userid":"zestar75","name":"zestar75","avatar":266,"group":" ","autoconfirmed":true,"rooms":{"@techcode":{},"@scholastic":{},"sports":{},"@twilightzone":{"isPrivate":true}},"friended":true}
       case "init":
         let users: User[] = [];
         for (; i < splitted_message.length; i++) { // start at 2 because first line is room id and second line is cmd
@@ -365,8 +447,8 @@ export class Client {
           if (!didType && splitted_message[i].startsWith("|init|")) {
             type = splitted_message[i].split("|")[2];
             if (type !== "chat" && type !== "battle") {
-              console.log(
-                "room type not supported (" + type + "), room id: " +
+              console.warn(
+                "Room type not supported (" + type + "), room id: " +
                   roomID,
               );
             }
@@ -401,8 +483,14 @@ export class Client {
             this.addUsers(roomID, users);
             continue;
           }
-          if (splitted_message[i].startsWith("|c:|")) {
-            const parsedMessage = this.parseCMessage(splitted_message[i]);
+          if (
+            splitted_message[i].startsWith("|c:|") ||
+            splitted_message[i].startsWith("|c|")
+          ) {
+            const parsedMessage = this.parseCMessage(
+              splitted_message[i],
+              splitted_message[i].startsWith("|c:|"),
+            );
             this.addMessageToRoom(roomID, parsedMessage);
           } else if (splitted_message[i].startsWith("|raw|")) {
             const [_, _2, ...data] = splitted_message[i].split("|");
@@ -415,8 +503,45 @@ export class Client {
                 content: data.join("|"),
               }),
             );
+          } else if (splitted_message[i].startsWith("|html|")) {
+            const [_, _2, ...data] = splitted_message[i].split("|");
+            this.addMessage(
+              roomID,
+              new Message({
+                timestamp,
+                user: "",
+                type: "raw",
+                content: data.join("|"),
+              }),
+            );
+          } else if (splitted_message[i].startsWith("|uhtml|")) {
+            const [_, _2, name, ...data] = splitted_message[i].split("|");
+            // TODO: Use the name
+            this.addMessage(
+              roomID,
+              new Message({
+                timestamp,
+                name,
+                user: "",
+                type: "raw",
+                content: data.join("|"),
+              }),
+            );
+          } else if (splitted_message[i].startsWith("|uhtmlchange|")) {
+            const room = this.room(roomID);
+            if (!room) {
+              console.error(
+                "Received |uhtmlchange| from untracked room",
+                roomID,
+              );
+              break;
+            }
+            room.changeUHTML(args[0], args.slice(1).join("|"));
+            this.events.dispatchEvent(
+              new CustomEvent("message", { detail: message }),
+            );
           } else {
-            console.log("unknown init message: " + splitted_message[i]);
+            console.warn("unknown init message: " + splitted_message[i]);
           }
         }
         break;
@@ -430,8 +555,8 @@ export class Client {
         break;
       case "updateuser":
         if (!args[0].trim().toLowerCase().startsWith("guest")) {
-          this.join(this.joinAfterLogin);
-          console.log("logged in as " + args[0]);
+          this.autojoin(this.joinAfterLogin);
+          console.log("Logged in as " + args[0]);
           this.loggedIn = true;
           this.setUsername(args[0]);
         }
@@ -440,28 +565,62 @@ export class Client {
         // leave room
         this._removeRoom(roomID);
         break;
+      case "uhtml":
+        // console.log("uhtml", args);
+        const uhtml = args.slice(1).join("|");
+        this.addMessage(
+          roomID,
+          new Message({
+            timestamp,
+            name: args[0],
+            user: "",
+            type: "raw",
+            content: uhtml,
+          }),
+        );
+        break;
+      case "uhtmlchange":
+        {
+          const room = this.room(roomID);
+          if (!room) {
+            console.error(
+              "Received |uhtmlchange| from untracked room",
+              roomID,
+            );
+            break;
+          }
+          room.changeUHTML(args[0], args.slice(1).join("|"));
+          this.events.dispatchEvent(
+            new CustomEvent("message", { detail: message }),
+          );
+        }
+        break;
       default:
-        console.log("unknown cmd: " + cmd);
+        console.warn("Unknown cmd: " + cmd);
     }
   }
 
-  private parseCMessage(message: string): Message {
+  private parseCMessage(message: string, hasTimestamp: boolean): Message {
     const splitted_message = message.split("|");
     let content;
     let type: "raw" | "chat" | "log" = "chat";
-    let [_, _2, msgTime, user, ...tmpcontent]: (string | undefined)[] =
-      splitted_message;
+    let _, _2, msgTime, user, tmpcontent: (string | undefined)[];
+    if (hasTimestamp) {
+      [_, _2, msgTime, user, ...tmpcontent] = splitted_message;
+    } else {
+      [_, _2, user, ...tmpcontent] = splitted_message;
+      msgTime = Math.floor(Date.now() / 1000).toString();
+    }
     content = tmpcontent.join("|");
     if (content.startsWith("/raw")) {
       type = "raw";
       content = content.slice(4);
-    } else if (splitted_message[3]?.startsWith("/log")) {
-      type = "log";
-      content = splitted_message[3].slice(4);
-      // msgTime = undefined;
-      msgTime = Math.floor(Date.now() / 1000).toString();
-    }
-    if (content.startsWith("/log")) {
+    } else if (content.startsWith("/uhtml")) {
+      let [name, ...html] = content.split(",");
+      // TODO: Use the name and parse uhtmlchange
+      type = "raw";
+      content = html.join(",");
+    } else if (content.startsWith("/log")) {
       type = "log";
       content = content.slice(4);
     }
@@ -474,15 +633,17 @@ export class Client {
   }
 
   private __setupSocketListeners() {
+    if (!this.socket) {
+      throw new Error("__setupSocketListeners: Socket not initialized");
+    }
     this.socket.onopen = () => {
-      console.log("socket connected");
       for (let cb of this.onOpen) {
         cb();
       }
       this.tryLogin();
     };
     this.socket.onmessage = (event) => {
-      console.log("msg:", event.data);
+      console.log("<<", event.data);
       this.parseSocketMsg(event.data);
     };
     this.socket.onerror = (event) => {

@@ -4,13 +4,15 @@ export class Message {
   user?: string;
   timestamp?: Date;
   hld?: boolean;
+  name?: string; // only defined for uhtml messages
   constructor(
-    { content, type, user, timestamp, hld = false }: {
+    { content, type, user, timestamp, hld = false, name }: {
       content: string;
       type: "chat" | "raw" | "log"
       user?: string;
       timestamp?: string;
       hld?: boolean 
+      name?: string
     },
   ) {
     this.content = content;
@@ -19,5 +21,6 @@ export class Message {
     // this.timestamp = timestamp ? new Date(timestamp) : undefined;
     if(timestamp) this.timestamp = new Date(Number(timestamp) * 1000);
     this.hld = hld;
+    this.name = name;
   }
 }

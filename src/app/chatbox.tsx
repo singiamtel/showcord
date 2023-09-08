@@ -41,7 +41,7 @@ export default function ChatBox() {
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!client || !room) return;
-    client.send(room, input);
+    client.send(input, room);
     setInput("");
   };
 
@@ -114,11 +114,12 @@ export default function ChatBox() {
           />
           <div className="flex flex-row">
             <TextareaAutosize
-              className="mr-5 ml-5 p-2 rounded-lg flex-grow bg-gray-375 text-white resize-none"
+              className="mr-5 ml-5 p-2 rounded-lg flex-grow bg-gray-375 text-white resize-none placeholder-gray-175"
               value={input}
               onChange={manageChanges}
               onKeyDown={manageKeybinds}
               ref={textAreaRef}
+              placeholder={`Message #${room}`}
             >
             </TextareaAutosize>
           </div>

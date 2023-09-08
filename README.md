@@ -2,7 +2,7 @@
 
 _Not quite PS, but not quite Discord either_
 
-The client is still in early development, but feel free to try it! [Website](https://ps-cord.vercel.app/)
+The client is still in early development, but feel free to try it! [Website](https://ps-cord.com/)
 
 Custom client for [Pokémon Showdown](play.pokemonshowdown.com) built in Next.js with a modern and user-friendly design
 

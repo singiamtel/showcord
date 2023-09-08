@@ -1,5 +1,8 @@
+import axios from "axios";
+import { toID } from "@/utils/generic";
+
 // Author: Felucia
-export function userColor(name) {
+function userColorHash(name) {
   let MD5 = function (f) {
     function i(b, c) {
       var d, e, f, g, h;
@@ -11,9 +14,7 @@ export function userColor(name) {
       return d & e
         ? h ^ 2147483648 ^ f ^ g
         : d | e
-        ? h & 1073741824
-          ? h ^ 3221225472 ^ f ^ g
-          : h ^ 1073741824 ^ f ^ g
+        ? h & 1073741824 ? h ^ 3221225472 ^ f ^ g : h ^ 1073741824 ^ f ^ g
         : h ^ f ^ g;
     }
 
@@ -41,10 +42,11 @@ export function userColor(name) {
       var c = "",
         e = "",
         d;
-      for (d = 0; d <= 3; d++)
+      for (d = 0; d <= 3; d++) {
         (e = (b >>> (d * 8)) & 255),
           (e = "0" + e.toString(16)),
           (c += e.substr(e.length - 2, 2));
+      }
       return c;
     }
     var g = [],
@@ -66,9 +68,9 @@ export function userColor(name) {
           d < 128
             ? (c += String.fromCharCode(d))
             : (d > 127 && d < 2048
-                ? (c += String.fromCharCode((d >> 6) | 192))
-                : ((c += String.fromCharCode((d >> 12) | 224)),
-                  (c += String.fromCharCode(((d >> 6) & 63) | 128))),
+              ? (c += String.fromCharCode((d >> 6) | 192))
+              : ((c += String.fromCharCode((d >> 12) | 224)),
+                (c += String.fromCharCode(((d >> 6) & 63) | 128))),
               (c += String.fromCharCode((d & 63) | 128)));
         }
         return c;
@@ -83,12 +85,12 @@ export function userColor(name) {
             g = 0,
             h = 0;
           h < d;
-
-        )
+        ) {
           (c = (h - (h % 4)) / 4),
             (g = (h % 4) * 8),
             (f[c] |= b.charCodeAt(h) << g),
             h++;
+        }
         f[(h - (h % 4)) / 4] |= 128 << ((h % 4) * 8);
         f[e - 2] = d << 3;
         f[e - 1] = d >>> 29;
@@ -98,7 +100,7 @@ export function userColor(name) {
     c = 4023233417;
     d = 2562383102;
     e = 271733878;
-    for (f = 0; f < g.length; f += 16)
+    for (f = 0; f < g.length; f += 16) {
       (o = b),
         (p = c),
         (q = d),
@@ -171,6 +173,7 @@ export function userColor(name) {
         (c = i(c, p)),
         (d = i(d, q)),
         (e = i(e, r));
+    }
     return (n(b) + n(c) + n(d) + n(e)).toLowerCase();
   };
   // This MD5 function was directly taken from the PS client source code.
@@ -322,4 +325,306 @@ export function userColor(name) {
     a += c[i].toString(16).toUpperCase();
   }
   return a;
+}
+
+export let loadedCustomColors = false
+export let customColors = {
+	'theimmortal': 'taco',
+	'bmelts': 'testmelts',
+	'jumpluff': 'zacchaeus',
+	'zacchaeus': 'jumpluff',
+	'kraw': 'kraw1',
+	'growlithe': 'steamroll',
+	'snowflakes': 'endedinariot',
+	'doomvendingmachine': 'theimmortal',
+	'mikel': 'mikkel',
+	'arcticblast': 'rsem',
+	'mjb': 'thefourthchaser',
+	'thefourthchaser': 'mjb',
+	'tfc': 'mjb',
+	'mikedecishere': 'mikedec3boobs',
+	'heartsonfire': 'haatsuonfaiyaa',
+	'royalty': 'wonder9',
+	'limi': 'azure2',
+	'ginganinja': 'piratesandninjas',
+	'aurora': 'c6n6fek',
+	'jdarden': 'danielcross',
+	'solace': 'amorlan',
+	'dcae': 'galvatron',
+	'queenofrandoms': 'hahaqor',
+	'jelandee': 'thejelandee',
+	'diatom': 'dledledlewhooop',
+	'texascloverleaf': 'aggronsmash',
+	'treecko': 'treecko56',
+	'violatic': 'violatic92',
+	'exeggutor': 'ironmanatee',
+	'ironmanatee': 'exeggutor',
+	'skylight': 'aerithass',
+	'nekonay': 'catbot20',
+	'coronis': 'kowonis',
+	'vaxter': 'anvaxter',
+	'mattl': 'mattl34',
+	'shaymin': 'test33',
+	'kayo': 'endedinariot',
+	'tgmd': 'greatmightydoom',
+	'vacate': 'vacatetest',
+	'bean': 'dragonbean',
+	'yunan': 'osiris13',
+	'politoed': 'brosb4hoohs',
+	'scotteh': 'nsyncluvr67',
+	'bumbadadabum': 'styrofoamboots',
+	'yuihirasawa': 'weeabookiller',
+	'monohearted': 'nighthearted',
+	'prem': 'erinanakiri',
+	'clefairy': 'fuckes',
+	'morfent': 'aaaa',
+	'crobat': 'supergaycrobat4',
+	'beowulf': '298789z7z',
+	'flippy': 'flippo',
+	'raoulsteve247': 'raoulbuildingpc',
+	'thedeceiver': 'colourtest011',
+	'darnell': 'ggggggg',
+	'shamethat': 'qpwkfklkjpskllj',
+	'aipom': 'wdsddsdadas',
+	'alter': 'spakling',
+	'biggie': 'aoedoedad',
+	'osiris': 'osiris12',
+	'azumarill': 'azumarill69',
+	'redew': 'redeww',
+	'sapphire': 'masquerains',
+	'calyxium': 'calyxium142',
+	'kiracookie': 'kracookie',
+	'blitz': 'hikaruhitachii',
+	'skitty': 'shckieei',
+	'sweep': 'jgjjfgdfg',
+	'panpawn': 'crowt',
+	'val': 'pleasegivemecolorr',
+	'valentine': 'pleasegivemecolorr',
+	'briayan': 'haxorusxi',
+	'xzern': 'mintycolors',
+	'shgeldz': 'cactusl00ver',
+	'abra': 'lunchawaits',
+	'maomiraen': 'aaaaaa',
+	'trickster': 'sunako',
+	'articuno': 'bluekitteh177',
+	'barton': 'hollywood15',
+	'zodiax': '5olanto4',
+	'ninetynine': 'blackkkk',
+	'kasumi': 'scooter4000',
+	'xylen': 'bloodyrevengebr',
+	'aelita': 'y34co3',
+	'fx': 'cm48ubpq',
+	'horyzhnz': 'superguy69',
+	'quarkz': 'quarkz345',
+	'fleurdyleurse': 'calvaryfishes',
+	'trinitrotoluene': '4qpr7pc5mb',
+	'yuno': 'qgadlu6g',
+	'austin': 'jkjkjkjkjkgdl',
+	'jinofthegale': 'cainvelasquez',
+	'waterbomb': 'naninan',
+	'starbloom': 'taigaaisaka',
+	'macle': 'flogged',
+	'ashiemore': 'poncp',
+	'charles': 'charlescarmichael',
+	'sigilyph': 'diving',
+	'spy': 'spydreigon',
+	'kinguu': 'dodmen',
+	'dodmen': 'kinguu',
+	'magnemite': 'dsfsdffs',
+	'ace': 'sigilyph143',
+	'leftiez': 'xxxxnbbhiojll',
+	'grim': 'grimoiregod',
+	'strength': '0v0tqpnu',
+	'honchkrow': 'nsyncluvr67',
+	'quote': '64z7i',
+	'snow': 'q21yzqgh',
+	'omegaxis': 'omegaxis14',
+	'paradise': 'rnxvzwpwtz',
+	'sailorcosmos': 'goldmedalpas',
+	'dontlose': 'dhcli22h',
+	'tatsumaki': 'developmentary',
+	'starry': 'starryblanket',
+	'imas': 'imas234',
+	'vexeniv': 'vexenx',
+	'ayanosredscarf': 'ezichqog',
+	'penquin': 'privatepenquin',
+	'mraldo': 'mraldopls',
+	'sawsbuck': 'deerling',
+	'litten': 'samurott',
+	'samurott': 'litten',
+	'lunala': 'lunalavioleif',
+	'wishes': 'unfixable',
+	'nerd': 'eee4444444',
+	'blaziken': 'knmfksdnf',
+	'andy': 'agkoemv',
+	'kris': 'likj9ajz',
+	'nv': 'larvitar',
+	'iyarito': '8f40n',
+	'paris': 'goojna',
+	'moo': 'soccerzxii',
+	'lyren': 'solarisfaux',
+	'tiksi': 'tikse',
+	'ev': 'eeveegeneral',
+	'chespin': 'd4ukzezn',
+	'halite': 'rosasite',
+	'thankyou': 'o5t9w5jl',
+	'wally': 'wallythebully',
+	'ant': 'nui',
+	'nui': 'ant',
+	'centiskorch': 'l99jh',
+	'ceteris': 'eprtiuly',
+	'om': 'omroom',
+	'roman': 'wt2sd0qh',
+	'maroon': 'rucbwbeg',
+	'lyd': 'ahdjfidnf',
+	'perry': 'mrperry',
+	'yogibears': 'bwahahahahahahahaha',
+	'tjay': 'teej19',
+	'explodingdaisies': '85kgt',
+	'flare': 'nsyncluvr67',
+	'tenshi': 'tenshinagae',
+	'pre': '0km',
+	'ransei': '54j7o',
+	'snaquaza': 'prrrrrrrrr',
+	'alpha': 'alphawittem',
+	'asheviere': '54hw4',
+	'taranteeeno': 'moondazingo',
+	'rage': 'hipfiregod',
+	'andrew': 'stevensnype',
+	'robyn': 'jediruwu',
+	'birdy': 'cmstrall',
+	'pirateprincess': '45mbh',
+	'tempering': 'tempho',
+	'chazm': 'chazmicsupanova',
+	'arsenal': '558ru',
+	'buffy': 'cvpux4zn',
+	'luigi': 'luifi',
+	'mitsuki': 'latiosred',
+	'faku': 'ifaku',
+	'pablo': 'arrested',
+	'facu': 'facundoooooooo',
+	'gimmick': 'gimm1ck',
+	'pichus': 'up1gat8f',
+	'pigeons': 'pigeonsvgc',
+	'clefable': '147x0',
+	'splash': 'mitsukokongou',
+	'talah': '2b',
+	'vexen': 'vexeniv',
+	'shuutsukiyama': 'spankmepikachu',
+	'blaz': 'blazask',
+	'annika': 'l07kxym4',
+	'tuthur': 'tuthur1',
+	'moutemoute': 'fjlelzmzp',
+	'mia': 'whgmpdku',
+	// alt of mia
+	'elisabetsobeck': '2sr28lp1',
+	'inactive': 'xfd6bys3',
+	'trace': 'mashirokurata',
+	'celine': 'celine13',
+	'hydro': '683tdwj6',
+	'pants': 'stnap',
+	'zap': 'zapcolor5',
+	'avarice': 'ava823',
+	'finch': 'finchinator',
+	'tpp': 'teampokepals',
+	'zarif': 'zariftest103',
+	'milak': 'rasbhari',
+	'dya': 'dyaaaaaaa',
+	'instruct': 'vgc24',
+	'jayi': 'prank',
+	'pujo': 'ballombre',
+	'blah': 'shubashubashub',
+	'sfg': 'saltyfrenchguy',
+	'sectonia': '6gv44c3w',
+	'awa': 'awanderingcaelum',
+	'vani': '6an2khng',
+	'duel': 'duelmex',
+	'lily': 'lilburr',
+	'ara': 'phoenixara',
+	'sakito': 'bysakito',
+	'dnb': 'onlyrandomstuff',
+	'niko': 'nikogoh',
+	'ophion': 'ophi0n',
+	'dflo': 'dragonflo',
+	'cleffa': 'momopono',
+	'skies': 'skiesjfk',
+	'empo': 'gsz9pvp6',
+	'devin': 'devwin',
+	'keys': 'dream',
+	'think': 'thinkerino',
+	'rosa': 'glyx',
+	'king': 'kingswordyt',
+	'ltg': 'loltrollgame',
+	'peary': 'hreybb',
+	'alex': '17ot7i28',
+	'zalm': 'vk0hw40x',
+	'swiffix': 'a7ms4bok',
+	'partman': '9tjak2hz',
+	'monkey': 'henka',
+	'soulwind': 'malahuju',
+	'eris': 'marjane',
+	'theia': 'nolnerd',
+	'litwick': 'nolnerd',
+	'grimm': 'grimmnightmare',
+	'violet': 'fi4li3t3',
+	'avery': 'ayvery',
+	'altthiel': 'rqj7oxwm',
+	'tranquilityy': 'axgwd',
+	'micoy': 'micoy21',
+	'pyro': 'loschunkos',
+	'clementine': '45xlimv0',
+	'boat': 'phiwings99',
+	'isaiah': 'menacing',
+	'ruby': 'woooooooooooooooo',
+	'kaede': 'kaedy',
+	'senko': 'emillight',
+	'towelie': 'alore',
+	'hisuianzoroark': 'supervillainx',
+	'mochi': 'bocchihitori',
+	'mex': 'megaeeveex',
+	'eli': '75hr8qhl',
+	'k': 'kennedy',
+	'importo': 'fcportoisthebest',
+	'rsb': 'rustysheriffbadge',
+	'rumia': 'akumajou',
+	'enrique': 'j3f2gdsz',
+	'kolohe2': 'sundrops',
+	'santiago': 'sevt',
+	'jakee': 'jayyke',
+	'pikachusean': 'ple8chwn',
+	'tranquility': 'axgwd',
+	'syrinix': 'blunix',
+	'talonflame': 'ut',
+	'neko': 'alotofnekos',
+	'siegfried': 'meistersiegfried',
+	'roxie': 'roxiee',
+	'aigis': 'narukami',
+	'mimejr': 'h9o4q4jg',
+	'beauts': 'platinna',
+	'ducky': 'mudkipbowl',
+	'zee': 'zeefable',
+	'sulo': 'suloxiv',
+	'shiloh': 'oic9lxkq',
+	'cathy': '' //{color: '#ff5cb6'}
+};
+
+export async function loadCustomColors() {
+  try{
+  const res = await axios.get(
+    "https://play.pokemonshowdown.com/config/colors.json",
+    {
+      withCredentials: false,
+      timeout: 5000,
+    },
+  );
+  Object.assign(customColors, res.data);
+  loadedCustomColors = true;
+  }
+  catch(e){
+    console.error("Couldn't fetch custom colours:", e)
+  }
+}
+
+export function userColor(name) {
+  return userColorHash(customColors[toID(name)] || toID(name));
 }

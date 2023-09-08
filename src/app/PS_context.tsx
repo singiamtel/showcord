@@ -1,7 +1,9 @@
 "use client";
 import { Client } from "@/client/client";
 import { Message } from "@/client/message";
+import { Notification } from "@/client/notifications";
 import { Room } from "@/client/room";
+import { loadCustomColors } from "@/utils/namecolour";
 import dotenv from "dotenv";
 import { createContext, useCallback, useEffect, useState } from "react";
 dotenv.config();
@@ -18,6 +20,7 @@ export const PS_context = createContext<
     messages: Message[];
     user?: string; // Will be an object with user info
     rooms: Room[];
+    notifications: Notification[];
   }
 >({
   client: null,
@@ -30,6 +33,7 @@ export const PS_context = createContext<
   messages: [],
   user: undefined,
   rooms: [],
+  notifications: [],
 });
 
 export default function PS_contextProvider(props: any) {
@@ -38,6 +42,7 @@ export default function PS_contextProvider(props: any) {
   const [selectedPage, setSelectedPage] = useState<string | null>(null);
   const [selectedPageType, setSelectedPageType] = useState<'room' | 'user'>('room')
   const [rooms, setRooms] = useState<Room[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [update, setUpdate] = useState<number>(0); // Used to force update on rooms change
   const [previousRooms, setPreviousRooms] = useState<string[]>([]);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -81,7 +86,7 @@ export default function PS_contextProvider(props: any) {
     if (!client) {
       return;
     }
-    setRooms(client.rooms);
+    setRooms(Array.from(client.rooms).map(e => e[1]));
   }, [client, update]);
 
   useEffect(() => {
@@ -94,11 +99,11 @@ export default function PS_contextProvider(props: any) {
       if (roomID) {
         // We don't switch to the room if it's in the settings as it probably means we're doing the initial join
         // console.log("settings", await client.settings.getSavedRooms());
-        const rooms = await client.settings.getSavedRooms()
-        if (!rooms.includes(roomID)) {
+        const rooms = await client.settings.getSavedRooms();
+        if (rooms && !rooms.map((e) => e.ID).includes(roomID)) {
           setRoom(roomID);
         }
-        else if (selectedPageType === 'room' && !selectedPage){
+        else if (selectedPageType === 'room' && !selectedPage) {
           // Well okay, but only once
           setRoom(roomID);
         }
@@ -107,9 +112,9 @@ export default function PS_contextProvider(props: any) {
 
     const removedEventListener = () => {
       setUpdate(update + 1);
-      if (client.rooms.length > 0) {
+      if (client.rooms.size > 0) {
         if (selectedPageType === 'room' && (!selectedPage || !client.room(selectedPage))) {
-          setRoom(client.rooms[0].ID);
+          setRoom(client.rooms.values().next().value.ID);
         }
       }
     };
@@ -130,7 +135,6 @@ export default function PS_contextProvider(props: any) {
       if (selectedPageType === 'room' && selectedPage && !client.room(selectedPage)) {
         const lastRoom = previousRooms[previousRooms.length - 2];
         if (lastRoom) {
-          console.log("setting room to lastRoom", lastRoom);
           setRoom(lastRoom);
         }
       }
@@ -139,7 +143,7 @@ export default function PS_contextProvider(props: any) {
 
   useEffect(() => {
     if (!client) return;
-    client.join(client.settings.rooms, true);
+    client.autojoin(client.settings.rooms.map((e) => e.ID));
     // client.login({username, password});
   }, [client]);
 
@@ -154,7 +158,7 @@ export default function PS_contextProvider(props: any) {
       return;
     }
     const msgs = client[selectedPageType](selectedPage)?.messages ?? [];
-    console.log("msgs", msgs.length);
+    setNotifications(client.getNotifications()); // Manage notifications
     setMessages(msgs);
   }, [client, selectedPage, selectedPageType]);
 
@@ -183,19 +187,21 @@ export default function PS_contextProvider(props: any) {
   /* --- End message handling --- */
 
   useEffect(() => {
-    const client = new Client();
-    client.onOpen.push(() => {
-      setClient(client);
-    });
-    client.events.addEventListener("login", (username) => {
-      console.log("logged in as", username);
-      setUser((username as CustomEvent).detail);
-    });
+    // TODO: This logic should clearly be in the client (issue #9)
+    const init = async () => {
+      await loadCustomColors();
+      console.log("loaded custom colors");
+      const client = new Client();
+      client.onOpen.push(() => {
+        setClient(client);
+      });
 
-    client.events.addEventListener("login", (username) => {
-      console.log("logged in as", username);
-      setUser((username as CustomEvent).detail);
-    });
+      client.events.addEventListener("login", (username) => {
+        console.log("logged in as", username);
+        setUser((username as CustomEvent).detail);
+      });
+    };
+    init();
   }, []);
 
   // Try to recover on socket death
@@ -222,6 +228,7 @@ export default function PS_contextProvider(props: any) {
         user,
         messages,
         rooms,
+        notifications,
       }}
     >
       {props.children}
