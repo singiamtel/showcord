@@ -287,13 +287,13 @@ export class Client {
         new CustomEvent("message", { detail: message }),
       );
       return;
-    } else {console.warn(
-        "addMessage: room (" + room_id + ") is unknown. Message:",
-        message,
-      );}
-    // else if(retry){
-    // setTimeout(() => this.addMessage(room_id, message, false), 1000);
-    // }
+    } else if (retry) {
+      setTimeout(() => this.addMessage(room_id, message, false), 1000);
+    }
+    console.warn(
+      "addMessage: room (" + room_id + ") is unknown. Message:",
+      message,
+    );
   }
 
   private addUsers(room_id: string, users: User[]) {
@@ -569,15 +569,18 @@ export class Client {
         );
         break;
       case "uhtmlchange":
-        const room = this.room(roomID);
-        if (!room) {
-          console.error(
-            "Received |uhtmlchange| from untracked room",
-            roomID,
-          );
-          break;
+        {
+          const room = this.room(roomID);
+          if (!room) {
+            console.error(
+              "Received |uhtmlchange| from untracked room",
+              roomID,
+            );
+            break;
+          }
+          room.changeUHTML(args[0], args.slice(1).join("|"));
         }
-        room.changeUHTML(args[0], args.slice(1).join("|"));
+        break;
       default:
         console.warn("Unknown cmd: " + cmd);
     }
