@@ -89,9 +89,12 @@ export default function HTML({ message }: any) {
       "button",
       "summary",
       "small",
+      "details",
+      "video",
     ],
     allowedAttributes: {
       "img": ["src", "height", "width"],
+      "video": ["src", "height", "width", "controls"],
       "button": ["value"],
       "a": ["href"],
       "*": ["style"],
