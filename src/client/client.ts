@@ -84,6 +84,14 @@ export class Client {
     }
   }
 
+  async autojoin(rooms: string[]){
+    if (!this.socket) {
+      throw new Error("Auto-joining rooms before socket initialization ");
+    }
+    if(!rooms) return
+    this.socket.send(`|/autojoin ${rooms.join(",")}`);
+  }
+
   private highlightMsg(roomid: string, message: string) {
     if (
       this.cleanUsername && (message.includes(this.cleanUsername) ||
@@ -515,6 +523,7 @@ export class Client {
               roomID,
               new Message({
                 timestamp,
+                name,
                 user: "",
                 type: "raw",
                 content: data.join("|"),
@@ -530,6 +539,9 @@ export class Client {
               break;
             }
             room.changeUHTML(args[0], args.slice(1).join("|"));
+            this.events.dispatchEvent(
+              new CustomEvent("message", { detail: message }),
+            );
           } else {
             console.warn("unknown init message: " + splitted_message[i]);
           }
@@ -545,7 +557,7 @@ export class Client {
         break;
       case "updateuser":
         if (!args[0].trim().toLowerCase().startsWith("guest")) {
-          this.join(this.joinAfterLogin);
+          this.autojoin(this.joinAfterLogin);
           console.log("Logged in as " + args[0]);
           this.loggedIn = true;
           this.setUsername(args[0]);
@@ -562,6 +574,7 @@ export class Client {
           roomID,
           new Message({
             timestamp,
+            name: args[0],
             user: "",
             type: "raw",
             content: uhtml,
@@ -579,6 +592,9 @@ export class Client {
             break;
           }
           room.changeUHTML(args[0], args.slice(1).join("|"));
+          this.events.dispatchEvent(
+            new CustomEvent("message", { detail: message }),
+          );
         }
         break;
       default:

@@ -132,7 +132,7 @@ export default function PS_contextProvider(props: any) {
 
   useEffect(() => {
     if (!client) return;
-    client.join(client.settings.rooms.map((e) => e.ID), true);
+    client.autojoin(client.settings.rooms.map((e) => e.ID));
     // client.login({username, password});
   }, [client]);
 

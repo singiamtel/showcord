@@ -53,7 +53,7 @@ export class Room {
     const message = this.messages.find((m) => m.name === name);
     if (!message) {
       console.error(
-        `changeUHTML(): Tried to change non-existent uhtml message ${name}`,
+        `changeUHTML(): Tried to change non-existent uhtml message ${name} for room ${this.name}`,
       );
       return;
     }
