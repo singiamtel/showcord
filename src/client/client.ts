@@ -65,17 +65,10 @@ export class Client {
     this.userListener = callback;
   }
 
-  async join(rooms: string | string[], useDefaultRooms = false) {
+  async join(rooms: string | string[]) {
     if (!this.socket) {
       throw new Error("Joining room(s) before socket initialization " + rooms);
     }
-    if (useDefaultRooms && (!rooms || rooms.length === 0)) {
-      for (let room of this.settings.defaultRooms) {
-        this.socket.send(`|/join ${room}`);
-      }
-      return;
-    }
-
     if (typeof rooms === "string") {
       this.socket.send(`|/join ${rooms}`);
     } else {
@@ -85,11 +78,18 @@ export class Client {
     }
   }
 
-  async autojoin(rooms: string[]){
+  async autojoin(rooms: string[], useDefaultRooms = false) {
     if (!this.socket) {
       throw new Error("Auto-joining rooms before socket initialization ");
     }
-    if(!rooms) return
+    if (useDefaultRooms && (!rooms || rooms.length === 0)) {
+      for (let room of this.settings.defaultRooms) {
+        this.socket.send(`|/join ${room}`);
+      }
+      return;
+    }
+
+    if (!rooms) return;
     this.socket.send(`|/autojoin ${rooms.join(",")}`);
   }
 
@@ -193,13 +193,16 @@ export class Client {
       await this.send_assertion(assertion);
       return;
     } else {
-      if (!await this.refreshToken()) {
-        console.error("Couldn't refresh token");
-        return;
-      }
-      const assertion = await this.assertionFromToken(this.challstr);
-      if (assertion) {
-        await this.send_assertion(assertion);
+      const token = await localforage.getItem("ps-token");
+      if (token && token !== "undefined") {
+        if (!await this.refreshToken()) {
+          console.error("Couldn't refresh token");
+          return;
+        }
+        const assertion = await this.assertionFromToken(this.challstr);
+        if (assertion) {
+          await this.send_assertion(assertion);
+        }
       }
     }
   }
