@@ -20,6 +20,7 @@
     "eslint-config-next": "13.4.12",
     "highlight.js": "^11.8.0",
     "html-react-parser": "^4.2.1",
+    "linkify-html": "^4.1.1",
     "linkify-react": "^4.1.1",
     "linkifyjs": "^4.1.1",
     "localforage": "^1.10.0",

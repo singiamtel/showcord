@@ -70,5 +70,8 @@ module.exports = {
     "px-4",
     "rounded",
     "whitespace-pre-wrap",
+    "bg-gray-700",
+    "text-gray-700",
+    "hover:text-white",
   ],
 };
