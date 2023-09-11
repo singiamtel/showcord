@@ -123,7 +123,7 @@ const encloseInTag = (
 };
 
 export function FormatMsgDisplay(
-  { msg, recursed = false }: { msg: string; recursed: boolean },
+  { msg, recursed = false }: { msg: string; recursed?: boolean },
 ) {
   if (!msg) return <>{msg}</>;
   const jsxElements = [];
