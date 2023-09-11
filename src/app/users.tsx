@@ -19,7 +19,6 @@ export default function Users() {
   useEffect(() => {
     if (!client) return;
     const refreshUsers = () => {
-      console.log("refreshing users");
       if (!room) return;
       const selectedRoom = client?.room(room);
       if (!selectedRoom) {
@@ -30,7 +29,6 @@ export default function Users() {
 
     refreshUsers();
     client.events.addEventListener("users", refreshUsers);
-    console.log("added event listener");
     return () => {
       client.events.removeEventListener("users", refreshUsers);
     };

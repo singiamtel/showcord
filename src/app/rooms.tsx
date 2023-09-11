@@ -33,7 +33,6 @@ export function RoomComponent(
   },
 ) {
   const { setRoom, selectedPage: room } = useContext(PS_context);
-  console.log("mentions", mentions);
   return (
     <div className={"relative flex flex-row hover:bg-gray-350 " +(
           ID === room
