@@ -69,7 +69,7 @@ const elements = {
   superscript: { pattern: /\^\^(.+?)\^\^/g, element: superscript },
   subscript: { pattern: /\\\\(.+?)\\\\/g, element: subscript },
   link: { pattern: /\[\[(.+?)?\]\]/g, element: link },
-  greentext: { pattern: />.*/g, element: greentext },
+  greentext: { pattern: /^\>.*/g, element: greentext },
 } as const;
 
 const cleanTag = (input: string, tag: keyof typeof elements) => {
@@ -98,7 +98,7 @@ const cleanTag = (input: string, tag: keyof typeof elements) => {
   }
 };
 
-let deepKey = 0
+let deepKey = 0;
 const encloseInTag = (
   input: string,
   tag: keyof typeof elements,
@@ -107,10 +107,14 @@ const encloseInTag = (
   elements[tag].pattern.lastIndex = 0;
   const matches = elements[tag].pattern.exec(input);
   if (matches) {
+    console.log(`tag ${tag} matched ${input}`);
     return {
       length: matches[0].length,
       element: elements[tag].element({
-        children: FormatMsgDisplay({ msg: cleanTag(matches[0], tag) }),
+        children: FormatMsgDisplay({
+          msg: cleanTag(matches[0], tag),
+          recursed: true,
+        }),
         key: deepKey++,
       }),
     };
@@ -118,7 +122,9 @@ const encloseInTag = (
   return false;
 };
 
-export function FormatMsgDisplay({ msg }: { msg: string }) {
+export function FormatMsgDisplay(
+  { msg, recursed = false }: { msg: string; recursed: boolean },
+) {
   if (!msg) return <>{msg}</>;
   const jsxElements = [];
   let currentString = "";
@@ -126,13 +132,29 @@ export function FormatMsgDisplay({ msg }: { msg: string }) {
     const char = msg[i];
     if (char in tokens) {
       const tag = tokens[char as keyof typeof tokens];
+      if (char === ">" && i !== 0) {
+        currentString += char;
+        continue;
+      }
       const result = encloseInTag(msg.slice(i), tag);
       if (result) {
         i += result.length - 1;
         if (currentString) {
-          jsxElements.push(<Fragment key={deepKey++}>currentString</Fragment>);
+          console.log("currentString", currentString, "recursed", recursed);
+          if (recursed) {
+            jsxElements.push(
+              <Fragment key={deepKey++}>{currentString}</Fragment>,
+            );
+          } else {
+            jsxElements.push(
+              <Linkify options={options} key={deepKey++}>
+                {currentString}
+              </Linkify>,
+            );
+          }
           currentString = "";
         }
+        console.log("result", result.element);
         jsxElements.push(result.element);
       } else {
         currentString += msg[i];
@@ -142,9 +164,19 @@ export function FormatMsgDisplay({ msg }: { msg: string }) {
     }
   }
   if (currentString) {
-    jsxElements.push(<Fragment key={deepKey++}>{currentString}</Fragment>);
+    if (recursed) {
+      jsxElements.push(
+        <Fragment key={deepKey++}>{currentString}</Fragment>,
+      );
+    } else {
+      jsxElements.push(
+        <Linkify options={options} key={deepKey++}>
+          {currentString}
+        </Linkify>,
+      );
+    }
   }
-  return <Linkify options={options}>{jsxElements}</Linkify>;
+  return <>{jsxElements}</>;
 }
 
 export default function Chat() {

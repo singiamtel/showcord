@@ -28,19 +28,18 @@ const options = {
   },
 };
 
+
 export function inlineCode(
   props: ExtendedProps,
 ) {
   const key = props.key;
   delete props.key;
   return (
-    <Linkify
-      as="code"
+    <code
       className={"text-gray-300 font-mono bg-gray-600 rounded p-0.5 " +
         roboto_mono.className}
       {...props}
       key={key}
-      options={options}
     />
   );
 }
@@ -74,7 +73,7 @@ export function italic(
 ) {
   const key = props.key;
   delete props.key;
-  return <Linkify as="em" {...props} key={key} options={options} />;
+  return <Linkify as="em" {...props} key={key} />;
 }
 
 export function strikethrough(
@@ -82,7 +81,7 @@ export function strikethrough(
 ) {
   const key = props.key;
   delete props.key;
-  return <Linkify as="s" {...props} key={key} options={options} />;
+  return <Linkify as="s" {...props} key={key} />;
 }
 
 export function superscript(
@@ -90,7 +89,7 @@ export function superscript(
 ) {
   const key = props.key;
   delete props.key;
-  return <Linkify as="sup" {...props} key={key} options={options} />;
+  return <Linkify as="sup" {...props} key={key} />;
 }
 
 export function subscript(
@@ -98,7 +97,7 @@ export function subscript(
 ) {
   const key = props.key;
   delete props.key;
-  return <Linkify as="sub" {...props} key={key} options={options} />;
+  return <Linkify as="sub" {...props} key={key} />;
 }
 
 export function link(
