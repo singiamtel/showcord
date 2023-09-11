@@ -412,10 +412,10 @@ export class Client {
           const receiver = toID(args[1]);
           if(sender === toID(this.username)) {
             // sent message
-            roomID = toID(receiver);
+            roomID = `pm-${receiver}`
           } else {
             // received message
-            roomID = toID(sender);
+            roomID = `pm-${sender}`
           }
           const content = args.slice(2).join("|");
           const room = this.room(roomID);
