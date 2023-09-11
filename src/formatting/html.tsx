@@ -14,7 +14,7 @@ export default function HTML({ message }: any) {
   //   "HTMLparsed",
   //   parse(sanitizeHtml(message, sanitizeOptions), parserOptions),
   // );
-  const { client, selectedRoom } = useContext(PS_context);
+  const { client, selectedPage } = useContext(PS_context);
   const parserOptions = {
     replace: (domNode: any) => {
       const { attribs, children } = domNode;
@@ -38,7 +38,7 @@ export default function HTML({ message }: any) {
         return (
           <button
             onClick={() => {
-              client?.send(attribs.value, selectedRoom || "");
+              client?.send(attribs.value, selectedPage || "");
             }}
             className="bg-blue-100 hover:bg-blue-400 text-white font-bold p-1 m-1 rounded text-sm"
             data-parsed="true"

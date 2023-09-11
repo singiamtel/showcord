@@ -9,7 +9,7 @@ export type Users = {
 };
 
 export default function Users() {
-  const { selectedRoom: room, client } = useContext(PS_context);
+  const { selectedPage: room, client } = useContext(PS_context);
   const [users, setUsers] = useState<Users[]>([]);
 
   const onClick = () => {

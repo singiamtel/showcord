@@ -4,7 +4,7 @@ import { User } from "./user";
 export class Room {
   ID: string;
   name: string;
-  type: "chat" | "battle";
+  type: "chat" | "battle" | "pm";
   messages: Message[] = [];
   users: User[] = [];
   unread = 0;
@@ -13,7 +13,7 @@ export class Room {
   private messageLimit = 600;
 
   constructor(
-    { ID, name, type }: { ID: string; name: string; type: "chat" | "battle" },
+    { ID, name, type }: { ID: string; name: string; type: "chat" | "battle" | "pm" },
   ) {
     this.ID = ID;
     this.name = name;
