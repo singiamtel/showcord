@@ -32,7 +32,7 @@ export function RoomComponent(
     notifications: { unread: number; mentions: number };
   },
 ) {
-  const { setRoom, selectedRoom: room } = useContext(PS_context);
+  const { setRoom, selectedPage: room } = useContext(PS_context);
   console.log("mentions", mentions);
   return (
     <div className={"relative flex flex-row hover:bg-gray-350 " +(

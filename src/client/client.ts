@@ -34,8 +34,21 @@ export class Client {
         `Sending message before socket initialization ${room} ${message}`,
       );
     }
-    console.log(`>>${room}|${message}`);
-    this.socket.send(`${room || ""}|${message}`);
+    if (!room) {
+      message = `|${message}`;
+    } else {
+      const roomObj = this.room(room);
+      if (roomObj) {
+        if (roomObj.type === "pm") {
+          message = `|/pm ${roomObj.name}, ${message}`;
+        } else {
+          message = `${roomObj.ID}|${message}`;
+        }
+      }
+    }
+
+    console.log(`>>${message}`);
+    this.socket.send(`${message}`);
   }
 
   room(room_id: string) {
@@ -86,11 +99,11 @@ export class Client {
     }
   }
 
-  async autojoin(rooms: string[]){
+  async autojoin(rooms: string[]) {
     if (!this.socket) {
       throw new Error("Auto-joining rooms before socket initialization ");
     }
-    if(!rooms) return
+    if (!rooms) return;
     this.socket.send(`|/autojoin ${rooms.join(",")}`);
   }
 
@@ -298,10 +311,10 @@ export class Client {
       );
       return;
     } else if (retry) {
-      setTimeout(() => this.addMessage(room_id, message, false), 1000);
+      setTimeout(() => this.addMessageToRoom(room_id, message, false), 1000);
     }
     console.warn(
-      "addMessage: room (" + room_id + ") is unknown. Message:",
+      "addMessageToRoom: room (" + room_id + ") is unknown. Message:",
       message,
     );
   }
@@ -364,7 +377,6 @@ export class Client {
     // console.log("cmd:", cmd, "args:", args);
     i++;
     let type = "",
-      didType = false,
       name = "",
       didName = false,
       timestamp: string | undefined = "",
@@ -372,8 +384,7 @@ export class Client {
       room = null;
     switch (cmd) {
       case "c":
-      case "c:":
-        // th
+      case "c:": {
         room = this.room(roomID);
         if (!room) {
           console.warn("room not found (" + roomID + ")");
@@ -389,6 +400,40 @@ export class Client {
             cmd === "c:",
           );
           this.addMessageToRoom(roomID, chatMessage);
+        }
+        break;
+      }
+      case "pm":
+        {
+          const sender = toID(args[0]);
+          const receiver = toID(args[1]);
+          if(sender === toID(this.username)) {
+            // sent message
+            roomID = toID(receiver);
+          } else {
+            // received message
+            roomID = toID(sender);
+          }
+          const content = args.slice(2).join("|");
+          const room = this.room(roomID);
+          if (!room) {
+            this._addRoom(
+              new Room({
+                ID: toID(args[0]),
+                name: roomID,
+                type: "pm",
+              }),
+            );
+          }
+          this.addMessageToRoom(
+            roomID,
+            new Message({
+              timestamp,
+              user: args[0],
+              type: "chat",
+              content,
+            }),
+          );
         }
         break;
       case "J": {
@@ -442,19 +487,9 @@ export class Client {
       // << |queryresponse|userdetails|{"id":"zestar75","userid":"zestar75","name":"zestar75","avatar":266,"group":" ","autoconfirmed":true,"rooms":{"@techcode":{},"@scholastic":{},"sports":{},"@twilightzone":{"isPrivate":true}},"friended":true}
       case "init":
         let users: User[] = [];
+        type = args[0];
         for (; i < splitted_message.length; i++) { // start at 2 because first line is room id and second line is cmd
           if (splitted_message[i] === "") continue;
-          if (!didType && splitted_message[i].startsWith("|init|")) {
-            type = splitted_message[i].split("|")[2];
-            if (type !== "chat" && type !== "battle") {
-              console.warn(
-                "Room type not supported (" + type + "), room id: " +
-                  roomID,
-              );
-            }
-            didType = true;
-            continue;
-          }
           if (!didName && splitted_message[i].startsWith("|title|")) {
             name = splitted_message[i].slice(7);
             didName = true;
@@ -505,7 +540,7 @@ export class Client {
             );
           } else if (splitted_message[i].startsWith("|html|")) {
             const [_, _2, ...data] = splitted_message[i].split("|");
-            this.addMessage(
+            this.addMessageToRoom(
               roomID,
               new Message({
                 timestamp,
@@ -517,7 +552,7 @@ export class Client {
           } else if (splitted_message[i].startsWith("|uhtml|")) {
             const [_, _2, name, ...data] = splitted_message[i].split("|");
             // TODO: Use the name
-            this.addMessage(
+            this.addMessageToRoom(
               roomID,
               new Message({
                 timestamp,
@@ -568,7 +603,7 @@ export class Client {
       case "uhtml":
         // console.log("uhtml", args);
         const uhtml = args.slice(1).join("|");
-        this.addMessage(
+        this.addMessageToRoom(
           roomID,
           new Message({
             timestamp,

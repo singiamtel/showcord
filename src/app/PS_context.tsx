@@ -14,9 +14,9 @@ export const PS_context = createContext<
     selectedPage: string | null;
     selectedPageType: 'user' | 'room',
     setRoom: (room: string | 1 | -1) => void;
-    selectedDM: string | null;
-    setDM: (user: string | 1 | -1) => void;
-    setPage: (type: 'user' | 'room', value: string) => void;
+    // selectedDM: string | null;
+    // setDM: (user: string | 1 | -1) => void;
+    // setPage: (type: 'user' | 'room', value: string) => void;
     messages: Message[];
     user?: string; // Will be an object with user info
     rooms: Room[];
@@ -27,9 +27,9 @@ export const PS_context = createContext<
   selectedPage: null,
   selectedPageType: 'room',
   setRoom: () => {},
-  selectedDM: null,
-  setDM: () => {},
-  setPage: () => {},
+  // selectedDM: null,
+  // setDM: () => {},
+  // setPage: () => {},
   messages: [],
   user: undefined,
   rooms: [],
@@ -157,16 +157,16 @@ export default function PS_contextProvider(props: any) {
     if (!selectedPage) {
       return;
     }
-    const msgs = client[selectedPageType](selectedPage)?.messages ?? [];
+    const msgs = client.room(selectedPage)?.messages ?? [];
     setNotifications(client.getNotifications()); // Manage notifications
     setMessages(msgs);
-  }, [client, selectedPage, selectedPageType]);
+  }, [client, selectedPage]);
 
   useEffect(() => {
     if (!client) return;
     if (!selectedPage) return;
 
-  setMessages(client[selectedPageType](selectedPage)?.messages ?? []);
+  setMessages(client.room(selectedPage)?.messages ?? []);
 
     const eventListener = () => {
       setUpdateMsgs(updateMsgs + 1);

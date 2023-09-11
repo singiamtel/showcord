@@ -22,7 +22,7 @@ import manageURL from "@/utils/manageURL";
 import useClickOutside from "@/utils/useClickOutside";
 
 export default function Chat() {
-  const { messages, client, selectedRoom } = useContext(PS_context);
+  const { messages, client, selectedPage } = useContext(PS_context);
   const messagesEndRef = createRef<HTMLDivElement>();
   const isIntersecting = useOnScreen(messagesEndRef);
   const [user, setUser] = useState<any | null>(null);
@@ -46,7 +46,7 @@ export default function Chat() {
 
   useEffect(() => {
     setUser(null);
-  }, [selectedRoom]);
+  }, [selectedPage]);
 
   useEffect(() => {
     if (isIntersecting) {
