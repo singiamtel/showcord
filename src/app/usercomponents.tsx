@@ -9,10 +9,11 @@ export const roboto_mono = Roboto_Mono({
 })
 
 export function UsernameComponent(
-  { user, alignRight, onClick }: {
+  { user, alignRight, onClick, colon }: {
     user: string;
     alignRight?: boolean;
     onClick?: MouseEventHandler<HTMLAnchorElement>;
+    colon?: boolean;
   },
 ) {
   const rank = user.charAt(0);
@@ -24,7 +25,7 @@ export function UsernameComponent(
       </span>
       <a onClick={onClick} style={onClick && { cursor: "pointer" } }>
         <span style={{ color: userColor(user) }} className="font-bold " data-message='true'>
-          {user.slice(1)}
+          {user.slice(1)}{colon && ":"}
         </span>
       </a>
     </>
