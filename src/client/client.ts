@@ -422,8 +422,8 @@ export class Client {
           if (!room) {
             this._addRoom(
               new Room({
-                ID: toID(args[0]),
-                name: roomID,
+                ID: roomID,
+                name: sender === toID(this.username) ? args[1] : args[0],
                 type: "pm",
               }),
             );
@@ -431,7 +431,7 @@ export class Client {
           this.addMessageToRoom(
             roomID,
             new Message({
-              timestamp,
+              timestamp: Math.floor(Date.now() / 1000).toString(),
               user: args[0],
               type: "chat",
               content,
