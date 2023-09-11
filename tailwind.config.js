@@ -40,6 +40,9 @@ module.exports = {
       red: {
         400: "#F54343",
       },
+      green: {
+        400: "#96F04A",
+      }
     },
     fontFamily: {
       sans: ["Inter", "sans-serif"],
@@ -73,5 +76,6 @@ module.exports = {
     "bg-gray-700",
     "text-gray-700",
     "hover:text-white",
+    "text-green-400",
   ],
 };
