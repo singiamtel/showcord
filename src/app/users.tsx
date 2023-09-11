@@ -3,14 +3,11 @@ import { useContext } from "react";
 import { PS_context } from "./PS_context";
 import { useEffect, useState } from "react";
 import { UsernameComponent } from "./usercomponents";
-
-export type Users = {
-  name: string;
-};
+import { User } from "@/client/user";
 
 export default function Users() {
   const { selectedPage: room, client } = useContext(PS_context);
-  const [users, setUsers] = useState<Users[]>([]);
+  const [users, setUsers] = useState<User[]>([]);
 
   const onClick = () => {
     console.log("clicked");
@@ -38,7 +35,7 @@ export default function Users() {
     <div className="bg-gray-600 h-full p-2 overflow-y-scroll">
       {users.map((user, index) => (
         <div key={index}>
-          <UsernameComponent user={user.name} alignRight onClick={onClick} />
+          <UsernameComponent user={user.name} alignRight onClick={onClick} idle={user.status === '!'} />
         </div>
       ))}
     </div>

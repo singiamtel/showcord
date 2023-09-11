@@ -272,6 +272,7 @@ export function MessageComponent(
           user={user}
           onClick={(e) => onNameClick && onNameClick(e)}
           colon
+          bold
         />
         {/* https://linkify.js.org/docs/linkify-react.html#custom-link-components */}
         &nbsp;<FormatMsgDisplay msg={message} />

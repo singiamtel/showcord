@@ -8,12 +8,15 @@ export const roboto_mono = Roboto_Mono({
   display: 'swap',
 })
 
+const auth = new Set(['&', '#', '@', '§', '%'])
 export function UsernameComponent(
-  { user, alignRight, onClick, colon }: {
+  { user, alignRight, onClick, colon, idle, bold }: {
     user: string;
+    idle?: boolean;
     alignRight?: boolean;
     onClick?: MouseEventHandler<HTMLAnchorElement>;
     colon?: boolean;
+    bold?: boolean;
   },
 ) {
   const rank = user.charAt(0);
@@ -24,7 +27,7 @@ export function UsernameComponent(
         {rankDisplay}
       </span>
       <a onClick={onClick} style={onClick && { cursor: "pointer" } }>
-        <span style={{ color: userColor(user) }} className="font-bold " data-message='true'>
+        <span style={{ color: idle? '#888888' :  userColor(user) }} className={ bold || auth.has(rank) ? "font-bold " : ''} data-message='true'>
           {user.slice(1)}{colon && ":"}
         </span>
       </a>
