@@ -106,7 +106,6 @@ const encloseInTag = (
   // Find the closing tag if it exists
   elements[tag].pattern.lastIndex = 0;
   const matches = elements[tag].pattern.exec(input);
-  console.log('encloseInTag', input, tag, matches)
   if (matches) {
     return {
       length: matches[0].length,
