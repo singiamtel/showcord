@@ -1,6 +1,7 @@
 import { roboto_mono } from "@/app/usercomponents";
 import Linkify from "linkify-react";
 import { HTMLAttributes } from "react";
+import manageURL from "@/utils/manageURL";
 
 // ``code here`` marks inline code
 // ||text|| are spoilers
@@ -18,6 +19,15 @@ interface ExtendedProps extends HTMLAttributes<HTMLSpanElement> {
   key?: number;
 }
 
+const options = {
+  defaultProtocol: "https",
+  target: "_blank",
+  attributes: {
+    onClick: manageURL,
+    className: "text-blue-500 underline cursor-pointer",
+  },
+};
+
 export function inlineCode(
   props: ExtendedProps,
 ) {
@@ -30,6 +40,7 @@ export function inlineCode(
         roboto_mono.className}
       {...props}
       key={key}
+      options={options}
     />
   );
 }
@@ -45,6 +56,7 @@ export function spoiler(
       className="bg-gray-700 text-gray-700 p-0.5 rounded hover:text-white"
       {...props}
       key={key}
+      options={options}
     />
   );
 }
@@ -54,7 +66,7 @@ export function bold(
 ) {
   const key = props.key;
   delete props.key;
-  return <Linkify as="strong" {...props} key={key} />;
+  return <Linkify as="strong" {...props} key={key} options={options} />;
 }
 
 export function italic(
@@ -62,7 +74,7 @@ export function italic(
 ) {
   const key = props.key;
   delete props.key;
-  return <Linkify as="em" {...props} key={key} />;
+  return <Linkify as="em" {...props} key={key} options={options} />;
 }
 
 export function strikethrough(
@@ -70,7 +82,7 @@ export function strikethrough(
 ) {
   const key = props.key;
   delete props.key;
-  return <Linkify as="s" {...props} key={key} />;
+  return <Linkify as="s" {...props} key={key} options={options} />;
 }
 
 export function superscript(
@@ -78,7 +90,7 @@ export function superscript(
 ) {
   const key = props.key;
   delete props.key;
-  return <Linkify as="sup" {...props} key={key} />;
+  return <Linkify as="sup" {...props} key={key} options={options} />;
 }
 
 export function subscript(
@@ -86,7 +98,7 @@ export function subscript(
 ) {
   const key = props.key;
   delete props.key;
-  return <Linkify as="sub" {...props} key={key} />;
+  return <Linkify as="sub" {...props} key={key} options={options} />;
 }
 
 export function link(

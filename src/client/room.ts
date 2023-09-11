@@ -28,7 +28,9 @@ export class Room {
       this.messages.shift();
     }
     if (selected) {
-      this.lastReadTime = new Date();
+      const date = new Date()
+      date.setSeconds(date.getSeconds() + 1) // Some margin of error
+      this.lastReadTime = date;
     }
     if (
       message.type === "chat" && !selfSent && message.timestamp &&

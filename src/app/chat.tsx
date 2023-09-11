@@ -145,7 +145,7 @@ export function FormatMsgDisplay({ msg }: { msg: string }) {
   if (currentString) {
     jsxElements.push(<Fragment key={deepKey++}>{currentString}</Fragment>);
   }
-  return <>{jsxElements}</>;
+  return <Linkify options={options}>{jsxElements}</Linkify>;
 }
 
 export default function Chat() {
