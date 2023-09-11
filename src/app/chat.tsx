@@ -254,6 +254,7 @@ export default function Chat() {
   );
 }
 
+/* https://linkify.js.org/docs/linkify-react.html#custom-link-components */
 const options = {
   defaultProtocol: "https",
   target: "_blank",
@@ -306,13 +307,8 @@ export function MessageComponent(
           colon
           bold
         />
-        {/* https://linkify.js.org/docs/linkify-react.html#custom-link-components */}
         &nbsp;<FormatMsgDisplay msg={message} />
       </span>
     </div>
   );
-
-  // <Linkify options={options}>
-  // &nbsp;{message}
-  // </Linkify>
 }
