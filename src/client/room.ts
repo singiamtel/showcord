@@ -4,16 +4,17 @@ import { User } from "./user";
 export class Room {
   ID: string;
   name: string;
-  type: "chat" | "battle" | "pm";
+  type: "chat" | "battle" | "pm" | "permanent"
   messages: Message[] = [];
   users: User[] = [];
   unread = 0;
   lastReadTime: Date = new Date();
   mentions = 0;
   private messageLimit = 600;
+  icon?: JSX.Element;
 
   constructor(
-    { ID, name, type }: { ID: string; name: string; type: "chat" | "battle" | "pm" },
+    { ID, name, type }: { ID: string; name: string; type: "chat" | "battle" | "pm" | "permanent" },
   ) {
     this.ID = ID;
     this.name = name;
@@ -49,6 +50,16 @@ export class Room {
   }
   removeUser(username: string) {
     this.users = this.users.filter((u) => u.name !== username);
+  }
+
+  addUHTML(message: Message,
+    { selected, selfSent }: { selected: boolean; selfSent: boolean },
+  ) {
+    const previousMessage = this.messages.find((m) => m.name === message.name);
+    if (previousMessage) {
+      this.messages.splice(this.messages.indexOf(previousMessage), 1);
+    }
+    this.addMessage(message, { selected, selfSent });
   }
 
   changeUHTML(name: string, html: string) {

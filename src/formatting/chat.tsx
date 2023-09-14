@@ -36,7 +36,7 @@ export function inlineCode(
   delete props.key;
   return (
     <code
-      className={"text-gray-300 font-mono bg-gray-600 rounded p-0.5 " +
+      className={"text-gray-300 font-mono bg-gray-600 rounded p-1 " +
         roboto_mono.className}
       {...props}
       key={key}

@@ -39,7 +39,7 @@ export const PS_context = createContext<
 export default function PS_contextProvider(props: any) {
   const [client, setClient] = useState<Client | null>(null);
   const [user, setUser] = useState<string | undefined>();
-  const [selectedPage, setSelectedPage] = useState<string | null>(null);
+  const [selectedPage, setSelectedPage] = useState<string | null>('home');
   const [selectedPageType, setSelectedPageType] = useState<'room' | 'user'>('room')
   const [rooms, setRooms] = useState<Room[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -195,7 +195,6 @@ export default function PS_contextProvider(props: any) {
       client.onOpen.push(() => {
         setClient(client);
       });
-
       client.events.addEventListener("login", (username) => {
         console.log("logged in as", username);
         setUser((username as CustomEvent).detail);

@@ -8,9 +8,10 @@ import "allotment/dist/style.css";
 
 export default function Sidebar() {
   const { rooms } = useContext(PS_context);
-  const [chatRooms, pmRooms] = [
+  const [chatRooms, pmRooms, permanentRooms] = [
     rooms.filter((e) => e.type === "chat"),
     rooms.filter((e) => e.type === "pm"),
+    rooms.filter((e) => e.type === "permanent"),
   ];
 
   useEffect(() => {
@@ -18,14 +19,21 @@ export default function Sidebar() {
   }, [rooms]);
 
   return (
-    <div className="bg-gray-600 h-screen flex flex-col justify-between">
-      {/** big fat text */}
-      <div className="text-center p-2 text-white font-bold text-lg h-16">
+    <div className="w-auto bg-gray-600 h-screen flex flex-col justify-between">
+      <div className="text-center mr-2 ml-2 p-2 text-white font-bold text-lg h-16 whitespace-nowrap">
         Pokémon Showdown!
       </div>
-      <div className="flex-grow overflow-scroll">
-        <Allotment vertical minSize={100}>
-          <div>
+      <div className="flex flex-grow">
+        <Allotment vertical minSize={100} className="">
+          <div >
+            {permanentRooms.map((room, idx) => (
+              <RoomComponent
+                key={idx}
+                name={room.name}
+                ID={room.ID}
+                notifications={{ unread: room.unread, mentions: room.mentions }}
+              />
+            ))}
             {chatRooms.map((room, idx) => (
               <RoomComponent
                 key={idx}

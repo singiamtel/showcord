@@ -91,6 +91,7 @@ export default function HTML({ message }: any) {
       "small",
       "details",
       "video",
+      "marquee",
     ],
     allowedAttributes: {
       "img": ["src", "height", "width"],

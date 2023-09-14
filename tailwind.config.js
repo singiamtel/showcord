@@ -16,6 +16,7 @@ module.exports = {
         200: "#404EED",
         300: "#05A8FC",
         400: "#4752C4",
+        pastel: "#E1E8FF",
       },
       gray: {
         100: "#F6F6F6",
@@ -39,8 +40,10 @@ module.exports = {
       },
       red: {
         400: "#F54343",
+        pastel: "#F8D7DA",
       },
       green: {
+        pastel: "#D4EDDA",
         400: "#96F04A",
       }
     },

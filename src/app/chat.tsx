@@ -217,7 +217,7 @@ export default function Chat() {
     // setIsOutside(null);
     setUsername(username);
     setPosition({ x: e.clientX, y: e.clientY });
-    client?.getUser(username, (user: any) => {
+    client?.queryUser(username, (user: any) => {
       setUser(user);
     });
   };

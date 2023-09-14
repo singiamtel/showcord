@@ -5,6 +5,7 @@ import { Room } from "./room";
 import { User } from "./user";
 import localforage from "localforage";
 import { Notification } from "./notifications";
+import { filter } from "lodash";
 
 export class Client {
   socket: WebSocket | undefined;
@@ -17,13 +18,30 @@ export class Client {
   username: string = "";
   loggedIn: boolean = false;
   settings: Settings = new Settings();
-  onOpen: (() => void)[] = []; // Append stuff here to run when the socket opens
+  onOpen: (() => void)[] = []; // Append callbacks here to run when the socket opens
   private joinAfterLogin: string[] = [];
+
+  // For highlighting
   private cleanUsername: string = "";
+
+  // Used for notifications
   private selectedRoom: string = "";
-  private userListener: ((json: any) => any) | undefined; // Returns the JSON
+
+  // callbacks given to query commands, it's called after the server responds back with the info
+  private userListener: ((json: any) => any) | undefined;
+  private roomListener: ((json: any) => any) | undefined;
+
+  // Client-side only rooms, joined automatically
+  private permanentRooms = [{
+    ID: "home",
+    name: "Home",
+  }];
+
+  // Server response to /cmd rooms
+  private roomsJSON: any = undefined;
 
   constructor() {
+    this.__createPermanentRooms();
     this.socket = new WebSocket(this.server_url);
     this.__setupSocketListeners();
   }
@@ -60,7 +78,6 @@ export class Client {
   selectRoom(roomid: string) {
     this.selectedRoom = roomid;
     this.room(roomid)?.select();
-    console.log("select room", this.rooms);
     this.settings.changeRooms(this.rooms);
   }
 
@@ -68,15 +85,23 @@ export class Client {
     if (!this.socket) {
       throw new Error("Leaving room before socket initialization " + room_id);
     }
-    this.socket.send(`|/leave ${room_id}`);
+    this.send(`/leave ${room_id}`, false);
   }
 
-  async getUser(user: string, callback: (json: any) => void) {
+  async queryUser(user: string, callback: (json: any) => void) {
     if (!this.socket) {
       throw new Error("Getting user before socket initialization " + user);
     }
-    this.socket.send(`|/cmd userdetails ${user}`);
+    this.send(`/cmd userdetails ${user}`, false);
     this.userListener = callback;
+  }
+
+  async queryRooms(callback: (json: any) => void) {
+    if (!this.socket) {
+      throw new Error("Getting /cmd rooms before socket initialization");
+    }
+    this.send(`/cmd rooms`, false);
+    this.roomListener = callback;
   }
 
   async join(rooms: string | string[]) {
@@ -84,10 +109,10 @@ export class Client {
       throw new Error("Joining room(s) before socket initialization " + rooms);
     }
     if (typeof rooms === "string") {
-      this.socket.send(`|/join ${rooms}`);
+      this.send(`/join ${rooms}`, false);
     } else {
       for (let room of rooms) {
-        this.socket.send(`|/join ${room}`);
+        this.send(`/join ${room}`, false);
       }
     }
   }
@@ -96,15 +121,20 @@ export class Client {
     if (!this.socket) {
       throw new Error("Auto-joining rooms before socket initialization ");
     }
-    if (useDefaultRooms && (!rooms || rooms.length === 0)) {
+    const filteredRooms = rooms.filter((e) =>
+      !this.permanentRooms.map((e) => e.ID).includes(e)
+    );
+    if (useDefaultRooms && (!filteredRooms || filteredRooms.length === 0)) {
       for (let room of this.settings.defaultRooms) {
-        this.socket.send(`|/join ${room}`);
+        this.send(`/join ${room}`, false);
       }
       return;
     }
-
-    if (!rooms) return;
-    this.socket.send(`|/autojoin ${rooms.join(",")}`);
+    if (!filteredRooms.length) return;
+    this.send(
+      `/autojoin ${filteredRooms.join(",")}`,
+      false,
+    );
   }
 
   private highlightMsg(roomid: string, message: string) {
@@ -166,9 +196,9 @@ export class Client {
           }
           const token = url.searchParams.get("token");
           if (token) {
-            await localforage.setItem(
+            localStorage.setItem(
               "ps-token",
-              url.searchParams.get("token"),
+              url.searchParams.get("token") || 'notoken',
             );
           }
           nWindow.close();
@@ -198,7 +228,7 @@ export class Client {
       await this.send_assertion(assertion);
       const token = urlParams.get("token");
       if (token) {
-        await localforage.setItem("ps-token", token);
+        localStorage.setItem("ps-token", token);
       }
       return;
     } else if (
@@ -207,7 +237,7 @@ export class Client {
       await this.send_assertion(assertion);
       return;
     } else {
-      const token = await localforage.getItem("ps-token");
+      const token = localStorage.getItem("ps-token");
       if (token && token !== "undefined") {
         if (!await this.refreshToken()) {
           console.error("Couldn't refresh token");
@@ -249,7 +279,7 @@ export class Client {
   }
 
   private async assertionFromToken(challstr: string): Promise<string | false> {
-    const token = await localforage.getItem("ps-token");
+    const token = localStorage.getItem("ps-token");
     if (!token || token === "undefined") {
       console.log("no token");
       return false;
@@ -260,9 +290,8 @@ export class Client {
     return await this.parseLoginserverResponse(response);
   }
 
-  // TODO: Actually use this
   private async refreshToken() {
-    const token = await localforage.getItem("ps-token");
+    const token = localStorage.getItem("ps-token");
     if (!token || token === "undefined") {
       console.log("no token");
       return false;
@@ -273,7 +302,7 @@ export class Client {
       );
       const result = await this.parseLoginserverResponse(response);
       console.log("refreshed token", result);
-      if (result) await localforage.setItem("ps-token", result);
+      if (result) localStorage.setItem("ps-token", result);
       return result;
     } catch (e) {
       console.error(e);
@@ -410,12 +439,12 @@ export class Client {
         {
           const sender = toID(args[0]);
           const receiver = toID(args[1]);
-          if(sender === toID(this.username)) {
+          if (sender === toID(this.username)) {
             // sent message
-            roomID = `pm-${receiver}`
+            roomID = `pm-${receiver}`;
           } else {
             // received message
-            roomID = `pm-${sender}`
+            roomID = `pm-${sender}`;
           }
           const content = args.slice(2).join("|");
           const room = this.room(roomID);
@@ -475,12 +504,27 @@ export class Client {
               this.userListener = undefined;
             } else {
               console.warn(
-                "received userdetails but nobody asked for it",
+                "received queryresponse|userdetails but nobody asked for it",
                 args,
               );
             }
           } catch (e) {
             console.error("Error parsing userdetails", args);
+          }
+        } else if (args[0] === "rooms") {
+          try {
+            const tmpjson = JSON.parse(args.slice(1).join("|"));
+            if (this.roomListener) {
+              this.roomListener(tmpjson);
+              this.roomListener = undefined;
+            } else {
+              console.warn(
+                "received queryresponse|rooms but nobody asked for it",
+                args,
+              );
+            }
+          } catch (e) {
+            console.error("Error parsing roomsdetails", args);
           }
         } else {
           console.warn("Unknown queryresponse", args);
@@ -555,8 +599,16 @@ export class Client {
           } else if (splitted_message[i].startsWith("|uhtml|")) {
             const [_, _2, name, ...data] = splitted_message[i].split("|");
             // TODO: Use the name
-            this.addMessageToRoom(
-              roomID,
+
+            const room = this.room(roomID);
+            if (!room) {
+              console.error(
+                "Received |uhtmlchange| from untracked room",
+                roomID,
+              );
+              break;
+            }
+            room.addUHTML(
               new Message({
                 timestamp,
                 name,
@@ -564,6 +616,10 @@ export class Client {
                 type: "raw",
                 content: data.join("|"),
               }),
+              {
+                selected: this.selectedRoom === roomID,
+                selfSent: false,
+              },
             );
           } else if (splitted_message[i].startsWith("|uhtmlchange|")) {
             const room = this.room(roomID);
@@ -605,17 +661,27 @@ export class Client {
         break;
       case "uhtml":
         // console.log("uhtml", args);
-        const uhtml = args.slice(1).join("|");
-        this.addMessageToRoom(
-          roomID,
-          new Message({
-            timestamp,
-            name: args[0],
-            user: "",
-            type: "raw",
-            content: uhtml,
-          }),
-        );
+        {
+          const uhtml = args.slice(1).join("|");
+          const room = this.room(roomID);
+          if (!room) {
+            console.error("Received |uhtml| from untracked room", roomID);
+            return;
+          }
+          room.addUHTML(
+            new Message({
+              timestamp,
+              name,
+              user: "",
+              type: "raw",
+              content: uhtml,
+            }),
+            {
+              selected: this.selectedRoom === roomID,
+              selfSent: false,
+            },
+          );
+        }
         break;
       case "uhtmlchange":
         {
@@ -690,5 +756,17 @@ export class Client {
     this.socket.onclose = (_) => {
       this.events.dispatchEvent(new CustomEvent("disconnect"));
     };
+  }
+
+  private __createPermanentRooms() {
+    this.permanentRooms.forEach((room) => {
+      this._addRoom(
+        new Room({
+          ID: room.ID,
+          name: room.name,
+          type: "permanent",
+        }),
+      );
+    });
   }
 }
