@@ -26,17 +26,17 @@ export function RoomComponent(
       )}
       {/** Room name */}
       <button
-        className={"rounded p-1 flex flex-row basis-full items-center  w-auto h-auto mr-2 ml-2 "}
+        className={"rounded p-1 flex flex-row basis-full items-center  h-auto mr-2 ml-2 "}
         onClick={() => setRoom(ID)}
       >
         <HashtagIcon height={16} width={16} />
-        <span className="text-left ml-2 w-full">
-          {name}
+        <span className="text-left ml-2 max-w-full truncate">
+          <span className="truncate max-w-full">{name}</span>
         {unread > 0 && <span className="ml-2 text-gray-500">[{unread}]</span>}
         </span>
       {mentions > 0 &&
         (
-          <span className="text-white flex justify-center items-center mr-1">
+          <span className="text-white flex justify-center items-center ml-2 mr-1">
             <Circle>{mentions}</Circle>
           </span>
         )}
