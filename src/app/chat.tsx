@@ -107,7 +107,6 @@ const encloseInTag = (
   elements[tag].pattern.lastIndex = 0;
   const matches = elements[tag].pattern.exec(input);
   if (matches) {
-    console.log(`tag ${tag} matched ${input}`);
     return {
       length: matches[0].length,
       element: elements[tag].element({
@@ -140,7 +139,6 @@ export function FormatMsgDisplay(
       if (result) {
         i += result.length - 1;
         if (currentString) {
-          console.log("currentString", currentString, "recursed", recursed);
           if (recursed) {
             jsxElements.push(
               <Fragment key={deepKey++}>{currentString}</Fragment>,
@@ -154,7 +152,6 @@ export function FormatMsgDisplay(
           }
           currentString = "";
         }
-        console.log("result", result.element);
         jsxElements.push(result.element);
       } else {
         currentString += msg[i];
