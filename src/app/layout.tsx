@@ -1,8 +1,6 @@
 "use client";
 import "./globals.css";
 import { Inter } from "next/font/google";
-import PS_contextProvider from "./PS_context";
-import ToastProvider from "./ToastProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
