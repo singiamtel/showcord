@@ -32,7 +32,7 @@ export default function Users() {
   }, [client, room]);
 
   return (
-    <div className="bg-gray-600 h-full p-2 overflow-y-scroll">
+    <div className="bg-gray-600 w-full h-full p-2 overflow-y-scroll">
       {users.map((user, index) => (
         <div key={index}>
           <UsernameComponent user={user.name} alignRight onClick={onClick} idle={user.status === '!'} />

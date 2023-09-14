@@ -45,7 +45,7 @@ module.exports = {
       green: {
         pastel: "#D4EDDA",
         400: "#96F04A",
-      }
+      },
     },
     fontFamily: {
       sans: ["Inter", "sans-serif"],

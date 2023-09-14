@@ -14,6 +14,7 @@ import MiniSearch, { SearchResult } from "minisearch";
 import TextareaAutosize from "react-textarea-autosize";
 import { PS_context } from "./PS_context";
 import cmds from "@/commands/chat_commands";
+import { text } from "stream/consumers";
 
 type SearchBoxOffset = {
   width: number;
@@ -103,6 +104,18 @@ export default function ChatBox() {
     textAreaRef.current?.focus();
   }, [room]);
 
+  useEffect(() => {
+    const focus = () => {
+      textAreaRef.current?.focus();
+    };
+    focus();
+    window.addEventListener("focus", focus);
+    return () => {
+      window.removeEventListener("focus", focus);
+    };
+  }, []);
+
+
   return (
     <>
       <div className="w-full">
@@ -119,7 +132,7 @@ export default function ChatBox() {
               onChange={manageChanges}
               onKeyDown={manageKeybinds}
               ref={textAreaRef}
-              placeholder={`Message #${room}`}
+              placeholder={`Message ${room ? client?.room(room)?.name.trim() : ""}`}
             >
             </TextareaAutosize>
           </div>

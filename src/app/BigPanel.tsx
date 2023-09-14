@@ -11,13 +11,11 @@ export default function BigPanel() {
   const roomType = rooms?.find((r) => r.ID === room)?.type;
   if (!room) return null;
   if (roomType === "permanent") {
-    return (
-      <MainPage/>
-    );
+    return <MainPage />;
   }
   return (
-    <>
-      <div className="bg-gray-300 flex flex-col">
+    <div className="flex w-full">
+      <div className={"bg-gray-300 flex flex-col " + "w-full"}>
         <div className="h-[90%] max-h-[90%] flex-grow flex-shrink min-h-0">
           <Messages />
         </div>
@@ -26,10 +24,11 @@ export default function BigPanel() {
         </div>
       </div>
 
-      <div className="w-1/6 flex-grow">
-        <Users />
-      </div>
-      <div id="modal-root"></div>
-    </>
+      {roomType === "pm" ? null : (
+        <div className="w-64">
+          <Users />
+        </div>
+      )}
+    </div>
   );
 }

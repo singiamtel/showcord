@@ -8,11 +8,14 @@ import dotenv from "dotenv";
 import { createContext, useCallback, useEffect, useState } from "react";
 dotenv.config();
 
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 export const PS_context = createContext<
   {
     client: Client | null;
     selectedPage: string | null;
-    selectedPageType: 'user' | 'room',
+    selectedPageType: "user" | "room";
     setRoom: (room: string | 1 | -1) => void;
     // selectedDM: string | null;
     // setDM: (user: string | 1 | -1) => void;
@@ -25,7 +28,7 @@ export const PS_context = createContext<
 >({
   client: null,
   selectedPage: null,
-  selectedPageType: 'room',
+  selectedPageType: "room",
   setRoom: () => {},
   // selectedDM: null,
   // setDM: () => {},
@@ -39,8 +42,10 @@ export const PS_context = createContext<
 export default function PS_contextProvider(props: any) {
   const [client, setClient] = useState<Client | null>(null);
   const [user, setUser] = useState<string | undefined>();
-  const [selectedPage, setSelectedPage] = useState<string | null>('home');
-  const [selectedPageType, setSelectedPageType] = useState<'room' | 'user'>('room')
+  const [selectedPage, setSelectedPage] = useState<string | null>("home");
+  const [selectedPageType, setSelectedPageType] = useState<"room" | "user">(
+    "room",
+  );
   const [rooms, setRooms] = useState<Room[]>([]);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [update, setUpdate] = useState<number>(0); // Used to force update on rooms change
@@ -79,14 +84,14 @@ export default function PS_contextProvider(props: any) {
     } else {
       console.log("Trying to set room that does not exist (" + room + ")");
     }
-    setSelectedPageType('room');
-  }, [client, rooms, selectedPage, selectedPageType, previousRooms]);
+    setSelectedPageType("room");
+  }, [client, rooms, selectedPage, previousRooms]);
 
   useEffect(() => {
     if (!client) {
       return;
     }
-    setRooms(Array.from(client.rooms).map(e => e[1]));
+    setRooms(Array.from(client.rooms).map((e) => e[1]));
   }, [client, update]);
 
   useEffect(() => {
@@ -102,8 +107,7 @@ export default function PS_contextProvider(props: any) {
         const rooms = await client.settings.getSavedRooms();
         if (rooms && !rooms.map((e) => e.ID).includes(roomID)) {
           setRoom(roomID);
-        }
-        else if (selectedPageType === 'room' && !selectedPage) {
+        } else if (selectedPageType === "room" && !selectedPage) {
           // Well okay, but only once
           setRoom(roomID);
         }
@@ -113,26 +117,50 @@ export default function PS_contextProvider(props: any) {
     const removedEventListener = () => {
       setUpdate(update + 1);
       if (client.rooms.size > 0) {
-        if (selectedPageType === 'room' && (!selectedPage || !client.room(selectedPage))) {
+        if (
+          selectedPageType === "room" &&
+          (!selectedPage || !client.room(selectedPage))
+        ) {
           setRoom(client.rooms.values().next().value.ID);
         }
       }
     };
 
+    const globalErrorListener = (e: Event) => {
+      const error = (e as CustomEvent).detail;
+      console.warn("Received error from socket", error);
+      if (error) {
+        toast.error(error);
+      }
+    };
+
     client.events.addEventListener("room", newEventListener);
     client.events.addEventListener("leaveroom", removedEventListener);
+    client.events.addEventListener("error", globalErrorListener);
 
     return () => {
       client.events.removeEventListener("room", newEventListener);
       client.events.removeEventListener("leaveroom", removedEventListener);
+      client.events.removeEventListener("error", globalErrorListener);
     };
-  }, [client, setRooms, selectedPage, selectedPageType, setRoom, update, setUpdate]);
+  }, [
+    client,
+    setRooms,
+    selectedPage,
+    selectedPageType,
+    setRoom,
+    update,
+    setUpdate,
+  ]);
 
   useEffect(() => {
     if (!client) return;
     client.events.addEventListener("leaveroom", (_) => {
       // if the current room was deleted, go to the last room
-      if (selectedPageType === 'room' && selectedPage && !client.room(selectedPage)) {
+      if (
+        selectedPageType === "room" && selectedPage &&
+        !client.room(selectedPage)
+      ) {
         const lastRoom = previousRooms[previousRooms.length - 2];
         if (lastRoom) {
           setRoom(lastRoom);
@@ -166,7 +194,7 @@ export default function PS_contextProvider(props: any) {
     if (!client) return;
     if (!selectedPage) return;
 
-  setMessages(client.room(selectedPage)?.messages ?? []);
+    setMessages(client.room(selectedPage)?.messages ?? []);
 
     const eventListener = () => {
       setUpdateMsgs(updateMsgs + 1);
@@ -178,7 +206,14 @@ export default function PS_contextProvider(props: any) {
       // Clean up the event listener when the component unmounts
       client.events.removeEventListener("message", eventListener);
     };
-  }, [client, selectedPage, selectedPageType, setMessages, handleMsgEvent, updateMsgs]);
+  }, [
+    client,
+    selectedPage,
+    selectedPageType,
+    setMessages,
+    handleMsgEvent,
+    updateMsgs,
+  ]);
 
   useEffect(() => {
     handleMsgEvent(setMessages);

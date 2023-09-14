@@ -1,13 +1,17 @@
 import Sidebar from "./sidebar";
-import Users from "./users";
 import BigPanel from "./BigPanel";
+import ToastProvider from "./ToastProvider";
+import PS_contextProvider from "./PS_context";
 
 export default function Home() {
   return (
     <div className="h-full flex bg-gray-300 w-full">
-      {/* JSX comment*/}
-      <Sidebar />
-      <BigPanel />
+      <PS_contextProvider>
+        <ToastProvider>
+          <Sidebar />
+          <BigPanel />
+        </ToastProvider>
+      </PS_contextProvider>
     </div>
   );
 }

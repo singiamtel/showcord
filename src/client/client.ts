@@ -3,9 +3,7 @@ import { toID } from "@/utils/generic";
 import { Message } from "./message";
 import { Room } from "./room";
 import { User } from "./user";
-import localforage from "localforage";
 import { Notification } from "./notifications";
-import { filter } from "lodash";
 
 export class Client {
   socket: WebSocket | undefined;
@@ -645,6 +643,11 @@ export class Client {
         // |noinit|namerequired|The room 'botdevelopment' does not exist or requires a login to join
         if (args[0] === "namerequired") {
           this.joinAfterLogin.push(roomID);
+        }
+        else if (args[0] === "nonexistent") {
+          this.events.dispatchEvent(
+          new CustomEvent("error", { detail: args[1] }),
+          )
         }
         break;
       case "updateuser":

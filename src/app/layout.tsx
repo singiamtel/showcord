@@ -2,6 +2,7 @@
 import "./globals.css";
 import { Inter } from "next/font/google";
 import PS_contextProvider from "./PS_context";
+import ToastProvider from "./ToastProvider";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,9 +22,7 @@ export default function RootLayout({
           referrerPolicy="no-referrer"
         />
       </head>
-      <PS_contextProvider>
-        <body className={inter.className + " h-full"}>{children}</body>
-      </PS_contextProvider>
+          <body className={inter.className + " h-full"}>{children}</body>
     </html>
   );
 }
