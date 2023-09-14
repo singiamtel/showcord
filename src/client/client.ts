@@ -67,9 +67,9 @@ export class Client {
     this.socket.send(`${message}`);
   }
 
-  room(room_id: string) {
+  room(roomID: string) {
     // rooms is a map
-    return this.rooms.get(room_id);
+    return this.rooms.get(roomID);
   }
 
   // Used to remove highlights and mentions
@@ -79,11 +79,11 @@ export class Client {
     this.settings.changeRooms(this.rooms);
   }
 
-  leaveRoom(room_id: string) {
+  leaveRoom(roomID: string) {
     if (!this.socket) {
-      throw new Error("Leaving room before socket initialization " + room_id);
+      throw new Error("Leaving room before socket initialization " + roomID);
     }
-    this.send(`/leave ${room_id}`, false);
+    this.send(`/leave ${roomID}`, false);
   }
 
   async queryUser(user: string, callback: (json: any) => void) {
@@ -316,24 +316,24 @@ export class Client {
     this.settings.changeRooms(this.rooms);
   }
 
-  private _removeRoom(room_id: string) {
-    this.rooms.delete(room_id);
-    const eventio = new CustomEvent("leaveroom", { detail: room_id });
+  private _removeRoom(roomID: string) {
+    this.rooms.delete(roomID);
+    const eventio = new CustomEvent("leaveroom", { detail: roomID });
     this.events.dispatchEvent(eventio);
     this.settings.changeRooms(this.rooms);
   }
 
-  private addMessageToRoom(room_id: string, message: Message, retry = true) {
-    const room = this.room(room_id);
+  private addMessageToRoom(roomID: string, message: Message, retry = true) {
+    const room = this.room(roomID);
     if (
       toID(message.user) !== toID(this.username) &&
-      this.highlightMsg(room_id, message.content)
+      this.highlightMsg(roomID, message.content)
     ) {
       message.hld = true;
     }
     if (room) {
       room.addMessage(message, {
-        selected: this.selectedRoom === room_id,
+        selected: this.selectedRoom === roomID,
         selfSent: toID(this.username) === toID(message.user),
       });
       this.events.dispatchEvent(
@@ -341,32 +341,42 @@ export class Client {
       );
       return;
     } else if (retry) {
-      setTimeout(() => this.addMessageToRoom(room_id, message, false), 1000);
+      setTimeout(() => this.addMessageToRoom(roomID, message, false), 1000);
     }
     console.warn(
-      "addMessageToRoom: room (" + room_id + ") is unknown. Message:",
+      "addMessageToRoom: room (" + roomID + ") is unknown. Message:",
       message,
     );
   }
 
-  private addUsers(room_id: string, users: User[]) {
-    const room = this.room(room_id);
+  private addUsers(roomID: string, users: User[]) {
+    const room = this.room(roomID);
     if (room) {
       room.addUsers(users);
       this.events.dispatchEvent(new CustomEvent("users", { detail: users }));
       return;
     }
-    console.warn("addUsers: room (" + room_id + ") is unknown. Users:", users);
+    console.warn("addUsers: room (" + roomID + ") is unknown. Users:", users);
   }
 
-  private removeUser(room_id: string, user: string) {
-    const room = this.room(room_id);
+  private removeUser(roomID: string, user: string) {
+    const room = this.room(roomID);
     if (room) {
       room.removeUser(user);
       this.events.dispatchEvent(new CustomEvent("users", { detail: user }));
       return;
     }
-    console.warn("removeUsers: room (" + room_id + ") is unknown");
+    console.warn("removeUsers: room (" + roomID + ") is unknown");
+  }
+
+  private updateUsername(roomID: string, newName: string, userID: string){
+    const room = this.room(roomID);
+    if (room) {
+      room.updateUsername(newName, userID)
+      this.events.dispatchEvent(new CustomEvent("users", { detail: newName }));
+      return;
+    }
+    console.warn("updateUsersUsers: room (" + roomID + ") is unknown");
   }
 
   private setUsername(username: string) {
@@ -475,7 +485,7 @@ export class Client {
           );
           return;
         }
-        this.addUsers(roomID, [new User({ name: args[0] })]);
+        this.addUsers(roomID, [new User({ name: args[0], ID: toID(args[0]) })]);
         break;
       }
       case "L": {
@@ -491,6 +501,7 @@ export class Client {
         break;
       }
       case "N": {
+        this.updateUsername(roomID, args[0], args[1]);
         break;
       }
       case "queryresponse": {
@@ -546,7 +557,8 @@ export class Client {
             );
             users = parsedUsers.map((tmpuser) => {
               const [user, status] = tmpuser.slice(1).split("@");
-              return new User({ name: tmpuser.slice(0, 1) + user, status });
+              const name = tmpuser.slice(0, 1) + user
+              return new User({ name, ID: toID(name), status });
             });
             users.shift();
             continue;
