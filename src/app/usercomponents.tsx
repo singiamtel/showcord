@@ -20,7 +20,7 @@ export function UsernameComponent(
   },
 ) {
   const rank = user.charAt(0);
-  const rankDisplay = alignRight ? rank.padEnd(2, " ") : (rank === ' ' ? '' : rank );
+  const rankDisplay = alignRight ? rank.padEnd(1, " ") : (rank === ' ' ? '' : rank );
   return (
     <>
       <span className={"text-[#9D9488] font-mono whitespace-pre " + roboto_mono.className}>

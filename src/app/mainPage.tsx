@@ -94,7 +94,7 @@ export default function MainPage() {
               onChange={(e) => {
                 setInput(e.target.value);
               }}
-              className="w-full rounded p-2 placeholder-gray-175 bg-gray-375 text-white"
+              className="w-full rounded my-1 p-2 placeholder-gray-175 bg-gray-375 text-white"
               placeholder="Search for a room"
             />
           </form>
