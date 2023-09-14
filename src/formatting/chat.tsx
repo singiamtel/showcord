@@ -2,6 +2,7 @@ import { roboto_mono } from "@/app/usercomponents";
 import Linkify from "linkify-react";
 import { HTMLAttributes } from "react";
 import manageURL from "@/utils/manageURL";
+import innerText from 'react-innertext';
 
 // ``code here`` marks inline code
 // ||text|| are spoilers
@@ -103,12 +104,11 @@ export function subscript(
 export function link(
   props: ExtendedProps,
 ) {
-  const href = typeof props.children === "string" ? props.children : "";
   const key = props.key;
   delete props.key;
   return (
     <a
-      href={href}
+      href={ `//www.google.com/search?ie=UTF-8&btnI&q=${innerText(props.children)}`}
       className="text-blue-400 hover:underline"
       {...props}
       key={key}
