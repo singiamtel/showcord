@@ -24,11 +24,13 @@ export default function BigPanel() {
         </div>
       </div>
 
-      {roomType === "pm" ? null : (
-        <div className="w-64">
-          <Users />
-        </div>
-      )}
+      {roomType === "chat" || roomType === "battle"
+        ? (
+          <div className="w-64">
+            <Users />
+          </div>
+        )
+        : null}
     </div>
   );
 }
