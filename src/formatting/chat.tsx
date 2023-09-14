@@ -112,6 +112,7 @@ export function link(
       className="text-blue-400 hover:underline"
       {...props}
       key={key}
+      target="_blank"
     />
   );
 }
