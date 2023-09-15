@@ -103,6 +103,9 @@ export class Client {
   }
 
   async join(rooms: string | string[]) {
+    if(!rooms){
+      console.trace('Trying to join empty string room')
+    }
     if (!this.socket) {
       throw new Error("Joining room(s) before socket initialization " + rooms);
     }

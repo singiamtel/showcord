@@ -2,6 +2,7 @@ import {
   createRef,
   FormEvent,
   KeyboardEventHandler,
+  MouseEventHandler,
   useContext,
   useEffect,
   useRef,
@@ -50,6 +51,11 @@ export default function MainPage() {
     setInput("");
   };
 
+  const manageRoomCardClick = (str: string) => {
+    if (!client) return;
+    client.join(str);
+  }
+
   const onKeyDown: KeyboardEventHandler  = (e : any) => {
     if ((e.key === "Tab" && !e.shiftKey) || e.key === "ArrowRight") {
       if (!formRef.current?.textContent) {
@@ -90,10 +96,10 @@ export default function MainPage() {
   return (
     <div className="w-full grid grid-cols-7 grid-rows-2">
       <div className="col-span-3 bg-gray-600 m-4 p-4 rounded text-white flex items-center justify-center">
-        Ladder will be here when I get around to it :S
+        Ladder will be here
       </div>
       <div className="col-span-2 bg-gray-600 m-4 p-4 rounded text-white flex items-center justify-center">
-        And this will be a cool friends list
+        News will be here
       </div>
       <div
         className="col-span-2 row-span-2 m-4 p-4 rounded overflow-y-auto text-white bg-gray-600"
@@ -130,10 +136,10 @@ export default function MainPage() {
           ? miniSearchResults?.sort((a: any, b: any) =>
             b.userCount - a.userCount
           )
-            .map((room: any, idx: number) => <RoomCard key={idx} room={room} />)
+            .map((room: any, idx: number) => <RoomCard onClick={manageRoomCardClick} key={idx} room={room} />)
           : roomsJSON
           ? roomsJSON.chat?.sort((a: any, b: any) => b.userCount - a.userCount)
-            .map((room: any, idx: number) => <RoomCard key={idx} room={room} />)
+            .map((room: any, idx: number) => <RoomCard onClick={manageRoomCardClick} key={idx} room={room} />)
           : (
             <div className="h-full flex items-center justify-center !bg-white">
               <InfinitySpin

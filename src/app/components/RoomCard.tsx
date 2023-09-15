@@ -1,3 +1,5 @@
+import { MouseEventHandler } from "react";
+
 export type RoomQuery = {
   title: string;
   desc: string;
@@ -6,7 +8,7 @@ export type RoomQuery = {
 };
 
 // blue 100 green 200
-const emoji: {[key:string]: string} = {
+const emoji: { [key: string]: string } = {
   Official: "📣",
   Languages: "📖",
   "Life & Hobbies": "🎨",
@@ -14,18 +16,29 @@ const emoji: {[key:string]: string} = {
   Gaming: "🎮",
   Entertainment: "🎬",
   "On-site games": "🎲",
-}
+};
 
-export default function RoomCard({ room }: { room: RoomQuery }) {
+export default function RoomCard(
+  { room, onClick }: { room: RoomQuery; onClick: (str: string) => void },
+) {
   return (
     <button
       className={"rounded-lg mr-2 my-2 p-2 bg-gray-300 hover:bg-gray-175 text-left w-full"}
+      onClick={(e) => {
+        e.preventDefault();
+        onClick(room.title);
+      }}
     >
-      <h3 className="font-bold text-blue-300">{emoji[room.section] || null} {room.title} {room.section} </h3>
-      <small className="block text-gray-100"> {room.userCount} users</small>
-      {room.desc}
+      <span className="text-gray-125">
+        <h3 className="font-bold text-blue-300">
+          {emoji[room.section] || null} {room.title}
+        </h3>{" "}
+        {room.section ? `${room.section} - ` : null}
+        <small className="inline text-gray-125">{room.userCount} users</small>
+      </span>
+      <div>
+        {room.desc}
+      </div>
     </button>
   );
-      // {room.userCount}
-      // {room.section}
 }
