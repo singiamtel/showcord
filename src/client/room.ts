@@ -1,10 +1,13 @@
 import { Message } from "./message";
 import { User } from "./user";
 
+export const roomTypes = ["chat", "battle", "pm", "permanent"] as const;
+export type RoomType = typeof roomTypes[number];
+
 export class Room {
   ID: string;
   name: string;
-  type: "chat" | "battle" | "pm" | "permanent";
+  type: RoomType;
   messages: Message[] = [];
   users: User[] = [];
   unread = 0;
@@ -17,7 +20,7 @@ export class Room {
     { ID, name, type }: {
       ID: string;
       name: string;
-      type: "chat" | "battle" | "pm" | "permanent";
+      type: RoomType;
     },
   ) {
     this.ID = ID;
@@ -62,16 +65,18 @@ export class Room {
   ) {
     const previousMessage = this.messages.find((m) => m.name === message.name);
     if (previousMessage) {
+      console.log('Removing previous UHTML message with name ', message.name);
       this.messages.splice(this.messages.indexOf(previousMessage), 1);
     }
+    console.log('Adding new UHTML message with name ', message.name);
     this.addMessage(message, { selected, selfSent });
   }
 
-  changeUHTML(name: string, html: string) {
-    const message = this.messages.find((m) => m.name === name);
+  changeUHTML(HTMLname: string, html: string) {
+    const message = this.messages.find((m) => m.name === HTMLname);
     if (!message) {
       console.error(
-        `changeUHTML(): Tried to change non-existent uhtml message ${name} for room ${this.name}`,
+        `changeUHTML(): Tried to change non-existent uhtml message named ${HTMLname} for room ${this.name}`,
       );
       return;
     }
@@ -113,8 +118,8 @@ export class Room {
       );
       return;
     }
-    const [name, status] = newName.split("@")
-    user.name = name
+    const [name, status] = newName.split("@");
+    user.name = name;
     user.status = status;
     this.users = this.users.sort(this.rankSorter);
   }

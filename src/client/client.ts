@@ -1,7 +1,7 @@
 import { Settings } from "@/settings";
 import { toID } from "@/utils/generic";
 import { Message } from "./message";
-import { Room } from "./room";
+import { Room, RoomType, roomTypes } from "./room";
 import { User } from "./user";
 import { Notification } from "./notifications";
 
@@ -525,6 +525,7 @@ export class Client {
             const tmpjson = JSON.parse(args.slice(1).join("|"));
             if (this.roomListener) {
               this.roomListener(tmpjson);
+              this.roomsJSON = tmpjson;
               this.roomListener = undefined;
             } else {
               console.warn(
@@ -566,10 +567,13 @@ export class Client {
           if (!didTimestamp && splitted_message[i].startsWith("|:|")) {
             timestamp = splitted_message[i].slice(3);
             didTimestamp = true;
+            if(!roomTypes.includes(type as RoomType)){
+              console.warn("Unknown room type", type);
+            }
             room = new Room({
               ID: roomID,
               name: name,
-              type: (type as "chat" | "battle"),
+              type: type as RoomType,
             });
             this._addRoom(room);
             this.addUsers(roomID, users);
@@ -678,6 +682,7 @@ export class Client {
         // console.log("uhtml", args);
         {
           const uhtml = args.slice(1).join("|");
+          const name = args[0]
           const room = this.room(roomID);
           if (!room) {
             console.error("Received |uhtml| from untracked room", roomID);
