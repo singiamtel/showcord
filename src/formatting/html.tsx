@@ -40,7 +40,7 @@ export default function HTML({ message }: any) {
             onClick={() => {
               client?.send(attribs.value, selectedPage || "");
             }}
-            className="bg-blue-100 hover:bg-blue-400 text-white font-bold p-1 m-1 rounded text-sm"
+            className="text-white border border-gray-border, font-bold p-1 m-1 rounded text-sm"
             data-parsed="true"
           >
             {domToReact(children, parserOptions)}

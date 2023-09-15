@@ -7,6 +7,7 @@ import {
   MouseEventHandler,
   ReactElement,
   useContext,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -182,6 +183,7 @@ export default function Chat() {
   const isIntersecting = useOnScreen(messagesEndRef);
   const [user, setUser] = useState<any | null>(null);
   const [username, setUsername] = useState<string | null>(null);
+  const [__messages, setMessages] = useState<Message[]>([]); // messages to display
   const [position, setPosition] = useState<{ x: number; y: number }>({
     x: 0,
     y: 0,
@@ -195,9 +197,14 @@ export default function Chat() {
     setUsername(null);
   }, [isOutside]);
 
-  useEffect(() => {
-    messagesEndRef.current!.scrollIntoView({ behavior: "auto" });
+  useLayoutEffect(() => {
+    setMessages(messages);
   }, [messages]);
+
+
+  useLayoutEffect(() => {
+    messagesEndRef.current!.scrollIntoView({ behavior: "auto" });
+  }, [__messages]);
 
   useEffect(() => {
     setUser(null);
@@ -207,7 +214,7 @@ export default function Chat() {
     if (isIntersecting) {
       messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
     }
-  }, [messages, messagesEndRef, isIntersecting]);
+  }, [__messages, messagesEndRef, isIntersecting]);
 
   const clickUsername = (e: MouseEvent) => {
     const username = (e.target as HTMLAnchorElement).innerText;
@@ -231,7 +238,7 @@ export default function Chat() {
           />
         )
         : null}
-      {messages.map((message, index, arr) => (
+      {__messages.map((message, index, arr) => (
         <MessageComponent
           key={index}
           time={message.timestamp}

@@ -98,6 +98,10 @@ export class Client {
     if (!this.socket) {
       throw new Error("Getting /cmd rooms before socket initialization");
     }
+    if (this.roomsJSON) {
+      callback(this.roomsJSON);
+      return;
+    }
     this.send(`/cmd rooms`, false);
     this.roomListener = callback;
   }
