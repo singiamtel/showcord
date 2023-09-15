@@ -1,6 +1,7 @@
 import {
   createRef,
   FormEvent,
+  KeyboardEventHandler,
   useContext,
   useEffect,
   useRef,
@@ -24,6 +25,7 @@ export default function MainPage() {
   const [miniSearchResults, setMiniSearchResults] = useState<SearchResult[]>(
     [],
   );
+  const { setRoom } = useContext(PS_context);
 
   const formRef = createRef<HTMLFormElement>();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -47,6 +49,24 @@ export default function MainPage() {
     client.join(input);
     setInput("");
   };
+
+  const onKeyDown: KeyboardEventHandler  = (e : any) => {
+    if ((e.key === "Tab" && !e.shiftKey) || e.key === "ArrowRight") {
+      if (!formRef.current?.textContent) {
+        setRoom(1);
+        e.preventDefault();
+        return;
+      }
+    }
+    if ((e.key === "Tab" && e.shiftKey) || e.key === "ArrowLeft") {
+      console.log(formRef.current?.textContent);
+      if (!formRef.current?.textContent) {
+        setRoom(-1);
+        e.preventDefault();
+        return;
+      }
+    }
+  }
 
   useEffect(() => {
     if (!client) return;
@@ -91,6 +111,7 @@ export default function MainPage() {
             <input
               value={input}
               ref={inputRef}
+              onKeyDown={onKeyDown}
               onChange={(e) => {
                 setInput(e.target.value);
               }}
