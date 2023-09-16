@@ -27,7 +27,7 @@ export default function NewsCard(
   return (
     <div className="m-2">
       <h2 className="font-bold text-lg">
-        {news.title}
+        {news.title} - by {news.author}
       </h2>
       <span className="m-2 block">
         <HTML message={news.summaryHTML} raw />
