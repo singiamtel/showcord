@@ -548,7 +548,6 @@ export class Client {
         }
         break;
       }
-      // << |queryresponse|userdetails|{"id":"zestar75","userid":"zestar75","name":"zestar75","avatar":266,"group":" ","autoconfirmed":true,"rooms":{"@techcode":{},"@scholastic":{},"sports":{},"@twilightzone":{"isPrivate":true}},"friended":true}
       case "init":
         let users: User[] = [];
         type = args[0];
@@ -661,9 +660,6 @@ export class Client {
         }
         break;
       case "noinit":
-        // store room and try again after login
-        // >botdevelopment
-        // |noinit|namerequired|The room 'botdevelopment' does not exist or requires a login to join
         if (args[0] === "namerequired") {
           this.joinAfterLogin.push(roomID);
         }
@@ -682,11 +678,9 @@ export class Client {
         }
         break;
       case "deinit":
-        // leave room
         this._removeRoom(roomID);
         break;
       case "uhtml":
-        // console.log("uhtml", args);
         {
           const uhtml = args.slice(1).join("|");
           const name = args[0]
@@ -733,7 +727,7 @@ export class Client {
 
   private parseCMessage(message: string, hasTimestamp: boolean): Message {
     const splitted_message = message.split("|");
-    let content;
+    let content, UHTMLName;
     let type: "raw" | "chat" | "log" = "chat";
     let _, _2, msgTime, user, tmpcontent: (string | undefined)[];
     if (hasTimestamp) {
@@ -748,7 +742,7 @@ export class Client {
       content = content.slice(4);
     } else if (content.startsWith("/uhtml")) {
       let [name, ...html] = content.split(",");
-      // TODO: Use the name and parse uhtmlchange
+      UHTMLName = name
       type = "raw";
       content = html.join(",");
     } else if (content.startsWith("/log")) {
@@ -758,6 +752,7 @@ export class Client {
     return new Message({
       timestamp: msgTime,
       user,
+      name: UHTMLName,
       type,
       content: content,
     });

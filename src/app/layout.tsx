@@ -16,8 +16,11 @@ export default function RootLayout({
           crossOrigin="anonymous"
           referrerPolicy="no-referrer"
         />
+        <title> PS-Cord </title>
       </head>
           <body className="h-full">{children}</body>
     </html>
   );
 }
+
+

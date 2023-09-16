@@ -2,9 +2,9 @@ import {
   createRef,
   FormEvent,
   KeyboardEventHandler,
-  MouseEventHandler,
   useContext,
   useEffect,
+  useLayoutEffect,
   useRef,
   useState,
 } from "react";
@@ -12,6 +12,7 @@ import { PS_context } from "./PS_context";
 import RoomCard from "./components/RoomCard";
 import { InfinitySpin } from "react-loader-spinner";
 import MiniSearch, { SearchResult } from "minisearch";
+import NewsCard from "./components/NewsCard";
 
 const minisearch = new MiniSearch({
   fields: ["title", "desc"],
@@ -27,6 +28,8 @@ export default function MainPage() {
     [],
   );
   const { setRoom } = useContext(PS_context);
+  const [news, setNews] = useState<any[]>([]);
+  const newsURL = "https://pokemonshowdown.com/news.json";
 
   const formRef = createRef<HTMLFormElement>();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -42,6 +45,14 @@ export default function MainPage() {
     };
   }, []);
 
+  useEffect(() => {
+    fetch(newsURL).then((res) => res.json()).then((json) => setNews(json));
+  }, []);
+
+  useEffect(() => {
+    console.log("got news", news);
+  }, [news]);
+
   const submit = (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     console.log("submit");
@@ -54,9 +65,9 @@ export default function MainPage() {
   const manageRoomCardClick = (str: string) => {
     if (!client) return;
     client.join(str);
-  }
+  };
 
-  const onKeyDown: KeyboardEventHandler  = (e : any) => {
+  const onKeyDown: KeyboardEventHandler = (e: any) => {
     if ((e.key === "Tab" && !e.shiftKey) || e.key === "ArrowRight") {
       if (!formRef.current?.textContent) {
         setRoom(1);
@@ -72,7 +83,7 @@ export default function MainPage() {
         return;
       }
     }
-  }
+  };
 
   useEffect(() => {
     if (!client) return;
@@ -98,8 +109,13 @@ export default function MainPage() {
       <div className="col-span-3 bg-gray-600 m-4 p-4 rounded text-white flex items-center justify-center">
         Ladder will be here
       </div>
-      <div className="col-span-2 bg-gray-600 m-4 p-4 rounded text-white flex items-center justify-center">
-        News will be here
+      <div className="col-span-2 bg-gray-600 m-4 p-4 rounded text-white flex flex-col items-center justify-center overflow-scroll">
+        <h2 className="font-bold text-xl text-center mt-8">
+          News
+        </h2>
+        {news?.slice(0, -1).map((n, idx) => (
+          <NewsCard key={idx} news={n} last={idx === news.length - 2} />
+        ))}
       </div>
       <div
         className="col-span-2 row-span-2 m-4 p-4 rounded overflow-y-auto text-white bg-gray-600"
@@ -136,10 +152,14 @@ export default function MainPage() {
           ? miniSearchResults?.sort((a: any, b: any) =>
             b.userCount - a.userCount
           )
-            .map((room: any, idx: number) => <RoomCard onClick={manageRoomCardClick} key={idx} room={room} />)
+            .map((room: any, idx: number) => (
+              <RoomCard onClick={manageRoomCardClick} key={idx} room={room} />
+            ))
           : roomsJSON
           ? roomsJSON.chat?.sort((a: any, b: any) => b.userCount - a.userCount)
-            .map((room: any, idx: number) => <RoomCard onClick={manageRoomCardClick} key={idx} room={room} />)
+            .map((room: any, idx: number) => (
+              <RoomCard onClick={manageRoomCardClick} key={idx} room={room} />
+            ))
           : (
             <div className="h-full flex items-center justify-center !bg-white">
               <InfinitySpin

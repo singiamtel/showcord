@@ -4,7 +4,8 @@ import { Room } from "./client/room";
 export class Settings {
   rooms: { ID: string; lastReadTime: Date }[] = [];
   highlightWords: Map<string, RegExp[]> = new Map(); // roomid -> highlightWords
-  defaultRooms = ["lobby", "help", "overused"];
+  defaultRooms = [];
+  // defaultRooms = ["lobby", "help", "overused"];
   URL = location.origin;
   private timeout: any;
   status = ""; // if status is set, it will be restored on login
@@ -18,7 +19,9 @@ export class Settings {
     this.rooms = Array.from(rooms).filter((e) => e[1].type === "chat").map((
       r,
     ) => ({ ID: r[1].ID, lastReadTime: r[1].lastReadTime }));
-    this.saveSettings();
+    if (this.rooms.length !== 0) {
+      this.saveSettings();
+    }
   }
 
   async getSavedRooms() {

@@ -7,7 +7,9 @@ import parse, { domToReact } from "html-react-parser";
 import { useContext } from "react";
 import sanitizeHtml from "sanitize-html-react";
 
-export default function HTML({ message }: any) {
+export default function HTML(
+  { message, raw }: { message: string; raw?: boolean },
+) {
   // console.log("HTMLmessage", message);
   // console.log("HTMLsanitized", sanitizeHtml(message, sanitizeOptions));
   // console.log(
@@ -119,6 +121,14 @@ export default function HTML({ message }: any) {
   };
   // console.log("HTMLmessage", sanitizeHtml(message, sanitizeOptions));
   // console.log("testHTML", sanitizeHtml("<test>lol", sanitizeOptions));
+  if (raw) {
+    return (
+      parse(
+        sanitizeHtml(message, sanitizeOptions),
+        parserOptions,
+      )
+    );
+  }
   return (
     <div className="p-2 ml-10 mr-10 m-2 text-white border border-solid border-gray-border bg-gray-600 rounded">
       <span className="">
