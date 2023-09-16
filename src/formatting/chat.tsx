@@ -2,7 +2,7 @@ import { roboto_mono } from "@/app/usercomponents";
 import Linkify from "linkify-react";
 import { HTMLAttributes } from "react";
 import manageURL from "@/utils/manageURL";
-import innerText from 'react-innertext';
+import innerText from "react-innertext";
 
 // ``code here`` marks inline code
 // ||text|| are spoilers
@@ -29,7 +29,6 @@ const options = {
   },
 };
 
-
 export function inlineCode(
   props: ExtendedProps,
 ) {
@@ -42,6 +41,25 @@ export function inlineCode(
       {...props}
       key={key}
     />
+  );
+}
+
+export function roomLink(
+  props: ExtendedProps,
+) {
+  const key = props.key;
+  delete props.key;
+  return (
+    <span key={key}>
+      «
+      <a
+        href={`/${innerText(props.children)}`}
+        className="text-blue-500 underline cursor-pointer"
+        onClick={manageURL}
+        {...props}
+      />
+      »
+    </span>
   );
 }
 
@@ -108,7 +126,9 @@ export function link(
   delete props.key;
   return (
     <a
-      href={ `//www.google.com/search?ie=UTF-8&btnI&q=${innerText(props.children)}`}
+      href={`//www.google.com/search?ie=UTF-8&btnI&q=${
+        innerText(props.children)
+      }`}
       className="text-blue-400 hover:underline"
       {...props}
       key={key}

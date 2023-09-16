@@ -5,5 +5,8 @@ export default function manageURL(evt:MouseEvent<HTMLAnchorElement>){
   if (location.host === (evt.target as HTMLAnchorElement).host) {
     console.log("this will redirect in client");
     evt.preventDefault();
+    return;
   }
+  // console.log("this will open in new tab");
+  window.open((evt.target as HTMLAnchorElement).href, "_blank");
 }
