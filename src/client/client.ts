@@ -766,6 +766,7 @@ export class Client {
       for (let cb of this.onOpen) {
         cb();
       }
+      console.log("Socket opened");
       this.tryLogin();
     };
     this.socket.onmessage = (event) => {
