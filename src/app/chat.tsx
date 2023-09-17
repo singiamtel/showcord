@@ -30,6 +30,7 @@ import {
   bold,
   greentext,
   inlineCode,
+  roomLink,
   italic,
   link,
   spoiler,
@@ -59,6 +60,7 @@ const tokens = {
   "\\": "subscript",
   "[": "link",
   ">": "greentext",
+  "<": "roomlink",
 } as const;
 
 const elements = {
@@ -71,28 +73,39 @@ const elements = {
   subscript: { pattern: /\\\\(.+?)\\\\/g, element: subscript },
   link: { pattern: /\[\[(.+?)?\]\]/g, element: link },
   greentext: { pattern: /^\>.*/g, element: greentext },
+  roomlink: { pattern: /\<\<(.+?)?\>\>/g, element: roomLink },
 } as const;
 
 const cleanTag = (input: string, tag: keyof typeof elements) => {
   switch (tag) {
     case "code":
-      return input.replace(/``(.+?)``/g, "$1");
+      // return input.replace(/``(.+?)``/g, "$1");
+      return input.replace(elements.code.pattern, "$1");
     case "spoiler":
-      return input.replace(/\|\|(.+?)\|\|/g, "$1");
+      // return input.replace(/\|\|(.+?)\|\|/g, "$1");
+      return input.replace(elements.spoiler.pattern, "$1");
     case "bold":
-      return input.replace(/\*\*(.+?)\*\*/g, "$1");
+      // return input.replace(/\*\*(.+?)\*\*/g, "$1");
+      return input.replace(elements.bold.pattern, "$1");
     case "italic":
-      return input.replace(/__(.+?)__/g, "$1");
+      // return input.replace(/__(.+?)__/g, "$1");
+      return input.replace(elements.italic.pattern, "$1");
     case "strikethrough":
-      return input.replace(/~~(.+?)~~/g, "$1");
+      // return input.replace(/~~(.+?)~~/g, "$1");
+      return input.replace(elements.strikethrough.pattern, "$1");
     case "superscript":
-      return input.replace(/\^\^(.+?)\^\^/g, "$1");
+      // return input.replace(/\^\^(.+?)\^\^/g, "$1");
+      return input.replace(elements.superscript.pattern, "$1");
     case "subscript":
-      return input.replace(/\\\\(.+?)\\\\/g, "$1");
+      // return input.replace(/\\\\(.+?)\\\\/g, "$1");
+      return input.replace(elements.subscript.pattern, "$1");
     case "link":
-      return input.replace(/\[\[(.+?)?\]\]/g, "$1");
+      // return input.replace(/\[\[(.+?)?\]\]/g, "$1");
+      return input.replace(elements.link.pattern, "$1");
     case "greentext":
       return input?.slice(1);
+    case "roomlink":
+      return input.replace(elements.roomlink.pattern, "$1");
     default:
       console.error("cleanTag: unknown tag", tag);
       return "";
