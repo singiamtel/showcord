@@ -6,6 +6,7 @@ import manageURL from "@/utils/manageURL";
 import parse, { domToReact } from "html-react-parser";
 import { useContext } from "react";
 import sanitizeHtml from "sanitize-html-react";
+import { escape } from "html-escaper";
 
 export default function HTML(
   { message, raw }: { message: string; raw?: boolean },
@@ -81,6 +82,7 @@ export default function HTML(
       "tbody",
       "tr",
       "td",
+      "th",
       "strong",
       "p",
       "code",
@@ -130,12 +132,20 @@ export default function HTML(
     );
   }
   return (
+    <Box>
+      {parse(
+        sanitizeHtml(escape(message.replaceAll("\n", "<br>")), sanitizeOptions),
+        parserOptions,
+      )}
+    </Box>
+  );
+}
+
+export function Box(props: React.PropsWithChildren<{}>) {
+  return (
     <div className="p-2 ml-10 mr-10 m-2 text-white border border-solid border-gray-border bg-gray-600 rounded">
       <span className="">
-        {parse(
-          sanitizeHtml(message, sanitizeOptions),
-          parserOptions,
-        )}
+        {props.children}
       </span>
     </div>
   );

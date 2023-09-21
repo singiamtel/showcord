@@ -8,5 +8,5 @@ export default function manageURL(evt:MouseEvent<HTMLAnchorElement>){
     return;
   }
   // console.log("this will open in new tab");
-  window.open((evt.target as HTMLAnchorElement).href, "_blank");
+  // window.open((evt.target as HTMLAnchorElement).href, "_blank");
 }

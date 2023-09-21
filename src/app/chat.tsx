@@ -298,6 +298,12 @@ export function MessageComponent(
     }
     return <HTML message={message} />;
   }
+  if (type === "simple") {
+    return message ? (
+    <div className="p-0.5 text-white">
+    {" " + message}
+    </div>) : null;
+  }
   if (type === "log") {
     return (
       <div className="p-0.5 text-white">

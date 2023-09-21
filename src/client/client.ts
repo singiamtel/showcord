@@ -107,8 +107,8 @@ export class Client {
   }
 
   async join(rooms: string | string[]) {
-    if(!rooms){
-      console.trace('Trying to join empty string room')
+    if (!rooms) {
+      console.trace("Trying to join empty string room");
     }
     if (!this.socket) {
       throw new Error("Joining room(s) before socket initialization " + rooms);
@@ -203,7 +203,7 @@ export class Client {
           if (token) {
             localStorage.setItem(
               "ps-token",
-              url.searchParams.get("token") || 'notoken',
+              url.searchParams.get("token") || "notoken",
             );
           }
           nWindow.close();
@@ -376,10 +376,10 @@ export class Client {
     console.warn("removeUsers: room (" + roomID + ") is unknown");
   }
 
-  private updateUsername(roomID: string, newName: string, userID: string){
+  private updateUsername(roomID: string, newName: string, userID: string) {
     const room = this.room(roomID);
     if (room) {
-      room.updateUsername(newName, userID)
+      room.updateUsername(newName, userID);
       this.events.dispatchEvent(new CustomEvent("users", { detail: newName }));
       return;
     }
@@ -419,6 +419,15 @@ export class Client {
     } else {
       i++;
       roomID = splitted_message[0].slice(1);
+    }
+
+    if (!splitted_message[i].startsWith("|")) {
+      // console.log("message", splitted_message.slice(1).join('\n'));
+      for (; i < splitted_message.length; i++) {
+        const chatMessage = this.parseCMessage(splitted_message[i], false);
+        this.addMessageToRoom(roomID, chatMessage);
+      }
+      return;
     }
     const [_, cmd, ...args] = splitted_message[i].split("|");
     // console.log("cmd:", cmd, "args:", args);
@@ -564,7 +573,7 @@ export class Client {
             );
             users = parsedUsers.map((tmpuser) => {
               const [user, status] = tmpuser.slice(1).split("@");
-              const name = tmpuser.slice(0, 1) + user
+              const name = tmpuser.slice(0, 1) + user;
               return new User({ name, ID: toID(name), status });
             });
             users.shift();
@@ -573,7 +582,7 @@ export class Client {
           if (!didTimestamp && splitted_message[i].startsWith("|:|")) {
             timestamp = splitted_message[i].slice(3);
             didTimestamp = true;
-            if(!roomTypes.includes(type as RoomType)){
+            if (!roomTypes.includes(type as RoomType)) {
               console.warn("Unknown room type", type);
             }
             room = new Room({
@@ -662,11 +671,10 @@ export class Client {
       case "noinit":
         if (args[0] === "namerequired") {
           this.joinAfterLogin.push(roomID);
-        }
-        else if (args[0] === "nonexistent") {
+        } else if (args[0] === "nonexistent") {
           this.events.dispatchEvent(
-          new CustomEvent("error", { detail: args[1] }),
-          )
+            new CustomEvent("error", { detail: args[1] }),
+          );
         }
         break;
       case "updateuser":
@@ -683,7 +691,7 @@ export class Client {
       case "uhtml":
         {
           const uhtml = args.slice(1).join("|");
-          const name = args[0]
+          const name = args[0];
           const room = this.room(roomID);
           if (!room) {
             console.error("Received |uhtml| from untracked room", roomID);
@@ -726,14 +734,22 @@ export class Client {
   }
 
   private parseCMessage(message: string, hasTimestamp: boolean): Message {
-    const splitted_message = message.split("|");
+    if (!message.startsWith("|")) {
+      return new Message({
+        timestamp: Math.floor(Date.now() / 1000).toString(),
+        type: "simple",
+        content: message,
+      });
+    }
+
+    const splitted_message = message.slice(1).split("|");
     let content, UHTMLName;
     let type: "raw" | "chat" | "log" = "chat";
-    let _, _2, msgTime, user, tmpcontent: (string | undefined)[];
+    let _, msgTime, user, tmpcontent: (string | undefined)[];
     if (hasTimestamp) {
-      [_, _2, msgTime, user, ...tmpcontent] = splitted_message;
+      [_, msgTime, user, ...tmpcontent] = splitted_message;
     } else {
-      [_, _2, user, ...tmpcontent] = splitted_message;
+      [_, user, ...tmpcontent] = splitted_message;
       msgTime = Math.floor(Date.now() / 1000).toString();
     }
     content = tmpcontent.join("|");
@@ -742,7 +758,7 @@ export class Client {
       content = content.slice(4);
     } else if (content.startsWith("/uhtml")) {
       let [name, ...html] = content.split(",");
-      UHTMLName = name
+      UHTMLName = name;
       type = "raw";
       content = html.join(",");
     } else if (content.startsWith("/log")) {
@@ -777,6 +793,7 @@ export class Client {
       console.error(event);
     };
     this.socket.onclose = (_) => {
+      console.error("Socket closed");
       this.events.dispatchEvent(new CustomEvent("disconnect"));
     };
   }

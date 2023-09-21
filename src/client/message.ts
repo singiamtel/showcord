@@ -1,6 +1,6 @@
 export class Message {
   content: string;
-  type: "chat" | "raw" | "log";
+  type: "chat" | "raw" | "log" | "simple" | "error";
   user?: string;
   timestamp?: Date;
   hld?: boolean;
@@ -8,7 +8,7 @@ export class Message {
   constructor(
     { content, type, user, timestamp, hld = false, name }: {
       content: string;
-      type: "chat" | "raw" | "log"
+      type: "chat" | "raw" | "log" | "simple" | "error";
       user?: string;
       timestamp?: string;
       hld?: boolean 

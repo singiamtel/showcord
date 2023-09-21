@@ -85,3 +85,15 @@ a:visited{
   background: red;
   border-radius: 10px;
 } 
+
+table {
+  border-collapse: collapse;
+  /* Allow table to be responsive */
+  width: 100%;
+  display: block;
+  overflow-x: auto;
+}
+
+table td, table th {
+  padding: 4px;
+}

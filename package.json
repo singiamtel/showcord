@@ -20,6 +20,7 @@
     "eslint": "8.46.0",
     "eslint-config-next": "13.4.12",
     "highlight.js": "^11.8.0",
+    "html-escaper": "^3.0.3",
     "html-react-parser": "^4.2.2",
     "linkify-html": "^4.1.1",
     "linkify-react": "^4.1.1",
