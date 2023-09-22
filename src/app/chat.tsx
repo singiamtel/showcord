@@ -300,13 +300,13 @@ export function MessageComponent(
   }
   if (type === "simple") {
     return message ? (
-    <div className="p-0.5 text-white">
+    <div className="text-white">
     {" " + message}
     </div>) : null;
   }
   if (type === "log") {
     return (
-      <div className="p-0.5 text-white">
+      <div className="text-white">
         <span className="text-gray-125 font-mono text-xs">
           {time ? HHMMSS(time) : ""}
 
@@ -318,7 +318,7 @@ export function MessageComponent(
   }
   // {" " + message}
   return (
-    <div className={"p-0.5 " + (hld ? "bg-yellow-hl-body" : "")}>
+    <div className={"" + (hld ? "bg-yellow-hl-body" : "")}>
       <span className="text-gray-125 font-mono text-xs">
         {time ? HHMMSS(time) : ""}
         &nbsp;
