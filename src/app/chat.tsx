@@ -1,26 +1,21 @@
 "use client";
 import {
-  createElement,
   createRef,
   Fragment,
   MouseEvent,
-  MouseEventHandler,
-  ReactElement,
   useContext,
   useLayoutEffect,
   useRef,
   useState,
+  useEffect,
 } from "react";
 import { PS_context } from "./PS_context";
-import { useEffect } from "react";
 
 import useOnScreen from "@/utils/isOnScreen";
 import HTML from "@/formatting/html";
 import { HHMMSS } from "@/utils/date";
 
-import * as linkify from "linkifyjs";
 import Linkify from "linkify-react";
-// import linkifyHtml from 'linkify-html';
 import { Message } from "@/client/message";
 import Code from "@/formatting/code";
 import { UserCard, UsernameComponent } from "./usercomponents";
