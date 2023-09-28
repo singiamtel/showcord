@@ -1,3 +1,4 @@
+'use client'
 import { Settings } from "@/settings";
 import { toID } from "@/utils/generic";
 import { Message } from "./message";
@@ -16,7 +17,6 @@ export class Client {
   events: EventTarget = new EventTarget();
   username: string = "";
   loggedIn: boolean = false;
-  // settings: Settings = new Settings();
   onOpen: (() => void)[] = []; // Append callbacks here to run when the socket opens
   private joinAfterLogin: string[] = [];
 
@@ -821,5 +821,3 @@ export class Client {
   }
 }
 
-const client = new Client();
-export default client;

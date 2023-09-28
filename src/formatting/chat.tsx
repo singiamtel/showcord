@@ -3,9 +3,6 @@ import Linkify from "linkify-react";
 import { HTMLAttributes } from "react";
 import manageURL from "@/utils/manageURL";
 import innerText from "react-innertext";
-import { Client } from "@/client/client";
-
-import { MouseEvent } from "react";
 
 // ``code here`` marks inline code
 // ||text|| are spoilers
@@ -21,8 +18,16 @@ import { MouseEvent } from "react";
 interface ExtendedProps extends HTMLAttributes<HTMLSpanElement> {
   children: string | JSX.Element;
   key?: number;
-  client?: Client;
 }
+
+const options = {
+  defaultProtocol: "https",
+  target: "_blank",
+  attributes: {
+    onClick: manageURL,
+    className: "text-blue-500 underline cursor-pointer",
+  },
+};
 
 export function inlineCode(
   props: ExtendedProps,
@@ -40,19 +45,17 @@ export function inlineCode(
 }
 
 export function roomLink(
-  props: ExtendedProps
+  props: ExtendedProps,
 ) {
   const key = props.key;
   delete props.key;
-  const client = props.client;
-  delete props.client;
   return (
     <span key={key}>
       «
       <a
         href={`/${innerText(props.children)}`}
         className="text-blue-500 underline cursor-pointer"
-        onClick={(e) => manageURL(e, client)}
+        onClick={manageURL}
         {...props}
       />
       »
@@ -65,22 +68,13 @@ export function spoiler(
 ) {
   const key = props.key;
   delete props.key;
-  const client = props.client;
-  delete props.client;
   return (
     <Linkify
       as="span"
       className="bg-gray-700 text-gray-700 p-0.5 rounded hover:text-white"
       {...props}
       key={key}
-      options={{
-        defaultProtocol: "https",
-        target: "_blank",
-        attributes: {
-          onClick: (e:MouseEvent<HTMLAnchorElement>) => manageURL(e, client),
-          className: "text-blue-500 underline cursor-pointer",
-        },
-      }}
+      options={options}
     />
   );
 }
@@ -90,23 +84,7 @@ export function bold(
 ) {
   const key = props.key;
   delete props.key;
-  const client = props.client;
-  delete props.client;
-  return (
-    <Linkify
-      as="strong"
-      {...props}
-      key={key}
-      options={{
-        defaultProtocol: "https",
-        target: "_blank",
-        attributes: {
-          onClick: (e:MouseEvent<HTMLAnchorElement>) => manageURL(e, client),
-          className: "text-blue-500 underline cursor-pointer",
-        },
-      }}
-    />
-  );
+  return <Linkify as="strong" {...props} key={key} options={options} />;
 }
 
 export function italic(

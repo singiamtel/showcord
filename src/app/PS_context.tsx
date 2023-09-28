@@ -1,5 +1,5 @@
 "use client";
-import client, { Client } from "@/client/client";
+import { Client } from "@/client/client";
 import { Message } from "@/client/message";
 import { Notification } from "@/client/notifications";
 import { Room } from "@/client/room";
@@ -10,6 +10,8 @@ dotenv.config();
 
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+
+export const client = new Client();
 
 export const PS_context = createContext<
   {

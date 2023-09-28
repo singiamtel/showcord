@@ -1,3 +1,4 @@
+"use client"
 import { Room } from "./client/room";
 
 export class Settings {
@@ -12,6 +13,9 @@ export class Settings {
   constructor() {
     // this.loadSettings();
 
+    if(typeof window === "undefined"){
+      return
+    }
     const settingsRaw = localStorage.getItem("settings");
     if (!settingsRaw) {
       return;
