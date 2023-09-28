@@ -1,4 +1,3 @@
-"use client";
 import {
   createRef,
   Fragment,
@@ -33,6 +32,7 @@ import {
   subscript,
   superscript,
 } from "@/formatting/chat";
+import { Client } from "@/client/client";
 
 // ``code here`` marks inline code
 // ||text|| are spoilers
@@ -111,6 +111,7 @@ let deepKey = 0;
 const encloseInTag = (
   input: string,
   tag: keyof typeof elements,
+  client: Client,
 ): false | { length: number; element: JSX.Element } => {
   // Find the closing tag if it exists
   elements[tag].pattern.lastIndex = 0;
@@ -122,8 +123,10 @@ const encloseInTag = (
         children: FormatMsgDisplay({
           msg: cleanTag(matches[0], tag),
           recursed: true,
+          client: client,
         }),
         key: deepKey++,
+        client: client,
       }),
     };
   }
@@ -131,7 +134,7 @@ const encloseInTag = (
 };
 
 export function FormatMsgDisplay(
-  { msg, recursed = false }: { msg: string; recursed?: boolean },
+  { msg, recursed = false, client }: { msg: string; recursed?: boolean, client: Client },
 ) {
   if (!msg) return <>{msg}</>;
   const jsxElements = [];
@@ -144,7 +147,7 @@ export function FormatMsgDisplay(
         currentString += char;
         continue;
       }
-      const result = encloseInTag(msg.slice(i), tag);
+      const result = encloseInTag(msg.slice(i), tag, client);
       if (result) {
         i += result.length - 1;
         if (currentString) {
@@ -256,6 +259,7 @@ export default function Chat() {
           hld={message.hld}
           prev={arr[index - 1]}
           onNameClick={clickUsername}
+          client={client}
         />
       ))}
       <div>
@@ -277,7 +281,7 @@ const options = {
 };
 
 export function MessageComponent(
-  { message, user, type, time, hld, prev, onNameClick }: {
+  { message, user, type, time, hld, prev, onNameClick, client }: {
     message: string;
     user: string;
     type: string;
@@ -285,6 +289,7 @@ export function MessageComponent(
     hld?: boolean;
     prev?: Message;
     onNameClick?: (e: MouseEvent) => void;
+    client: Client;
   },
 ) {
   if (type === "raw") {
@@ -325,7 +330,7 @@ export function MessageComponent(
           colon
           bold
         />
-        &nbsp;<FormatMsgDisplay msg={message} />
+        &nbsp;<FormatMsgDisplay msg={message} client={client} />
       </span>
     </div>
   );

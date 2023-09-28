@@ -47,6 +47,13 @@ export class Room {
       this.unread++;
       if (message.hld) {
         this.mentions++;
+        if (!selected || !document.hasFocus()) {
+          // message.hld = false;
+          new Notification(`Private message from ${message.user}`, {
+            body: message.content,
+            icon: "/static/favicon.png",
+          });
+        }
       }
     }
     this.messages.push(message);
@@ -65,10 +72,10 @@ export class Room {
   ) {
     const previousMessage = this.messages.find((m) => m.name === message.name);
     if (previousMessage) {
-      console.log('Removing previous UHTML message with name ', message.name);
+      console.log("Removing previous UHTML message with name ", message.name);
       this.messages.splice(this.messages.indexOf(previousMessage), 1);
     }
-    console.log('Adding new UHTML message with name ', message.name);
+    console.log("Adding new UHTML message with name ", message.name);
     this.addMessage(message, { selected, selfSent });
   }
 

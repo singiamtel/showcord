@@ -1,18 +1,36 @@
-import localForage from "localforage";
 import { Room } from "./client/room";
 
 export class Settings {
   rooms: { ID: string; lastReadTime: Date }[] = [];
-  highlightWords: Map<string, RegExp[]> = new Map(); // roomid -> highlightWords
+  highlightWords: { [key: string]: RegExp[] } = Object.create(null); // roomid -> highlightWords
   defaultRooms = [];
   // defaultRooms = ["lobby", "help", "overused"];
-  URL = location.origin;
   private timeout: any;
   status = ""; // if status is set, it will be restored on login
   notes: Map<string, string> = new Map(); // user -> note
 
   constructor() {
-    this.loadSettings();
+    // this.loadSettings();
+
+    const settingsRaw = localStorage.getItem("settings");
+    if (!settingsRaw) {
+      return;
+    }
+    const settings = JSON.parse(settingsRaw);
+    console.log("loadSettings", settings);
+    if (settings) {
+      for (const [key, value] of Object.entries(settings.highlightWords) as [key:string, value: string[]][]){
+        this.highlightWords[key] = value.map((w: string) => new RegExp(w));
+      }
+      this.highlightWords = {};
+      console.log("AWD SAVED ROOMS", settings.rooms);
+      this.rooms = settings.rooms;
+    }
+    console.log("AWD loadSettings rooms", this.rooms);
+    console.log("AWD constructor finished");
+    // Notification.requestPermission((result) => {
+    //   console.log(result);
+    // });
   }
 
   changeRooms(rooms: Map<string, Room>) {
@@ -24,64 +42,68 @@ export class Settings {
     }
   }
 
-  async getSavedRooms() {
-    return (await localForage.getItem("settings") as any)?.rooms as {
+  getSavedRooms() {
+    const settingsRaw = localStorage.getItem("settings");
+    if (!settingsRaw) {
+      return [];
+      }
+    const settings = JSON.parse(settingsRaw);
+    return settings.rooms as {
       ID: string;
       lastReadTime: Date;
     }[];
   }
 
-  async saveSettings() {
-    const settings = {
-      highlightWords: this.highlightWords,
+  saveSettings() {
+    const settings: {
+      highlightWords: any;
+      rooms: {
+        ID: string;
+        lastReadTime: Date;
+      }[];
+    } = {
+      highlightWords: {},
       rooms: this.rooms,
     };
+    for (const [key, value] of Object.entries(this.highlightWords)) {
+      settings.highlightWords[key] = value.map((w) => w.toString());
+    }
     if (this.timeout) {
       clearTimeout(this.timeout);
     }
     this.timeout = setTimeout(async () => {
       console.log("saveSettings", settings);
-      await localForage.setItem("settings", settings);
-    }, 2500);
-  }
-
-  async loadSettings() {
-    const settings: any = await localForage.getItem("settings");
-    console.log("loadSettings", settings);
-    if (settings) {
-      this.highlightWords = settings.highlightWords;
-      this.rooms = settings.rooms;
-    }
-    console.log("loadSettings", this.rooms);
+      localStorage.setItem("settings", JSON.stringify(settings));
+    }, 1500);
   }
 
   async addHighlightWord(roomid: string, word: string) {
-    if (!this.highlightWords.has(roomid)) {
-      this.highlightWords.set(roomid, []);
+    if (this.highlightWords[roomid] === undefined) {
+      this.highlightWords[roomid] = [];
     }
     const regex = new RegExp(word, "i");
-    this.highlightWords.get(roomid)?.push(regex);
-    await this.saveSettings();
+    this.highlightWords[roomid]?.push(regex);
+    this.saveSettings();
   }
 
   async removeHighlightWord(roomid: string, word: string) {
-    if (!this.highlightWords.has(roomid)) {
+    if (!this.highlightWords[roomid]) {
       console.warn("removeHighlightWord", "roomid not found", roomid);
       return;
     }
     const regex = new RegExp(word, "i");
-    const words = this.highlightWords.get(roomid);
+    const words = this.highlightWords[roomid];
     const index = words?.findIndex((w) => w.toString() === regex.toString());
     if (index === undefined || index === -1) {
       console.warn("removeHighlightWord", "word not found", word);
     } else {
-      this.highlightWords.get(roomid)?.splice(index, 1);
+      delete words[index];
     }
   }
 
   highlightMsg(roomid: string, message: string) {
     // Room highlights
-    this.highlightWords.get(roomid)?.forEach((word) => {
+    this.highlightWords[roomid]?.forEach((word) => {
       if (word.test(message)) {
         console.log("word", word, "matched message", message);
         return true;
@@ -89,7 +111,7 @@ export class Settings {
     });
 
     // Global highlights
-    this.highlightWords.get("global")?.forEach((word) => {
+    this.highlightWords["global"]?.forEach((word) => {
       if (word.test(message)) {
         console.log("word", word, "matched message", message);
         return true;

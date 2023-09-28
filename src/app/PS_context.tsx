@@ -1,5 +1,5 @@
 "use client";
-import { Client } from "@/client/client";
+import client, { Client } from "@/client/client";
 import { Message } from "@/client/message";
 import { Notification } from "@/client/notifications";
 import { Room } from "@/client/room";
@@ -13,7 +13,7 @@ import "react-toastify/dist/ReactToastify.css";
 
 export const PS_context = createContext<
   {
-    client: Client | null;
+    client: Client;
     selectedPage: string | null;
     selectedPageType: "user" | "room";
     setRoom: (room: string | 1 | -1) => void;
@@ -26,7 +26,7 @@ export const PS_context = createContext<
     notifications: Notification[];
   }
 >({
-  client: null,
+  client: client,
   selectedPage: null,
   selectedPageType: "room",
   setRoom: () => {},
@@ -40,7 +40,6 @@ export const PS_context = createContext<
 });
 
 export default function PS_contextProvider(props: any) {
-  const [client, setClient] = useState<Client | null>(null);
   const [user, setUser] = useState<string | undefined>();
   const [selectedPage, setSelectedPage] = useState<string | null>("home");
   const [selectedPageType, setSelectedPageType] = useState<"room" | "user">(
@@ -102,15 +101,13 @@ export default function PS_contextProvider(props: any) {
       setUpdate(update + 1);
       const roomID = (e as CustomEvent)?.detail?.ID;
       if (roomID) {
+        setRoom(roomID);
         // We don't switch to the room if it's in the settings as it probably means we're doing the initial join
         // console.log("settings", await client.settings.getSavedRooms());
-        const rooms = await client.settings.getSavedRooms();
-        if (rooms && !rooms.map((e) => e.ID).includes(roomID)) {
-          setRoom(roomID);
-        } else if (selectedPageType === "room" && !selectedPage) {
-          // Well okay, but only once
-          setRoom(roomID);
-        }
+        // const rooms = await settings.getSavedRooms();
+        // if (rooms && !rooms.map((e) => e.ID).includes(roomID)) {
+        //   setRoom(roomID);
+        // } 
       }
     };
 
@@ -171,7 +168,8 @@ export default function PS_contextProvider(props: any) {
 
   useEffect(() => {
     if (!client) return;
-    client.autojoin(client.settings.rooms.map((e) => e.ID), true);
+    console.log("AWD Joining rooms", client.settings.getSavedRooms())
+    client.autojoin(client.settings.getSavedRooms().map((e) => e.ID), true);
     // client.login({username, password});
   }, [client]);
 
@@ -226,10 +224,10 @@ export default function PS_contextProvider(props: any) {
     const init = async () => {
       await loadCustomColors();
       console.log("loaded custom colors");
-      const client = new Client();
-      client.onOpen.push(() => {
-        setClient(client);
-      });
+      // const client = new Client();
+      // client.onOpen.push(() => {
+      //   setClient(client);
+      // });
       client.events.addEventListener("login", (username) => {
         console.log("logged in as", username);
         setUser((username as CustomEvent).detail);

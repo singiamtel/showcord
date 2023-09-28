@@ -6,6 +6,7 @@ import { User } from "./user";
 import { Notification } from "./notifications";
 
 export class Client {
+  settings: Settings = new Settings();
   socket: WebSocket | undefined;
   server_url: string = "wss://sim3.psim.us/showdown/websocket/";
   loginserver_url: string = "https://play.pokemonshowdown.com/api/";
@@ -15,7 +16,7 @@ export class Client {
   events: EventTarget = new EventTarget();
   username: string = "";
   loggedIn: boolean = false;
-  settings: Settings = new Settings();
+  // settings: Settings = new Settings();
   onOpen: (() => void)[] = []; // Append callbacks here to run when the socket opens
   private joinAfterLogin: string[] = [];
 
@@ -64,7 +65,16 @@ export class Client {
     }
 
     console.log(`>>${message}`);
-    this.socket.send(`${message}`);
+    try{
+      this.socket.send(`${message}`);
+    }
+    catch(e){
+      if(e instanceof DOMException){
+        this.onOpen.push(() => this.socket!.send(`${message}`));
+        return
+      }
+      throw e;
+    }
   }
 
   room(roomID: string) {
@@ -171,10 +181,10 @@ export class Client {
     // Order of login methods:
     // 1. Assertion in URL (from oauth login)
     // - This happens right after oauth login
-    // - We also need to store the token in localforage
+    // - We also need to store the token in localstorage
     //
     // 2. Assertion from token
-    // - This happens when we have a token stored in localforage
+    // - This happens when we have a token stored in localstorage
     // - We try to get an assertion from the token, and send it to the server
     // - If it fails we drop the token and go to #3
     //
@@ -810,3 +820,6 @@ export class Client {
     });
   }
 }
+
+const client = new Client();
+export default client;
