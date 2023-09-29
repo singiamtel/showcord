@@ -4,20 +4,22 @@
   "scripts": {
     "start": "vite",
     "build": "tsc && vite build",
-    "serve": "vite preview"
+    "serve": "vite preview",
+    "lint": "eslint --ext .js,.jsx,.ts,.tsx .",
+    "lint:fix": "eslint src/ --ext .js,.jsx,.ts,.tsx --fix"
   },
   "dependencies": {
     "@types/lodash": "^4.14.199",
     "@types/node": "^20.4.7",
     "@types/react": "18.2.18",
     "@types/react-dom": "18.2.7",
+    "@typescript-eslint/eslint-plugin": "^6.7.3",
     "@vitejs/plugin-react-swc": "^3.4.0",
     "allotment": "^1.19.3",
     "autoprefixer": "10.4.14",
     "axios": "^1.5.1",
     "core-js": "^3.32.2",
     "eslint": "8.46.0",
-    "eslint-config-next": "13.4.12",
     "highlight.js": "^11.8.0",
     "html-escaper": "^3.0.3",
     "html-react-parser": "^4.2.2",
@@ -26,7 +28,6 @@
     "linkifyjs": "^4.1.1",
     "lodash": "^4.17.21",
     "minisearch": "^6.1.0",
-    "next": "13.4.12",
     "postcss": "8.4.27",
     "react": "18.2.0",
     "react-dom": "18.2.0",

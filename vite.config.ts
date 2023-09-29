@@ -1,12 +1,12 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
 
 export default defineConfig(({ command }) => {
     const config = {
-        base: `${process.env.PUBLIC_URL ?? ""}/`,
+        base: `${process.env.PUBLIC_URL ?? ''}/`,
     };
 
-    if (command === "build") {
+    if (command === 'build') {
         return {
             ...config,
             esbuild: {
