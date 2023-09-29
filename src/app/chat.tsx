@@ -10,16 +10,16 @@ import {
 } from "react";
 import { PS_context } from "./PS_context";
 
-import useOnScreen from "@/utils/isOnScreen";
-import HTML from "@/formatting/html";
-import { HHMMSS } from "@/utils/date";
+import useOnScreen from "../utils/isOnScreen";
+import HTML from "../formatting/html";
+import { HHMMSS } from "../utils/date";
 
 import Linkify from "linkify-react";
-import { Message } from "@/client/message";
-import Code from "@/formatting/code";
+import { Message } from "../client/message";
+import Code from "../formatting/code";
 import { UserCard, UsernameComponent } from "./usercomponents";
-import manageURL from "@/utils/manageURL";
-import useClickOutside from "@/utils/useClickOutside";
+import manageURL from "../utils/manageURL";
+import useClickOutside from "../utils/useClickOutside";
 import {
   bold,
   greentext,
@@ -31,7 +31,7 @@ import {
   strikethrough,
   subscript,
   superscript,
-} from "@/formatting/chat";
+} from "../formatting/chat";
 
 // ``code here`` marks inline code
 // ||text|| are spoilers
@@ -219,7 +219,7 @@ export default function Chat() {
 
   useEffect(() => {
     if (isIntersecting) {
-      messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
+      messagesEndRef.current?.scrollIntoView({ behavior: "auto" });
     }
   }, [__messages, messagesEndRef, isIntersecting]);
 

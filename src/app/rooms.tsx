@@ -1,7 +1,7 @@
 "use client";
 import { useContext } from "react";
 import { PS_context } from "./PS_context";
-import HashtagIcon from "../../public/hashtag.svg";
+import HashtagIcon from "../public/hashtag";
 import Circle from "./components/circle";
 
 export function RoomComponent(

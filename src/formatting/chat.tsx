@@ -1,7 +1,6 @@
-import { roboto_mono } from "@/app/usercomponents";
 import Linkify from "linkify-react";
 import { HTMLAttributes } from "react";
-import manageURL from "@/utils/manageURL";
+import manageURL from "../utils/manageURL";
 import innerText from "react-innertext";
 
 // ``code here`` marks inline code
@@ -36,8 +35,8 @@ export function inlineCode(
   delete props.key;
   return (
     <code
-      className={"text-gray-300 font-mono bg-gray-600 rounded p-1 " +
-        roboto_mono.className}
+      className={"text-gray-300 font-mono bg-gray-600 rounded p-1 "
+        }
       {...props}
       key={key}
     />

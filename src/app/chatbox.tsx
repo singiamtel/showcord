@@ -13,8 +13,7 @@ import {
 import MiniSearch, { SearchResult } from "minisearch";
 import TextareaAutosize from "react-textarea-autosize";
 import { PS_context } from "./PS_context";
-import cmds from "@/commands/chat_commands";
-import { text } from "stream/consumers";
+import cmds from "../commands/chat_commands";
 
 type SearchBoxOffset = {
   width: number;

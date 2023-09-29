@@ -3,7 +3,7 @@ import { useContext } from "react";
 import { PS_context } from "./PS_context";
 import { useEffect, useState } from "react";
 import { UsernameComponent } from "./usercomponents";
-import { User } from "@/client/user";
+import { User } from "../client/user";
 
 export default function Users() {
   const { selectedPage: room, client } = useContext(PS_context);

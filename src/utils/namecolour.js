@@ -1,5 +1,5 @@
 import axios from "axios";
-import { toID } from "@/utils/generic";
+import { toID } from "../utils/generic";
 
 // Author: Felucia
 function userColorHash(name) {

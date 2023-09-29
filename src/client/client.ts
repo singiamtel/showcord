@@ -1,6 +1,6 @@
 'use client'
-import { Settings } from "@/settings";
-import { toID } from "@/utils/generic";
+import { Settings } from "../settings";
+import { toID } from "../utils/generic";
 import { Message } from "./message";
 import { Room, RoomType, roomTypes } from "./room";
 import { User } from "./user";

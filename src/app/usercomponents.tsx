@@ -1,12 +1,6 @@
-import { userColor } from "@/utils/namecolour";
+import { userColor } from "../utils/namecolour";
 import { MouseEventHandler, MutableRefObject } from "react";
-import { clamp, toID } from "@/utils/generic";
-import { Roboto_Mono } from 'next/font/google'
-
-export const roboto_mono = Roboto_Mono({
-  subsets: ['latin'],
-  display: 'swap',
-})
+import { clamp, toID } from "../utils/generic";
 
 const auth = new Set(['&', '#', '@', '§', '%'])
 export function UsernameComponent(
@@ -23,7 +17,7 @@ export function UsernameComponent(
   const rankDisplay = alignRight ? rank.padEnd(1, " ") : (rank === ' ' ? '' : rank );
   return (
     <>
-      <span className={"text-[#9D9488] font-mono whitespace-pre " + roboto_mono.className}>
+      <span className={"text-[#9D9488] font-mono whitespace-pre "}>
         {rankDisplay}
       </span>
       <a onClick={onClick} style={onClick && { cursor: "pointer" } }>

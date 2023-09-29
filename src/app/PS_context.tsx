@@ -1,12 +1,10 @@
 "use client";
-import { Client } from "@/client/client";
-import { Message } from "@/client/message";
-import { Notification } from "@/client/notifications";
-import { Room } from "@/client/room";
-import { loadCustomColors } from "@/utils/namecolour";
-import dotenv from "dotenv";
+import { Client } from "../client/client";
+import { Message } from "../client/message";
+import { Notification } from "../client/notifications";
+import { Room } from "../client/room";
+import { loadCustomColors } from "../utils/namecolour";
 import { createContext, useCallback, useEffect, useState } from "react";
-dotenv.config();
 
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";

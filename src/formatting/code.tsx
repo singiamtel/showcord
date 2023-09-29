@@ -1,5 +1,4 @@
 "use client";
-import { roboto_mono } from "@/app/usercomponents";
 import Highlight from "react-highlight";
 import hljs from "highlight.js";
 
@@ -25,14 +24,14 @@ export default function Code({ message }: any) {
       {relevance > 10
         ? (
           <Highlight
-            className={"whitespace-pre-wrap text-sm " + roboto_mono.className}
+            className={"whitespace-pre-wrap text-sm "}
           >
             {str}
           </Highlight>
         )
         : (
           <pre
-            className={"whitespace-pre-wrap text-sm " + roboto_mono.className}
+            className={"whitespace-pre-wrap text-sm "}
           >
         {str}
           </pre>

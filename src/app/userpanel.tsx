@@ -1,8 +1,8 @@
 "use client";
-import IconProfile from "@/assets/profile";
+import IconProfile from "../assets/profile";
 import { useContext } from "react";
 import { PS_context } from "./PS_context";
-import { userColor } from "@/utils/namecolour";
+import { userColor } from "../utils/namecolour";
 
 export default function UserPanel() {
   const { client, user } = useContext(PS_context);
