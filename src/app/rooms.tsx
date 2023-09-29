@@ -1,4 +1,3 @@
-"use client";
 import { useContext } from "react";
 import { PS_context } from "./PS_context";
 import HashtagIcon from "../public/hashtag";

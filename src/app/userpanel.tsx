@@ -1,4 +1,3 @@
-"use client";
 import IconProfile from "../assets/profile";
 import { useContext } from "react";
 import { PS_context } from "./PS_context";

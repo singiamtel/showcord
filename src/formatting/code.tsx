@@ -1,4 +1,3 @@
-"use client";
 import Highlight from "react-highlight";
 import hljs from "highlight.js";
 

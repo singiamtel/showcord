@@ -1,4 +1,3 @@
-"use client"
 import { Room } from "./client/room";
 
 export class Settings {

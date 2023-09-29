@@ -1,4 +1,3 @@
-"use client";
 import { useContext, useEffect } from "react";
 import { PS_context } from "./PS_context";
 import { RoomComponent } from "./rooms";

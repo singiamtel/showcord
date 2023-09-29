@@ -37,3 +37,4 @@ next-env.d.ts
 
 secrets.ts
 mine.md
+dist/

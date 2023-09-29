@@ -1,4 +1,3 @@
-"use client";
 import { useContext } from "react";
 import ChatBox from "./chatbox";
 import Messages from "./chat";

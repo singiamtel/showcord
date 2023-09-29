@@ -1,4 +1,3 @@
-"use client";
 import { useContext } from "react";
 import { PS_context } from "./PS_context";
 import { useEffect, useState } from "react";

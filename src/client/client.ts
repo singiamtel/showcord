@@ -1,4 +1,3 @@
-'use client'
 import { Settings } from "../settings";
 import { toID } from "../utils/generic";
 import { Message } from "./message";
@@ -195,7 +194,7 @@ export class Client {
     }
     // Oauth login method
     const url =
-      `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}&challenge=${this.challstr}`;
+      `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${import.meta.env.VITE_OAUTH_CLIENTID}&challenge=${this.challstr}`;
     const nWindow = (window as any).n = open(
       url,
       undefined,

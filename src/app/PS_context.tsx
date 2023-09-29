@@ -1,4 +1,3 @@
-"use client";
 import { Client } from "../client/client";
 import { Message } from "../client/message";
 import { Notification } from "../client/notifications";

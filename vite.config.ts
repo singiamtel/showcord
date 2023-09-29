@@ -1,8 +1,22 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react-swc'
 
-// https://vitejs.dev/config/
-export default defineConfig({
-  base: '/',
-  plugins: [react()]
-})
+export default defineConfig(({ command }) => {
+    const config = {
+        base: `${process.env.PUBLIC_URL ?? ""}/`,
+    };
+
+    if (command === "build") {
+        return {
+            ...config,
+            esbuild: {
+                jsxInject: 'import React from "react";',
+            },
+        };
+    } else {
+        return {
+            ...config,
+            plugins: [react()],
+        };
+    }
+});
