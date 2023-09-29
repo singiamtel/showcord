@@ -18,6 +18,7 @@ export class Client {
     loggedIn: boolean = false;
     onOpen: (() => void)[] = []; // Append callbacks here to run when the socket opens
     private joinAfterLogin: string[] = [];
+    client_id = import.meta.env.VITE_OAUTH_CLIENTID;
 
     // For highlighting
     private cleanUsername: string = '';
@@ -192,7 +193,7 @@ export class Client {
         }
         // Oauth login method
         const url =
-      `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${import.meta.env.VITE_OAUTH_CLIENTID}&challenge=${this.challstr}`;
+      `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${this.client_id}&challenge=${this.challstr}`;
         const nWindow = (window as any).n = open(
             url,
             undefined,
@@ -298,7 +299,7 @@ export class Client {
             return false;
         }
         const response = await fetch(
-            `${this.loginserver_url}oauth/api/getassertion?challenge=${challstr}&token=${token}&client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}`,
+            `${this.loginserver_url}oauth/api/getassertion?challenge=${challstr}&token=${token}&client_id=${this.client_id}`,
         );
         return await this.parseLoginserverResponse(response);
     }
@@ -311,7 +312,7 @@ export class Client {
         }
         try {
             const response = await fetch(
-                `${this.loginserver_url}oauth/api/refreshtoken?token=${token}&client_id=${process.env.NEXT_PUBLIC_OAUTH_ID}`,
+                `${this.loginserver_url}oauth/api/refreshtoken?token=${token}&client_id=${this.client_id}`,
             );
             const result = await this.parseLoginserverResponse(response);
             console.log('refreshed token', result);
