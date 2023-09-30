@@ -325,7 +325,7 @@ export function MessageComponent(
     }
     // {" " + message}
     return (
-        <div className={'' + (hld ? 'bg-yellow-hl-body' : '')}>
+        <div className={'p-0.5' + (hld ? 'bg-yellow-hl-body' : '')}>
             <span className="text-gray-125 font-mono text-xs">
                 {time ? HHMMSS(time) : ''}
         &nbsp;

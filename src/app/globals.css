@@ -17,6 +17,10 @@
   }
 }
 
+html{
+  font-size: 14px;
+}
+
 input{background-color: transparent;}
 textarea:focus, input:focus{
   outline: none;
