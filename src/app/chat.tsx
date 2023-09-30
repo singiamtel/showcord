@@ -323,7 +323,6 @@ export function MessageComponent(
             </div>
         );
     }
-    // {" " + message}
     return (
         <div className={'p-0.5' + (hld ? 'bg-yellow-hl-body' : '')}>
             <span className="text-gray-125 font-mono text-xs">
