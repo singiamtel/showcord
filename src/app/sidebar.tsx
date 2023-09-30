@@ -4,6 +4,7 @@ import { RoomComponent } from './rooms';
 import UserPanel from './userpanel';
 import { Allotment } from 'allotment';
 import 'allotment/dist/style.css';
+import { useSortable } from '@dnd-kit/sortable';
 
 export default function Sidebar() {
     const { rooms } = useContext(PS_context);
@@ -12,6 +13,10 @@ export default function Sidebar() {
         rooms.filter((e) => e.type === 'pm'),
         rooms.filter((e) => e.type === 'permanent'),
     ];
+
+    const { listeners, setNodeRef, setActivatorNodeRef } = useSortable({
+        id: 'sidebar-rooms',
+    });
 
     useEffect(() => {
         console.log('rooms changed:', rooms);
@@ -24,9 +29,10 @@ export default function Sidebar() {
             </div>
             <div className="flex flex-grow">
                 <Allotment vertical minSize={100} className="">
-                    <div >
+                    <div ref={setNodeRef}>
                         {permanentRooms.map((room, idx) => (
                             <RoomComponent
+                                listeners={listeners}
                                 key={idx}
                                 name={room.name}
                                 ID={room.ID}
@@ -35,6 +41,7 @@ export default function Sidebar() {
                         ))}
                         {chatRooms.map((room, idx) => (
                             <RoomComponent
+                                listeners={listeners}
                                 key={idx}
                                 name={room.name}
                                 ID={room.ID}
@@ -47,6 +54,7 @@ export default function Sidebar() {
                         <div>
                             {pmRooms.filter((e) => e.type === 'pm').map((room, idx) => (
                                 <RoomComponent
+                                    listeners={listeners}
                                     key={idx}
                                     name={room.name}
                                     ID={room.ID}

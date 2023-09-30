@@ -9,6 +9,8 @@
     "lint:fix": "eslint src/ --ext .js,.jsx,.ts,.tsx --fix"
   },
   "dependencies": {
+    "@dnd-kit/core": "^6.0.8",
+    "@dnd-kit/sortable": "^7.0.2",
     "@types/lodash": "^4.14.199",
     "@types/node": "^20.4.7",
     "@types/react": "18.2.18",
