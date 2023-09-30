@@ -114,9 +114,9 @@ export default function HTML(
             },
             '*': {
                 'color': colorRegex,
-                // "background-image": [
-                //   /^url\((.*?)\)$/i,
-                // ],
+                'background-image': [
+                    /^url\((.*?)\)$/i,
+                ],
             },
         },
         disallowedTagsMode: 'escape',
@@ -126,7 +126,7 @@ export default function HTML(
     if (raw) {
         return (
             <>
-                {parse(sanitizeHtml(message, sanitizeOptions), parserOptions,)}
+                {parse(sanitizeHtml(message, sanitizeOptions), parserOptions)}
             </>
         );
     }

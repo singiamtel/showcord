@@ -35,8 +35,7 @@ export function inlineCode(
     delete props.key;
     return (
         <code
-            className={'text-gray-300 font-mono bg-gray-600 rounded p-1 '
-            }
+            className={'font-mono bg-gray-600 rounded p-1 '}
             {...props}
             key={key}
         />
@@ -148,6 +147,20 @@ export function greentext(
     return (
         <Linkify as="span" className="text-green-400" {...props} key={key}>
       &gt;{children}
+        </Linkify>
+    );
+}
+
+export function fakeCommand(
+    props: Optional<ExtendedProps, 'children'>,
+) {
+    const key = props.key;
+    const children = props.children;
+    delete props.key;
+    delete props.children;
+    return (
+        <Linkify as="span" {...props} key={key}>
+            {children}
         </Linkify>
     );
 }

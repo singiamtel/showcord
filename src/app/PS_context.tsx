@@ -80,7 +80,7 @@ export default function PS_contextProvider(props: any) {
             setSelectedPage(room);
             client.selectRoom(room);
         } else {
-            console.log('Trying to set room that does not exist (' + room + ')');
+            console.warn('Trying to set room that does not exist (' + room + ')');
         }
         setSelectedPageType('room');
     }, [client, rooms, selectedPage, previousRooms]);

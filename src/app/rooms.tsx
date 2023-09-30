@@ -4,20 +4,25 @@ import HashtagIcon from '../public/hashtag';
 import Circle from './components/circle';
 
 export function RoomComponent(
-    { name, ID, notifications: { unread, mentions } }: {
+    { name, ID, notifications: { unread, mentions }, listeners }: {
         name: string;
         ID: string;
         notifications: { unread: number; mentions: number };
+        listeners: any;
     },
 ) {
     const { setRoom, selectedPage: room } = useContext(PS_context);
+
     return (
-        <div className={'relative flex flex-row hover:bg-gray-350 ' + (
-            ID === room ?
-                ' bg-gray-450 hover:bg-gray-450 text-white ' :
-                mentions > 0 || unread > 0 ?
-                    'text-white ' :
-                    ' text-gray-150 ')}
+        <div
+            {...listeners}
+            className={'relative flex flex-row hover:bg-gray-350 ' + (
+                ID === room ?
+                    ' bg-gray-450 hover:bg-gray-450 text-white ' :
+                    mentions > 0 || unread > 0 ?
+                        'text-white ' :
+                        ' text-gray-150 '
+            )}
         >
             {/** Notification circle if it applies */}
             {unread > 0 && (
@@ -34,12 +39,36 @@ export function RoomComponent(
                     {unread > 0 && <span className="ml-2 text-gray-500">[{unread}]</span>}
                 </span>
                 {mentions > 0 &&
-        (
-            <span className="text-white flex justify-center items-center ml-2 mr-1">
-                <Circle>{mentions}</Circle>
-            </span>
-        )}
+          (
+              <span className="text-white flex justify-center items-center ml-2 mr-1">
+                  <Circle>{mentions}</Circle>
+              </span>
+          )}
             </button>
         </div>
     );
 }
+// import React from 'react';
+// import {useSortable} from '@dnd-kit/sortable';
+// import {CSS} from '@dnd-kit/utilities';
+//
+// function SortableItem(props) {
+//   const {
+//     attributes,
+//     listeners,
+//     setNodeRef,
+//     transform,
+//     transition,
+//   } = useSortable({id: props.id});
+//
+//   const style = {
+//     transform: CSS.Transform.toString(transform),
+//     transition,
+//   };
+//
+//   return (
+//     <li ref={setNodeRef} style={style} {...attributes} {...listeners}>
+//       {/* ... */}
+//     </li>
+//   );
+// }

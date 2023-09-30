@@ -3,10 +3,10 @@ import {
     Fragment,
     MouseEvent,
     useContext,
+    useEffect,
     useLayoutEffect,
     useRef,
     useState,
-    useEffect,
 } from 'react';
 import { PS_context } from './PS_context';
 
@@ -22,11 +22,12 @@ import manageURL from '../utils/manageURL';
 import useClickOutside from '../utils/useClickOutside';
 import {
     bold,
+    fakeCommand,
     greentext,
     inlineCode,
-    roomLink,
     italic,
     link,
+    roomLink,
     spoiler,
     strikethrough,
     subscript,
@@ -55,9 +56,17 @@ const tokens = {
     '[': 'link',
     '>': 'greentext',
     '<': 'roomlink',
+    '/': 'fakeCommand',
 } as const;
 
-const elements = {
+type Token = typeof tokens[keyof typeof tokens]
+
+const elements: {
+    [key in Token]: {
+        pattern: RegExp;
+        element: (props: any) => JSX.Element;
+    };
+} = {
     code: { pattern: /``(.+?)``/g, element: inlineCode },
     spoiler: { pattern: /\|\|(.+?)\|\|/g, element: spoiler },
     bold: { pattern: /\*\*(.+?)\*\*/g, element: bold },
@@ -67,6 +76,7 @@ const elements = {
     subscript: { pattern: /\\\\(.+?)\\\\/g, element: subscript },
     link: { pattern: /\[\[(.+?)?\]\]/g, element: link },
     greentext: { pattern: /^>.*/g, element: greentext },
+    fakeCommand: { pattern: /^\/\/.*/g, element: fakeCommand },
     roomlink: { pattern: /<<(.+?)?>>/g, element: roomLink },
 } as const;
 
@@ -97,6 +107,7 @@ const cleanTag = (input: string, tag: keyof typeof elements) => {
             // return input.replace(/\[\[(.+?)?\]\]/g, "$1");
             return input.replace(elements.link.pattern, '$1');
         case 'greentext':
+        case 'fakeCommand':
             return input?.slice(1);
         case 'roomlink':
             return input.replace(elements.roomlink.pattern, '$1');
@@ -139,7 +150,7 @@ export function FormatMsgDisplay(
         const char = msg[i];
         if (char in tokens) {
             const tag = tokens[char as keyof typeof tokens];
-            if (char === '>' && i !== 0) {
+            if ((char === '>' || char === '/') && i !== 0) {
                 currentString += char;
                 continue;
             }
@@ -207,7 +218,6 @@ export default function Chat() {
     useLayoutEffect(() => {
         setMessages(messages);
     }, [messages]);
-
 
     useLayoutEffect(() => {
         messagesEndRef.current!.scrollIntoView({ behavior: 'auto' });
@@ -293,10 +303,13 @@ export function MessageComponent(
         return <HTML message={message} />;
     }
     if (type === 'simple') {
-        return message ? (
-            <div className="text-white">
-                {' ' + message}
-            </div>) : null;
+        return message ?
+            (
+                <div className="text-white">
+                    {' ' + message}
+                </div>
+            ) :
+            null;
     }
     if (type === 'log') {
         return (

@@ -287,7 +287,7 @@ export class Client {
                 return response_json.success;
             }
         } catch (e) {
-            console.warn('Error parsing loginserver response', response_test);
+            // pass
         }
         return response_test;
     }
@@ -429,43 +429,80 @@ export class Client {
             i++;
             roomID = splitted_message[0].slice(1);
         }
-
-        if (!splitted_message[i].startsWith('|')) {
-            // console.log("message", splitted_message.slice(1).join('\n'));
-            for (; i < splitted_message.length; i++) {
-                const chatMessage = this.parseCMessage(splitted_message[i], false);
-                this.addMessageToRoom(roomID, chatMessage);
+        if (splitted_message[i].startsWith('|init|')) {
+            let name = '';
+            let users: User[] = [];
+            const type = splitted_message[i].split('|')[2];
+            i++;
+            for (; i < splitted_message.length; i++) { // start at 2 because first line is room id and second line is cmd
+                if (splitted_message[i] === '') continue;
+                if (splitted_message[i].startsWith('|title|')) {
+                    name = splitted_message[i].slice(7);
+                    continue;
+                }
+                if (splitted_message[i].startsWith('|users|')) {
+                    const parsedUsers = splitted_message[i].split('|')[2].split(
+                        ',',
+                    );
+                    users = parsedUsers.map((tmpuser) => {
+                        const [user, status] = tmpuser.slice(1).split('@');
+                        const name = tmpuser.slice(0, 1) + user;
+                        return new User({ name, ID: toID(name), status });
+                    });
+                    users.shift();
+                    continue;
+                }
+                if (splitted_message[i].startsWith('|:|')) {
+                    if (!roomTypes.includes(type as RoomType)) {
+                        console.warn('Unknown room type', type);
+                    }
+                    const room = new Room({
+                        ID: roomID,
+                        name: name,
+                        type: type as RoomType,
+                    });
+                    this._addRoom(room);
+                    this.addUsers(roomID, users);
+                    continue;
+                }
+                this.parseSingleLiner(splitted_message[i], roomID);
             }
-            return;
         }
-        const [_, cmd, ...args] = splitted_message[i].split('|');
-        // console.log("cmd:", cmd, "args:", args);
-        i++;
-        let type = '',
-            name = '',
-            didName = false,
-            timestamp: string | undefined = '',
-            didTimestamp = false,
-            room = null;
+
+        for (; i < splitted_message.length; i++) {
+            this.parseSingleLiner(splitted_message[i], roomID);
+        }
+    }
+
+    private parseSingleLiner(
+        message: string,
+        roomID: string,
+    ): void {
+        if (!message.startsWith('|')) {
+            const chatMessage = new Message({
+                timestamp: Math.floor(Date.now() / 1000).toString(),
+                type: 'simple',
+                content: message,
+            });
+            return this.addMessageToRoom(roomID, chatMessage);
+        }
+
+        const [_, cmd, ...args] = message.split('|');
+        console.log('cmd', cmd, 'args', args);
         switch (cmd) {
             case 'c':
             case 'c:': {
-                room = this.room(roomID);
+                const room = this.room(roomID);
                 if (!room) {
-                    console.warn('room not found (' + roomID + ')');
+                    console.warn(
+                        'Trying to add message to non-existent room (' + roomID + ')',
+                        message,
+                    );
                     return;
                 }
-                for (
-                    let j = isGlobalOrLobby ? 0 : 1;
-                    j < splitted_message.length;
-                    j++
-                ) {
-                    const chatMessage = this.parseCMessage(
-                        splitted_message[j],
-                        cmd === 'c:',
-                    );
-                    this.addMessageToRoom(roomID, chatMessage);
-                }
+
+                const chatMessage = this.parseCMessage(message, cmd === 'c:');
+                this.addMessageToRoom(roomID, chatMessage);
                 break;
             }
             case 'pm':
@@ -566,118 +603,6 @@ export class Client {
                 }
                 break;
             }
-            case 'init': {
-                let users: User[] = [];
-                type = args[0];
-                for (; i < splitted_message.length; i++) { // start at 2 because first line is room id and second line is cmd
-                    if (splitted_message[i] === '') continue;
-                    if (!didName && splitted_message[i].startsWith('|title|')) {
-                        name = splitted_message[i].slice(7);
-                        didName = true;
-                        continue;
-                    }
-                    if (splitted_message[i].startsWith('|users|')) {
-                        const parsedUsers = splitted_message[i].split('|')[2].split(
-                            ',',
-                        );
-                        users = parsedUsers.map((tmpuser) => {
-                            const [user, status] = tmpuser.slice(1).split('@');
-                            const name = tmpuser.slice(0, 1) + user;
-                            return new User({ name, ID: toID(name), status });
-                        });
-                        users.shift();
-                        continue;
-                    }
-                    if (!didTimestamp && splitted_message[i].startsWith('|:|')) {
-                        timestamp = splitted_message[i].slice(3);
-                        didTimestamp = true;
-                        if (!roomTypes.includes(type as RoomType)) {
-                            console.warn('Unknown room type', type);
-                        }
-                        room = new Room({
-                            ID: roomID,
-                            name: name,
-                            type: type as RoomType,
-                        });
-                        this._addRoom(room);
-                        this.addUsers(roomID, users);
-                        continue;
-                    }
-                    if (
-                        splitted_message[i].startsWith('|c:|') ||
-            splitted_message[i].startsWith('|c|')
-                    ) {
-                        const parsedMessage = this.parseCMessage(
-                            splitted_message[i],
-                            splitted_message[i].startsWith('|c:|'),
-                        );
-                        this.addMessageToRoom(roomID, parsedMessage);
-                    } else if (splitted_message[i].startsWith('|raw|')) {
-                        const [_, _2, ...data] = splitted_message[i].split('|');
-                        this.addMessageToRoom(
-                            roomID,
-                            new Message({
-                                timestamp,
-                                user: '',
-                                type: 'raw',
-                                content: data.join('|'),
-                            }),
-                        );
-                    } else if (splitted_message[i].startsWith('|html|')) {
-                        const [_, _2, ...data] = splitted_message[i].split('|');
-                        this.addMessageToRoom(
-                            roomID,
-                            new Message({
-                                timestamp,
-                                user: '',
-                                type: 'raw',
-                                content: data.join('|'),
-                            }),
-                        );
-                    } else if (splitted_message[i].startsWith('|uhtml|')) {
-                        const [_, _2, name, ...data] = splitted_message[i].split('|');
-                        // TODO: Use the name
-
-                        const room = this.room(roomID);
-                        if (!room) {
-                            console.error(
-                                'Received |uhtmlchange| from untracked room',
-                                roomID,
-                            );
-                            break;
-                        }
-                        room.addUHTML(
-                            new Message({
-                                timestamp,
-                                name,
-                                user: '',
-                                type: 'raw',
-                                content: data.join('|'),
-                            }),
-                            {
-                                selected: this.selectedRoom === roomID,
-                                selfSent: false,
-                            },
-                        );
-                    } else if (splitted_message[i].startsWith('|uhtmlchange|')) {
-                        const room = this.room(roomID);
-                        if (!room) {
-                            console.error(
-                                'Received |uhtmlchange| from untracked room',
-                                roomID,
-                            );
-                            break;
-                        }
-                        room.changeUHTML(args[0], args.slice(1).join('|'));
-                        this.events.dispatchEvent(
-                            new CustomEvent('message', { detail: message }),
-                        );
-                    } else {
-                        console.warn('unknown init message: ' + splitted_message[i]);
-                    }
-                }
-                break;
-            }
             case 'noinit':
                 if (args[0] === 'namerequired') {
                     this.joinAfterLogin.push(roomID);
@@ -709,7 +634,6 @@ export class Client {
                     }
                     room.addUHTML(
                         new Message({
-                            timestamp,
                             name,
                             user: '',
                             type: 'raw',
@@ -738,20 +662,23 @@ export class Client {
                     );
                 }
                 break;
+            case 'raw': {
+                this.addMessageToRoom(
+                    roomID,
+                    new Message({
+                        user: '',
+                        type: 'raw',
+                        content: args.join('|'),
+                    }),
+                );
+                break;
+            }
             default:
                 console.warn('Unknown cmd: ' + cmd);
         }
     }
 
-    private parseCMessage(message: string, hasTimestamp: boolean): Message {
-        if (!message.startsWith('|')) {
-            return new Message({
-                timestamp: Math.floor(Date.now() / 1000).toString(),
-                type: 'simple',
-                content: message,
-            });
-        }
-
+    private parseCMessage(message: string, hasTimestamp: boolean) {
         const splitted_message = message.slice(1).split('|');
         let content, UHTMLName;
         let type: 'raw' | 'chat' | 'log' = 'chat';
@@ -763,6 +690,7 @@ export class Client {
             msgTime = Math.floor(Date.now() / 1000).toString();
         }
         content = tmpcontent.join('|');
+        console.log('content', content);
         if (content.startsWith('/raw')) {
             type = 'raw';
             content = content.slice(4);
