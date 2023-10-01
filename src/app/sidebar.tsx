@@ -1,22 +1,22 @@
-import { useContext, useEffect } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { PS_context } from './PS_context';
 import { RoomComponent } from './rooms';
 import UserPanel from './userpanel';
-import { Allotment } from 'allotment';
 import 'allotment/dist/style.css';
-import { useSortable } from '@dnd-kit/sortable';
+import { Room } from '../client/room';
 
 export default function Sidebar() {
-    const { rooms } = useContext(PS_context);
+    const { rooms: mainRooms } = useContext(PS_context);
+    const [rooms, setRooms] = useState<Room[]>([]);
     const [chatRooms, pmRooms, permanentRooms] = [
         rooms.filter((e) => e.type === 'chat'),
         rooms.filter((e) => e.type === 'pm'),
         rooms.filter((e) => e.type === 'permanent'),
     ];
 
-    const { listeners, setNodeRef, setActivatorNodeRef } = useSortable({
-        id: 'sidebar-rooms',
-    });
+    useEffect(() => {
+        setRooms(mainRooms);
+    }, [mainRooms]);
 
     useEffect(() => {
         console.log('rooms changed:', rooms);
@@ -28,45 +28,35 @@ export default function Sidebar() {
         Pokémon Showdown!
             </div>
             <div className="flex flex-grow">
-                <Allotment vertical minSize={100} className="">
-                    <div ref={setNodeRef}>
-                        {permanentRooms.map((room, idx) => (
+                <div className="w-full">
+                    {[...permanentRooms, ...chatRooms].map((room, idx) => (
+                        <RoomComponent
+                            key={idx}
+                            name={room.name}
+                            ID={room.ID}
+                            notifications={{
+                                unread: room.unread,
+                                mentions: room.mentions,
+                            }}
+                        />
+                    ))}
+                </div>
+
+                {pmRooms.length > 0 && (
+                    <div>
+                        {pmRooms.filter((e) => e.type === 'pm').map((room, idx) => (
                             <RoomComponent
-                                listeners={listeners}
                                 key={idx}
                                 name={room.name}
                                 ID={room.ID}
-                                notifications={{ unread: room.unread, mentions: room.mentions }}
-                            />
-                        ))}
-                        {chatRooms.map((room, idx) => (
-                            <RoomComponent
-                                listeners={listeners}
-                                key={idx}
-                                name={room.name}
-                                ID={room.ID}
-                                notifications={{ unread: room.unread, mentions: room.mentions }}
+                                notifications={{
+                                    unread: room.unread,
+                                    mentions: room.mentions,
+                                }}
                             />
                         ))}
                     </div>
-
-                    {pmRooms.length > 0 && (
-                        <div>
-                            {pmRooms.filter((e) => e.type === 'pm').map((room, idx) => (
-                                <RoomComponent
-                                    listeners={listeners}
-                                    key={idx}
-                                    name={room.name}
-                                    ID={room.ID}
-                                    notifications={{
-                                        unread: room.unread,
-                                        mentions: room.mentions,
-                                    }}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </Allotment>
+                )}
             </div>
             <UserPanel />
         </div>

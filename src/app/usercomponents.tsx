@@ -4,25 +4,39 @@ import { clamp, toID } from '../utils/generic';
 
 const auth = new Set(['&', '#', '@', '§', '%']);
 export function UsernameComponent(
-    { user, alignRight, onClick, colon, idle, bold }: {
+    { user, alignRight, onClick, colon, idle, bold, colorless }: {
         user: string;
         idle?: boolean;
         alignRight?: boolean;
         onClick?: MouseEventHandler<HTMLAnchorElement>;
         colon?: boolean;
         bold?: boolean;
+        colorless?: boolean;
     },
 ) {
     const rank = user.charAt(0);
-    const rankDisplay = alignRight ? rank.padEnd(1, ' ') : (rank === ' ' ? '' : rank);
+    const rankDisplay = alignRight ?
+        rank.padEnd(1, ' ') :
+        (rank === ' ' ? '' : rank);
     return (
         <>
             <span className={'text-[#9D9488] font-mono whitespace-pre '}>
                 {rankDisplay}
             </span>
-            <a onClick={onClick} style={onClick && { cursor: 'pointer' } }>
-                <span style={{ color: idle ? '#888888' : userColor(user) }} className={ bold || auth.has(rank) ? 'font-bold ' : ''} data-message='true'>
-                    {user.slice(1)}{colon && ':'}
+            <a onClick={onClick} style={onClick && { cursor: 'pointer' }}>
+                <span
+                    style={{
+                        color: colorless ?
+                            'white' :
+                            idle ?
+                                '#888888' :
+                                userColor(user),
+                    }}
+                    className={bold || auth.has(rank) ? 'font-bold ' : ''}
+                    data-message="true"
+                >
+                    {user.slice(1)}
+                    {colon && ':'}
                 </span>
             </a>
         </>
@@ -47,7 +61,14 @@ export function UserCard(
                 top: clamp(position.y, margin, window.innerHeight - 300 - margin),
             }}
         >
-            <strong><a target="_blank" href={'https://pokemonshowdown.com/users/' + toID(name)}>{name}</a></strong>
+            <strong>
+                <a
+                    target="_blank"
+                    href={'https://pokemonshowdown.com/users/' + toID(name)}
+                >
+                    {name}
+                </a>
+            </strong>
             <div className="text-xs text-gray-100">
                 {user ? user.status : ''}
             </div>

@@ -33,6 +33,7 @@ import {
     subscript,
     superscript,
 } from '../formatting/chat';
+import { userColor } from '../utils/namecolour';
 
 // ``code here`` marks inline code
 // ||text|| are spoilers
@@ -59,7 +60,7 @@ const tokens = {
     '/': 'fakeCommand',
 } as const;
 
-type Token = typeof tokens[keyof typeof tokens]
+type Token = typeof tokens[keyof typeof tokens];
 
 const elements: {
     [key in Token]: {
@@ -313,7 +314,7 @@ export function MessageComponent(
     }
     if (type === 'log') {
         return (
-            <div className="text-white">
+            <div className="p-0.5 text-white">
                 <span className="text-gray-125 font-mono text-xs">
                     {time ? HHMMSS(time) : ''}
 
@@ -330,13 +331,30 @@ export function MessageComponent(
         &nbsp;
             </span>
             <span className="text-white">
-                <UsernameComponent
-                    user={user}
-                    onClick={(e) => onNameClick && onNameClick(e)}
-                    colon
-                    bold
-                />
-        &nbsp;<FormatMsgDisplay msg={message} />
+                {type === 'roleplay' ?
+                    (
+                        <>
+                            <strong style={{ color: userColor(user) }}>
+                ●
+                            </strong>{' '}
+                            <UsernameComponent
+                                user={user}
+                                onClick={(e) => onNameClick && onNameClick(e)}
+                                colorless
+                            />
+                        </>
+                    ) :
+                    (
+                        <>
+                            <UsernameComponent
+                                user={user}
+                                onClick={(e) => onNameClick && onNameClick(e)}
+                                colon
+                                bold
+                            />&nbsp;
+                        </>
+                    )}
+                <FormatMsgDisplay msg={message} />
             </span>
         </div>
     );

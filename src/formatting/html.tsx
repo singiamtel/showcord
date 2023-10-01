@@ -50,15 +50,6 @@ export default function HTML(
                     </button>
                 );
             }
-            if (domNode.name === 'anonymous') {
-                console.log('anonymous', domNode);
-                return (
-                    <>
-                        {'<anonymous>'}
-                        {domToReact(children, parserOptions)}
-                    </>
-                );
-            }
             if (domNode.name === 'summary') {
                 return (
                     <>
@@ -66,6 +57,14 @@ export default function HTML(
                     </>
                 );
             }
+
+            // if (domNode.name === 'psicon') {
+            //     return (
+            //         <>
+            //             {domToReact(children, parserOptions)}
+            //         </>
+            //     );
+            // }
         },
     };
 

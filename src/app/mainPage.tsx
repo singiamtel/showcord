@@ -28,7 +28,6 @@ export default function MainPage() {
     );
     const { setRoom } = useContext(PS_context);
     const [news, setNews] = useState<any[]>([]);
-    const newsURL = 'https://pokemonshowdown.com/news.json';
 
     const formRef = createRef<HTMLFormElement>();
     const inputRef = useRef<HTMLInputElement>(null);
@@ -43,14 +42,6 @@ export default function MainPage() {
             window.removeEventListener('focus', focus);
         };
     }, []);
-
-    useEffect(() => {
-        fetch(newsURL).then((res) => res.json()).then((json) => setNews(json));
-    }, []);
-
-    useEffect(() => {
-        console.log('got news', news);
-    }, [news]);
 
     const submit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -87,6 +78,7 @@ export default function MainPage() {
     useEffect(() => {
         if (!client) return;
         client.queryRooms(setRoomsJSON);
+        client.queryNews(setNews);
     }, [client]);
 
     useEffect(() => {

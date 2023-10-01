@@ -4,19 +4,17 @@ import HashtagIcon from '../public/hashtag';
 import Circle from './components/circle';
 
 export function RoomComponent(
-    { name, ID, notifications: { unread, mentions }, listeners }: {
+    { name, ID, notifications: { unread, mentions } }: {
         name: string;
         ID: string;
         notifications: { unread: number; mentions: number };
-        listeners: any;
     },
 ) {
     const { setRoom, selectedPage: room } = useContext(PS_context);
 
     return (
         <div
-            {...listeners}
-            className={'relative flex flex-row hover:bg-gray-350 ' + (
+            className={'flex flex-row hover:bg-gray-350 ' + (
                 ID === room ?
                     ' bg-gray-450 hover:bg-gray-450 text-white ' :
                     mentions > 0 || unread > 0 ?

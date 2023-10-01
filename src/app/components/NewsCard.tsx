@@ -15,9 +15,12 @@ export default function NewsCard(
     return (
         <div className="m-2">
             <h2 className="font-bold text-lg">
-                {news.title} - by {news.author}
+                {news.title}
             </h2>
-            <span className="m-2 block">
+            <span className="ml-2 mb-2 block">
+                <span className="text-gray-125">
+                    {news.author}
+                </span>
                 <HTML message={news.summaryHTML} raw />
             </span>
             {!last && <hr />}

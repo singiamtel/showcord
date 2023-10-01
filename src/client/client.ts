@@ -6,38 +6,34 @@ import { User } from './user';
 import { Notification } from './notifications';
 
 export class Client {
+    readonly server_url: string = 'wss://sim3.psim.us/showdown/websocket/';
+    readonly loginserver_url: string = 'https://play.pokemonshowdown.com/api/';
+    readonly newsURL = 'https://pokemonshowdown.com/news.json';
+
     settings: Settings = new Settings();
     socket: WebSocket | undefined;
-    server_url: string = 'wss://sim3.psim.us/showdown/websocket/';
-    loginserver_url: string = 'https://play.pokemonshowdown.com/api/';
-    challstr: string = '';
+
     rooms: Map<string, Room> = new Map();
     users: User[] = [];
     events: EventTarget = new EventTarget();
     username: string = '';
     loggedIn: boolean = false;
     onOpen: (() => void)[] = []; // Append callbacks here to run when the socket opens
+
     private joinAfterLogin: string[] = [];
-    client_id = import.meta.env.VITE_OAUTH_CLIENTID;
-
-    // For highlighting
-    private cleanUsername: string = '';
-
-    // Used for notifications
-    private selectedRoom: string = '';
-
-    // callbacks given to query commands, it's called after the server responds back with the info
+    private challstr: string = '';
+    private client_id = import.meta.env.VITE_OAUTH_CLIENTID;
+    private cleanUsername: string = ''; // For highlighting
+    private selectedRoom: string = ''; // Used for notifications
+    // Callbacks given to query commands, it's called after the server responds back with the info
     private userListener: ((json: any) => any) | undefined;
     private roomListener: ((json: any) => any) | undefined;
-
-    // Client-side only rooms, joined automatically
     private permanentRooms = [{
         ID: 'home',
         name: 'Home',
-    }];
-
-    // Server response to /cmd rooms
-    private roomsJSON: any = undefined;
+    }]; // Client-side only rooms, joined automatically
+    private roomsJSON: any = undefined; // Server response to /cmd rooms
+    private news: any = undefined; // Cached news
 
     constructor() {
         this.__createPermanentRooms();
@@ -113,6 +109,16 @@ export class Client {
         }
         this.send(`/cmd rooms`, false);
         this.roomListener = callback;
+    }
+
+    async queryNews(callback: (json: any) => void) {
+        if (this.news) {
+            return callback(this.news);
+        }
+        fetch(this.newsURL).then((res) => res.json()).then((json) => {
+            this.news = json;
+            callback(json);
+        });
     }
 
     async join(rooms: string | string[]) {
@@ -585,15 +591,10 @@ export class Client {
                 } else if (args[0] === 'rooms') {
                     try {
                         const tmpjson = JSON.parse(args.slice(1).join('|'));
+                        this.roomsJSON = tmpjson;
                         if (this.roomListener) {
                             this.roomListener(tmpjson);
-                            this.roomsJSON = tmpjson;
                             this.roomListener = undefined;
-                        } else {
-                            console.warn(
-                                'received queryresponse|rooms but nobody asked for it',
-                                args,
-                            );
                         }
                     } catch (e) {
                         console.error('Error parsing roomsdetails', args);
@@ -681,7 +682,7 @@ export class Client {
     private parseCMessage(message: string, hasTimestamp: boolean) {
         const splitted_message = message.slice(1).split('|');
         let content, UHTMLName;
-        let type: 'raw' | 'chat' | 'log' = 'chat';
+        let type: Message['type'] = 'chat';
         let _, msgTime, user, tmpcontent: (string | undefined)[];
         if (hasTimestamp) {
             [_, msgTime, user, ...tmpcontent] = splitted_message;
@@ -702,6 +703,9 @@ export class Client {
         } else if (content.startsWith('/log')) {
             type = 'log';
             content = content.slice(4);
+        } else if (content.startsWith('/me')) {
+            type = 'roleplay';
+            content = content.slice(3);
         }
         return new Message({
             timestamp: msgTime,
