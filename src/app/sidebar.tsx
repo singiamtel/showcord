@@ -3,6 +3,7 @@ import { PS_context } from './PS_context';
 import { RoomComponent } from './rooms';
 import UserPanel from './userpanel';
 import 'allotment/dist/style.css';
+import { Allotment } from 'allotment';
 import { Room } from '../client/room';
 
 export default function Sidebar() {
@@ -28,23 +29,9 @@ export default function Sidebar() {
         Pokémon Showdown!
             </div>
             <div className="flex flex-grow">
-                <div className="w-full">
-                    {[...permanentRooms, ...chatRooms].map((room, idx) => (
-                        <RoomComponent
-                            key={idx}
-                            name={room.name}
-                            ID={room.ID}
-                            notifications={{
-                                unread: room.unread,
-                                mentions: room.mentions,
-                            }}
-                        />
-                    ))}
-                </div>
-
-                {pmRooms.length > 0 && (
-                    <div>
-                        {pmRooms.filter((e) => e.type === 'pm').map((room, idx) => (
+                <Allotment vertical minSize={100} className="">
+                    <div className="w-full">
+                        {[...permanentRooms, ...chatRooms].map((room, idx) => (
                             <RoomComponent
                                 key={idx}
                                 name={room.name}
@@ -56,7 +43,23 @@ export default function Sidebar() {
                             />
                         ))}
                     </div>
-                )}
+
+                    {pmRooms.length > 0 && (
+                        <div className="w-full">
+                            {pmRooms.filter((e) => e.type === 'pm').map((room, idx) => (
+                                <RoomComponent
+                                    key={idx}
+                                    name={room.name}
+                                    ID={room.ID}
+                                    notifications={{
+                                        unread: room.unread,
+                                        mentions: room.mentions,
+                                    }}
+                                />
+                            ))}
+                        </div>
+                    )}
+                </Allotment>
             </div>
             <UserPanel />
         </div>

@@ -14,7 +14,7 @@ export function RoomComponent(
 
     return (
         <div
-            className={'flex flex-row hover:bg-gray-350 ' + (
+            className={'relative flex flex-row hover:bg-gray-350 ' + (
                 ID === room ?
                     ' bg-gray-450 hover:bg-gray-450 text-white ' :
                     mentions > 0 || unread > 0 ?

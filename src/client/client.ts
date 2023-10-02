@@ -494,7 +494,6 @@ export class Client {
         }
 
         const [_, cmd, ...args] = message.split('|');
-        console.log('cmd', cmd, 'args', args);
         switch (cmd) {
             case 'c':
             case 'c:': {
@@ -522,7 +521,9 @@ export class Client {
                         // received message
                         roomID = `pm-${sender}`;
                     }
-                    const content = args.slice(2).join('|');
+                    const { content, type } = this.parseCMessageContent(
+                        args.slice(2).join('|'),
+                    );
                     const room = this.room(roomID);
                     if (!room) {
                         this._addRoom(
@@ -536,10 +537,10 @@ export class Client {
                     this.addMessageToRoom(
                         roomID,
                         new Message({
-                            timestamp: Math.floor(Date.now() / 1000).toString(),
                             user: args[0],
-                            type: 'chat',
                             content,
+                            timestamp: Math.floor(Date.now() / 1000).toString(),
+                            type,
                         }),
                     );
                 }
@@ -681,8 +682,6 @@ export class Client {
 
     private parseCMessage(message: string, hasTimestamp: boolean) {
         const splitted_message = message.slice(1).split('|');
-        let content, UHTMLName;
-        let type: Message['type'] = 'chat';
         let _, msgTime, user, tmpcontent: (string | undefined)[];
         if (hasTimestamp) {
             [_, msgTime, user, ...tmpcontent] = splitted_message;
@@ -690,8 +689,23 @@ export class Client {
             [_, user, ...tmpcontent] = splitted_message;
             msgTime = Math.floor(Date.now() / 1000).toString();
         }
-        content = tmpcontent.join('|');
-        console.log('content', content);
+        const { content, type, UHTMLName } = this.parseCMessageContent(
+            tmpcontent.join('|'),
+        );
+        return new Message({
+            timestamp: msgTime,
+            user,
+            name: UHTMLName,
+            type,
+            content: content,
+        });
+    }
+
+    private parseCMessageContent(
+        content: string,
+    ): { type: Message['type']; content: string; UHTMLName?: string } {
+        let type: Message['type'] = 'chat';
+        let UHTMLName = undefined;
         if (content.startsWith('/raw')) {
             type = 'raw';
             content = content.slice(4);
@@ -707,13 +721,10 @@ export class Client {
             type = 'roleplay';
             content = content.slice(3);
         }
-        return new Message({
-            timestamp: msgTime,
-            user,
-            name: UHTMLName,
-            type,
-            content: content,
-        });
+        if (UHTMLName) {
+            return { type, content, UHTMLName };
+        }
+        return { type, content };
     }
 
     private __setupSocketListeners() {
