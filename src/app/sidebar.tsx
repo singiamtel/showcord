@@ -13,6 +13,7 @@ import {
     closestCenter,
     DndContext,
     DragEndEvent,
+    DragOverEvent,
     MouseSensor,
     TouchSensor,
     useSensor,
@@ -24,7 +25,6 @@ import {
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import SortableItem from '../utils/Sortable';
-import { SortableOverlay } from '../utils/SortableOverlay';
 
 export default function Sidebar() {
     const { rooms, setRooms } = useContext(PS_context);
@@ -54,7 +54,7 @@ export default function Sidebar() {
         console.log('rooms:', rooms.map((e) => e.ID));
     }, [rooms]);
 
-    const handleDragEnd = (event: DragEndEvent) => {
+    const handleDragOver = (event: DragOverEvent) => {
         const { active, over } = event;
         if (over) {
             if (active.id !== over.id) {
@@ -75,7 +75,7 @@ export default function Sidebar() {
             onDragStart={({ active }) => {
                 setActive(active);
             }}
-            onDragEnd={handleDragEnd}
+            onDragOver={handleDragOver}
             onDragCancel={() => {
                 setActive(null);
             }}

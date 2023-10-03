@@ -23,6 +23,7 @@ const SortableItem: FC<SortableItemProps> = ({ id, children }) => {
     });
 
     const style = {
+        opacity: transform ? 0.8 : 1,
         transform: CSS.Transform.toString(transform),
         transition: transition,
     };

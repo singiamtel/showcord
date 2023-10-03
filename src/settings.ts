@@ -10,8 +10,6 @@ export class Settings {
     notes: Map<string, string> = new Map(); // user -> note
 
     constructor() {
-    // this.loadSettings();
-
         if (typeof window === 'undefined') {
             return;
         }
@@ -20,17 +18,14 @@ export class Settings {
             return;
         }
         const settings = JSON.parse(settingsRaw);
-        console.log('loadSettings', settings);
+        console.log('loaded settings', settings);
         if (settings) {
             for (const [key, value] of Object.entries(settings.highlightWords) as [key:string, value: string[]][]) {
                 this.highlightWords[key] = value.map((w: string) => new RegExp(w));
             }
-            this.highlightWords = {};
-            console.log('AWD SAVED ROOMS', settings.rooms);
+            // this.highlightWords = {};
             this.rooms = settings.rooms;
         }
-        console.log('AWD loadSettings rooms', this.rooms);
-        console.log('AWD constructor finished');
     // Notification.requestPermission((result) => {
     //   console.log(result);
     // });
