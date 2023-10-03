@@ -2,6 +2,7 @@ import { useContext, useEffect, useMemo, useState } from 'react';
 import { PS_context } from './PS_context';
 import { RoomComponent } from './rooms';
 import {
+    restrictToParentElement,
     restrictToVerticalAxis,
     restrictToWindowEdges,
 } from '@dnd-kit/modifiers';
@@ -43,16 +44,6 @@ export default function Sidebar() {
         },
     });
     const sensors = useSensors(mouseSensor, touchSensor);
-    const [active, setActive] = useState<Active | null>(null);
-
-    const activeItem = useMemo(
-        () => rooms.find((item) => item.ID === active?.id),
-        [active, rooms],
-    );
-
-    useEffect(() => {
-        console.log('rooms:', rooms.map((e) => e.ID));
-    }, [rooms]);
 
     const handleDragOver = (event: DragOverEvent) => {
         const { active, over } = event;
@@ -65,21 +56,14 @@ export default function Sidebar() {
                 setRooms(tmp);
             }
         }
-        setActive(null);
     };
 
     return (
         <DndContext
             sensors={sensors}
             collisionDetection={closestCenter}
-            onDragStart={({ active }) => {
-                setActive(active);
-            }}
             onDragOver={handleDragOver}
-            onDragCancel={() => {
-                setActive(null);
-            }}
-            modifiers={[restrictToVerticalAxis, restrictToWindowEdges]}
+            modifiers={[restrictToVerticalAxis, restrictToParentElement]}
         >
             <div className="w-auto bg-gray-600 h-screen flex flex-col justify-between">
                 <div className="text-center mr-2 ml-2 p-2 text-white font-bold text-lg h-16 whitespace-nowrap">
@@ -92,7 +76,7 @@ export default function Sidebar() {
                                 items={rooms.map((e) => e.ID)}
                                 strategy={verticalListSortingStrategy}
                             >
-                                {rooms.map((room) => (
+                                {rooms.filter((e) => e.type !== 'pm').map((room) => (
                                     <SortableItem id={room.ID}>
                                         <RoomComponent
                                             name={room.name}
@@ -107,20 +91,34 @@ export default function Sidebar() {
                             </SortableContext>
                         </div>
 
-                        {rooms.filter((e) => e.type === 'pm').length > 0 && (
-                            <div className="w-full">
-                                {rooms.filter((e) => e.type === 'pm').map((room) => (
-                                    <RoomComponent
-                                        name={room.name}
-                                        ID={room.ID}
-                                        notifications={{
-                                            unread: room.unread,
-                                            mentions: room.mentions,
-                                        }}
-                                    />
-                                ))}
-                            </div>
-                        )}
+                        <DndContext
+                            sensors={sensors}
+                            collisionDetection={closestCenter}
+                            onDragOver={handleDragOver}
+                            modifiers={[restrictToVerticalAxis, restrictToParentElement]}
+                        >
+                            <SortableContext
+                                items={rooms.map((e) => e.ID)}
+                                strategy={verticalListSortingStrategy}
+                            >
+                                {rooms.filter((e) => e.type === 'pm').length > 0 && (
+                                    <div className="w-full">
+                                        {rooms.filter((e) => e.type === 'pm').map((room) => (
+                                            <SortableItem id={room.ID}>
+                                                <RoomComponent
+                                                    name={room.name}
+                                                    ID={room.ID}
+                                                    notifications={{
+                                                        unread: room.unread,
+                                                        mentions: room.mentions,
+                                                    }}
+                                                />
+                                            </SortableItem>
+                                        ))}
+                                    </div>
+                                )}
+                            </SortableContext>
+                        </DndContext>
                     </Allotment>
                 </div>
                 <UserPanel />

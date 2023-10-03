@@ -72,7 +72,7 @@ export class Settings {
         this.timeout = setTimeout(async () => {
             console.log('saveSettings', settings);
             localStorage.setItem('settings', JSON.stringify(settings));
-        }, 1500);
+        }, 3000);
     }
 
     async addHighlightWord(roomid: string, word: string) {
