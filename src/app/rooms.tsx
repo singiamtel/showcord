@@ -14,59 +14,41 @@ export function RoomComponent(
 
     return (
         <div
-            className={'relative flex flex-row hover:bg-gray-350 ' + (
-                ID === room ?
-                    ' bg-gray-450 hover:bg-gray-450 text-white ' :
-                    mentions > 0 || unread > 0 ?
-                        'text-white ' :
-                        ' text-gray-150 '
-            )}
+            className={'relative flex w-full  '}
         >
-            {/** Notification circle if it applies */}
-            {unread > 0 && (
-                <span className="rounded-full bg-white text-white text-xs p-1 h-1 w-1  absolute top-1/2  transform -translate-x-1/2 -translate-y-1/2" />
-            )}
-            {/** Room name */}
-            <button
-                className={'rounded p-1 flex flex-row basis-full items-center  h-auto mr-2 ml-2 '}
-                onClick={() => setRoom(ID)}
+            <div
+                className={' flex flex-row hover:bg-gray-350 w-full ' + (
+                    ID === room ?
+                        ' bg-gray-450 hover:bg-gray-450 text-white ' :
+                        mentions > 0 || unread > 0 ?
+                            'text-white ' :
+                            ' text-gray-150 '
+                )}
             >
-                <HashtagIcon height={16} width={16} />
-                <span className="text-left ml-2 max-w-full truncate">
-                    <span className="truncate max-w-full">{name}</span>
-                    {unread > 0 && <span className="ml-2 text-gray-500">[{unread}]</span>}
+                {/** Notification circle if it applies */}
+                {unread > 0 && (
+                    <span className="rounded-full bg-white text-white text-xs p-1 h-1 w-1  absolute top-1/2  transform -translate-x-1/2 -translate-y-1/2" />
+                )}
+                {/** Room name */}
+                <button
+                    className={'rounded p-1 flex flex-row basis-full items-center  h-auto mr-2 ml-2 '}
+                    onClick={() => setRoom(ID)}
+                >
+                    <HashtagIcon height={16} width={16} />
+                    <span className="text-left ml-2 max-w-full truncate">
+                        <span className="truncate max-w-full">{name}</span>
+                        {unread > 0 && (
+                            <span className="ml-2 text-gray-500">[{unread}]</span>
+                        )}
+                    </span>
+                    {mentions > 0 &&
+            (
+                <span className="text-white flex justify-center items-center ml-2 mr-1">
+                    <Circle>{mentions}</Circle>
                 </span>
-                {mentions > 0 &&
-          (
-              <span className="text-white flex justify-center items-center ml-2 mr-1">
-                  <Circle>{mentions}</Circle>
-              </span>
-          )}
-            </button>
+            )}
+                </button>
+            </div>
         </div>
     );
 }
-// import React from 'react';
-// import {useSortable} from '@dnd-kit/sortable';
-// import {CSS} from '@dnd-kit/utilities';
-//
-// function SortableItem(props) {
-//   const {
-//     attributes,
-//     listeners,
-//     setNodeRef,
-//     transform,
-//     transition,
-//   } = useSortable({id: props.id});
-//
-//   const style = {
-//     transform: CSS.Transform.toString(transform),
-//     transition,
-//   };
-//
-//   return (
-//     <li ref={setNodeRef} style={style} {...attributes} {...listeners}>
-//       {/* ... */}
-//     </li>
-//   );
-// }

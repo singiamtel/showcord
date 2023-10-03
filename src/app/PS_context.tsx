@@ -22,6 +22,7 @@ export const PS_context = createContext<
     messages: Message[];
     user?: string; // Will be an object with user info
     rooms: Room[];
+    setRooms: (rooms: Room[]) => void;
     notifications: Notification[];
 }
 >({
@@ -35,6 +36,7 @@ export const PS_context = createContext<
             messages: [],
             user: undefined,
             rooms: [],
+            setRooms: () => {},
             notifications: [],
         });
 
@@ -259,6 +261,7 @@ export default function PS_contextProvider(props: any) {
                 user,
                 messages,
                 rooms,
+                setRooms,
                 notifications,
             }}
         >
