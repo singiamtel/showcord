@@ -2,14 +2,16 @@ import ReactDOM from 'react-dom/client';
 import Home from './app/page';
 import './app/globals.css';
 import { StrictMode } from 'react';
+import { Analytics } from '@vercel/analytics/react';
 
 const root = ReactDOM.createRoot(
-    document.getElementById('root') as HTMLElement
+    document.getElementById('root') as HTMLElement,
 );
 root.render(
     <StrictMode>
         <Home />
-    </StrictMode>
+        <Analytics />
+    </StrictMode>,
 );
 
 // If you want to start measuring performance in your app, pass a function
