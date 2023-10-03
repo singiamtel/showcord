@@ -1,9 +1,10 @@
 import { Settings } from '../settings';
-import { toID } from '../utils/generic';
+import { cleanRegex, toID } from '../utils/generic';
 import { Message } from './message';
 import { Room, RoomType, roomTypes } from './room';
 import { User } from './user';
 import { Notification } from './notifications';
+import cmds from '../commands/chat_commands';
 
 export class Client {
     readonly server_url: string = 'wss://sim3.psim.us/showdown/websocket/';
@@ -41,12 +42,13 @@ export class Client {
         this.__setupSocketListeners();
     }
 
-    async send(message: string, room: string | false) {
+    async send(ogMessage: string, room: string | false) {
         if (!this.socket) {
             throw new Error(
-                `Sending message before socket initialization ${room} ${message}`,
+                `Sending message before socket initialization ${room} ${ogMessage}`,
             );
         }
+        let message = ogMessage;
         if (!room) {
             message = `|${message}`;
         } else {
@@ -62,6 +64,7 @@ export class Client {
 
         console.log(`>>${message}`);
         try {
+            if (this.__parseSendMsg(ogMessage, room)) return; // Already handled client-side
             this.socket.send(`${message}`);
         } catch (e) {
             if (e instanceof DOMException) {
@@ -166,6 +169,7 @@ export class Client {
         if (
             this.settings.highlightMsg(roomid, message)
         ) {
+            console.log('highlighted1', message);
             return true;
         }
         return false;
@@ -351,6 +355,7 @@ export class Client {
             toID(message.user) !== toID(this.username) &&
       this.highlightMsg(roomID, message.content)
         ) {
+            console.log('highlighted', message.content);
             message.hld = true;
         }
         if (room) {
@@ -675,6 +680,21 @@ export class Client {
                 );
                 break;
             }
+            case 'error':
+                {
+                    // this.events.dispatchEvent(
+                    //     new CustomEvent('error', { detail: args.join('|') }),
+                    // );
+                    this.addMessageToRoom(
+                        roomID,
+                        new Message({
+                            user: '',
+                            type: 'error',
+                            content: args.join('|'),
+                        }),
+                    );
+                }
+                break;
             default:
                 console.warn('Unknown cmd: ' + cmd);
         }
@@ -761,5 +781,116 @@ export class Client {
                 }),
             );
         });
+    }
+
+    private __parseSendMsg(message: string, room: string | false): boolean {
+        if (!message.startsWith('/')) {
+            return false;
+        }
+        const splitted_message = message.split(' ');
+        const cmd = splitted_message[0].slice(1);
+        console.log('cmd', cmd);
+        switch (cmd) {
+            case 'highlight':
+            case 'hl':
+                {
+                    console.log('splitted_message', splitted_message);
+                    const [subcmd, ...args] = splitted_message.slice(1);
+                    console.log(`subcmd (${subcmd}) args ${args}`);
+                    switch (subcmd) {
+                        case 'add':
+                        case 'roomadd':
+                            for (const word of args) {
+                                this.settings.addHighlightWord(
+                                    subcmd === 'add' ? 'global' : this.selectedRoom,
+                                    word,
+                                );
+                            }
+                            this.addMessageToRoom(
+                                this.selectedRoom,
+                                new Message({
+                                    user: '',
+                                    name: '',
+                                    type: 'log',
+                                    content: `Added "${args.join(' ')}" to highlight list`,
+                                }),
+                            );
+                            // TODO: display help
+                            return true;
+                        case 'delete':
+                        case 'roomdelete':
+                            for (const word of args) {
+                                this.settings.removeHighlightWord(
+                                    subcmd === 'delete' ? 'global' : this.selectedRoom,
+                                    word,
+                                );
+                            }
+                            this.addMessageToRoom(
+                                this.selectedRoom,
+                                new Message({
+                                    user: '',
+                                    name: '',
+                                    type: 'log',
+                                    content: `Deleted "${args.join(' ')}" from highlight list`,
+                                }),
+                            );
+                            return true;
+                        case 'list':
+                        case 'roomlist':
+                            {
+                                const words = this.settings.highlightWords[
+                                    subcmd === 'list' ? 'global' : this.selectedRoom
+                                ]?.map((e) => cleanRegex(e));
+                                console.log('words', words);
+
+                                this.addMessageToRoom(
+                                    this.selectedRoom,
+                                    new Message({
+                                        user: '',
+                                        name: '',
+                                        type: 'log',
+                                        content: words && words.length ? `Current highlight list: ${words.join(', ')}` : 'Your highlight list is empty',
+                                    }),
+                                );
+                            }
+                            return true;
+                        case 'clear':
+                        case 'roomclear':
+                            {
+                                this.settings.clearHighlightWords(
+                                    subcmd === 'clear' ? 'global' : this.selectedRoom,
+                                );
+                                this.addMessageToRoom(
+                                    this.selectedRoom,
+                                    new Message({
+                                        user: '',
+                                        name: '',
+                                        type: 'log',
+                                        content: `Cleared highlight list`,
+                                    }),
+                                );
+                            }
+                            return true;
+
+                        default:
+                            // Display help
+                            console.warn('Unknown subcommand for /highlight: ', subcmd);
+                            return true; // Don't send to server
+                    }
+                }
+                break;
+            default:
+                return false;
+        // /highlight add [word 1], [word 2], [...] - Add the provided list of words to your highlight list.
+        // /highlight roomadd [word 1], [word 2], [...] - Add the provided list of words to the highlight list of whichever room you used the command in.
+        // /highlight list - List all words that currently highlight you.
+        // /highlight roomlist - List all words that currently highlight you in whichever room you used the command in.
+        // /highlight delete [word 1], [word 2], [...] - Delete the provided list of words from your entire highlight list.
+        // /highlight roomdelete [word 1], [word 2], [...] - Delete the provided list of words from the highlight list of whichever room you used the command in.
+        // /highlight clear - Clear your global highlight list.
+        // /highlight roomclear - Clear the highlight list of whichever room you used the command in.
+        // /highlight clearall - Clear your entire highlight list (all rooms and globally).
+        // Don't send to server
+        }
     }
 }

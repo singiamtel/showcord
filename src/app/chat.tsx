@@ -312,6 +312,18 @@ export function MessageComponent(
             ) :
             null;
     }
+    if (type === 'error') {
+        return (
+            <div className="p-0.5 text-red-400">
+                <span className="text-gray-125 font-mono text-xs">
+                    {time ? HHMMSS(time) : ''}
+
+          &nbsp;
+                </span>
+                {' ' + message}
+            </div>
+        );
+    }
     if (type === 'log') {
         return (
             <div className="p-0.5 text-white">
@@ -325,7 +337,7 @@ export function MessageComponent(
         );
     }
     return (
-        <div className={'p-0.5' + (hld ? 'bg-yellow-hl-body' : '')}>
+        <div className={'p-0.5 ' + (hld ? 'bg-yellow-hl-body' : '')}>
             <span className="text-gray-125 font-mono text-xs">
                 {time ? HHMMSS(time) : ''}
         &nbsp;

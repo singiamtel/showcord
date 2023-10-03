@@ -116,6 +116,7 @@ export default function HTML(
                 'background-image': [
                     /^url\((.*?)\)$/i,
                 ],
+                'max-height': [/^(\d+)px$/],
             },
         },
         disallowedTagsMode: 'escape',

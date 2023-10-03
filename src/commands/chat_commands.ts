@@ -1,30 +1,20 @@
 // each command is an object with a name, description, arguments, and if they are core commands or not
 
-type ChatCommand = {
-    name: string
-    description: string
-    core: boolean
-    arguments?: {
-        name: string
-        description: string
-    }[]
-}
-
-const cmds : ChatCommand[] = [
-    {
-        name: 'part',
+const cmds = {
+    'part': {
         description: 'Leave the current channel',
+        clientSide: false,
         core: true,
     },
-    {
-        name: 'join',
+    'join': {
         description: 'Join a channel',
+        clientSide: false,
         core: true,
     },
-    {
-        name: 'me',
+    'me': {
         description: 'Send a message in the third person',
         core: true,
+        clientSide: false,
         arguments: [
             {
                 name: 'message',
@@ -32,10 +22,11 @@ const cmds : ChatCommand[] = [
             },
         ],
     },
-    {
-        name: 'highlight',
-        description: 'Add a highlight word to the current channel. When someone says this word, you will be notified. (Regex is supported)',
+    'highlight': {
+        description:
+      'Add a highlight word to the current channel. When someone says this word, you will be notified. (Regex is supported)',
         core: true,
+        clientSide: true,
         arguments: [
             {
                 name: 'word',
@@ -43,6 +34,6 @@ const cmds : ChatCommand[] = [
             },
         ],
     },
-];
+} as const;
 
 export default cmds;

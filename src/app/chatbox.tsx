@@ -24,7 +24,7 @@ const minisearch = new MiniSearch({
     idField: 'name',
 });
 
-minisearch.addAll(cmds);
+// minisearch.addAll(cmds);
 export default function ChatBox() {
     const [input, setInput] = useState<string>('');
     const [displaySearchbox, setDisplaySearchbox] = useState<boolean>(false);

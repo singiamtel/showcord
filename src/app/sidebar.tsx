@@ -1,19 +1,16 @@
-import { useContext, useEffect, useMemo, useState } from 'react';
+import { useContext } from 'react';
 import { PS_context } from './PS_context';
 import { RoomComponent } from './rooms';
 import {
     restrictToParentElement,
     restrictToVerticalAxis,
-    restrictToWindowEdges,
 } from '@dnd-kit/modifiers';
 import UserPanel from './userpanel';
 import 'allotment/dist/style.css';
 import { Allotment } from 'allotment';
 import {
-    Active,
     closestCenter,
     DndContext,
-    DragEndEvent,
     DragOverEvent,
     MouseSensor,
     TouchSensor,
@@ -76,8 +73,8 @@ export default function Sidebar() {
                                 items={rooms.map((e) => e.ID)}
                                 strategy={verticalListSortingStrategy}
                             >
-                                {rooms.filter((e) => e.type !== 'pm').map((room) => (
-                                    <SortableItem id={room.ID}>
+                                {rooms.filter((e) => e.type !== 'pm').map((room, idx) => (
+                                    <SortableItem id={room.ID} key={idx}>
                                         <RoomComponent
                                             name={room.name}
                                             ID={room.ID}
@@ -91,20 +88,20 @@ export default function Sidebar() {
                             </SortableContext>
                         </div>
 
-                        <DndContext
-                            sensors={sensors}
-                            collisionDetection={closestCenter}
-                            onDragOver={handleDragOver}
-                            modifiers={[restrictToVerticalAxis, restrictToParentElement]}
-                        >
-                            <SortableContext
-                                items={rooms.map((e) => e.ID)}
-                                strategy={verticalListSortingStrategy}
+                        {rooms.filter((e) => e.type === 'pm').length > 0 && (
+                            <DndContext
+                                sensors={sensors}
+                                collisionDetection={closestCenter}
+                                onDragOver={handleDragOver}
+                                modifiers={[restrictToVerticalAxis, restrictToParentElement]}
                             >
-                                {rooms.filter((e) => e.type === 'pm').length > 0 && (
+                                <SortableContext
+                                    items={rooms.map((e) => e.ID)}
+                                    strategy={verticalListSortingStrategy}
+                                >
                                     <div className="w-full">
-                                        {rooms.filter((e) => e.type === 'pm').map((room) => (
-                                            <SortableItem id={room.ID}>
+                                        {rooms.filter((e) => e.type === 'pm').map((room, idx) => (
+                                            <SortableItem id={room.ID} key={idx}>
                                                 <RoomComponent
                                                     name={room.name}
                                                     ID={room.ID}
@@ -116,9 +113,9 @@ export default function Sidebar() {
                                             </SortableItem>
                                         ))}
                                     </div>
-                                )}
-                            </SortableContext>
-                        </DndContext>
+                                </SortableContext>
+                            </DndContext>
+                        )}
                     </Allotment>
                 </div>
                 <UserPanel />

@@ -1,4 +1,5 @@
 import { Room } from './client/room';
+import { cleanRegex } from './utils/generic';
 
 export class Settings {
     rooms: { ID: string; lastReadTime: Date }[] = [];
@@ -20,8 +21,13 @@ export class Settings {
         const settings = JSON.parse(settingsRaw);
         console.log('loaded settings', settings);
         if (settings) {
-            for (const [key, value] of Object.entries(settings.highlightWords) as [key:string, value: string[]][]) {
-                this.highlightWords[key] = value.map((w: string) => new RegExp(w));
+            for (
+                const [key, value] of Object.entries(settings.highlightWords) as [
+          key: string,
+          value: string[],
+                ][]
+            ) {
+                this.highlightWords[key] = value.map((w: string) => new RegExp(w, 'i'));
             }
             // this.highlightWords = {};
             this.rooms = settings.rooms;
@@ -64,7 +70,7 @@ export class Settings {
             rooms: this.rooms,
         };
         for (const [key, value] of Object.entries(this.highlightWords)) {
-            settings.highlightWords[key] = value.map((w) => w.toString());
+            settings.highlightWords[key] = value.map((w) => cleanRegex(w));
         }
         if (this.timeout) {
             clearTimeout(this.timeout);
@@ -84,7 +90,7 @@ export class Settings {
         this.saveSettings();
     }
 
-    async removeHighlightWord(roomid: string, word: string) {
+    removeHighlightWord(roomid: string, word: string) {
         if (!this.highlightWords[roomid]) {
             console.warn('removeHighlightWord', 'roomid not found', roomid);
             return;
@@ -99,22 +105,30 @@ export class Settings {
         }
     }
 
+    clearHighlightWords(roomid: string) {
+        if (!this.highlightWords[roomid]) {
+            console.warn('clearHighlightWords', 'roomid not found', roomid);
+            return;
+        }
+        this.highlightWords[roomid] = [];
+    }
+
     highlightMsg(roomid: string, message: string) {
-    // Room highlights
-        this.highlightWords[roomid]?.forEach((word) => {
+        // Room highlights
+        for (const word of this.highlightWords[roomid] ?? []) {
             if (word.test(message)) {
                 console.log('word', word, 'matched message', message);
                 return true;
             }
-        });
+        }
 
         // Global highlights
-        this.highlightWords['global']?.forEach((word) => {
+        for (const word of this.highlightWords['global'] ?? []) {
             if (word.test(message)) {
                 console.log('word', word, 'matched message', message);
                 return true;
             }
-        });
+        }
         return false;
     }
 }
