@@ -1,5 +1,5 @@
 import { PS_context } from './PS_context';
-import { useEffect, useState, useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { UsernameComponent } from './usercomponents';
 import { User } from '../client/user';
 
@@ -33,7 +33,13 @@ export default function Users() {
         <div className="bg-gray-600 w-full h-full p-2 overflow-y-scroll">
             {users.map((user, index) => (
                 <div key={index}>
-                    <UsernameComponent user={user.name} alignRight onClick={onClick} idle={user.status === '!'} />
+                    <UsernameComponent
+                        user={user.name}
+                        bold={user.name[0] !== ' '}
+                        alignRight
+                        onClick={onClick}
+                        idle={user.status === '!'}
+                    />
                 </div>
             ))}
         </div>

@@ -2,7 +2,6 @@ import { userColor } from '../utils/namecolour';
 import { MouseEventHandler, MutableRefObject } from 'react';
 import { clamp, toID } from '../utils/generic';
 
-const auth = new Set(['&', '#', '@', '§', '%']);
 export function UsernameComponent(
     { user, alignRight, onClick, colon, idle, bold, colorless }: {
         user: string;
@@ -32,7 +31,7 @@ export function UsernameComponent(
                                 '#888888' :
                                 userColor(user),
                     }}
-                    className={bold || auth.has(rank) ? 'font-bold ' : ''}
+                    className={bold ? 'font-bold ' : ''}
                     data-message="true"
                 >
                     {user.slice(1)}
