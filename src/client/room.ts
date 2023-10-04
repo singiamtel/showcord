@@ -66,7 +66,20 @@ export class Room {
         this.users = this.users.filter((u) => u.name !== username);
     }
 
-    addUHTML(
+    addOrChangeUHTML(
+        message: Message,
+        { selected, selfSent }: { selected: boolean; selfSent: boolean },
+    ) {
+        console.trace('addOrChangeUHTML', message.name);
+        const previousMessage = this.messages.find((m) => m.name === message.name);
+        if (previousMessage) {
+            previousMessage.content = message.content;
+            return;
+        }
+        return this.addUHTML(message, { selected, selfSent });
+    }
+
+    private addUHTML(
         message: Message,
         { selected, selfSent }: { selected: boolean; selfSent: boolean },
     ) {
@@ -77,15 +90,23 @@ export class Room {
         this.addMessage(message, { selected, selfSent });
     }
 
-    changeUHTML(HTMLname: string, html: string) {
+    private changeUHTML(HTMLname: string | undefined, html: string) {
+        if (!HTMLname) {
+            console.error(
+                `changeUHTML(): Tried to change non-existent uhtml message named ${HTMLname} for room ${this.name}`,
+            );
+            return false;
+        }
         const message = this.messages.find((m) => m.name === HTMLname);
+        console.log('changeUHTML', message, html);
         if (!message) {
             console.error(
                 `changeUHTML(): Tried to change non-existent uhtml message named ${HTMLname} for room ${this.name}`,
             );
-            return;
+            return false;
         }
         message.content = html;
+        return true;
     }
 
     private rankOrder: any = {

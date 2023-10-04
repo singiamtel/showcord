@@ -13,12 +13,12 @@ import { PS_context } from './PS_context';
 import useOnScreen from '../utils/isOnScreen';
 import HTML from '../formatting/html';
 import { HHMMSS } from '../utils/date';
+import { ErrorBoundary } from 'react-error-boundary';
 
 import Linkify from 'linkify-react';
 import { Message } from '../client/message';
 import Code from '../formatting/code';
 import { UserCard, UsernameComponent } from './usercomponents';
-import manageURL from '../utils/manageURL';
 import useClickOutside from '../utils/useClickOutside';
 import {
     bold,
@@ -34,6 +34,7 @@ import {
     superscript,
 } from '../formatting/chat';
 import { userColor } from '../utils/namecolour';
+import manageURL from '../utils/manageURL';
 
 // ``code here`` marks inline code
 // ||text|| are spoilers
@@ -257,16 +258,23 @@ export default function Chat() {
                 ) :
                 null}
             {__messages.map((message, index, arr) => (
-                <MessageComponent
-                    key={index}
-                    time={message.timestamp}
-                    user={message.user || ''}
-                    message={message.content}
-                    type={message.type}
-                    hld={message.hld}
-                    prev={arr[index - 1]}
-                    onNameClick={clickUsername}
-                />
+                <ErrorBoundary
+                    fallbackRender={({ error: e }) => {
+                        console.error('awewewewe', e.name, message.content);
+                        return <div className="text-red-400">Error displaying message</div>;
+                    }}
+                >
+                    <MessageComponent
+                        key={index}
+                        time={message.timestamp}
+                        user={message.user || ''}
+                        message={message.content}
+                        type={message.type}
+                        hld={message.hld}
+                        prev={arr[index - 1]}
+                        onNameClick={clickUsername}
+                    />
+                </ErrorBoundary>
             ))}
             <div>
                 <div id="msg_end" ref={messagesEndRef} className="h-4 w-4"></div>{' '}

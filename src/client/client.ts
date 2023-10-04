@@ -169,7 +169,6 @@ export class Client {
         if (
             this.settings.highlightMsg(roomid, message)
         ) {
-            console.log('highlighted1', message);
             return true;
         }
         return false;
@@ -349,20 +348,28 @@ export class Client {
         this.settings.changeRooms(this.rooms);
     }
 
-    private addMessageToRoom(roomID: string, message: Message, retry = true) {
+    private addMessageToRoom(
+        roomID: string,
+        message: Message,
+        retry = true,
+    ) {
         const room = this.room(roomID);
         if (
             toID(message.user) !== toID(this.username) &&
       this.highlightMsg(roomID, message.content)
         ) {
-            console.log('highlighted', message.content);
             message.hld = true;
         }
         if (room) {
-            room.addMessage(message, {
+            const settings = {
                 selected: this.selectedRoom === roomID,
                 selfSent: toID(this.username) === toID(message.user),
-            });
+            };
+            if (message.name) {
+                room.addOrChangeUHTML(message, settings);
+            } else {
+                room.addMessage(message, settings);
+            }
             this.events.dispatchEvent(
                 new CustomEvent('message', { detail: message }),
             );
@@ -639,7 +646,7 @@ export class Client {
                         console.error('Received |uhtml| from untracked room', roomID);
                         return;
                     }
-                    room.addUHTML(
+                    room.addOrChangeUHTML(
                         new Message({
                             name,
                             user: '',
@@ -663,7 +670,19 @@ export class Client {
                         );
                         break;
                     }
-                    room.changeUHTML(args[0], args.slice(1).join('|'));
+                    room.addOrChangeUHTML(
+                        new Message({
+                            name: args[0],
+                            user: '',
+                            type: 'raw',
+                            content: args.slice(1).join('|'),
+                        }),
+                        {
+                            selected: this.selectedRoom === roomID,
+                            selfSent: false,
+                        },
+                    );
+
                     this.events.dispatchEvent(
                         new CustomEvent('message', { detail: message }),
                     );
@@ -731,7 +750,7 @@ export class Client {
             content = content.slice(4);
         } else if (content.startsWith('/uhtml')) {
             const [name, ...html] = content.split(',');
-            UHTMLName = name;
+            UHTMLName = name.split(' ')[1];
             type = 'raw';
             content = html.join(',');
         } else if (content.startsWith('/log')) {
@@ -789,14 +808,11 @@ export class Client {
         }
         const splitted_message = message.split(' ');
         const cmd = splitted_message[0].slice(1);
-        console.log('cmd', cmd);
         switch (cmd) {
             case 'highlight':
             case 'hl':
                 {
-                    console.log('splitted_message', splitted_message);
                     const [subcmd, ...args] = splitted_message.slice(1);
-                    console.log(`subcmd (${subcmd}) args ${args}`);
                     switch (subcmd) {
                         case 'add':
                         case 'roomadd':
@@ -841,7 +857,6 @@ export class Client {
                                 const words = this.settings.highlightWords[
                                     subcmd === 'list' ? 'global' : this.selectedRoom
                                 ]?.map((e) => cleanRegex(e));
-                                console.log('words', words);
 
                                 this.addMessageToRoom(
                                     this.selectedRoom,
@@ -849,7 +864,9 @@ export class Client {
                                         user: '',
                                         name: '',
                                         type: 'log',
-                                        content: words && words.length ? `Current highlight list: ${words.join(', ')}` : 'Your highlight list is empty',
+                                        content: words && words.length ?
+                                            `Current highlight list: ${words.join(', ')}` :
+                                            'Your highlight list is empty',
                                     }),
                                 );
                             }
