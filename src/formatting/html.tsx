@@ -121,8 +121,6 @@ export default function HTML(
         },
         disallowedTagsMode: 'escape',
     };
-    console.log('HTMLmessage', sanitizeHtml(message, sanitizeOptions));
-    // console.log("testHTML", sanitizeHtml("<test>lol", sanitizeOptions));
     if (raw) {
         return (
             <>

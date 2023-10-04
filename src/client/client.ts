@@ -304,7 +304,6 @@ export class Client {
     private async assertionFromToken(challstr: string): Promise<string | false> {
         const token = localStorage.getItem('ps-token');
         if (!token || token === 'undefined') {
-            console.log('no token');
             return false;
         }
         const response = await fetch(
@@ -316,7 +315,6 @@ export class Client {
     private async refreshToken() {
         const token = localStorage.getItem('ps-token');
         if (!token || token === 'undefined') {
-            console.log('no token');
             return false;
         }
         try {
@@ -324,7 +322,6 @@ export class Client {
                 `${this.loginserver_url}oauth/api/refreshtoken?token=${token}&client_id=${this.client_id}`,
             );
             const result = await this.parseLoginserverResponse(response);
-            console.log('refreshed token', result);
             if (result) localStorage.setItem('ps-token', result);
             return result;
         } catch (e) {
@@ -410,7 +407,7 @@ export class Client {
             this.events.dispatchEvent(new CustomEvent('users', { detail: newName }));
             return;
         }
-        console.warn('updateUsersUsers: room (' + roomID + ') is unknown');
+        console.warn('updateUserName: room (' + roomID + ') is unknown');
     }
 
     private setUsername(username: string) {
@@ -472,7 +469,7 @@ export class Client {
                 }
                 if (splitted_message[i].startsWith('|:|')) {
                     if (!roomTypes.includes(type as RoomType)) {
-                        console.warn('Unknown room type', type);
+                        console.error('Unknown room type', type);
                     }
                     const room = new Room({
                         ID: roomID,
@@ -613,7 +610,7 @@ export class Client {
                         console.error('Error parsing roomsdetails', args);
                     }
                 } else {
-                    console.warn('Unknown queryresponse', args);
+                    console.error('Unknown queryresponse', args);
                 }
                 break;
             }
@@ -629,7 +626,6 @@ export class Client {
             case 'updateuser':
                 if (!args[0].trim().toLowerCase().startsWith('guest')) {
                     this.autojoin(this.joinAfterLogin);
-                    console.log('Logged in as ' + args[0]);
                     this.loggedIn = true;
                     this.setUsername(args[0]);
                 }
@@ -715,7 +711,7 @@ export class Client {
                 }
                 break;
             default:
-                console.warn('Unknown cmd: ' + cmd);
+                console.error('Unknown cmd: ' + cmd);
         }
     }
 
@@ -774,7 +770,6 @@ export class Client {
             for (const cb of this.onOpen) {
                 cb();
             }
-            console.log('Socket opened');
             this.tryLogin();
         };
         this.socket.onmessage = (event) => {
