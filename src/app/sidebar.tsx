@@ -67,56 +67,26 @@ export default function Sidebar() {
           Pokémon Showdown!
                 </div>
                 <div className="flex flex-grow">
-                    <Allotment vertical minSize={100} className="">
-                        <div className="w-full">
-                            <SortableContext
-                                items={rooms.map((e) => e.ID)}
-                                strategy={verticalListSortingStrategy}
-                            >
-                                {rooms.filter((e) => e.type !== 'pm').map((room, idx) => (
-                                    <SortableItem id={room.ID} key={idx}>
-                                        <RoomComponent
-                                            name={room.name}
-                                            ID={room.ID}
-                                            notifications={{
-                                                unread: room.unread,
-                                                mentions: room.mentions,
-                                            }}
-                                        />
-                                    </SortableItem>
-                                ))}
-                            </SortableContext>
-                        </div>
-
-                        {rooms.filter((e) => e.type === 'pm').length > 0 && (
-                            <DndContext
-                                sensors={sensors}
-                                collisionDetection={closestCenter}
-                                onDragOver={handleDragOver}
-                                modifiers={[restrictToVerticalAxis, restrictToParentElement]}
-                            >
-                                <SortableContext
-                                    items={rooms.map((e) => e.ID)}
-                                    strategy={verticalListSortingStrategy}
-                                >
-                                    <div className="w-full">
-                                        {rooms.filter((e) => e.type === 'pm').map((room, idx) => (
-                                            <SortableItem id={room.ID} key={idx}>
-                                                <RoomComponent
-                                                    name={room.name}
-                                                    ID={room.ID}
-                                                    notifications={{
-                                                        unread: room.unread,
-                                                        mentions: room.mentions,
-                                                    }}
-                                                />
-                                            </SortableItem>
-                                        ))}
-                                    </div>
-                                </SortableContext>
-                            </DndContext>
-                        )}
-                    </Allotment>
+                    <div className="w-full">
+                        <SortableContext
+                            items={rooms.map((e) => e.ID)}
+                            strategy={verticalListSortingStrategy}
+                        >
+                            {rooms.map((room, idx) => (
+                                <SortableItem id={room.ID} key={idx}>
+                                    <RoomComponent
+                                        name={room.name}
+                                        type={room.type}
+                                        ID={room.ID}
+                                        notifications={{
+                                            unread: room.unread,
+                                            mentions: room.mentions,
+                                        }}
+                                    />
+                                </SortableItem>
+                            ))}
+                        </SortableContext>
+                    </div>
                 </div>
                 <UserPanel />
             </div>

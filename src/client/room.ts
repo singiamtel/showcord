@@ -5,16 +5,29 @@ export const roomTypes = ['chat', 'battle', 'pm', 'permanent'] as const;
 export type RoomType = typeof roomTypes[number];
 
 export class Room {
+    type: RoomType;
     ID: string;
     name: string;
-    type: RoomType;
+    lastReadTime: Date = new Date();
+    unread = 0;
+    mentions = 0;
+
     messages: Message[] = [];
     users: User[] = [];
-    unread = 0;
-    lastReadTime: Date = new Date();
-    mentions = 0;
-    private messageLimit = 600;
-    icon?: JSX.Element;
+    private readonly messageLimit = 600;
+    private icon?: JSX.Element;
+    private readonly rankOrder: any = {
+        '&': 9,
+        '#': 8,
+        '\u00a7': 7,
+        '@': 6,
+        '%': 5,
+        '*': 4,
+        '+': 3,
+        '^': 2,
+        ' ': 1,
+        '‽': 0,
+    };
 
     constructor(
         { ID, name, type }: {
@@ -26,6 +39,12 @@ export class Room {
         this.ID = ID;
         this.name = name;
         this.type = type;
+    }
+
+    select() {
+        this.lastReadTime = new Date();
+        this.mentions = 0;
+        this.unread = 0;
     }
 
     addMessage(
@@ -59,9 +78,6 @@ export class Room {
         this.messages.push(message);
     }
 
-    addUser(user: User) {
-        this.addUsers([user]);
-    }
     removeUser(username: string) {
         this.users = this.users.filter((u) => u.name !== username);
     }
@@ -97,19 +113,6 @@ export class Room {
         return true;
     }
 
-    private rankOrder: any = {
-        '&': 9,
-        '#': 8,
-        '\u00a7': 7,
-        '@': 6,
-        '%': 5,
-        '*': 4,
-        '+': 3,
-        '^': 2,
-        ' ': 1,
-        '‽': 0,
-    };
-
     private rankSorter = (a: User, b: User) => {
     // the symbols should go first, then the spaces, then the interrobangs
         const aSymbol = a.name.charAt(0);
@@ -119,6 +122,10 @@ export class Room {
         }
         return a.name.localeCompare(b.name, 'en', { sensitivity: 'base' });
     };
+
+    addUser(user: User) {
+        this.addUsers([user]);
+    }
 
     addUsers(users: User[]) {
         this.users = this.users.concat(users).sort(this.rankSorter);
@@ -138,9 +145,13 @@ export class Room {
         this.users = this.users.sort(this.rankSorter);
     }
 
-    select() {
-        this.lastReadTime = new Date();
-        this.mentions = 0;
-        this.unread = 0;
+    runHighlight(callback: (roomID: string, content: string) => boolean): void {
+        for (const message of this.messages) {
+            if (message.type === 'chat') {
+                if (callback(this.ID, message.content)) {
+                    message.hld = true;
+                }
+            }
+        }
     }
 }

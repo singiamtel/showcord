@@ -4,22 +4,23 @@ import { Message } from './message';
 import { Room, RoomType, roomTypes } from './room';
 import { User } from './user';
 import { Notification } from './notifications';
-import cmds from '../commands/chat_commands';
 
 export class Client {
-    readonly server_url: string = 'wss://sim3.psim.us/showdown/websocket/';
-    readonly loginserver_url: string = 'https://play.pokemonshowdown.com/api/';
-    readonly newsURL = 'https://pokemonshowdown.com/news.json';
+    private readonly server_url: string =
+        'wss://sim3.psim.us/showdown/websocket/';
+    private readonly loginserver_url: string =
+        'https://play.pokemonshowdown.com/api/';
+    private readonly newsURL = 'https://pokemonshowdown.com/news.json';
 
     settings: Settings = new Settings();
-    socket: WebSocket | undefined;
+    private socket: WebSocket | undefined;
 
     rooms: Map<string, Room> = new Map();
-    users: User[] = [];
+    private users: User[] = [];
     events: EventTarget = new EventTarget();
-    username: string = '';
-    loggedIn: boolean = false;
-    onOpen: (() => void)[] = []; // Append callbacks here to run when the socket opens
+    private username: string = '';
+    private loggedIn: boolean = false;
+    private onOpen: (() => void)[] = []; // Append callbacks here to run when the socket opens
 
     private joinAfterLogin: string[] = [];
     private challstr: string = '';
@@ -87,13 +88,6 @@ export class Client {
         this.settings.changeRooms(this.rooms);
     }
 
-    leaveRoom(roomID: string) {
-        if (!this.socket) {
-            throw new Error('Leaving room before socket initialization ' + roomID);
-        }
-        this.send(`/leave ${roomID}`, false);
-    }
-
     async queryUser(user: string, callback: (json: any) => void) {
         if (!this.socket) {
             throw new Error('Getting user before socket initialization ' + user);
@@ -139,6 +133,14 @@ export class Client {
             }
         }
     }
+
+    private leaveRoom(roomID: string) {
+        if (!this.socket) {
+            throw new Error('Leaving room before socket initialization ' + roomID);
+        }
+        this.send(`/leave ${roomID}`, false);
+    }
+
 
     async autojoin(rooms: string[], useDefaultRooms = false) {
         if (!this.socket) {
@@ -415,9 +417,7 @@ export class Client {
         this.username = username;
         this.cleanUsername = username.replace(/[\u{0080}-\u{FFFF}]/gu, '').trim();
         this.rooms.forEach(async (room) => {
-            room.messages.forEach((msg) => {
-                msg.hld = this.highlightMsg(room.ID, msg.content);
-            });
+            room.runHighlight(this.highlightMsg);
         });
         this.events.dispatchEvent(
             new CustomEvent('login', { detail: this.username }),
@@ -785,6 +785,9 @@ export class Client {
             UHTMLName = name.split(' ')[1];
             type = 'raw';
             content = html.join(',');
+        } else if (content.startsWith('/error')) {
+            type = 'error';
+            content = content.slice(6);
         } else if (content.startsWith('/log')) {
             type = 'log';
             content = content.slice(4);
@@ -841,92 +844,90 @@ export class Client {
         const cmd = splitted_message[0].slice(1);
         switch (cmd) {
             case 'highlight':
-            case 'hl':
-                {
-                    const [subcmd, ...args] = splitted_message.slice(1);
-                    switch (subcmd) {
-                        case 'add':
-                        case 'roomadd':
-                            for (const word of args) {
-                                this.settings.addHighlightWord(
-                                    subcmd === 'add' ? 'global' : this.selectedRoom,
-                                    word,
-                                );
-                            }
+            case 'hl': {
+                const [subcmd, ...args] = splitted_message.slice(1);
+                switch (subcmd) {
+                    case 'add':
+                    case 'roomadd':
+                        for (const word of args) {
+                            this.settings.addHighlightWord(
+                                subcmd === 'add' ? 'global' : this.selectedRoom,
+                                word,
+                            );
+                        }
+                        this.addMessageToRoom(
+                            this.selectedRoom,
+                            new Message({
+                                user: '',
+                                name: '',
+                                type: 'log',
+                                content: `Added "${args.join(' ')}" to highlight list`,
+                            }),
+                        );
+                        // TODO: display help
+                        return true;
+                    case 'delete':
+                    case 'roomdelete':
+                        for (const word of args) {
+                            this.settings.removeHighlightWord(
+                                subcmd === 'delete' ? 'global' : this.selectedRoom,
+                                word,
+                            );
+                        }
+                        this.addMessageToRoom(
+                            this.selectedRoom,
+                            new Message({
+                                user: '',
+                                name: '',
+                                type: 'log',
+                                content: `Deleted "${args.join(' ')}" from highlight list`,
+                            }),
+                        );
+                        return true;
+                    case 'list':
+                    case 'roomlist':
+                        {
+                            const words = this.settings.highlightWords[
+                                subcmd === 'list' ? 'global' : this.selectedRoom
+                            ]?.map((e) => cleanRegex(e));
+
                             this.addMessageToRoom(
                                 this.selectedRoom,
                                 new Message({
                                     user: '',
                                     name: '',
                                     type: 'log',
-                                    content: `Added "${args.join(' ')}" to highlight list`,
+                                    content: words && words.length ?
+                                        `Current highlight list: ${words.join(', ')}` :
+                                        'Your highlight list is empty',
                                 }),
                             );
-                            // TODO: display help
-                            return true;
-                        case 'delete':
-                        case 'roomdelete':
-                            for (const word of args) {
-                                this.settings.removeHighlightWord(
-                                    subcmd === 'delete' ? 'global' : this.selectedRoom,
-                                    word,
-                                );
-                            }
+                        }
+                        return true;
+                    case 'clear':
+                    case 'roomclear':
+                        {
+                            this.settings.clearHighlightWords(
+                                subcmd === 'clear' ? 'global' : this.selectedRoom,
+                            );
                             this.addMessageToRoom(
                                 this.selectedRoom,
                                 new Message({
                                     user: '',
                                     name: '',
                                     type: 'log',
-                                    content: `Deleted "${args.join(' ')}" from highlight list`,
+                                    content: `Cleared highlight list`,
                                 }),
                             );
-                            return true;
-                        case 'list':
-                        case 'roomlist':
-                            {
-                                const words = this.settings.highlightWords[
-                                    subcmd === 'list' ? 'global' : this.selectedRoom
-                                ]?.map((e) => cleanRegex(e));
+                        }
+                        return true;
 
-                                this.addMessageToRoom(
-                                    this.selectedRoom,
-                                    new Message({
-                                        user: '',
-                                        name: '',
-                                        type: 'log',
-                                        content: words && words.length ?
-                                            `Current highlight list: ${words.join(', ')}` :
-                                            'Your highlight list is empty',
-                                    }),
-                                );
-                            }
-                            return true;
-                        case 'clear':
-                        case 'roomclear':
-                            {
-                                this.settings.clearHighlightWords(
-                                    subcmd === 'clear' ? 'global' : this.selectedRoom,
-                                );
-                                this.addMessageToRoom(
-                                    this.selectedRoom,
-                                    new Message({
-                                        user: '',
-                                        name: '',
-                                        type: 'log',
-                                        content: `Cleared highlight list`,
-                                    }),
-                                );
-                            }
-                            return true;
-
-                        default:
-                            // Display help
-                            console.warn('Unknown subcommand for /highlight: ', subcmd);
-                            return true; // Don't send to server
-                    }
+                    default:
+                        // Display help
+                        console.warn('Unknown subcommand for /highlight: ', subcmd);
+                        return true; // Don't send to server
                 }
-                break;
+            }
             default:
                 return false;
         // /highlight add [word 1], [word 2], [...] - Add the provided list of words to your highlight list.

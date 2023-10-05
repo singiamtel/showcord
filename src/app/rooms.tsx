@@ -2,11 +2,14 @@ import { useContext } from 'react';
 import { PS_context } from './PS_context';
 import HashtagIcon from '../public/hashtag';
 import Circle from './components/circle';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faUser } from '@fortawesome/free-solid-svg-icons';
 
 export function RoomComponent(
-    { name, ID, notifications: { unread, mentions } }: {
+    { name, ID, notifications: { unread, mentions }, type }: {
         name: string;
         ID: string;
+        type: string;
         notifications: { unread: number; mentions: number };
     },
 ) {
@@ -34,7 +37,9 @@ export function RoomComponent(
                     className={'rounded p-1 flex flex-row basis-full items-center  h-auto mr-2 ml-2 '}
                     onClick={() => setRoom(ID)}
                 >
-                    <HashtagIcon height={16} width={16} />
+                    {type === 'pm' ?
+                        <FontAwesomeIcon icon={faUser} height={16} width={16} /> :
+                        <HashtagIcon height={16} width={16} />}
                     <span className="text-left ml-2 max-w-full truncate">
                         <span className="truncate max-w-full">{name}</span>
                         {unread > 0 && (

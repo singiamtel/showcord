@@ -169,9 +169,7 @@ export default function PS_contextProvider(props: any) {
 
     useEffect(() => {
         if (!client) return;
-        console.log('AWD Joining rooms', client.settings.getSavedRooms());
         client.autojoin(client.settings.getSavedRooms().map((e) => e.ID), true);
-    // client.login({username, password});
     }, [client]);
 
     /* --- End room handling --- */
@@ -185,7 +183,7 @@ export default function PS_contextProvider(props: any) {
             return;
         }
         const msgs = client.room(selectedPage)?.messages ?? [];
-        setNotifications(client.getNotifications()); // Manage notifications
+        setNotifications(client.getNotifications());
         setMessages(msgs);
     }, [client, selectedPage]);
 
@@ -221,14 +219,10 @@ export default function PS_contextProvider(props: any) {
     /* --- End message handling --- */
 
     useEffect(() => {
-    // TODO: This logic should clearly be in the client (issue #9)
+    // TODO: Unclear if this should be here
         const init = async () => {
             await loadCustomColors();
             console.log('loaded custom colors');
-            // const client = new Client();
-            // client.onOpen.push(() => {
-            //   setClient(client);
-            // });
             client.events.addEventListener('login', (username) => {
                 console.log('logged in as', username);
                 setUser((username as CustomEvent).detail);
@@ -236,18 +230,6 @@ export default function PS_contextProvider(props: any) {
         };
         init();
     }, []);
-
-    // Try to recover on socket death
-    // TODO: It doesn't work very well
-    // useEffect(() => {
-    //   if(!client) return;
-    //   client.socket.onclose = () => {
-    //     const newClient = new Client();
-    //     newClient.socket.onopen = () => {
-    //       setClient(newClient);
-    //     };
-    //   }
-    // }, [client])
 
     /* --- End user handling --- */
 

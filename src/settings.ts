@@ -2,13 +2,13 @@ import { Room } from './client/room';
 import { cleanRegex } from './utils/generic';
 
 export class Settings {
-    rooms: { ID: string; lastReadTime: Date }[] = [];
+    readonly defaultRooms = [];
+    private rooms: { ID: string; lastReadTime: Date }[] = [];
     highlightWords: { [key: string]: RegExp[] } = Object.create(null); // roomid -> highlightWords
-    defaultRooms = [];
     // defaultRooms = ["lobby", "help", "overused"];
     private timeout: any;
-    status = ''; // if status is set, it will be restored on login
-    notes: Map<string, string> = new Map(); // user -> note
+    private status = ''; // if status is set, it will be restored on login
+    private notes: Map<string, string> = new Map(); // user -> note
 
     constructor() {
         if (typeof window === 'undefined') {
@@ -58,7 +58,7 @@ export class Settings {
         }[];
     }
 
-    saveSettings() {
+    private saveSettings() {
         const settings: {
             highlightWords: any;
             rooms: {
