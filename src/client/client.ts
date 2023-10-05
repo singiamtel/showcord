@@ -363,7 +363,7 @@ export class Client {
                 selfSent: toID(this.username) === toID(message.user),
             };
             if (message.name) {
-                room.addOrChangeUHTML(message, settings);
+                room.addUHTML(message, settings);
             } else {
                 room.addMessage(message, settings);
             }
@@ -515,7 +515,13 @@ export class Client {
                     return;
                 }
 
-                const chatMessage = this.parseCMessage(message, cmd === 'c:');
+                const chatMessage = this.parseCMessage(message, cmd === 'c:', roomID);
+                if (!chatMessage) {
+                    this.events.dispatchEvent(
+                        new CustomEvent('message', { detail: message }),
+                    );
+                    return;
+                }
                 this.addMessageToRoom(roomID, chatMessage);
                 break;
             }
@@ -642,7 +648,7 @@ export class Client {
                         console.error('Received |uhtml| from untracked room', roomID);
                         return;
                     }
-                    room.addOrChangeUHTML(
+                    room.addUHTML(
                         new Message({
                             name,
                             user: '',
@@ -666,17 +672,13 @@ export class Client {
                         );
                         break;
                     }
-                    room.addOrChangeUHTML(
+                    room.changeUHTML(
                         new Message({
                             name: args[0],
                             user: '',
                             type: 'raw',
                             content: args.slice(1).join('|'),
                         }),
-                        {
-                            selected: this.selectedRoom === roomID,
-                            selfSent: false,
-                        },
                     );
 
                     this.events.dispatchEvent(
@@ -715,7 +717,11 @@ export class Client {
         }
     }
 
-    private parseCMessage(message: string, hasTimestamp: boolean) {
+    private parseCMessage(
+        message: string,
+        hasTimestamp: boolean,
+        room: string,
+    ): Message | undefined {
         const splitted_message = message.slice(1).split('|');
         let _, msgTime, user, tmpcontent: (string | undefined)[];
         if (hasTimestamp) {
@@ -727,6 +733,27 @@ export class Client {
         const { content, type, UHTMLName } = this.parseCMessageContent(
             tmpcontent.join('|'),
         );
+        if (type === 'uhtmlchange') {
+            const roomObj = this.room(room);
+            if (!roomObj) {
+                console.error(
+                    'Received |uhtmlchange| from untracked room',
+                    room,
+                );
+                return;
+            }
+            roomObj.changeUHTML(
+                new Message({
+                    name: UHTMLName,
+                    user: '',
+                    type: 'raw',
+                    content,
+                }),
+            );
+
+            return;
+        }
+
         return new Message({
             timestamp: msgTime,
             user,
@@ -738,12 +765,21 @@ export class Client {
 
     private parseCMessageContent(
         content: string,
-    ): { type: Message['type']; content: string; UHTMLName?: string } {
-        let type: Message['type'] = 'chat';
+    ): {
+            type: Message['type'] | 'uhtmlchange';
+            content: string;
+            UHTMLName?: string;
+        } {
+        let type: Message['type'] | 'uhtmlchange' = 'chat';
         let UHTMLName = undefined;
         if (content.startsWith('/raw')) {
             type = 'raw';
             content = content.slice(4);
+        } else if (content.startsWith('/uhtmlchange')) {
+            const [name, ...html] = content.split(',');
+            UHTMLName = name.split(' ')[1];
+            type = 'uhtmlchange';
+            content = html.join(',');
         } else if (content.startsWith('/uhtml')) {
             const [name, ...html] = content.split(',');
             UHTMLName = name.split(' ')[1];

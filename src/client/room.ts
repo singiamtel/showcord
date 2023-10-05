@@ -66,20 +66,7 @@ export class Room {
         this.users = this.users.filter((u) => u.name !== username);
     }
 
-    addOrChangeUHTML(
-        message: Message,
-        { selected, selfSent }: { selected: boolean; selfSent: boolean },
-    ) {
-        console.trace('addOrChangeUHTML', message.name);
-        const previousMessage = this.messages.find((m) => m.name === message.name);
-        if (previousMessage) {
-            previousMessage.content = message.content;
-            return;
-        }
-        return this.addUHTML(message, { selected, selfSent });
-    }
-
-    private addUHTML(
+    addUHTML(
         message: Message,
         { selected, selfSent }: { selected: boolean; selfSent: boolean },
     ) {
@@ -90,22 +77,23 @@ export class Room {
         this.addMessage(message, { selected, selfSent });
     }
 
-    private changeUHTML(HTMLname: string | undefined, html: string) {
-        if (!HTMLname) {
+    changeUHTML(
+        message: Message,
+    ) {
+        if (!message.name) {
             console.error(
-                `changeUHTML(): Tried to change non-existent uhtml message named ${HTMLname} for room ${this.name}`,
+                `changeUHTML(): Received unnamed UHTML for room ${this.name}`,
             );
             return false;
         }
-        const message = this.messages.find((m) => m.name === HTMLname);
-        console.log('changeUHTML', message, html);
-        if (!message) {
+        const prevMsg = this.messages.find((m) => m.name === message.name);
+        if (!prevMsg) {
             console.error(
-                `changeUHTML(): Tried to change non-existent uhtml message named ${HTMLname} for room ${this.name}`,
+                `changeUHTML(): Tried to change non-existent uhtml message named ${message.name} for room ${this.name}`,
             );
             return false;
         }
-        message.content = html;
+        prevMsg.content = message.content;
         return true;
     }
 

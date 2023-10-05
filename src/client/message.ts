@@ -1,6 +1,14 @@
+type MessageTypes =
+  | 'chat'
+  | 'raw'
+  | 'log'
+  | 'simple'
+  | 'error'
+  | 'roleplay'
+  | 'uhtmlchange';
 export class Message {
     content: string;
-    type: 'chat' | 'raw' | 'log' | 'simple' | 'error' | 'roleplay';
+    type: MessageTypes;
     user?: string;
     timestamp?: Date;
     hld?: boolean;
@@ -8,14 +16,17 @@ export class Message {
     constructor(
         { content, type, user, timestamp, hld = false, name }: {
             content: string;
-            type: 'chat' | 'raw' | 'log' | 'simple' | 'error' | 'roleplay';
+            type: MessageTypes;
             user?: string;
             timestamp?: string;
-            hld?: boolean
-            name?: string
+            hld?: boolean;
+            name?: string;
         },
     ) {
         this.content = content;
+        if (type === 'uhtmlchange') {
+            throw new Error('Received invalid message type uhtmlchange');
+        }
         this.type = type;
         this.user = user;
         // this.timestamp = timestamp ? new Date(timestamp) : undefined;
