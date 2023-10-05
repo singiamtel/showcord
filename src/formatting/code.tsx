@@ -20,7 +20,7 @@ export default function Code({ message }: any) {
         <div
             className={'ml-10 mr-10 m-2 text-white border border-solid border-gray-border bg-gray-600 rounded p-2 '}
         >
-            {relevance > 10 ?
+            {relevance > 12.5 ?
                 (
                     <Highlight
                         className={'whitespace-pre-wrap text-sm '}
