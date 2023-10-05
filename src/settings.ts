@@ -117,7 +117,6 @@ export class Settings {
         // Room highlights
         for (const word of this.highlightWords[roomid] ?? []) {
             if (word.test(message)) {
-                console.log('word', word, 'matched message', message);
                 return true;
             }
         }
@@ -125,7 +124,6 @@ export class Settings {
         // Global highlights
         for (const word of this.highlightWords['global'] ?? []) {
             if (word.test(message)) {
-                console.log('word', word, 'matched message', message);
                 return true;
             }
         }
