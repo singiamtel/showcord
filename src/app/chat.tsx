@@ -259,8 +259,9 @@ export default function Chat() {
                 null}
             {__messages.map((message, index, arr) => (
                 <ErrorBoundary
+                    key={index}
                     fallbackRender={({ error: e }) => {
-                        console.error('awewewewe', e.name, message.content);
+                        console.error('Error', e.name, message.content);
                         return <div className="text-red-400">Error displaying message</div>;
                     }}
                 >
