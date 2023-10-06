@@ -16,7 +16,6 @@ export class Client {
     private socket: WebSocket | undefined;
 
     rooms: Map<string, Room> = new Map();
-    private users: User[] = [];
     events: EventTarget = new EventTarget();
     private username: string = '';
     private loggedIn: boolean = false;
