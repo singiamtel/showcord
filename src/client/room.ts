@@ -9,6 +9,7 @@ export class Room {
     ID: string;
     name: string;
     lastReadTime: Date = new Date();
+    lastReadTimeMargin = 1000; // 1 second
     unread = 0;
     mentions = 0;
 
@@ -50,7 +51,8 @@ export class Room {
     addMessage(
         message: Message,
         { selected, selfSent }: { selected: boolean; selfSent: boolean },
-    ) {
+    ): boolean {
+        let shouldNotify = false;
         if (this.messages.length > this.messageLimit) {
             this.messages.shift();
         }
@@ -60,22 +62,25 @@ export class Room {
             this.lastReadTime = date;
         }
         if (
-            message.type === 'chat' && !selfSent && message.timestamp &&
-      message.timestamp > this.lastReadTime
+            ['chat', 'pm'].includes(message.type) && !selfSent && message.timestamp &&
+      message.timestamp >
+        new Date(this.lastReadTime.getTime() - this.lastReadTimeMargin)
         ) {
             this.unread++;
-            if (message.hld) {
+            if (message.hld || this.type === 'pm') {
                 this.mentions++;
                 if (!selected || !document.hasFocus()) {
+                    shouldNotify = true;
                     // message.hld = false;
-                    new Notification(`Private message from ${message.user}`, {
-                        body: message.content,
-                        icon: '/static/favicon.png',
-                    });
+                    // new Notification(`Private message from ${message.user}`, {
+                    //     body: message.content,
+                    //     icon: '/static/favicon.png',
+                    // });
                 }
             }
         }
         this.messages.push(message);
+        return shouldNotify;
     }
 
     removeUser(username: string) {

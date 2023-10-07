@@ -1,12 +1,11 @@
 import { Client } from '../client/client';
 import { Message } from '../client/message';
-import { Notification } from '../client/notifications';
+import { notificationsEngine, RoomNotification } from '../client/notifications';
 import { Room } from '../client/room';
 import { loadCustomColors } from '../utils/namecolour';
 import { createContext, useCallback, useEffect, useState } from 'react';
 
 import { toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
 
 export const client = new Client();
 
@@ -23,7 +22,7 @@ export const PS_context = createContext<
     user?: string; // Will be an object with user info
     rooms: Room[];
     setRooms: (rooms: Room[]) => void;
-    notifications: Notification[];
+    notifications: RoomNotification[];
 }
 >({
             client: client,
@@ -47,7 +46,7 @@ export default function PS_contextProvider(props: any) {
         'room',
     );
     const [rooms, setRooms] = useState<Room[]>([]);
-    const [notifications, setNotifications] = useState<Notification[]>([]);
+    const [notifications, setNotifications] = useState<RoomNotification[]>([]);
     const [update, setUpdate] = useState<number>(0); // Used to force update on rooms change
     const [previousRooms, setPreviousRooms] = useState<string[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -101,7 +100,7 @@ export default function PS_contextProvider(props: any) {
         const newEventListener = async (e: Event) => {
             setUpdate(update + 1);
             const roomID = (e as CustomEvent)?.detail?.ID;
-            if (roomID) {
+            if (roomID && !roomID.startsWith('pm-')) {
                 setRoom(roomID);
                 // We don't switch to the room if it's in the settings as it probably means we're doing the initial join
                 // console.log("settings", await client.settings.getSavedRooms());
@@ -197,11 +196,21 @@ export default function PS_contextProvider(props: any) {
             setUpdateMsgs(updateMsgs + 1);
         };
 
+        const notificationsEventListener: EventListener = (event) => {
+            console.log('Received notification', (event as CustomEvent).detail);
+            notificationsEngine.sendNotification((event as CustomEvent).detail);
+        };
+
         client.events.addEventListener('message', eventListener);
+        client.events.addEventListener('notification', notificationsEventListener);
 
         return () => {
             // Clean up the event listener when the component unmounts
             client.events.removeEventListener('message', eventListener);
+            client.events.removeEventListener(
+                'notification',
+                notificationsEventListener,
+            );
         };
     }, [
         client,

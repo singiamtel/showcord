@@ -29,9 +29,11 @@ export function RoomComponent(
                 )}
             >
                 {/** Notification circle if it applies */}
-                {unread > 0 && (
-                    <span className="rounded-full bg-white text-white text-xs p-1 h-1 w-1  absolute top-1/2  transform -translate-x-1/2 -translate-y-1/2" />
-                )}
+                {(unread > 0) ?
+                    (
+                        <span className="rounded-full bg-white text-white text-xs p-1 h-1 w-1  absolute top-1/2  transform -translate-x-1/2 -translate-y-1/2" />
+                    ) :
+                    null}
                 {/** Room name */}
                 <button
                     className={'rounded p-1 flex flex-row basis-full items-center  h-auto mr-2 ml-2 '}
@@ -42,7 +44,7 @@ export function RoomComponent(
                         <HashtagIcon height={16} width={16} />}
                     <span className="text-left ml-2 max-w-full truncate">
                         <span className="truncate max-w-full">{name}</span>
-                        {unread > 0 && (
+                        {(unread > 0 && type !== 'pm') && (
                             <span className="ml-2 text-gray-500">[{unread}]</span>
                         )}
                     </span>

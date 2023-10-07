@@ -13,8 +13,8 @@ export default function BigPanel() {
         return <MainPage />;
     }
     return (
-        <div className="flex w-full">
-            <div className={'bg-gray-300 flex flex-col ' + 'w-full'}>
+        <div className="flex w-full max-w-full break-normal">
+            <div className={'bg-gray-300 flex flex-col w-full max-w-full'}>
                 <div className="h-[90%] max-h-[90%] flex-grow flex-shrink min-h-0">
                     <Messages />
                 </div>

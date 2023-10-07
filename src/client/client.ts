@@ -3,7 +3,7 @@ import { cleanRegex, toID } from '../utils/generic';
 import { Message } from './message';
 import { Room, RoomType, roomTypes } from './room';
 import { User } from './user';
-import { Notification } from './notifications';
+import { clientNotification, RoomNotification } from './notifications';
 
 export class Client {
     private readonly server_url: string =
@@ -140,7 +140,6 @@ export class Client {
         this.send(`/leave ${roomID}`, false);
     }
 
-
     async autojoin(rooms: string[], useDefaultRooms = false) {
         if (!this.socket) {
             throw new Error('Auto-joining rooms before socket initialization ');
@@ -162,7 +161,8 @@ export class Client {
 
     private highlightMsg(roomid: string, message: string) {
         if (
-            this.cleanUsername && (message.includes(this.cleanUsername) ||
+            this.cleanUsername &&
+      (message.includes(this.cleanUsername) ||
         message.includes(toID(this.username)))
         ) {
             return true;
@@ -175,7 +175,7 @@ export class Client {
         return false;
     }
 
-    getNotifications(): Notification[] {
+    getNotifications(): RoomNotification[] {
         return Array.from(this.rooms).map(([_, room]) => ({
             room: room.ID,
             mentions: room.mentions,
@@ -357,20 +357,39 @@ export class Client {
       this.highlightMsg(roomID, message.content)
         ) {
             message.hld = true;
+            this.events.dispatchEvent(
+                new CustomEvent('message', { detail: message }),
+            );
         }
         if (room) {
             const settings = {
                 selected: this.selectedRoom === roomID,
                 selfSent: toID(this.username) === toID(message.user),
             };
+            let shouldNotify = false;
             if (message.name) {
                 room.addUHTML(message, settings);
             } else {
-                room.addMessage(message, settings);
+                shouldNotify = room.addMessage(message, settings);
             }
             this.events.dispatchEvent(
                 new CustomEvent('message', { detail: message }),
             );
+            console.log('addMessageToRoom', roomID, message);
+            if (shouldNotify) {
+                console.log('sendNotification for', roomID, message);
+                this.events.dispatchEvent(
+                    new CustomEvent('notification', {
+                        detail: {
+                            user: message.user,
+                            message: message.content,
+                            room: roomID,
+                            roomType: room.type,
+                        } as clientNotification,
+                    }),
+                );
+            }
+
             return;
         } else if (retry) {
             setTimeout(() => this.addMessageToRoom(roomID, message, false), 1000);
@@ -381,7 +400,7 @@ export class Client {
         );
     }
 
-    private addUsers(roomID: string, users: User[]) {
+    private addUsers(roomID: string, users: User[] /*  */) {
         const room = this.room(roomID);
         if (room) {
             room.addUsers(users);
@@ -416,7 +435,7 @@ export class Client {
         this.username = username;
         this.cleanUsername = username.replace(/[\u{0080}-\u{FFFF}]/gu, '').trim();
         this.rooms.forEach(async (room) => {
-            room.runHighlight(this.highlightMsg);
+            room.runHighlight(this.highlightMsg.bind(this));
         });
         this.events.dispatchEvent(
             new CustomEvent('login', { detail: this.username }),

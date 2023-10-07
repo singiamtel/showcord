@@ -1,7 +1,9 @@
 import ReactDOM from 'react-dom/client';
 import Home from './app/page';
-import './app/globals.css';
 import { StrictMode } from 'react';
+
+import './app/globals.css';
+import 'react-toastify/dist/ReactToastify.css';
 
 const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement,
