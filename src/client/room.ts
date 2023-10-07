@@ -58,11 +58,10 @@ export class Room {
         }
         if (selected) {
             const date = new Date();
-            date.setSeconds(date.getSeconds() + 1); // Some margin of error
             this.lastReadTime = date;
         }
         if (
-            ['chat', 'pm'].includes(message.type) && !selfSent && message.timestamp &&
+            ['chat', 'pm'].includes(message.type) && !selfSent && !selected && message.timestamp &&
       message.timestamp >
         new Date(this.lastReadTime.getTime() - this.lastReadTimeMargin)
         ) {
