@@ -2,6 +2,7 @@ import IconProfile from '../assets/profile';
 import { useContext } from 'react';
 import { PS_context } from './PS_context';
 import { userColor } from '../utils/namecolour';
+import { notificationsEngine } from '../client/notifications';
 
 export default function UserPanel() {
     const { client, user } = useContext(PS_context);
@@ -27,7 +28,10 @@ export default function UserPanel() {
                     (
                         <>
                             <button
-                                onClick={() => client?.login()}
+                                onClick={() => {
+                                    client?.login();
+                                    notificationsEngine.askPermission();
+                                }}
                                 className="font-bold rounded px-2 py-1 w-full"
                             >
                 Login

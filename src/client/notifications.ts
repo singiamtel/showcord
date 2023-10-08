@@ -20,28 +20,31 @@ function limitString(str: string, limit: number) {
 
 class NotificationsEngine {
     private permission = Notification.permission;
-    sendNotification = (
-        notification: clientNotification,
-        selectedRoom?: string,
-    ) => {
-        console.log('sendNotification', Math.random());
+
+    askPermission() {
         if (this.permission === 'default') {
             Notification.requestPermission().then((permission) => {
                 this.permission = permission;
             });
             return;
         }
+    }
+
+    sendNotification(
+        notification: clientNotification,
+        selectedRoom?: string,
+    ) {
         if (document.hasFocus()) {
             notification.user = notification.user.trim();
-            // Toasts don't have a title so we merge everything into the message
-
             if (selectedRoom !== notification.room) {
+                // Toasts don't have a title so we merge everything into the message
                 const message = notification.roomType === 'pm' ?
                     `PM from ${notification.user}: ${notification.message}` :
                     `${notification.room} - ${notification.user}: ${notification.message}`;
                 toast(limitString(message, 150));
             }
         } else {
+            if (this.permission !== 'granted') return;
             const title = notification.roomType === 'pm' ?
                 `PM from ${notification.user}` :
                 `${notification.room} - ${notification.user}`;
@@ -52,7 +55,7 @@ class NotificationsEngine {
                 icon,
             });
         }
-    };
+    }
 }
 
 export const notificationsEngine = new NotificationsEngine();

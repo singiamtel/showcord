@@ -4,6 +4,7 @@ import HashtagIcon from '../public/hashtag';
 import Circle from './components/circle';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { notificationsEngine } from '../client/notifications';
 
 export function RoomComponent(
     { name, ID, notifications: { unread, mentions }, type }: {
@@ -37,7 +38,10 @@ export function RoomComponent(
                 {/** Room name */}
                 <button
                     className={'rounded p-1 flex flex-row basis-full items-center  h-auto mr-2 ml-2 '}
-                    onClick={() => setRoom(ID)}
+                    onClick={() => {
+                        notificationsEngine.askPermission();
+                        setRoom(ID);
+                    }}
                 >
                     {type === 'pm' ?
                         <FontAwesomeIcon icon={faUser} height={16} width={16} /> :
