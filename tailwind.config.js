@@ -63,7 +63,7 @@ module.exports = {
         'm-1',
         'p-5.5',
         'm-2',
-        'w-[500px]',
+        'w-[400px]',
         'h-[300px]',
         'text-sm',
         'bg-blue-100',

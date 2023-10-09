@@ -348,11 +348,11 @@ export function MessageComponent(
     }
     return (
         <div className={'pt-0.5 ' + (hld ? 'bg-yellow-hl-body' : '')}>
-            <span className="text-gray-125 font-mono text-xs">
+            <span className="text-gray-125 text-xs">
                 {time ? HHMMSS(time) : ''}
-        &nbsp;
             </span>
             <span className="text-white break-all">
+        &nbsp;
                 {type === 'roleplay' ?
                     (
                         <>
