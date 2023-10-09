@@ -2,6 +2,7 @@ import ReactDOM from 'react-dom/client';
 import Home from './app/page';
 import { StrictMode } from 'react';
 
+import '@fontsource/roboto-mono';
 import './app/globals.css';
 import 'react-toastify/dist/ReactToastify.css';
 
