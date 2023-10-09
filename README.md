@@ -1,6 +1,4 @@
-# PS-cord
-
-_Not quite PS, but not quite Discord either_
+# Showcord!
 
 The client is still in early development, but feel free to try it! [Website](https://ps-cord.com/)
 
