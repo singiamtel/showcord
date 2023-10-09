@@ -103,7 +103,7 @@ export function UserCard(
             </div>
             {
                 <div id="usercard-rooms">
-          Rooms:
+          Chatrooms:
                 </div>
             }
         </div>
