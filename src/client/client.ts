@@ -656,12 +656,16 @@ export class Client {
                 this._removeRoom(roomID);
                 break;
             case 'uhtml':
+            case 'html':
                 {
-                    const uhtml = args.slice(1).join('|');
-                    const name = args[0];
+                    const name = cmd === 'uhtml' ? args[0] : undefined;
+                    if (name) {
+                        args.shift();
+                    }
+                    const uhtml = args.join('|');
                     const room = this.room(roomID);
                     if (!room) {
-                        console.error('Received |uhtml| from untracked room', roomID);
+                        console.error('Received |' + cmd + '| from untracked room', roomID);
                         return;
                     }
                     room.addUHTML(
@@ -675,6 +679,9 @@ export class Client {
                             selected: this.selectedRoom === roomID,
                             selfSent: false,
                         },
+                    );
+                    this.events.dispatchEvent(
+                        new CustomEvent('message', { detail: message }),
                     );
                 }
                 break;
