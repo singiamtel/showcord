@@ -79,5 +79,7 @@ module.exports = {
         'text-gray-700',
         'hover:text-white',
         'text-green-400',
+        'px-3',
+        'py-1',
     ],
 };

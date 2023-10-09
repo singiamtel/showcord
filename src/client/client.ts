@@ -375,9 +375,7 @@ export class Client {
             this.events.dispatchEvent(
                 new CustomEvent('message', { detail: message }),
             );
-            console.log('addMessageToRoom', roomID, message);
             if (shouldNotify) {
-                console.log('sendNotification for', roomID, message);
                 this.events.dispatchEvent(
                     new CustomEvent('notification', {
                         detail: {

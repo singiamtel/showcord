@@ -236,7 +236,8 @@ export default function Chat() {
     }, [__messages, messagesEndRef, isIntersecting]);
 
     const clickUsername = (e: MouseEvent) => {
-        const username = (e.target as HTMLAnchorElement).innerText;
+        const username = (e.target as HTMLAnchorElement).innerText.slice(0, -1)
+            .trim();
         // setIsOutside(null);
         setUsername(username);
         setPosition({ x: e.clientX, y: e.clientY });
