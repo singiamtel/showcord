@@ -3,6 +3,8 @@ import { MouseEventHandler, MutableRefObject, ReactNode } from 'react';
 import { clamp, toID } from '../utils/generic';
 import { FaCommentAlt, FaUserPlus } from 'react-icons/fa';
 import { PiSwordBold } from 'react-icons/pi';
+import manageURL from '../utils/manageURL';
+import { rankOrder } from '../client/room';
 
 export function UsernameComponent(
     { user, alignRight, onClick, colon, idle, bold, colorless }: {
@@ -48,11 +50,18 @@ export function UserCard(
         position: { x: number; y: number };
         forwardRef: MutableRefObject<any>;
     },
-) { // user is a json
+) {
+    console.log('queryuser', user);
+    const publicRooms = user ?
+        Object.entries(user.rooms).filter((e: any) => !e[1].isPrivate) :
+        [];
+    const privateRooms = user ?
+        Object.entries(user.rooms).filter((e: any) => e[1].isPrivate) :
+        [];
     return (
         <div
             ref={forwardRef}
-            className="absolute bg-gray-600 rounded-lg p-5 w-[400px] h-[300px] text-white shadow-sm shadow-black z-10"
+            className="absolute bg-gray-600 rounded-lg p-5 w-[400px] min-h-[300px] text-white shadow-sm shadow-black z-10"
             style={{
                 left: clamp(position.x, margin, window.innerWidth - 500 - margin),
                 top: clamp(position.y, margin, window.innerHeight - 300 - margin),
@@ -102,8 +111,22 @@ export function UserCard(
                 </div>
             </div>
             {
-                <div id="usercard-rooms">
-          Chatrooms:
+                <div id="usercard-rooms" className='text-sm'>
+          Chatrooms: {user ?
+                        publicRooms.map((e, idx) =>
+                            roomLink(e[0], idx === publicRooms.length - 1)) :
+                        ''}
+                    <br />
+                    {privateRooms.length > 0 ?
+                        (
+                            <>
+                Private rooms: {user ?
+                                    privateRooms.map((e, idx) =>
+                                        roomLink(e[0], idx === privateRooms.length - 1)) :
+                                    ''}
+                            </>
+                        ) :
+                        ''}
                 </div>
             }
         </div>
@@ -134,5 +157,31 @@ function UserCardButton({
                 {name}
             </div>
         </button>
+    );
+}
+
+function roomLink(room: string, last?: boolean) {
+    const hasRank =
+    rankOrder[room.charAt(0) as keyof typeof rankOrder] !== undefined;
+    if (toID(room).startsWith('battle')) {
+        return;
+    }
+    return (
+        <>
+            <span id="rank" className="text-[#9D9488] font-mono whitespace-pre">
+                {hasRank ? room.charAt(0) : ''}
+            </span>
+            <span className="text-blue-300 font-bold">
+                <a
+                    href={'/' + (toID(room))}
+                    target="_blank"
+                    onClick={(e) => manageURL(e)}
+                    className="hover:underline"
+                >
+                    {hasRank ? room.slice(1) : room}
+                </a>
+            </span>
+            {last ? '' : ', '}
+        </>
     );
 }

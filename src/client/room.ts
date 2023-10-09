@@ -4,6 +4,19 @@ import { User } from './user';
 export const roomTypes = ['chat', 'battle', 'pm', 'permanent'] as const;
 export type RoomType = typeof roomTypes[number];
 
+export const rankOrder = {
+    '&': 9,
+    '#': 8,
+    '\u00a7': 7,
+    '@': 6,
+    '%': 5,
+    '*': 4,
+    '+': 3,
+    '^': 2,
+    ' ': 1,
+    '‽': 0,
+} as const;
+
 export class Room {
     type: RoomType;
     ID: string;
@@ -17,19 +30,6 @@ export class Room {
     users: User[] = [];
     private readonly messageLimit = 600;
     private icon?: JSX.Element;
-    private readonly rankOrder: any = {
-        '&': 9,
-        '#': 8,
-        '\u00a7': 7,
-        '@': 6,
-        '%': 5,
-        '*': 4,
-        '+': 3,
-        '^': 2,
-        ' ': 1,
-        '‽': 0,
-    };
-
     constructor(
         { ID, name, type }: {
             ID: string;
@@ -61,7 +61,8 @@ export class Room {
             this.lastReadTime = date;
         }
         if (
-            ['chat', 'pm'].includes(message.type) && !selfSent && !selected && message.timestamp &&
+            ['chat', 'pm'].includes(message.type) && !selfSent && !selected &&
+      message.timestamp &&
       message.timestamp >
         new Date(this.lastReadTime.getTime() - this.lastReadTimeMargin)
         ) {
@@ -119,10 +120,10 @@ export class Room {
 
     private rankSorter = (a: User, b: User) => {
     // the symbols should go first, then the spaces, then the interrobangs
-        const aSymbol = a.name.charAt(0);
-        const bSymbol = b.name.charAt(0);
-        if (this.rankOrder[aSymbol] !== this.rankOrder[bSymbol]) {
-            return this.rankOrder[bSymbol] - this.rankOrder[aSymbol];
+        const aSymbol = a.name.charAt(0) as keyof typeof rankOrder;
+        const bSymbol = b.name.charAt(0) as keyof typeof rankOrder;
+        if (rankOrder[aSymbol] !== rankOrder[bSymbol]) {
+            return rankOrder[bSymbol] - rankOrder[aSymbol];
         }
         return a.name.localeCompare(b.name, 'en', { sensitivity: 'base' });
     };
