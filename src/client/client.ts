@@ -156,21 +156,15 @@ export class Client {
         });
     }
 
-    async join(rooms: string | string[]) {
-        if (!rooms) {
+    async join(room: string) {
+        if (!room) {
             console.trace('Trying to join empty string room');
         }
         if (!this.socket) {
-            throw new Error('Joining room(s) before socket initialization ' + rooms);
+            throw new Error('Joining room(s) before socket initialization ' + room);
         }
-        if (typeof rooms === 'string') {
-            this.__send(`/join ${rooms}`, false);
-            this.autoSelectRoom = rooms;
-        } else {
-            for (const room of rooms) {
-                this.__send(`/join ${room}`, false);
-            }
-        }
+        this.__send(`/join ${room}`, false);
+        this.autoSelectRoom = room;
     }
 
     leaveRoom(roomID: string) {
