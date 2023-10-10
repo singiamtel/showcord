@@ -2,6 +2,7 @@ import {
     createRef,
     Fragment,
     MouseEvent,
+    useCallback,
     useContext,
     useEffect,
     useLayoutEffect,
@@ -212,9 +213,13 @@ export default function Chat() {
     const wrapperRef = useRef(null);
     const { isOutside } = useClickOutside(wrapperRef);
 
-    useEffect(() => {
+    const closeWindow = useCallback(() => {
         setUser(null);
         setUsername(null);
+    }, [setUser, setUsername]);
+
+    useEffect(() => {
+        closeWindow();
     }, [isOutside]);
 
     useLayoutEffect(() => {
@@ -255,6 +260,7 @@ export default function Chat() {
                         name={username}
                         position={position}
                         forwardRef={wrapperRef}
+                        close={closeWindow}
                     />
                 ) :
                 null}
@@ -278,8 +284,13 @@ export default function Chat() {
                     />
                 </ErrorBoundary>
             ))}
-            <div>
-                <div id="msg_end" ref={messagesEndRef} className="h-4 w-4"></div>{' '}
+            <div className="relative h-0">
+                <div
+                    id="msg_end"
+                    ref={messagesEndRef}
+                    className="absolute right-0 top-0 h-1 scale-[500%] w-4"
+                >
+                </div>{' '}
                 {/* invisible div to scroll to */}
             </div>
         </div>

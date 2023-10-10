@@ -30,6 +30,7 @@ export class Room {
     users: User[] = [];
     private readonly messageLimit = 600;
     private icon?: JSX.Element;
+    private lastSentMessages: string[] = [];
     constructor(
         { ID, name, type }: {
             ID: string;
@@ -46,6 +47,17 @@ export class Room {
         this.lastReadTime = new Date();
         this.mentions = 0;
         this.unread = 0;
+    }
+
+    send(message: string) {
+        if (this.lastSentMessages.length > 25) {
+            this.lastSentMessages.shift();
+        }
+        this.lastSentMessages.push(message);
+    }
+
+    getLastSentMessage(age: number) {
+        return this.lastSentMessages[this.lastSentMessages.length - age];
     }
 
     addMessage(
@@ -133,7 +145,8 @@ export class Room {
     }
 
     addUsers(users: User[]) {
-        this.users = this.users.concat(users).sort(this.rankSorter);
+        this.users = this.users.concat(users).filter((user, index, self) =>
+            self.findIndex((u) => u.ID === user.ID) === index).sort(this.rankSorter);
     }
 
     updateUsername(newName: string, userID: string) {

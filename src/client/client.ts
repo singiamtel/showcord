@@ -18,6 +18,7 @@ export class Client {
     rooms: Map<string, Room> = new Map();
     events: EventTarget = new EventTarget();
     private username: string = '';
+    private autoSelectRoom: string = '';
     private loggedIn: boolean = false;
     private onOpen: (() => void)[] = []; // Append callbacks here to run when the socket opens
 
@@ -35,6 +36,7 @@ export class Client {
     }]; // Client-side only rooms, joined automatically
     private roomsJSON: any = undefined; // Server response to /cmd rooms
     private news: any = undefined; // Cached news
+    private lastQueriedUser: { user: string; json: any } | undefined; // Cached user query
 
     constructor() {
         this.__createPermanentRooms();
@@ -42,7 +44,11 @@ export class Client {
         this.__setupSocketListeners();
     }
 
-    async send(ogMessage: string, room: string | false) {
+    async send(message: string, room: string | false) {
+        this.__send(message, room, false);
+    }
+
+    private async __send(ogMessage: string, room: string | false, raw = true) {
         if (!this.socket) {
             throw new Error(
                 `Sending message before socket initialization ${room} ${ogMessage}`,
@@ -59,12 +65,15 @@ export class Client {
                 } else {
                     message = `${roomObj.ID}|${message}`;
                 }
+                roomObj.send(message);
+            } else {
+                console.warn('Sending message to non-existent room', room);
             }
         }
 
         console.log(`>>${message}`);
         try {
-            if (this.__parseSendMsg(ogMessage, room)) return; // Already handled client-side
+            if (this.__parseSendMsg(ogMessage, room, raw)) return; // Already handled client-side
             this.socket.send(`${message}`);
         } catch (e) {
             if (e instanceof DOMException) {
@@ -80,6 +89,29 @@ export class Client {
         return this.rooms.get(roomID);
     }
 
+    createPM(user: string) {
+        this.__createPM(user);
+        console.log('selecting room pm-' + toID(user));
+        this.autoSelectRoom = '';
+        this.events.dispatchEvent(
+            new CustomEvent('selectroom', { detail: 'pm-' + toID(user) }),
+        );
+    }
+
+    private __createPM(user: string) {
+        const roomID = `pm-${toID(user)}`;
+        const room = this.room(roomID);
+        if (room) {
+            return;
+        }
+        const newRoom = new Room({
+            ID: roomID,
+            name: user,
+            type: 'pm',
+        });
+        this._addRoom(newRoom);
+    }
+
     // Used to remove highlights and mentions
     selectRoom(roomid: string) {
         this.selectedRoom = roomid;
@@ -91,7 +123,13 @@ export class Client {
         if (!this.socket) {
             throw new Error('Getting user before socket initialization ' + user);
         }
-        this.send(`/cmd userdetails ${user}`, false);
+        if (this.lastQueriedUser && this.lastQueriedUser.user === user) {
+            // Refresh anyways but give the cached json first
+            callback(this.lastQueriedUser.json);
+            this.__send(`/cmd userdetails ${user}`, false);
+            this.userListener = callback;
+        }
+        this.__send(`/cmd userdetails ${user}`, false);
         this.userListener = callback;
     }
 
@@ -103,7 +141,7 @@ export class Client {
             callback(this.roomsJSON);
             return;
         }
-        this.send(`/cmd rooms`, false);
+        this.__send(`/cmd rooms`, false);
         this.roomListener = callback;
     }
 
@@ -125,10 +163,11 @@ export class Client {
             throw new Error('Joining room(s) before socket initialization ' + rooms);
         }
         if (typeof rooms === 'string') {
-            this.send(`/join ${rooms}`, false);
+            this.__send(`/join ${rooms}`, false);
+            this.autoSelectRoom = rooms;
         } else {
             for (const room of rooms) {
-                this.send(`/join ${room}`, false);
+                this.__send(`/join ${room}`, false);
             }
         }
     }
@@ -137,7 +176,7 @@ export class Client {
         if (!this.socket) {
             throw new Error('Leaving room before socket initialization ' + roomID);
         }
-        this.send(`/leave ${roomID}`, false);
+        this.__send(`/leave ${roomID}`, false);
     }
 
     async autojoin(rooms: string[], useDefaultRooms = false) {
@@ -148,12 +187,12 @@ export class Client {
             !this.permanentRooms.map((e) => e.ID).includes(e));
         if (useDefaultRooms && (!filteredRooms || filteredRooms.length === 0)) {
             for (const room of this.settings.defaultRooms) {
-                this.send(`/join ${room}`, false);
+                this.__send(`/join ${room}`, false);
             }
             return;
         }
         if (!filteredRooms.length) return;
-        this.send(
+        this.__send(
             `/autojoin ${filteredRooms.join(',')}`,
             false,
         );
@@ -276,7 +315,7 @@ export class Client {
 
     private async send_assertion(assertion: string) {
         const username = assertion.split(',')[1];
-        this.send(`/trn ${username},0,${assertion}`, false);
+        this.__send(`/trn ${username},0,${assertion}`, false);
     }
 
     private async parseLoginserverResponse(
@@ -494,6 +533,12 @@ export class Client {
                     });
                     this._addRoom(room);
                     this.addUsers(roomID, users);
+                    if (toID(this.autoSelectRoom) === roomID) {
+                        this.autoSelectRoom = '';
+                        this.events.dispatchEvent(
+                            new CustomEvent('selectroom', { detail: roomID }),
+                        );
+                    }
                     continue;
                 }
                 this.parseSingleLiner(splitted_message[i], roomID);
@@ -555,16 +600,9 @@ export class Client {
                     const { content, type } = this.parseCMessageContent(
                         args.slice(2).join('|'),
                     );
-                    const room = this.room(roomID);
-                    if (!room) {
-                        this._addRoom(
-                            new Room({
-                                ID: roomID,
-                                name: sender === toID(this.username) ? args[1] : args[0],
-                                type: 'pm',
-                            }),
-                        );
-                    }
+                    this.__createPM(
+                        sender === toID(this.username) ? args[1] : args[0],
+                    );
                     this.addMessageToRoom(
                         roomID,
                         new Message({
@@ -576,6 +614,7 @@ export class Client {
                     );
                 }
                 break;
+                // case 'j':
             case 'J': {
                 const room = this.room(roomID);
                 if (!room) {
@@ -588,6 +627,7 @@ export class Client {
                 this.addUsers(roomID, [new User({ name: args[0], ID: toID(args[0]) })]);
                 break;
             }
+            // case 'l':
             case 'L': {
                 const room = this.room(roomID);
                 if (!room) {
@@ -600,6 +640,7 @@ export class Client {
                 this.removeUser(roomID, args[0]);
                 break;
             }
+            // case 'n':
             case 'N': {
                 this.updateUsername(roomID, args[0], args[1]);
                 break;
@@ -643,6 +684,12 @@ export class Client {
                     this.events.dispatchEvent(
                         new CustomEvent('error', { detail: args[1] }),
                     );
+                } else if (args[0] === 'joinfailed') {
+                    this.events.dispatchEvent(
+                        new CustomEvent('error', { detail: args[1] }),
+                    );
+                } else {
+                    console.error('Unknown noinit', args);
                 }
                 break;
             case 'updateuser':
@@ -859,12 +906,17 @@ export class Client {
         });
     }
 
-    private __parseSendMsg(message: string, room: string | false): boolean {
+    private __parseSendMsg(
+        message: string,
+        room: string | false,
+        raw: boolean,
+    ): boolean {
         if (!message.startsWith('/')) {
             return false;
         }
         const splitted_message = message.split(' ');
         const cmd = splitted_message[0].slice(1);
+        console.log('__parse cmd', cmd);
         switch (cmd) {
             case 'highlight':
             case 'hl': {
@@ -951,6 +1003,18 @@ export class Client {
                         return true; // Don't send to server
                 }
             }
+            case 'j':
+            case 'join':
+                if (!raw) {
+                    // Set as autoselect room
+                    const args = splitted_message.slice(1);
+                    if (args.length === 0) {
+                        return false;
+                    }
+                    this.autoSelectRoom = toID(args.join(''));
+                    console.log('autoSelectingRoom', this.autoSelectRoom);
+                }
+                return false;
             default:
                 return false;
         // /highlight add [word 1], [word 2], [...] - Add the provided list of words to your highlight list.

@@ -97,18 +97,8 @@ export default function PS_contextProvider(props: any) {
         if (!client) {
             return;
         }
-        const newEventListener = async (e: Event) => {
+        const newEventListener = async (_: Event) => {
             setUpdate(update + 1);
-            const roomID = (e as CustomEvent)?.detail?.ID;
-            if (roomID && !roomID.startsWith('pm-')) {
-                setRoom(roomID);
-                // We don't switch to the room if it's in the settings as it probably means we're doing the initial join
-                // console.log("settings", await client.settings.getSavedRooms());
-                // const rooms = await settings.getSavedRooms();
-                // if (rooms && !rooms.map((e) => e.ID).includes(roomID)) {
-                //   setRoom(roomID);
-                // }
-            }
         };
 
         const removedEventListener = () => {
@@ -131,12 +121,25 @@ export default function PS_contextProvider(props: any) {
             }
         };
 
+        const autoSelectRoomListener = (e: Event) => {
+            console.log('Received selectroom event', e);
+            const roomID = (e as CustomEvent)?.detail;
+            if (roomID) {
+                setRoom(roomID);
+            }
+        };
+
         client.events.addEventListener('room', newEventListener);
+        client.events.addEventListener('selectroom', autoSelectRoomListener);
         client.events.addEventListener('leaveroom', removedEventListener);
         client.events.addEventListener('error', globalErrorListener);
 
         return () => {
             client.events.removeEventListener('room', newEventListener);
+            client.events.removeEventListener(
+                'selectroom',
+                autoSelectRoomListener,
+            );
             client.events.removeEventListener('leaveroom', removedEventListener);
             client.events.removeEventListener('error', globalErrorListener);
         };
