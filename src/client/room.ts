@@ -25,6 +25,7 @@ export class Room {
     lastReadTimeMargin = 1000; // 1 second
     unread = 0;
     mentions = 0;
+    connected = false;
 
     messages: Message[] = [];
     users: User[] = [];
@@ -32,15 +33,17 @@ export class Room {
     private icon?: JSX.Element;
     private lastSentMessages: string[] = [];
     constructor(
-        { ID, name, type }: {
+        { ID, name, type, connected }: {
             ID: string;
             name: string;
             type: RoomType;
+            connected: boolean;
         },
     ) {
         this.ID = ID;
         this.name = name;
         this.type = type;
+        this.connected = connected;
     }
 
     select() {

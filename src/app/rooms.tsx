@@ -1,10 +1,11 @@
 import { useContext } from 'react';
-import { PS_context } from './PS_context';
+import { client, PS_context } from './PS_context';
 import HashtagIcon from '../public/hashtag';
 import Circle from './components/circle';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { notificationsEngine } from '../client/notifications';
+import { AiOutlineClose } from 'react-icons/ai';
 
 export function RoomComponent(
     { name, ID, notifications: { unread, mentions }, type }: {
@@ -59,7 +60,21 @@ export function RoomComponent(
                 </span>
             )}
                 </button>
+                {
+                    /* Should display closing button?*/
+                    (room === ID && !client.permanentRooms.some((e) => e.ID === room)) ?
+                        <ClosingButton room={room} /> :
+                        ''
+                }
             </div>
         </div>
+    );
+}
+
+function ClosingButton({ room }: { room: string }) {
+    return (
+        <button className="p-1" onClick={() => client.leaveRoom(room)}>
+            <AiOutlineClose color="red" opacity={0.4} />
+        </button>
     );
 }

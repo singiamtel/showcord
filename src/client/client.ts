@@ -30,7 +30,7 @@ export class Client {
     // Callbacks given to query commands, it's called after the server responds back with the info
     private userListener: ((json: any) => any) | undefined;
     private roomListener: ((json: any) => any) | undefined;
-    private permanentRooms = [{
+    permanentRooms = [{
         ID: 'home',
         name: 'Home',
     }]; // Client-side only rooms, joined automatically
@@ -108,6 +108,7 @@ export class Client {
             ID: roomID,
             name: user,
             type: 'pm',
+            connected: false,
         });
         this._addRoom(newRoom);
     }
@@ -172,11 +173,25 @@ export class Client {
         }
     }
 
-    private leaveRoom(roomID: string) {
+    leaveRoom(roomID: string) {
         if (!this.socket) {
             throw new Error('Leaving room before socket initialization ' + roomID);
         }
-        this.__send(`/leave ${roomID}`, false);
+        const room = this.room(roomID);
+        if (!room) {
+            console.warn('Trying to leave non-existent room', roomID);
+            this.events.dispatchEvent(
+                new CustomEvent('error', {
+                    detail: `Trying to leave non-existent room ${roomID}`,
+                }),
+            );
+            return;
+        }
+        if (room.connected) {
+            this.__send(`/leave ${roomID}`, false);
+        } else {
+            this._removeRoom(roomID);
+        }
     }
 
     async autojoin(rooms: string[], useDefaultRooms = false) {
@@ -530,6 +545,7 @@ export class Client {
                         ID: roomID,
                         name: name,
                         type: type as RoomType,
+                        connected: true,
                     });
                     this._addRoom(room);
                     this.addUsers(roomID, users);
@@ -901,6 +917,7 @@ export class Client {
                     ID: room.ID,
                     name: room.name,
                     type: 'permanent',
+                    connected: false,
                 }),
             );
         });
