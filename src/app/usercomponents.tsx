@@ -1,5 +1,5 @@
 import { userColor } from '../utils/namecolour';
-import { MouseEventHandler, MutableRefObject, ReactNode } from 'react';
+import { Fragment, MouseEventHandler, MutableRefObject, ReactNode } from 'react';
 import { clamp, toID } from '../utils/generic';
 import { FaCommentAlt, FaUserPlus } from 'react-icons/fa';
 import { PiSwordBold } from 'react-icons/pi';
@@ -120,7 +120,7 @@ export function UserCard(
                 <div id="usercard-rooms" className="text-sm">
           Chatrooms: {user ?
                         publicRooms.map((e, idx) =>
-                            roomLink(e[0], idx === publicRooms.length - 1, close)) :
+                            roomLink(e[0], idx === publicRooms.length - 1, close, idx)) :
                         ''}
                     <br />
                     {privateRooms.length > 0 ?
@@ -128,7 +128,7 @@ export function UserCard(
                             <>
                 Private rooms: {user ?
                                     privateRooms.map((e, idx) =>
-                                        roomLink(e[0], idx === privateRooms.length - 1, close)) :
+                                        roomLink(e[0], idx === privateRooms.length - 1, close, idx)) :
                                     ''}
                             </>
                         ) :
@@ -170,14 +170,14 @@ function UserCardButton({
     );
 }
 
-function roomLink(room: string, last: boolean, close: () => void) {
+function roomLink(room: string, last: boolean, close: () => void, key: number) {
     const hasRank =
     rankOrder[room.charAt(0) as keyof typeof rankOrder] !== undefined;
     if (toID(room).startsWith('battle')) {
         return;
     }
     return (
-        <>
+        <Fragment key={key}>
             <span id="rank" className="text-[#9D9488] font-mono whitespace-pre">
                 {hasRank ? room.charAt(0) : ''}
             </span>
@@ -195,7 +195,7 @@ function roomLink(room: string, last: boolean, close: () => void) {
                 </a>
             </span>
             {last ? '' : ', '}
-        </>
+        </Fragment>
     );
 }
 
