@@ -71,6 +71,29 @@ export default function ChatBox() {
                 return;
             }
         }
+        // Chat history works like a shell
+        if (e.key === 'ArrowUp') {
+            // Previous message in history
+            console.log('here', room);
+            if (!room) return;
+            const prev = client.room(room)?.historyPrev();
+            console.log('prev', prev);
+            if (!prev) return;
+            setInput(prev);
+            e.preventDefault();
+        }
+        if (e.key === 'ArrowDown') {
+            console.log('here', room);
+            if (!room) return;
+            const prev = client.room(room)?.historyNext();
+            console.log('next', prev);
+            if (!prev) {
+                setInput('');
+            } else {
+                setInput(prev);
+            }
+            e.preventDefault();
+        }
     };
 
     const manageChanges: ChangeEventHandler<HTMLTextAreaElement> = (e) => {
@@ -112,7 +135,6 @@ export default function ChatBox() {
         };
     }, []);
 
-
     return (
         <>
             <div className="w-full">
@@ -129,7 +151,9 @@ export default function ChatBox() {
                             onChange={manageChanges}
                             onKeyDown={manageKeybinds}
                             ref={textAreaRef}
-                            placeholder={`Message ${room ? client?.room(room)?.name.trim() : ''}`}
+                            placeholder={`Message ${
+                                room ? client.room(room)?.name.trim() : ''
+                            }`}
                         >
                         </TextareaAutosize>
                     </div>

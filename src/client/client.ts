@@ -45,6 +45,9 @@ export class Client {
     }
 
     async send(message: string, room: string | false) {
+        if (room) {
+            this.room(room)?.send(message);
+        }
         this.__send(message, room, false);
     }
 
@@ -65,7 +68,6 @@ export class Client {
                 } else {
                     message = `${roomObj.ID}|${message}`;
                 }
-                roomObj.send(message);
             } else {
                 console.warn('Sending message to non-existent room', room);
             }

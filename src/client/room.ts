@@ -32,6 +32,8 @@ export class Room {
     private readonly messageLimit = 600;
     private icon?: JSX.Element;
     private lastSentMessages: string[] = [];
+    private readonly lastSentMessageLimit = 25;
+    private prevIndex = 0;
     constructor(
         { ID, name, type, connected }: {
             ID: string;
@@ -46,21 +48,24 @@ export class Room {
         this.connected = connected;
     }
 
+    historyPrev() {
+        if (this.prevIndex === 0) {
+            return '';
+        }
+        return this.lastSentMessages[--this.prevIndex];
+    }
+
+    historyNext() {
+        if (this.prevIndex === this.lastSentMessages.length) {
+            return '';
+        }
+        return this.lastSentMessages[++this.prevIndex];
+    }
     select() {
         this.lastReadTime = new Date();
         this.mentions = 0;
         this.unread = 0;
-    }
-
-    send(message: string) {
-        if (this.lastSentMessages.length > 25) {
-            this.lastSentMessages.shift();
-        }
-        this.lastSentMessages.push(message);
-    }
-
-    getLastSentMessage(age: number) {
-        return this.lastSentMessages[this.lastSentMessages.length - age];
+        this.prevIndex = this.lastSentMessages.length;
     }
 
     addMessage(
@@ -96,6 +101,14 @@ export class Room {
         }
         this.messages.push(message);
         return shouldNotify;
+    }
+
+    send(message: string) {
+        this.lastSentMessages.push(message);
+        if (this.lastSentMessages.length > this.lastSentMessageLimit) {
+            this.lastSentMessages.shift();
+        }
+        this.prevIndex = this.lastSentMessages.length;
     }
 
     removeUser(username: string) {
