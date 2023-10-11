@@ -64,7 +64,6 @@ export default function ChatBox() {
             }
         }
         if ((e.key === 'Tab' && e.shiftKey) || e.key === 'ArrowLeft') {
-            console.log(formRef.current?.textContent);
             if (!formRef.current?.textContent) {
                 setRoom(-1);
                 e.preventDefault();
@@ -74,19 +73,15 @@ export default function ChatBox() {
         // Chat history works like a shell
         if (e.key === 'ArrowUp') {
             // Previous message in history
-            console.log('here', room);
             if (!room) return;
             const prev = client.room(room)?.historyPrev();
-            console.log('prev', prev);
             if (!prev) return;
             setInput(prev);
             e.preventDefault();
         }
         if (e.key === 'ArrowDown') {
-            console.log('here', room);
             if (!room) return;
             const prev = client.room(room)?.historyNext();
-            console.log('next', prev);
             if (!prev) {
                 setInput('');
             } else {
