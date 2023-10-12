@@ -13,6 +13,8 @@ import { InfinitySpin } from 'react-loader-spinner';
 import MiniSearch, { SearchResult } from 'minisearch';
 import NewsCard from './components/NewsCard';
 
+import targetFaceCluster from '../assets/cluster_target_face_original.png';
+
 const minisearch = new MiniSearch({
     fields: ['title', 'desc'],
     storeFields: ['title', 'desc', 'userCount', 'section'],
@@ -97,8 +99,8 @@ export default function MainPage() {
 
     return (
         <div className="w-full grid grid-cols-7 grid-rows-2">
-            <div className="col-span-3 bg-gray-600 m-4 p-4 rounded text-white flex items-center justify-center">
-        Ladder will be here
+            <div className="col-span-3 bg-gray-600 m-4 rounded text-white flex justify-center items-center overflow-hidden">
+                <img src={targetFaceCluster} alt="targetFaceCluster" />
             </div>
             <div className="col-span-2 bg-gray-600 m-4 p-4 rounded text-white flex flex-col items-center justify-center overflow-scroll">
                 <h2 className="font-bold text-xl text-center mt-8">
