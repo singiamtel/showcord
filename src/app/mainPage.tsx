@@ -99,7 +99,7 @@ export default function MainPage() {
 
     return (
         <div className="w-full grid grid-cols-7 grid-rows-2">
-            <div className="col-span-3 m-4 rounded-lg text-white flex flex-col justify-center items-center overflow-hidden relative ">
+            <div className="col-span-3 m-4 rounded-lg bg-gray-600 text-white flex flex-col justify-center items-center overflow-hidden relative ">
                 <img
                     src={targetFaceCluster}
                     alt="targetFaceCluster"
