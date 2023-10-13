@@ -13,7 +13,7 @@ import { InfinitySpin } from 'react-loader-spinner';
 import MiniSearch, { SearchResult } from 'minisearch';
 import NewsCard from './components/NewsCard';
 
-import targetFaceCluster from '../assets/cluster_target_face_original.png';
+import targetFaceCluster from '../assets/cluster_target_face_nobg.png';
 
 const minisearch = new MiniSearch({
     fields: ['title', 'desc'],
@@ -99,10 +99,22 @@ export default function MainPage() {
 
     return (
         <div className="w-full grid grid-cols-7 grid-rows-2">
-            <div className="col-span-3 bg-gray-600 m-4 rounded text-white flex justify-center items-center overflow-hidden">
-                <img src={targetFaceCluster} alt="targetFaceCluster" />
+            <div className="col-span-3 m-4 rounded-lg text-white flex flex-col justify-center items-center overflow-hidden relative ">
+                <img
+                    src={targetFaceCluster}
+                    alt="targetFaceCluster"
+                    className="opacity-70 h-auto min-h-[110%]"
+                />
+                <div className="flex flex-col justify-between h-full p-4 absolute">
+                    <h1 className="font-bold text-4xl text-center z-10 text-transparent">
+            Welcome to Showcord!
+                    </h1>
+                    <h2 className="font-bold text-2xl text-center z-10 text-transparent">
+            Chat with your friends and meet new people
+                    </h2>
+                </div>
             </div>
-            <div className="col-span-2 bg-gray-600 m-4 p-4 rounded text-white flex flex-col items-center justify-center overflow-scroll">
+            <div className="col-span-2 bg-gray-600 m-4 p-4 rounded-lg text-white flex flex-col items-center justify-center overflow-scroll">
                 <h2 className="font-bold text-xl text-center mt-8">
           News
                 </h2>
@@ -111,7 +123,7 @@ export default function MainPage() {
                 ))}
             </div>
             <div
-                className="col-span-2 row-span-2 m-4 p-4 rounded overflow-y-auto text-white bg-gray-600"
+                className="col-span-2 row-span-2 m-4 p-4 rounded-lg overflow-y-auto text-white bg-gray-600"
                 style={{ scrollbarGutter: 'stable' }}
             >
                 <h2 className="font-bold text-xl text-center">
