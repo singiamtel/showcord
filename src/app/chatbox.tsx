@@ -57,10 +57,24 @@ export default function ChatBox() {
             return;
         }
         if ((e.key === 'Tab' && !e.shiftKey) || e.key === 'ArrowRight') {
+
             if (!formRef.current?.textContent) {
                 setRoom(1);
                 e.preventDefault();
                 return;
+            } else {
+                const users = client.room(room)?.users;
+                if (!users) return;
+
+                const parts = formRef.current.textContent.split(/\b/);
+                const last = parts.pop();
+                if (!last) return;
+
+                const user = users.find(user => user.name.slice(1).toLowerCase().startsWith(last.toLowerCase()));
+                if (!user) return;
+
+                e.preventDefault();
+                setInput(parts.concat([user.name.slice(1)]).join(""));
             }
         }
         if ((e.key === 'Tab' && e.shiftKey) || e.key === 'ArrowLeft') {
