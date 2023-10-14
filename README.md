@@ -1,6 +1,6 @@
 # Showcord!
 
-The client is still in early development, but feel free to try it! [Website](https://ps-cord.com/)
+The client is still in early development, but feel free to try it! [Website](https://showcord.com/)
 
 Custom client for [Pokémon Showdown](play.pokemonshowdown.com) built in React.js with a modern and user-friendly design
 
@@ -16,18 +16,18 @@ The client should always be:
 
 ## Installation
 
-If you want to self-host PS-cord, follow these steps:
+If you want to self-host Showcord, follow these steps:
 
-1. Clone the repository: `git clone https://github.com/yourusername/ps-cord.git`
-2. Navigate to the project directory: `cd ps-cord`
+1. Clone the repository: `git clone https://github.com/singiamtel/showcord.git`
+2. Navigate to the project directory: `cd showcord`
 3. Install dependencies: `npm install`
 4. Start the development server: `npm run dev`
 5. Open your browser and visit: `http://localhost:3000`
 
 ## Contributing
 
-We welcome contributions to make PS-cord even better! If you'd like to contribute, make sure to check our [feature tracker](https://github.com/users/singiamtel/projects/1)
+We welcome contributions to make Showcord even better! If you'd like to contribute, make sure to check our [feature tracker](https://github.com/users/singiamtel/projects/1)
 
 ## License
 
-PS-cord is [MIT](https://opensource.org/licenses/MIT).
+Showcord is [MIT](https://opensource.org/licenses/MIT).
