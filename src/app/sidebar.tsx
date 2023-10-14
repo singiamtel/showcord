@@ -7,7 +7,6 @@ import {
 } from '@dnd-kit/modifiers';
 import UserPanel from './userpanel';
 import 'allotment/dist/style.css';
-import { Allotment } from 'allotment';
 import {
     closestCenter,
     DndContext,
