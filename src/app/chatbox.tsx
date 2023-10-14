@@ -44,7 +44,7 @@ export default function ChatBox() {
         setInput('');
     };
 
-    const manageKeybinds  = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    const manageKeybinds = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     // if user pressed enter, submit form
     // don't submit if user pressed shift+enter
         if (e.key === 'Enter' && !e.shiftKey) {
