@@ -2,16 +2,16 @@ import {
     ChangeEventHandler,
     createRef,
     FormEvent,
-    KeyboardEventHandler,
+    KeyboardEvent,
     useContext,
     useEffect,
+    useLayoutEffect,
     useRef,
     useState,
 } from 'react';
 import MiniSearch, { SearchResult } from 'minisearch';
 import TextareaAutosize from 'react-textarea-autosize';
 import { PS_context } from './PS_context';
-import cmds from '../commands/chat_commands';
 
 type SearchBoxOffset = {
     width: number;
@@ -27,6 +27,7 @@ const minisearch = new MiniSearch({
 // minisearch.addAll(cmds);
 export default function ChatBox() {
     const [input, setInput] = useState<string>('');
+    const [cursorPos, setCursorPos] = useState(input.length);
     const [displaySearchbox, setDisplaySearchbox] = useState<boolean>(false);
     const [searchBoxOffset, setSearchBoxOffset] = useState<SearchBoxOffset>({
         width: 0,
@@ -43,7 +44,7 @@ export default function ChatBox() {
         setInput('');
     };
 
-    const manageKeybinds: KeyboardEventHandler = (e) => {
+    const manageKeybinds  = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     // if user pressed enter, submit form
     // don't submit if user pressed shift+enter
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -61,20 +62,28 @@ export default function ChatBox() {
                 setRoom(1);
                 e.preventDefault();
                 return;
-            } else if (room) {
-                const users = client.room(room)?.users;
-                if (!users) return;
-
-                const parts = formRef.current.textContent.split(/\b/);
-                const last = parts.pop();
-                if (!last) return;
-
-                const user = users.find(user => user.name.slice(1).toLowerCase().startsWith(last.toLowerCase()));
-                if (!user) return;
-
-                e.preventDefault();
-                setInput(parts.concat([user.name.slice(1)]).join(""));
             }
+        }
+        if (e.key === 'Tab' && !e.shiftKey && e.currentTarget.value && room) {
+            e.preventDefault();
+
+            const users = client.room(room)?.users;
+            if (!users) return;
+
+            const { selectionStart: cursorPos, value: text } = e.currentTarget;
+            const textBeforeCursor = text.slice(0, cursorPos);
+            const textAfterCursor = text.slice(cursorPos);
+            const partsBeforeCursor = textBeforeCursor.split(/\b/);
+            const lastWordBeforeCursor = partsBeforeCursor.pop();
+            if (!lastWordBeforeCursor) return;
+
+            const user = users.find(user => user.name.slice(1).toLowerCase().startsWith(lastWordBeforeCursor.toLowerCase()));
+            if (!user) return;
+
+            const userNameWithoutRank = user.name.slice(1);
+            setInput(partsBeforeCursor.concat([userNameWithoutRank]).join('') + textAfterCursor);
+            setCursorPos(cursorPos + userNameWithoutRank.length - lastWordBeforeCursor.length);
+            return;
         }
         if ((e.key === 'Tab' && e.shiftKey) || e.key === 'ArrowLeft') {
             if (!formRef.current?.textContent) {
@@ -103,6 +112,11 @@ export default function ChatBox() {
             e.preventDefault();
         }
     };
+
+    useLayoutEffect(() => {
+        if (!textAreaRef.current) return;
+        textAreaRef.current.setSelectionRange(cursorPos, cursorPos);
+    }, [cursorPos, textAreaRef]);
 
     const manageChanges: ChangeEventHandler<HTMLTextAreaElement> = (e) => {
     // if (!formRef.current?.textContent) {
