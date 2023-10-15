@@ -74,7 +74,7 @@ export function RoomComponent(
 function ClosingButton({ room }: { room: string }) {
     return (
         <button className="p-1" onClick={() => client.leaveRoom(room)}>
-            <AiOutlineClose color="red" opacity={0.4} />
+            <AiOutlineClose className='hover:text-red-600' opacity={0.4} />
         </button>
     );
 }

@@ -40,6 +40,7 @@ module.exports = {
             },
             red: {
                 400: '#F54343',
+                600: 'red',
                 pastel: '#F8D7DA',
             },
             green: {
@@ -82,5 +83,6 @@ module.exports = {
         'text-green-400',
         'px-3',
         'py-1',
+        'text-red-600',
     ],
 };
