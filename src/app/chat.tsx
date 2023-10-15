@@ -324,7 +324,7 @@ export function MessageComponent(
     if (type === 'error') {
         return (
             <div className="pt-0.5 text-red-400">
-                <span className="text-gray-125 font-mono text-xs">
+                <span className="text-gray-125 text-xs">
                     {time ? HHMMSS(time) : ''}
 
           &nbsp;
@@ -336,10 +336,9 @@ export function MessageComponent(
     if (type === 'log') {
         return (
             <div className="pt-0.5 text-white">
-                <span className="text-gray-125 font-mono text-xs">
+                <span className="text-gray-125 text-xs">
                     {time ? HHMMSS(time) : ''}
 
-          &nbsp;
                 </span>
                 {' ' + message}
             </div>
