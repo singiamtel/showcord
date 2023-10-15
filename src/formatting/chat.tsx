@@ -127,7 +127,7 @@ export function link(
             href={`//www.google.com/search?ie=UTF-8&btnI&q=${
                 innerText(props.children)
             }`}
-            className="text-blue-400 hover:underline"
+            className="text-blue-500 underline"
             {...props}
             key={key}
             target="_blank"

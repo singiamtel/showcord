@@ -30,8 +30,7 @@ export default function HTML(
                         href={attribs.href}
                         target="_blank"
                         onClick={manageURL}
-                        style={{ cursor: 'pointer' }}
-                        className="novisited"
+                        className="novisited cursor-pointer text-blue-500 underline"
                     >
                         {domToReact(children, parserOptions)}
                     </a>
