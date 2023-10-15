@@ -69,7 +69,7 @@ export function UserCard(
             }}
         >
             <div id="usercard-header" className="flex flex-row justify-between">
-                <div id="usercard-user">
+                <div id="usercard-user" className='w-full'>
                     <div id="usercard-user-name">
                         <strong>
                             <a
@@ -84,7 +84,7 @@ export function UserCard(
                             {parseStatus(user?.status)}
                         </div>
                     </div>
-                    <div id="usercard-action-buttons" className="py-4 flex flex-row ">
+                    <div id="usercard-action-buttons" className="p-4 flex flex-row w-full justify-between">
                         <UserCardButton
                             name="Chat"
                             alt="Chat with this user"
@@ -154,8 +154,8 @@ function UserCardButton({
 }) {
     return (
         <button
-            className={'inline-block text-sm rounded-lg px-4 py-2 flex-grow-0 text-white ' +
-        (disabled ? 'opacity-50' : 'hover:bg-gray-700 ')}
+            className={'text-sm rounded-lg px-4 py-2 flex-grow-0 text-white border border-gray-700 flex flex-col justify-center items-center ' +
+        (disabled ? 'opacity-50' : 'hover:bg-gray-700 hover:underline ')}
             onClick={onClick}
             title={alt}
             disabled={disabled}
