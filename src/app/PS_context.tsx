@@ -186,14 +186,14 @@ export default function PS_contextProvider(props: any) {
         }
         const msgs = client.room(selectedPage)?.messages ?? [];
         setNotifications(client.getNotifications());
-        setMessages(msgs);
+        setMessages([...msgs]);
     }, [client, selectedPage]);
 
     useEffect(() => {
         if (!client) return;
         if (!selectedPage) return;
 
-        setMessages(client.room(selectedPage)?.messages ?? []);
+        setMessages([...client.room(selectedPage)?.messages ?? []]);
 
         const eventListener = () => {
             setUpdateMsgs(updateMsgs + 1);
