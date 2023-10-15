@@ -30,9 +30,8 @@ export default function RoomCard(
             <span className="text-gray-125">
                 <h3 className="font-bold text-blue-300">
                     {emoji[room.section] || null} &nbsp;{room.title}
-                </h3>{' '}
-                {room.section ? `${room.section} - ` : null}
-                <small className="inline text-gray-125">{room.userCount} users</small>
+                </h3>
+                <small className="inline text-gray-125">{room.section ? `${room.section} - ` : null} {room.userCount} users</small>
             </span>
             <div>
                 {room.desc}
