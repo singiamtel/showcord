@@ -86,31 +86,23 @@ const elements: {
 const cleanTag = (input: string, tag: keyof typeof elements) => {
     switch (tag) {
         case 'code':
-            // return input.replace(/``(.+?)``/g, "$1");
             return input.replace(elements.code.pattern, '$1');
         case 'spoiler':
-            // return input.replace(/\|\|(.+?)\|\|/g, "$1");
             return input.replace(elements.spoiler.pattern, '$1');
         case 'bold':
-            // return input.replace(/\*\*(.+?)\*\*/g, "$1");
             return input.replace(elements.bold.pattern, '$1');
         case 'italic':
-            // return input.replace(/__(.+?)__/g, "$1");
             return input.replace(elements.italic.pattern, '$1');
         case 'strikethrough':
-            // return input.replace(/~~(.+?)~~/g, "$1");
             return input.replace(elements.strikethrough.pattern, '$1');
         case 'superscript':
-            // return input.replace(/\^\^(.+?)\^\^/g, "$1");
             return input.replace(elements.superscript.pattern, '$1');
         case 'subscript':
-            // return input.replace(/\\\\(.+?)\\\\/g, "$1");
             return input.replace(elements.subscript.pattern, '$1');
         case 'link':
-            // return input.replace(/\[\[(.+?)?\]\]/g, "$1");
             return input.replace(elements.link.pattern, '$1');
         case 'greentext':
-        case 'fakeCommand':
+        case 'fakeCommand': // e.g. //help should display as /help
             return input?.slice(1);
         case 'roomlink':
             return input.replace(elements.roomlink.pattern, '$1');
@@ -204,7 +196,6 @@ export default function Chat() {
     const isIntersecting = useOnScreen(messagesEndRef);
     const [user, setUser] = useState<any | null>(null);
     const [username, setUsername] = useState<string | null>(null);
-    const [__messages, setMessages] = useState<Message[]>([]); // messages to display
     const [position, setPosition] = useState<{ x: number; y: number }>({
         x: 0,
         y: 0,
@@ -222,23 +213,19 @@ export default function Chat() {
         closeWindow();
     }, [isOutside]);
 
-    useLayoutEffect(() => {
-        setMessages(messages);
-    }, [messages]);
-
-    useLayoutEffect(() => {
+    const scrollToBottom = useCallback(() => {
         messagesEndRef.current!.scrollIntoView({ behavior: 'auto' });
-    }, [__messages]);
+    }, [messagesEndRef]);
+
+    useEffect(() => {
+        if (isIntersecting) {
+            scrollToBottom();
+        }
+    }, [messages]);
 
     useEffect(() => {
         setUser(null);
     }, [selectedPage]);
-
-    useEffect(() => {
-        if (isIntersecting) {
-            messagesEndRef.current?.scrollIntoView({ behavior: 'auto' });
-        }
-    }, [__messages, messagesEndRef, isIntersecting]);
 
     const clickUsername = (e: MouseEvent) => {
         const username = (e.target as HTMLAnchorElement).innerText.slice(0, -1)
@@ -264,7 +251,7 @@ export default function Chat() {
                     />
                 ) :
                 null}
-            {__messages.map((message, index, arr) => (
+            {messages.map((message, index, arr) => (
                 <ErrorBoundary
                     key={index}
                     fallbackRender={({ error: e }) => {
@@ -284,15 +271,16 @@ export default function Chat() {
                     />
                 </ErrorBoundary>
             ))}
-            <div className="relative h-0">
+            <div className="relative h-0 w-0">
+                {/* invisible div to scroll to */}
                 <div
                     id="msg_end"
                     ref={messagesEndRef}
-                    className="absolute right-0 top-0 h-1 scale-[500%] w-4"
+                    className="absolute right-0 top-0 h-4 w-4"
                 >
-                </div>{' '}
-                {/* invisible div to scroll to */}
+                </div>
             </div>
+            {' '}
         </div>
     );
 }
