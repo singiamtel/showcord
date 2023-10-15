@@ -1,5 +1,10 @@
 import { userColor } from '../utils/namecolour';
-import { Fragment, MouseEventHandler, MutableRefObject, ReactNode } from 'react';
+import {
+    Fragment,
+    MouseEventHandler,
+    MutableRefObject,
+    ReactNode,
+} from 'react';
 import { clamp, toID } from '../utils/generic';
 import { FaCommentAlt, FaUserPlus } from 'react-icons/fa';
 import { PiSwordBold } from 'react-icons/pi';
@@ -27,17 +32,16 @@ export function UsernameComponent(
             <span className={'text-[#9D9488] font-mono whitespace-pre '}>
                 {rankDisplay}
             </span>
-            <a onClick={onClick} style={onClick && { cursor: 'pointer' }}>
-                <span
-                    style={{
-                        color: colorless ? 'white' : idle ? '#888888' : userColor(user),
-                    }}
-                    className={bold ? 'font-bold ' : ''}
-                    data-message="true"
-                >
-                    {user.slice(1)}
-                    {colon && ':'}
-                </span>
+            <a
+                onClick={onClick}
+                style={{
+                    color: colorless ? 'white' : idle ? '#888888' : userColor(user),
+                }}
+                className={(onClick ? 'hover:underline hover:cursor-pointer ' : '') + (bold ? 'font-bold ' : '')}
+                data-message="true"
+            >
+                {user.slice(1)}
+                {colon && ':'}
             </a>
         </>
     );
@@ -69,7 +73,7 @@ export function UserCard(
             }}
         >
             <div id="usercard-header" className="flex flex-row justify-between">
-                <div id="usercard-user" className='w-full'>
+                <div id="usercard-user" className="w-full">
                     <div id="usercard-user-name">
                         <strong>
                             <a
@@ -84,7 +88,10 @@ export function UserCard(
                             {parseStatus(user?.status)}
                         </div>
                     </div>
-                    <div id="usercard-action-buttons" className="p-4 flex flex-row w-full justify-between">
+                    <div
+                        id="usercard-action-buttons"
+                        className="p-4 flex flex-row w-full justify-between"
+                    >
                         <UserCardButton
                             name="Chat"
                             alt="Chat with this user"
