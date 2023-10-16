@@ -84,7 +84,17 @@ export default function PS_contextProvider(props: any) {
         if (!client) {
             return;
         }
-        setRooms(Array.from(client.rooms).map((e) => e[1]));
+        const newRooms = client.getRooms();
+        // Keep the same order we had before
+        const newRoomsOrdered = newRooms.sort((a, b) => {
+            const indexA = rooms.findIndex((e) => e.ID === a.ID);
+            const indexB = rooms.findIndex((e) => e.ID === b.ID);
+            if (indexA === -1 || indexB === -1) {
+                return 0;
+            }
+            return indexA - indexB;
+        });
+        setRooms(newRoomsOrdered);
     }, [client, update]);
 
     useEffect(() => {
@@ -97,12 +107,13 @@ export default function PS_contextProvider(props: any) {
 
         const removedEventListener = () => {
             setUpdate(update + 1);
-            if (client.rooms.size > 0) {
+            if (rooms.length > 0) {
                 if (
                     selectedPageType === 'room' &&
           (!selectedPage)
                 ) {
-                    setRoom(client.rooms.values().next().value.ID);
+                    const previousRoom = previousRooms[previousRooms.length - 1];
+                    setRoom(previousRoom);
                 }
             }
         };

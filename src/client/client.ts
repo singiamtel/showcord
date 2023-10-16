@@ -15,7 +15,7 @@ export class Client {
     settings: Settings = new Settings();
     private socket: WebSocket | undefined;
 
-    rooms: Map<string, Room> = new Map();
+    private rooms: Map<string, Room> = new Map();
     events: EventTarget = new EventTarget();
     private username: string = '';
     private autoSelectRoom: string = '';
@@ -89,6 +89,10 @@ export class Client {
     room(roomID: string) {
     // rooms is a map
         return this.rooms.get(roomID);
+    }
+
+    getRooms() {
+        return [...this.rooms.values()];
     }
 
     createPM(user: string) {
