@@ -390,14 +390,14 @@ export class Client {
         this.rooms.set(room.ID, room);
         const eventio = new CustomEvent('room', { detail: room });
         this.events.dispatchEvent(eventio);
-        this.settings.changeRooms(this.rooms);
+        this.settings.addRoom(room.ID);
     }
 
     private _removeRoom(roomID: string) {
         this.rooms.delete(roomID);
         const eventio = new CustomEvent('leaveroom', { detail: roomID });
         this.events.dispatchEvent(eventio);
-        this.settings.changeRooms(this.rooms);
+        this.settings.removeRoom(roomID);
     }
 
     private addMessageToRoom(

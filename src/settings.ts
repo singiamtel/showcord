@@ -37,6 +37,19 @@ export class Settings {
     // });
     }
 
+    addRoom(roomid: string) {
+        if (!this.rooms.find((r) => r.ID === roomid)) {
+            this.rooms.push({ ID: roomid, lastReadTime: new Date() });
+        }
+    }
+
+    removeRoom(roomid: string) {
+        const index = this.rooms.findIndex((r) => r.ID === roomid);
+        if (index !== -1) {
+            this.rooms.splice(index, 1);
+        }
+    }
+
     changeRooms(rooms: Map<string, Room>) {
         this.rooms = Array.from(rooms).filter((e) => e[1].type === 'chat').map((
             r,
@@ -76,7 +89,7 @@ export class Settings {
         this.timeout = setTimeout(async () => {
             console.log('saveSettings', settings);
             localStorage.setItem('settings', JSON.stringify(settings));
-        }, 3000);
+        }, 300);
     }
 
     async addHighlightWord(roomid: string, word: string) {
