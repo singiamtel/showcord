@@ -61,9 +61,9 @@ export default function Sidebar() {
             onDragOver={handleDragOver}
             modifiers={[restrictToVerticalAxis, restrictToParentElement]}
         >
-            <div className="w-auto bg-gray-600 h-screen flex flex-col justify-between">
+            <div className="w-[15%] bg-gray-600 h-screen flex flex-col justify-between">
                 <div className="text-center mr-2 ml-2 p-2 text-white font-bold text-lg h-16 whitespace-nowrap">
-          Pokémon Showdown!
+          Showcord!
                 </div>
                 <div
                     className="flex flex-grow overflow-y-auto"
