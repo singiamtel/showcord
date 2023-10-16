@@ -41,9 +41,7 @@ export class Settings {
         this.rooms = Array.from(rooms).filter((e) => e[1].type === 'chat').map((
             r,
         ) => ({ ID: r[1].ID, lastReadTime: r[1].lastReadTime }));
-        if (this.rooms.length !== 0) {
-            this.saveSettings();
-        }
+        this.saveSettings();
     }
 
     getSavedRooms() {
@@ -114,7 +112,7 @@ export class Settings {
     }
 
     highlightMsg(roomid: string, message: string) {
-        // Room highlights
+    // Room highlights
         for (const word of this.highlightWords[roomid] ?? []) {
             if (word.test(message)) {
                 return true;
