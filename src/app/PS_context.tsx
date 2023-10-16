@@ -15,9 +15,6 @@ export const PS_context = createContext<
     selectedPage: string | null;
     selectedPageType: 'user' | 'room';
     setRoom:(room: string | 1 | -1) => void;
-    // selectedDM: string | null;
-    // setDM: (user: string | 1 | -1) => void;
-    // setPage: (type: 'user' | 'room', value: string) => void;
     messages: Message[];
     user?: string; // Will be an object with user info
     rooms: Room[];
@@ -29,9 +26,6 @@ export const PS_context = createContext<
             selectedPage: null,
             selectedPageType: 'room',
             setRoom: () => {},
-            // selectedDM: null,
-            // setDM: () => {},
-            // setPage: () => {},
             messages: [],
             user: undefined,
             rooms: [],
@@ -106,7 +100,7 @@ export default function PS_contextProvider(props: any) {
             if (client.rooms.size > 0) {
                 if (
                     selectedPageType === 'room' &&
-          (!selectedPage || !client.room(selectedPage))
+          (!selectedPage)
                 ) {
                     setRoom(client.rooms.values().next().value.ID);
                 }
