@@ -65,7 +65,10 @@ export default function Sidebar() {
                 <div className="text-center mr-2 ml-2 p-2 text-white font-bold text-lg h-16 whitespace-nowrap">
           Pokémon Showdown!
                 </div>
-                <div className="flex flex-grow">
+                <div
+                    className="flex flex-grow overflow-y-scroll"
+                    style={{ scrollbarGutter: 'stable' }}
+                >
                     <div className="w-full">
                         <SortableContext
                             items={rooms.map((e) => e.ID)}
