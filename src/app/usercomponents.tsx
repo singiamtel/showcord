@@ -29,7 +29,10 @@ export function UsernameComponent(
         (rank === ' ' ? '' : rank);
     return (
         <>
-            <span className={'text-[#9D9488] font-mono whitespace-pre '}>
+            <span
+                className={'text-[#9D9488] whitespace-pre ' +
+          (alignRight ? 'font-mono' : '')}
+            >
                 {rankDisplay}
             </span>
             <a
@@ -37,7 +40,8 @@ export function UsernameComponent(
                 style={{
                     color: colorless ? 'white' : idle ? '#888888' : userColor(user),
                 }}
-                className={(onClick ? 'hover:underline hover:cursor-pointer ' : '') + (bold ? 'font-bold ' : '')}
+                className={(onClick ? 'hover:underline hover:cursor-pointer ' : '') +
+          (bold ? 'font-bold ' : '')}
                 data-message="true"
             >
                 {user.slice(1)}
