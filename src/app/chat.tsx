@@ -338,7 +338,6 @@ export function MessageComponent(
             <div className="pt-0.5 text-white">
                 <span className="text-gray-125 text-xs">
                     {time ? HHMMSS(time) : ''}
-
                 </span>
                 {' ' + message}
             </div>
@@ -362,6 +361,9 @@ export function MessageComponent(
                                 onClick={(e) => onNameClick && onNameClick(e)}
                                 colorless
                             />
+                            <em>
+                                <FormatMsgDisplay msg={message} />
+                            </em>
                         </>
                     ) :
                     (
@@ -372,9 +374,9 @@ export function MessageComponent(
                                 colon
                                 bold
                             />&nbsp;
+                            <FormatMsgDisplay msg={message} />
                         </>
                     )}
-                <FormatMsgDisplay msg={message} />
             </span>
         </div>
     );
