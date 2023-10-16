@@ -217,7 +217,7 @@ export default function Chat() {
         messagesEndRef.current!.scrollIntoView({ behavior: 'auto' });
     }, [messagesEndRef]);
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (isIntersecting) {
             scrollToBottom();
         }
