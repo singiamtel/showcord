@@ -66,8 +66,7 @@ export default function Sidebar() {
           Pokémon Showdown!
                 </div>
                 <div
-                    className="flex flex-grow overflow-y-scroll"
-                    style={{ scrollbarGutter: 'stable' }}
+                    className="flex flex-grow overflow-y-auto"
                 >
                     <div className="w-full">
                         <SortableContext

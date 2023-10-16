@@ -114,8 +114,8 @@ export default function MainPage() {
                     </h2>
                 </div>
             </div>
-            <div className="col-span-2 bg-gray-600 p-4 rounded-lg text-white flex flex-col items-center justify-center overflow-scroll">
-                <h2 className="font-bold text-xl text-center mt-8">
+            <div className="col-span-2 bg-gray-600 p-4 rounded-lg text-white flex flex-col overflow-y-auto">
+                <h2 className="font-bold text-xl text-center mt-2">
           News
                 </h2>
                 {news?.slice(0, -1).map((n, idx) => (
@@ -124,7 +124,6 @@ export default function MainPage() {
             </div>
             <div
                 className="col-span-2 row-span-2 p-4 rounded-lg overflow-y-auto text-white bg-gray-600"
-                style={{ scrollbarGutter: 'stable' }}
             >
                 <h2 className="font-bold text-xl text-center">
           Rooms
