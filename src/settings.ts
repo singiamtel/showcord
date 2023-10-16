@@ -7,6 +7,7 @@ export class Settings {
     highlightWords: { [key: string]: RegExp[] } = Object.create(null); // roomid -> highlightWords
     // defaultRooms = ["lobby", "help", "overused"];
     private timeout: any;
+    private username = '';
     private status = ''; // if status is set, it will be restored on login
     private notes: Map<string, string> = new Map(); // user -> note
 
@@ -29,18 +30,24 @@ export class Settings {
             ) {
                 this.highlightWords[key] = value.map((w: string) => new RegExp(w, 'i'));
             }
-            // this.highlightWords = {};
             this.rooms = settings.rooms;
+            this.username = settings.username;
         }
-    // Notification.requestPermission((result) => {
-    //   console.log(result);
-    // });
     }
 
     addRoom(roomid: string) {
         if (!this.rooms.find((r) => r.ID === roomid)) {
             this.rooms.push({ ID: roomid, lastReadTime: new Date() });
         }
+    }
+
+    updateUsername(username: string) {
+        this.username = username;
+        this.saveSettings();
+    }
+
+    getUserName() {
+        return this.username;
     }
 
     removeRoom(roomid: string) {
@@ -76,9 +83,11 @@ export class Settings {
                 ID: string;
                 lastReadTime: Date;
             }[];
+            username?: string;
         } = {
             highlightWords: {},
             rooms: this.rooms,
+            username: this.username,
         };
         for (const [key, value] of Object.entries(this.highlightWords)) {
             settings.highlightWords[key] = value.map((w) => cleanRegex(w));

@@ -97,7 +97,6 @@ export class Client {
 
     createPM(user: string) {
         this.__createPM(user);
-        console.log('selecting room pm-' + toID(user));
         this.autoSelectRoom = '';
         this.events.dispatchEvent(
             new CustomEvent('selectroom', { detail: 'pm-' + toID(user) }),
@@ -330,7 +329,14 @@ export class Client {
 
     private async send_assertion(assertion: string) {
         const username = assertion.split(',')[1];
-        this.__send(`/trn ${username},0,${assertion}`, false);
+
+        const storedName = this.settings.getUserName();
+        this.__send(
+            `/trn ${
+                toID(storedName) === toID(username) ? storedName : username
+            },0,${assertion}`,
+            false,
+        );
     }
 
     private async parseLoginserverResponse(
@@ -709,10 +715,13 @@ export class Client {
                 }
                 break;
             case 'updateuser':
-                if (!args[0].trim().toLowerCase().startsWith('guest')) {
-                    this.autojoin(this.joinAfterLogin);
-                    this.loggedIn = true;
-                    this.setUsername(args[0]);
+                {
+                    if (!args[0].trim().toLowerCase().startsWith('guest')) {
+                        this.autojoin(this.joinAfterLogin);
+                        this.loggedIn = true;
+                        this.setUsername(args[0]);
+                        this.settings.updateUsername(args[0]);
+                    }
                 }
                 break;
             case 'deinit':
@@ -1029,7 +1038,6 @@ export class Client {
                         return false;
                     }
                     this.autoSelectRoom = toID(args.join(''));
-                    console.log('autoSelectingRoom', this.autoSelectRoom);
                 }
                 return false;
             default:
