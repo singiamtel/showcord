@@ -354,7 +354,7 @@ export function MessageComponent(
             <span className="text-gray-125 text-xs">
                 {time ? HHMMSS(time) : ''}
             </span>
-            <span className="text-white break-all">
+            <span className="text-white break-words">
         &nbsp;
                 {type === 'roleplay' ?
                     (
