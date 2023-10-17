@@ -29,7 +29,7 @@ export class Room {
 
     messages: Message[] = [];
     users: User[] = [];
-    private readonly messageLimit = 600;
+    private readonly messageLimit = 200;
     private icon?: JSX.Element;
     private lastSentMessages: string[] = [];
     private readonly lastSentMessageLimit = 25;
