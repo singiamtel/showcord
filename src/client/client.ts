@@ -883,6 +883,9 @@ export class Client {
         } else if (content.startsWith('/error')) {
             type = 'error';
             content = content.slice(6);
+        } else if (content.startsWith('/text')) {
+            type = 'log';
+            content = content.slice(5);
         } else if (content.startsWith('/log')) {
             type = 'log';
             content = content.slice(4);
