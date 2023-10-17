@@ -339,7 +339,9 @@ export function MessageComponent(
                 <span className="text-gray-125 text-xs">
                     {time ? HHMMSS(time) : ''}
                 </span>
-                {' ' + message}
+                <Linkify options={options}>
+                    {' ' + message}
+                </Linkify>,
             </div>
         );
     }
