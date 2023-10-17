@@ -19,7 +19,7 @@ export function RoomComponent(
 
     return (
         <div
-            className={'relative flex w-full  '}
+            className={'relative flex w-full cursor-pointer '}
         >
             <div
                 className={' flex flex-row hover:bg-gray-350 w-full ' + (

@@ -122,9 +122,7 @@ export default function MainPage() {
                     <NewsCard key={idx} news={n} last={idx === news.length - 2} />
                 ))}
             </div>
-            <div
-                className="col-span-2 row-span-2 p-4 rounded-lg overflow-y-auto text-white bg-gray-600"
-            >
+            <div className="col-span-2 row-span-2 p-4 rounded-lg overflow-y-auto text-white bg-gray-600">
                 <h2 className="font-bold text-xl text-center">
           Rooms
                 </h2>

@@ -243,7 +243,7 @@ export default function Chat() {
     };
 
     return (
-        <div className="p-5 flex flex-col overflow-auto overflow-x-hidden break-words overflow-y-scroll h-full ">
+        <div className="p-5 flex flex-col overflow-auto overflow-x-hidden break-words overflow-y-scroll h-full relative ">
             {username ?
                 (
                     <UserCard
