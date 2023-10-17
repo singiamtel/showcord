@@ -228,9 +228,13 @@ export default function Chat() {
     }, [selectedPage]);
 
     const clickUsername = (e: MouseEvent) => {
-        const username = (e.target as HTMLAnchorElement).innerText.slice(0, -1)
-            .trim();
-        // setIsOutside(null);
+        const username = (e.target as HTMLAnchorElement).getAttribute(
+            'data-username',
+        )?.trim();
+        if (!username) {
+            console.error('clickUsername: no username');
+            return;
+        }
         setUsername(username);
         setPosition({ x: e.clientX, y: e.clientY });
         client?.queryUser(username, (user: any) => {

@@ -43,6 +43,7 @@ export function UsernameComponent(
                 className={(onClick ? 'hover:underline hover:cursor-pointer ' : '') +
           (bold ? 'font-bold ' : '')}
                 data-message="true"
+                data-username={user.slice(1)}
             >
                 {user.slice(1)}
                 {colon && ':'}
