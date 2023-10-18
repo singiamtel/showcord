@@ -1,6 +1,6 @@
 import { useContext } from 'react';
 import ChatBox from './chatbox';
-import Messages from './chat';
+import Chat from './chat';
 import { PS_context } from './PS_context';
 import Users from './users';
 import MainPage from './mainPage';
@@ -16,7 +16,7 @@ export default function BigPanel() {
         <div className="flex w-full max-w-full break-normal">
             <div className={'bg-gray-300 flex flex-col w-full max-w-full'}>
                 <div className="h-[90%] max-h-[90%] flex-grow flex-shrink min-h-0">
-                    <Messages />
+                    <Chat />
                 </div>
                 <div className="flex-grow">
                     <ChatBox />
