@@ -71,7 +71,7 @@ export function UserCard(
     return (
         <div
             ref={forwardRef}
-            className="absolute bg-gray-600 rounded-lg p-5 w-[400px] min-h-[150px] text-white shadow-sm shadow-black z-10"
+            className="fixed bg-gray-600 rounded-lg p-5 w-[400px] min-h-[150px] text-white shadow-sm shadow-black z-10"
             style={{
                 left: clamp(position.x, margin, window.innerWidth - 500 - margin),
                 top: clamp(position.y, margin, window.innerHeight - 300 - margin),
