@@ -90,7 +90,7 @@ export function italic(
 ) {
     const key = props.key;
     delete props.key;
-    return <Linkify as="em" {...props} key={key} />;
+    return <Linkify as="em" {...props} key={key} options={options} />;
 }
 
 export function strikethrough(
@@ -98,7 +98,7 @@ export function strikethrough(
 ) {
     const key = props.key;
     delete props.key;
-    return <Linkify as="s" {...props} key={key} />;
+    return <Linkify as="s" {...props} key={key} options={options} />;
 }
 
 export function superscript(
@@ -106,7 +106,7 @@ export function superscript(
 ) {
     const key = props.key;
     delete props.key;
-    return <Linkify as="sup" {...props} key={key} />;
+    return <Linkify as="sup" {...props} key={key} options={options} />;
 }
 
 export function subscript(
@@ -114,7 +114,7 @@ export function subscript(
 ) {
     const key = props.key;
     delete props.key;
-    return <Linkify as="sub" {...props} key={key} />;
+    return <Linkify as="sub" {...props} key={key} options={options} />;
 }
 
 export function link(
@@ -145,7 +145,7 @@ export function greentext(
     delete props.key;
     delete props.children;
     return (
-        <Linkify as="span" className="text-green-400" {...props} key={key}>
+        <Linkify as="span" className="text-green-400" {...props} key={key} options={options}>
       &gt;{children}
         </Linkify>
     );
@@ -159,7 +159,7 @@ export function fakeCommand(
     delete props.key;
     delete props.children;
     return (
-        <Linkify as="span" {...props} key={key}>
+        <Linkify as="span" {...props} key={key} options={options}>
             {children}
         </Linkify>
     );
