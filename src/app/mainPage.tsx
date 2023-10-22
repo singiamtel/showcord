@@ -1,6 +1,7 @@
 import {
     createRef,
     FormEvent,
+    HTMLAttributes,
     KeyboardEventHandler,
     useContext,
     useEffect,
@@ -14,6 +15,7 @@ import MiniSearch, { SearchResult } from 'minisearch';
 import NewsCard from './components/NewsCard';
 
 import targetFaceCluster from '../assets/cluster_target_face_nobg.png';
+import { twMerge } from 'tailwind-merge';
 
 const minisearch = new MiniSearch({
     fields: ['title', 'desc'],
@@ -21,7 +23,7 @@ const minisearch = new MiniSearch({
     idField: 'title',
 });
 
-export default function MainPage() {
+export default function MainPage(props: HTMLAttributes<'div'>) {
     const { client } = useContext(PS_context);
     const [roomsJSON, setRoomsJSON] = useState<any>({});
     const [input, setInput] = useState<string>('');
@@ -98,14 +100,19 @@ export default function MainPage() {
     }, [input, setMiniSearchResults]);
 
     return (
-        <div className="w-full grid grid-cols-7 grid-rows-2 gap-6 m-6">
-            <div className="col-span-3 rounded-lg bg-gray-600 text-white flex flex-col justify-center items-center overflow-hidden relative ">
+        <div
+            className={twMerge(
+                'grid grid-cols-7 grid-rows-2 gap-6 m-6',
+                props.className,
+            )}
+        >
+            <div className="col-span-3 row-span-1 rounded-lg bg-gray-600 text-white flex flex-col justify-center items-center overflow-hidden relative ">
                 <img
                     src={targetFaceCluster}
                     alt="targetFaceCluster"
                     className="opacity-70 h-auto min-h-[110%]"
                 />
-                <div className="flex flex-col justify-between h-full p-4 absolute">
+                <div className="flex flex-col justify-between p-4 absolute">
                     <h1 className="font-bold text-4xl text-center z-10 text-transparent">
             Welcome to Showcord!
                     </h1>
@@ -114,7 +121,7 @@ export default function MainPage() {
                     </h2>
                 </div>
             </div>
-            <div className="col-span-2 bg-gray-600 p-4 rounded-lg text-white flex flex-col overflow-y-auto">
+            <div className="col-span-2 row-span-1 bg-gray-600 p-4 rounded-lg text-white flex flex-col overflow-y-auto">
                 <h2 className="font-bold text-xl text-center mt-2">
           News
                 </h2>

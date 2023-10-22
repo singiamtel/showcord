@@ -7,9 +7,9 @@ export default function Home() {
     return (
         <PS_contextProvider>
             <ToastProvider>
-                <div className="h-full flex bg-gray-300 w-full">
-                    <Sidebar />
-                    <BigPanel />
+                <div className="grid grid-cols-7 grid-rows-1 h-screen bg-gray-300 w-screen">
+                    <Sidebar className='col-span-1'/>
+                    <BigPanel className='col-span-6'/>
                 </div>
             </ToastProvider>
         </PS_contextProvider>

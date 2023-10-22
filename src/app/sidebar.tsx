@@ -1,6 +1,7 @@
-import { useContext } from 'react';
+import { HTMLAttributes, useContext } from 'react';
 import { PS_context } from './PS_context';
 import { RoomComponent } from './rooms';
+import { twMerge } from 'tailwind-merge';
 import {
     restrictToParentElement,
     restrictToVerticalAxis,
@@ -23,7 +24,7 @@ import {
 } from '@dnd-kit/sortable';
 import SortableItem from '../utils/Sortable';
 
-export default function Sidebar() {
+export default function Sidebar(props: HTMLAttributes<'div'>) {
     const { rooms, setRooms } = useContext(PS_context);
 
     const mouseSensor = useSensor(MouseSensor, {
@@ -61,13 +62,16 @@ export default function Sidebar() {
             onDragOver={handleDragOver}
             modifiers={[restrictToVerticalAxis, restrictToParentElement]}
         >
-            <div className="w-[15%] bg-gray-600 h-screen flex flex-col justify-between">
+            <div
+                className={twMerge(
+                    props.className,
+                    'bg-gray-600 h-screen flex flex-col justify-between',
+                )}
+            >
                 <div className="text-center mr-2 ml-2 p-2 text-white font-bold text-lg h-16 whitespace-nowrap">
           Showcord!
                 </div>
-                <div
-                    className="flex flex-grow overflow-y-auto"
-                >
+                <div className="flex flex-grow overflow-y-auto">
                     <div className="w-full">
                         <SortableContext
                             items={rooms.map((e) => e.ID)}
