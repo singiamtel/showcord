@@ -1,4 +1,4 @@
-// each command is an object with a name, description, arguments, and if they are core commands or not
+// TODO
 
 const cmds = {
     'part': {
