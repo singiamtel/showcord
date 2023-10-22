@@ -1,5 +1,5 @@
 import Sidebar from './sidebar';
-import BigPanel from './BigPanel';
+import BigPanel from './bigpanel';
 import ToastProvider from './ToastProvider';
 import PS_contextProvider from './PS_context';
 

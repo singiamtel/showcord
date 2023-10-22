@@ -10,7 +10,6 @@ import {
     useState,
 } from 'react';
 import { PS_context } from './PS_context';
-
 import useOnScreen from '../utils/isOnScreen';
 import HTML from '../formatting/html';
 import { HHMMSS } from '../utils/date';
