@@ -219,16 +219,6 @@ export default function MainPage(props: HTMLAttributes<'div'>) {
                     </span>
                 </a>
                 <div id="links">
-                    <p className="text-center">
-            Made with ❤️ by{' '}
-                        <a
-                            href="https://github.com/singiamtel"
-                            target="_blank"
-                            className="text-blue-400 hover:text-blue-300 visited:text-blue-300 hover:underline"
-                        >
-                        singiamtel
-                        </a>{' '}
-                    </p>
                 </div>
             </div>
         </div>
