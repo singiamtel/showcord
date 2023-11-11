@@ -15,6 +15,10 @@ import MiniSearch, { SearchResult } from 'minisearch';
 import NewsCard from './components/NewsCard';
 
 import targetFaceCluster from '../assets/cluster_target_face_nobg.png';
+
+import github from '../assets/github.png';
+import discord from '../assets/discord.png';
+
 import { twMerge } from 'tailwind-merge';
 
 const minisearch = new MiniSearch({
@@ -177,8 +181,55 @@ export default function MainPage(props: HTMLAttributes<'div'>) {
                             </div>
                         )}
             </div>
-            <div className="col-span-5 bg-gray-600 p-4 rounded text-white flex items-center justify-center">
-        And some random links here, like credits, repos, discord etc
+            <div className="col-span-5 bg-gray-600 p-4 rounded text-white flex items-center justify-center flex-col gap-8 ">
+                <a
+                    id="discord"
+                    className="max-h-full min-h-0 flex items-center gap-2 w-full p-8 rounded-lg hover:bg-gray-700 cursor-pointer text-white hover:text-white visited:text-white"
+                    target="_blank"
+                    href="https://discord.gg/kxNdKdWxW2"
+                >
+                    <img
+                        src={discord}
+                        alt="discord"
+                        className="max-h-full h-auto w-auto object-contain"
+                    />
+                    <span>
+                        <p>
+              Found a bug? Have a suggestion or feedback? Join our Discord
+              community to share your thoughts and help us improve!
+                        </p>
+                    </span>
+                </a>
+                <a
+                    id="github"
+                    className="max-h-full min-h-0 flex items-center gap-2 w-full p-8 rounded-lg hover:bg-gray-700 cursor-pointer text-white hover:text-white visited:text-white"
+                    target="_blank"
+                    href="https://github.com/singiamtel/Showcord"
+                >
+                    <img
+                        src={github}
+                        alt="github"
+                        className="max-h-full h-auto w-auto object-contain"
+                    />
+                    <span>
+                        <p>
+              All of our code is open source and available on GitHub.
+              Contribute, explore, and help us evolve!
+                        </p>
+                    </span>
+                </a>
+                <div id="links">
+                    <p className="text-center">
+            Made with ❤️ by{' '}
+                        <a
+                            href="https://github.com/singiamtel"
+                            target="_blank"
+                            className="text-blue-400 hover:text-blue-300 visited:text-blue-300 hover:underline"
+                        >
+                        singiamtel
+                        </a>{' '}
+                    </p>
+                </div>
             </div>
         </div>
     );
