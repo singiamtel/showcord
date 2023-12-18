@@ -328,7 +328,9 @@ function userColorHash(name) {
 }
 
 export let loadedCustomColors = false;
-export let customColors = {
+// From https://play.pokemonshowdown.com/config/config.js
+// It's supposed to not change often, so we can just hardcode it here
+export let customColors = { 
     'theimmortal': 'taco',
     'bmelts': 'testmelts',
     'jumpluff': 'zacchaeus',
