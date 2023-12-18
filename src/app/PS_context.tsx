@@ -20,6 +20,7 @@ export const PS_context = createContext<
     rooms: Room[];
     setRooms: (rooms: Room[]) => void;
     notifications: RoomNotification[];
+    avatar?: string;
 }
 >({
             client: client,
@@ -45,6 +46,7 @@ export default function PS_contextProvider(props: any) {
     const [previousRooms, setPreviousRooms] = useState<string[]>([]);
     const [messages, setMessages] = useState<Message[]>([]);
     const [updateMsgs, setUpdateMsgs] = useState<number>(0); // Used to force update on rooms change
+    const [avatar, setAvatar] = useState<string | undefined>(undefined);
 
     /* --- Room handling --- */
 
@@ -243,6 +245,7 @@ export default function PS_contextProvider(props: any) {
             client.events.addEventListener('login', (username) => {
                 console.log('logged in as', username);
                 setUser((username as CustomEvent).detail);
+                setAvatar(client.settings.getAvatar());
             });
         };
         init();
@@ -262,6 +265,7 @@ export default function PS_contextProvider(props: any) {
                 rooms,
                 setRooms,
                 notifications,
+                avatar,
             }}
         >
             {props.children}

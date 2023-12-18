@@ -8,6 +8,7 @@ export class Settings {
     // defaultRooms = ["lobby", "help", "overused"];
     private timeout: any;
     private username = '';
+    private avatar = '';
     private status = ''; // if status is set, it will be restored on login
     private notes: Map<string, string> = new Map(); // user -> note
 
@@ -41,13 +42,22 @@ export class Settings {
         }
     }
 
-    updateUsername(username: string) {
+    updateUsername(username: string, avatar: string) {
         this.username = username;
+        this.avatar = avatar;
         this.saveSettings();
     }
 
     getUserName() {
         return this.username;
+    }
+
+    getAvatar() {
+        return this.avatar;
+    }
+
+    getStatus() {
+        return this.status;
     }
 
     removeRoom(roomid: string) {

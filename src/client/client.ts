@@ -719,8 +719,8 @@ export class Client {
                     if (!args[0].trim().toLowerCase().startsWith('guest')) {
                         this.autojoin(this.joinAfterLogin);
                         this.loggedIn = true;
+                        this.settings.updateUsername(args[0], args[2]);
                         this.setUsername(args[0]);
-                        this.settings.updateUsername(args[0]);
                     }
                 }
                 break;
