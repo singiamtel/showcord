@@ -344,7 +344,7 @@ export function MessageComponent(
                 </span>
                 <Linkify options={options}>
                     {' ' + message}
-                </Linkify>,
+                </Linkify>
             </div>
         );
     }
