@@ -1,15 +1,31 @@
 import { PS_context } from './PS_context';
-import { useContext, useEffect, useState } from 'react';
+import { MouseEvent, useContext, useEffect, useState } from 'react';
 import { UsernameComponent } from './usercomponents';
 import { User } from '../client/user';
 
-export default function Users() {
+export default function Users({
+    setUser,
+    username,
+    setUsername,
+    setPosition,
+    user,
+    position,
+    wrapperRef,
+    closeWindow,
+    clickUsername,
+}: {
+    setUser: (user: any) => void;
+    username: string | null;
+    setUsername: (username: string) => void;
+    setPosition: (position: { x: number; y: number }) => void;
+    user: any | null;
+    position: { x: number; y: number };
+    wrapperRef: React.MutableRefObject<any>;
+    closeWindow: () => void;
+    clickUsername: (e: MouseEvent) => void;
+}) {
     const { selectedPage: room, client } = useContext(PS_context);
     const [users, setUsers] = useState<User[]>([]);
-
-    const onClick = () => {
-        console.log('clicked');
-    };
 
     useEffect(() => {
         if (!client) return;
@@ -37,7 +53,7 @@ export default function Users() {
                         user={user.name}
                         bold={user.name[0] !== ' '}
                         alignRight
-                        onClick={onClick}
+                        onClick={(e) => clickUsername(e)}
                         idle={user.status === '!'}
                     />
                 </div>

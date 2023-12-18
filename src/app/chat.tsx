@@ -6,8 +6,6 @@ import {
     useContext,
     useEffect,
     useLayoutEffect,
-    useRef,
-    useState,
 } from 'react';
 import { PS_context } from './PS_context';
 import useOnScreen from '../utils/isOnScreen';
@@ -19,7 +17,7 @@ import Linkify from 'linkify-react';
 import { Message } from '../client/message';
 import Code from '../formatting/code';
 import { UserCard, UsernameComponent } from './usercomponents';
-import useClickOutside from '../utils/useClickOutside';
+
 import {
     bold,
     fakeCommand,
@@ -189,28 +187,28 @@ export function FormatMsgDisplay(
     return <>{jsxElements}</>;
 }
 
-export default function Chat() {
-    const { messages, client, selectedPage } = useContext(PS_context);
+export default function Chat({
+    setUser,
+    username,
+    user,
+    position,
+    wrapperRef,
+    closeWindow,
+    clickUsername,
+}: {
+    setUser: (user: any) => void;
+    username: string | null;
+    setUsername: (username: string) => void;
+    setPosition: (position: { x: number; y: number }) => void;
+    user: any | null;
+    position: { x: number; y: number };
+    wrapperRef: React.MutableRefObject<any>;
+    closeWindow: () => void;
+    clickUsername: (e: MouseEvent) => void;
+}) {
+    const { messages, selectedPage } = useContext(PS_context);
     const messagesEndRef = createRef<HTMLDivElement>();
     const isIntersecting = useOnScreen(messagesEndRef);
-    const [user, setUser] = useState<any | null>(null);
-    const [username, setUsername] = useState<string | null>(null);
-    const [position, setPosition] = useState<{ x: number; y: number }>({
-        x: 0,
-        y: 0,
-    });
-
-    const wrapperRef = useRef(null);
-    const { isOutside } = useClickOutside(wrapperRef);
-
-    const closeWindow = useCallback(() => {
-        setUser(null);
-        setUsername(null);
-    }, [setUser, setUsername]);
-
-    useEffect(() => {
-        closeWindow();
-    }, [isOutside]);
 
     const scrollToBottom = useCallback(() => {
         messagesEndRef.current!.scrollIntoView({ behavior: 'auto' });
@@ -225,22 +223,6 @@ export default function Chat() {
     useEffect(() => {
         setUser(null);
     }, [selectedPage]);
-
-    const clickUsername = (e: MouseEvent) => {
-        const username = (e.target as HTMLAnchorElement).getAttribute(
-            'data-username',
-        )?.trim();
-        if (!username) {
-            console.error('clickUsername: no username');
-            return;
-        }
-        setUsername(username);
-        setPosition({ x: e.clientX, y: e.clientY });
-        setUser(undefined);
-        client?.queryUser(username, (user: any) => {
-            setUser(user);
-        });
-    };
 
     return (
         <div className="p-5 flex flex-col overflow-auto overflow-x-hidden break-words overflow-y-scroll h-full relative ">
