@@ -1,4 +1,5 @@
 import { userColor } from '../utils/namecolour';
+import { Sprites } from '@pkmn/img';
 import {
     Fragment,
     MouseEventHandler,
@@ -122,10 +123,15 @@ export function UserCard(
                         />
                     </div>
                 </div>
-                <div id="usercard-avatar" className="w-16 h-20 bg-blue-100">
-                    <span className="text-white text-sm m-2 inline-block">
-            Avatar will go here
-                    </span>
+                <div id="usercard-avatar" className="w-20 h-20">
+                    {user?.avatar ?
+                        (
+                            <img
+                                src={Sprites.getAvatar(user.avatar)}
+                                className="w-20 h-20"
+                            />
+                        ) :
+                        ''}
                 </div>
             </div>
             {

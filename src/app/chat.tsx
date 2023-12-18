@@ -236,6 +236,7 @@ export default function Chat() {
         }
         setUsername(username);
         setPosition({ x: e.clientX, y: e.clientY });
+        setUser(undefined);
         client?.queryUser(username, (user: any) => {
             setUser(user);
         });
