@@ -1,7 +1,7 @@
 // recognize HTML commands and try to parse them
 // if they have no parser, just return the sanitized HTML
 
-import { PS_context } from '../PS_context';
+import { PS_context } from '../components/single/PS_context';
 import manageURL from '../../utils/manageURL';
 import parse, { domToReact } from 'html-react-parser';
 import { useContext } from 'react';

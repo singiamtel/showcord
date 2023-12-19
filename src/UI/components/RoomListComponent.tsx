@@ -1,5 +1,5 @@
 import { useContext } from 'react';
-import { client, PS_context } from '../PS_context';
+import { client, PS_context } from './single/PS_context';
 import HashtagIcon from '../assets/hashtag';
 import Circle from './circle';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -7,7 +7,7 @@ import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { notificationsEngine } from '../../client/notifications';
 import { AiOutlineClose } from 'react-icons/ai';
 
-export function RoomComponent(
+export function RoomListComponent(
     { name, ID, notifications: { unread, mentions }, type }: {
         name: string;
         ID: string;

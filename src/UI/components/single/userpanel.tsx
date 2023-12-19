@@ -1,7 +1,7 @@
 import { useContext } from 'react';
-import { PS_context } from '../PS_context';
-import { userColor } from '../../utils/namecolour';
-import { notificationsEngine } from '../../client/notifications';
+import { PS_context } from './PS_context';
+import { userColor } from '../../../utils/namecolour';
+import { notificationsEngine } from '../../../client/notifications';
 import { Sprites } from '@pkmn/img';
 
 export default function UserPanel() {

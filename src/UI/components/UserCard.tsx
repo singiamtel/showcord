@@ -1,4 +1,3 @@
-import { userColor } from '../utils/namecolour';
 import { Sprites } from '@pkmn/img';
 import {
     Fragment,
@@ -6,55 +5,16 @@ import {
     MutableRefObject,
     ReactNode,
 } from 'react';
-import { clamp, toID } from '../utils/generic';
+import { clamp, toID, removeFirstCharacterIfNotLetter } from '../../utils/generic';
 import { FaCommentAlt, FaUserPlus } from 'react-icons/fa';
 import { PiSwordBold } from 'react-icons/pi';
-import manageURL from '../utils/manageURL';
-import { rankOrder } from '../client/room';
-import { client } from './PS_context';
-
-export function UsernameComponent(
-    { user, alignRight, onClick, colon, idle, bold, colorless }: {
-        user: string;
-        idle?: boolean;
-        alignRight?: boolean;
-        onClick?: MouseEventHandler<HTMLAnchorElement>;
-        colon?: boolean;
-        bold?: boolean;
-        colorless?: boolean;
-    },
-) {
-    const rank = user.charAt(0);
-    const rankDisplay = alignRight ?
-        rank.padEnd(1, ' ') :
-        (rank === ' ' ? '' : rank);
-    return (
-        <>
-            <span
-                className={'text-[#9D9488] whitespace-pre ' +
-          (alignRight ? 'font-mono' : '')}
-            >
-                {rankDisplay}
-            </span>
-            <a
-                onClick={onClick}
-                style={{
-                    color: colorless ? 'white' : idle ? '#888888' : userColor(user),
-                }}
-                className={(onClick ? 'hover:underline hover:cursor-pointer ' : '') +
-          (bold ? 'font-bold ' : '')}
-                data-message="true"
-                data-username={user.slice(1)}
-            >
-                {user.slice(1)}
-                {colon && ':'}
-            </a>
-        </>
-    );
-}
+import manageURL from '../../utils/manageURL';
+import { rankOrder } from '../../client/room';
+import { client } from './single/PS_context';
 
 const margin = 15;
-export function UserCard(
+
+export default function UserCard(
     { user, name, position, forwardRef, close }: {
         user: any;
         name: string;
@@ -215,13 +175,6 @@ function roomLink(room: string, last: boolean, close: () => void, key: number) {
             {last ? '' : ', '}
         </Fragment>
     );
-}
-
-function removeFirstCharacterIfNotLetter(str: string) {
-    if (str.length > 0 && !str.charAt(0).match(/[a-zA-Z]/)) {
-        return str.slice(1);
-    }
-    return str;
 }
 
 function parseStatus(status: string | undefined): string {

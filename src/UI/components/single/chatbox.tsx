@@ -11,7 +11,7 @@ import {
 } from 'react';
 import MiniSearch, { SearchResult } from 'minisearch';
 import TextareaAutosize from 'react-textarea-autosize';
-import { PS_context } from '../PS_context';
+import { PS_context } from './PS_context';
 
 type SearchBoxOffset = {
     width: number;

@@ -1,8 +1,8 @@
-import { Client } from '../client/client';
-import { Message } from '../client/message';
-import { notificationsEngine, RoomNotification } from '../client/notifications';
-import { Room } from '../client/room';
-import { loadCustomColors } from '../utils/namecolour';
+import { Client } from '../../../client/client';
+import { Message } from '../../../client/message';
+import { notificationsEngine, RoomNotification } from '../../../client/notifications';
+import { Room } from '../../../client/room';
+import { loadCustomColors } from '../../../utils/namecolour';
 import { createContext, useCallback, useEffect, useState } from 'react';
 
 import { toast } from 'react-toastify';

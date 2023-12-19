@@ -9,11 +9,11 @@ import {
 } from 'react';
 import ChatBox from './chatbox';
 import Chat from './chat';
-import { client, PS_context } from '../PS_context';
-import UserList from '../UserList';
-import Home from '../Home';
+import { client, PS_context } from './PS_context';
+import UserList from './UserList';
+import Home from '../../Home';
 import { twMerge } from 'tailwind-merge';
-import useClickOutside from '../hooks/useClickOutside';
+import useClickOutside from '../../hooks/useClickOutside';
 
 export default function BigPanel(props: HTMLAttributes<'div'>) {
     const { selectedPage: room, rooms } = useContext(PS_context);

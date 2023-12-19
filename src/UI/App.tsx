@@ -1,7 +1,7 @@
-import Sidebar from './components/sidebar';
-import BigPanel from './components/BigPanel';
-import ToastProvider from './components/ToastProvider';
-import PS_contextProvider from './PS_context';
+import Sidebar from './components/single/sidebar';
+import BigPanel from './components/single/BigPanel';
+import ToastProvider from './components/single/ToastProvider';
+import PS_contextProvider from './components/single/PS_context';
 import { useState } from 'react';
 
 export default function Home() {

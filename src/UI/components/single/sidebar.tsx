@@ -1,6 +1,6 @@
 import { HTMLAttributes, useContext } from 'react';
-import { PS_context } from '../PS_context';
-import { RoomComponent } from './rooms';
+import { PS_context } from './PS_context';
+import { RoomListComponent } from '../RoomListComponent';
 import { twMerge } from 'tailwind-merge';
 import {
     restrictToParentElement,
@@ -22,7 +22,7 @@ import {
     SortableContext,
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
-import SortableItem from '../../utils/Sortable';
+import SortableItem from '../../../utils/Sortable';
 
 export default function Sidebar(props: HTMLAttributes<'div'>) {
     const { rooms, setRooms } = useContext(PS_context);
@@ -79,7 +79,7 @@ export default function Sidebar(props: HTMLAttributes<'div'>) {
                         >
                             {rooms.map((room, idx) => (
                                 <SortableItem id={room.ID} key={idx}>
-                                    <RoomComponent
+                                    <RoomListComponent
                                         name={room.name}
                                         type={room.type}
                                         ID={room.ID}

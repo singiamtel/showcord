@@ -8,7 +8,7 @@ import {
     useRef,
     useState,
 } from 'react';
-import { PS_context } from './PS_context';
+import { PS_context } from './components/single/PS_context';
 import RoomCard from './components/RoomCard';
 import { InfinitySpin } from 'react-loader-spinner';
 import MiniSearch, { SearchResult } from 'minisearch';

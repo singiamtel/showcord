@@ -7,16 +7,17 @@ import {
     useEffect,
     useLayoutEffect,
 } from 'react';
-import { PS_context } from '../PS_context';
-import useOnScreen from '../hooks/isOnScreen';
-import HTML from '../formatting/html';
-import { HHMMSS } from '../../utils/date';
+import { PS_context } from './PS_context';
+import useOnScreen from '../../hooks/isOnScreen';
+import HTML from '../../chatFormatting/html';
+import { HHMMSS } from '../../../utils/date';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import Linkify from 'linkify-react';
-import { Message } from '../../client/message';
-import Code from '../formatting/code';
-import { UserCard, UsernameComponent } from '../usercomponents';
+import { Message } from '../../../client/message';
+import Code from '../../chatFormatting/code';
+import UserCard from '../UserCard';
+import { Username } from '../Username';
 
 import {
     bold,
@@ -30,9 +31,9 @@ import {
     strikethrough,
     subscript,
     superscript,
-} from '../formatting/chat';
-import { userColor } from '../../utils/namecolour';
-import manageURL from '../../utils/manageURL';
+} from '../../chatFormatting/chat';
+import { userColor } from '../../../utils/namecolour';
+import manageURL from '../../../utils/manageURL';
 
 // ``code here`` marks inline code
 // ||text|| are spoilers
@@ -344,7 +345,7 @@ export function MessageComponent(
                             <strong style={{ color: userColor(user) }}>
                 ●
                             </strong>{' '}
-                            <UsernameComponent
+                            <Username
                                 user={user}
                                 onClick={(e) => onNameClick && onNameClick(e)}
                                 colorless
@@ -356,7 +357,7 @@ export function MessageComponent(
                     ) :
                     (
                         <>
-                            <UsernameComponent
+                            <Username
                                 user={user}
                                 onClick={(e) => onNameClick && onNameClick(e)}
                                 colon

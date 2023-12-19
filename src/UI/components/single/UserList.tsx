@@ -1,17 +1,9 @@
 import { PS_context } from './PS_context';
 import { MouseEvent, useContext, useEffect, useState } from 'react';
-import { UsernameComponent } from './usercomponents';
-import { User } from '../client/user';
+import { Username } from '../Username';
+import { User } from '../../../client/user';
 
 export default function UserList({
-    setUser,
-    username,
-    setUsername,
-    setPosition,
-    user,
-    position,
-    wrapperRef,
-    closeWindow,
     clickUsername,
 }: {
     setUser: (user: any) => void;
@@ -49,7 +41,7 @@ export default function UserList({
         <div className="bg-gray-600 w-full h-full p-2 overflow-y-auto whitespace-nowrap">
             {users.map((user, index) => (
                 <div key={index}>
-                    <UsernameComponent
+                    <Username
                         user={user.name}
                         bold={user.name[0] !== ' '}
                         alignRight

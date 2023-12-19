@@ -12,3 +12,11 @@ export function clamp(n: number, min: number, max: number) {
 export function cleanRegex(regex: RegExp) { // Convert regex to string
     return regex.toString().slice(1, -2);
 }
+
+export function removeFirstCharacterIfNotLetter(str: string) {
+    if (str.length > 0 && !str.charAt(0).match(/[a-zA-Z]/)) {
+        return str.slice(1);
+    }
+    return str;
+}
+
