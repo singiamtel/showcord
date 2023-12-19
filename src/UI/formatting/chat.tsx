@@ -1,6 +1,6 @@
 import Linkify from 'linkify-react';
 import { HTMLAttributes } from 'react';
-import manageURL from '../utils/manageURL';
+import manageURL from '../../utils/manageURL';
 import innerText from 'react-innertext';
 
 // ``code here`` marks inline code

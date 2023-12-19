@@ -1,6 +1,6 @@
-import Sidebar from './sidebar';
-import BigPanel from './BigPanel';
-import ToastProvider from './ToastProvider';
+import Sidebar from './components/sidebar';
+import BigPanel from './components/BigPanel';
+import ToastProvider from './components/ToastProvider';
 import PS_contextProvider from './PS_context';
 import { useState } from 'react';
 

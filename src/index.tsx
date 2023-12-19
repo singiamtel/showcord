@@ -1,9 +1,9 @@
 import ReactDOM from 'react-dom/client';
-import Home from './app/Home';
+import Home from './UI/App';
 import { StrictMode } from 'react';
 
 import '@fontsource/roboto-mono';
-import './app/globals.css';
+import './UI/globals.css';
 import 'react-toastify/dist/ReactToastify.css';
 
 const root = ReactDOM.createRoot(

@@ -14,10 +14,10 @@ import { InfinitySpin } from 'react-loader-spinner';
 import MiniSearch, { SearchResult } from 'minisearch';
 import NewsCard from './components/NewsCard';
 
-import targetFaceCluster from '../assets/cluster_target_face_nobg.png';
+import targetFaceCluster from './assets/cluster_target_face_nobg.png';
 
-import github from '../assets/github.png';
-import discord from '../assets/discord.png';
+import github from './assets/github.png';
+import discord from './assets/discord.png';
 
 import { twMerge } from 'tailwind-merge';
 
@@ -27,7 +27,7 @@ const minisearch = new MiniSearch({
     idField: 'title',
 });
 
-export default function MainPage(props: HTMLAttributes<'div'>) {
+export default function Home(props: HTMLAttributes<'div'>) {
     const { client } = useContext(PS_context);
     const [roomsJSON, setRoomsJSON] = useState<any>({});
     const [input, setInput] = useState<string>('');

@@ -1,4 +1,4 @@
-import { client } from '../app/PS_context';
+import { client } from '../UI/PS_context';
 import { MouseEvent } from 'react';
 
 export default function manageURL(evt:MouseEvent<HTMLAnchorElement>) {

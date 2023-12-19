@@ -627,5 +627,6 @@ export async function loadCustomColors() {
 }
 
 export function userColor(name) {
-    return userColorHash(customColors[toID(name)] || toID(name));
+    const nameId = toID(name);
+    return userColorHash(customColors[nameId] || nameId);
 }

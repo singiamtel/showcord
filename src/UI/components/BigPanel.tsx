@@ -9,18 +9,18 @@ import {
 } from 'react';
 import ChatBox from './chatbox';
 import Chat from './chat';
-import { client, PS_context } from './PS_context';
-import Users from './users';
-import MainPage from './mainPage';
+import { client, PS_context } from '../PS_context';
+import UserList from '../UserList';
+import Home from '../Home';
 import { twMerge } from 'tailwind-merge';
-import useClickOutside from '../utils/useClickOutside';
+import useClickOutside from '../hooks/useClickOutside';
 
 export default function BigPanel(props: HTMLAttributes<'div'>) {
     const { selectedPage: room, rooms } = useContext(PS_context);
     const roomType = rooms?.find((r) => r.ID === room)?.type;
     if (!room) return null;
     if (roomType === 'permanent') {
-        return <MainPage className={props.className} />;
+        return <Home className={props.className} />;
     }
 
     const [user, setUser] = useState<any | null>(null);
@@ -87,7 +87,7 @@ export default function BigPanel(props: HTMLAttributes<'div'>) {
             {roomType === 'chat' || roomType === 'battle' ?
                 (
                     <div className="w-64">
-                        <Users
+                        <UserList
                             setUser={setUser}
                             username={username}
                             setUsername={setUsername}

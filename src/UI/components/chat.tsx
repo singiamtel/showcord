@@ -7,16 +7,16 @@ import {
     useEffect,
     useLayoutEffect,
 } from 'react';
-import { PS_context } from './PS_context';
-import useOnScreen from '../utils/isOnScreen';
+import { PS_context } from '../PS_context';
+import useOnScreen from '../hooks/isOnScreen';
 import HTML from '../formatting/html';
-import { HHMMSS } from '../utils/date';
+import { HHMMSS } from '../../utils/date';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import Linkify from 'linkify-react';
-import { Message } from '../client/message';
+import { Message } from '../../client/message';
 import Code from '../formatting/code';
-import { UserCard, UsernameComponent } from './usercomponents';
+import { UserCard, UsernameComponent } from '../usercomponents';
 
 import {
     bold,
@@ -31,8 +31,8 @@ import {
     subscript,
     superscript,
 } from '../formatting/chat';
-import { userColor } from '../utils/namecolour';
-import manageURL from '../utils/manageURL';
+import { userColor } from '../../utils/namecolour';
+import manageURL from '../../utils/manageURL';
 
 // ``code here`` marks inline code
 // ||text|| are spoilers

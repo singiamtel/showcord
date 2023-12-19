@@ -3,7 +3,7 @@ import { MouseEvent, useContext, useEffect, useState } from 'react';
 import { UsernameComponent } from './usercomponents';
 import { User } from '../client/user';
 
-export default function Users({
+export default function UserList({
     setUser,
     username,
     setUsername,
