@@ -8,7 +8,7 @@ import {
     useLayoutEffect,
 } from 'react';
 import { PS_context } from './PS_context';
-import useOnScreen from '../../hooks/isOnScreen';
+import useOnScreen from '../../hooks/useOnScreen';
 import HTML from '../../chatFormatting/html';
 import { HHMMSS } from '../../../utils/date';
 import { ErrorBoundary } from 'react-error-boundary';
