@@ -1,6 +1,6 @@
 import { Settings } from '../settings';
 import { cleanRegex, toID } from '../utils/generic';
-import { Message } from './message';
+import newMessage, { Message } from './message';
 import { Room, RoomType, roomTypes } from './room';
 import { User } from './user';
 import { clientNotification, RoomNotification } from './notifications';
@@ -585,7 +585,7 @@ export class Client {
         roomID: string,
     ): void {
         if (!message.startsWith('|')) {
-            const chatMessage = new Message({
+            const chatMessage = newMessage({
                 timestamp: Math.floor(Date.now() / 1000).toString(),
                 type: 'simple',
                 content: message,
@@ -635,7 +635,7 @@ export class Client {
                     );
                     this.addMessageToRoom(
                         roomID,
-                        new Message({
+                        newMessage({
                             user: args[0],
                             content,
                             timestamp: Math.floor(Date.now() / 1000).toString(),
@@ -749,7 +749,7 @@ export class Client {
                         return;
                     }
                     room.addUHTML(
-                        new Message({
+                        newMessage({
                             name,
                             user: '',
                             type: 'raw',
@@ -776,7 +776,7 @@ export class Client {
                         break;
                     }
                     room.changeUHTML(
-                        new Message({
+                        newMessage({
                             name: args[0],
                             user: '',
                             type: 'raw',
@@ -792,7 +792,7 @@ export class Client {
             case 'raw': {
                 this.addMessageToRoom(
                     roomID,
-                    new Message({
+                    newMessage({
                         user: '',
                         type: 'raw',
                         content: args.join('|'),
@@ -807,7 +807,7 @@ export class Client {
                     // );
                     this.addMessageToRoom(
                         roomID,
-                        new Message({
+                        newMessage({
                             user: '',
                             type: 'error',
                             content: args.join('|'),
@@ -846,7 +846,7 @@ export class Client {
                 return;
             }
             roomObj.changeUHTML(
-                new Message({
+                newMessage({
                     name: UHTMLName,
                     user: '',
                     type: 'raw',
@@ -857,7 +857,7 @@ export class Client {
             return;
         }
 
-        return new Message({
+        return newMessage({
             timestamp: msgTime,
             user,
             name: UHTMLName,
@@ -969,7 +969,7 @@ export class Client {
                         }
                         this.addMessageToRoom(
                             this.selectedRoom,
-                            new Message({
+                            newMessage({
                                 user: '',
                                 name: '',
                                 type: 'log',
@@ -988,7 +988,7 @@ export class Client {
                         }
                         this.addMessageToRoom(
                             this.selectedRoom,
-                            new Message({
+                            newMessage({
                                 user: '',
                                 name: '',
                                 type: 'log',
@@ -1005,7 +1005,7 @@ export class Client {
 
                             this.addMessageToRoom(
                                 this.selectedRoom,
-                                new Message({
+                                newMessage({
                                     user: '',
                                     name: '',
                                     type: 'log',
@@ -1024,7 +1024,7 @@ export class Client {
                             );
                             this.addMessageToRoom(
                                 this.selectedRoom,
-                                new Message({
+                                newMessage({
                                     user: '',
                                     name: '',
                                     type: 'log',

@@ -27,3 +27,5 @@ export const omit = <T extends object, K extends keyof T>(
     keys.forEach((key) => delete obj[key]);
     return obj;
 };
+
+export type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
