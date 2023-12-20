@@ -26,26 +26,28 @@ export class Room {
     unread = 0;
     mentions = 0;
     connected = false;
+    open = false;
 
     messages: Message[] = [];
     users: User[] = [];
     private readonly messageLimit = 200;
-    private icon?: JSX.Element;
     private lastSentMessages: string[] = [];
     private readonly lastSentMessageLimit = 25;
     private prevIndex = 0;
     constructor(
-        { ID, name, type, connected }: {
+        { ID, name, type, connected, open }: {
             ID: string;
             name: string;
             type: RoomType;
             connected: boolean;
+            open?: boolean;
         },
     ) {
         this.ID = ID;
         this.name = name;
         this.type = type;
         this.connected = connected;
+        this.open = open || true;
     }
 
     historyPrev() {

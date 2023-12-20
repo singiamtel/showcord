@@ -1,14 +1,27 @@
 import { Room } from './client/room';
-import { cleanRegex } from './utils/generic';
+import { cleanRegex, omit } from './utils/generic';
+
+export interface UserDefinedSettings {
+    highlightWords: { [key: string]: RegExp[] };
+    theme: 'light' | 'dark';
+    chatStyle: 'compact' | 'normal'; // compact = IRC style
+    avatar: string;
+}
 
 export class Settings {
     readonly defaultRooms = [];
-    private rooms: { ID: string; lastReadTime: Date }[] = [];
-    highlightWords: { [key: string]: RegExp[] } = Object.create(null); // roomid -> highlightWords
+    private rooms: Room[] = [];
+    userDefinedSettings: UserDefinedSettings = {
+    // Only serializable data should be here
+        highlightWords: {},
+        theme: 'dark',
+        chatStyle: 'normal',
+        avatar: '',
+    };
+    // highlightWords: { [key: string]: RegExp[] } = Object.create(null); // roomid -> highlightWords
     // defaultRooms = ["lobby", "help", "overused"];
     private timeout: any;
     private username = '';
-    private avatar = '';
     private status = ''; // if status is set, it will be restored on login
     private notes: Map<string, string> = new Map(); // user -> note
 
@@ -21,30 +34,40 @@ export class Settings {
             return;
         }
         const settings = JSON.parse(settingsRaw);
-        console.log('loaded settings', settings);
-        if (settings) {
-            for (
-                const [key, value] of Object.entries(settings.highlightWords) as [
-          key: string,
-          value: string[],
-                ][]
-            ) {
-                this.highlightWords[key] = value.map((w: string) => new RegExp(w, 'i'));
-            }
+        if (settings && settings.userDefinedSettings) {
+            console.log('before loaded settings', this.userDefinedSettings);
             this.rooms = settings.rooms;
             this.username = settings.username;
+            // User defined settings
+            this.userDefinedSettings.avatar = settings.userDefinedSettings.avatar;
+            if (settings.userDefinedSettings.highlightWords) {
+                for (
+                    const [key, value] of Object.entries(
+                        settings.userDefinedSettings.highlightWords,
+                    ) as [
+            key: string,
+            value: string[],
+                    ][]
+                ) {
+                    this.userDefinedSettings.highlightWords[key] = value.map((
+                        w: string,
+                    ) => new RegExp(w, 'i'));
+                }
+            }
+            console.log('loaded settings', JSON.stringify(this.userDefinedSettings));
+            console.log('loaded settings', this.userDefinedSettings);
         }
     }
 
-    addRoom(roomid: string) {
-        if (!this.rooms.find((r) => r.ID === roomid)) {
-            this.rooms.push({ ID: roomid, lastReadTime: new Date() });
+    addRoom(room: Room) {
+        if (!this.rooms.find((r) => r.ID === room.ID)) {
+            this.rooms.push(room);
         }
     }
 
     updateUsername(username: string, avatar: string) {
         this.username = username;
-        this.avatar = avatar;
+        this.userDefinedSettings.avatar = avatar;
         this.saveSettings();
     }
 
@@ -53,7 +76,7 @@ export class Settings {
     }
 
     getAvatar() {
-        return this.avatar;
+        return this.userDefinedSettings.avatar;
     }
 
     getStatus() {
@@ -63,14 +86,15 @@ export class Settings {
     removeRoom(roomid: string) {
         const index = this.rooms.findIndex((r) => r.ID === roomid);
         if (index !== -1) {
-            this.rooms.splice(index, 1);
+            // this.rooms.splice(index, 1);
+            this.rooms[index].open = false;
         }
     }
 
     changeRooms(rooms: Map<string, Room>) {
-        this.rooms = Array.from(rooms).filter((e) => e[1].type === 'chat').map((
-            r,
-        ) => ({ ID: r[1].ID, lastReadTime: r[1].lastReadTime }));
+    // Used to remember which rooms were open when the user logs out
+        this.rooms = Array.from(rooms).map((e) => e[1]).filter((e) =>
+            e.type === 'chat');
         this.saveSettings();
     }
 
@@ -87,20 +111,35 @@ export class Settings {
     }
 
     private saveSettings() {
+        const nonSerializable = ['highlightWords'] as const;
+        const userDefinedSettingsCopy = omit(
+            { ...this.userDefinedSettings },
+            ...nonSerializable,
+        );
         const settings: {
-            highlightWords: any;
+            userDefinedSettings: typeof userDefinedSettingsCopy & {
+                highlightWords: { [key: string]: string[] };
+            };
             rooms: {
                 ID: string;
                 lastReadTime: Date;
             }[];
-            username?: string;
+            username: string;
         } = {
-            highlightWords: {},
+            userDefinedSettings: {
+                highlightWords: {},
+                ...userDefinedSettingsCopy,
+            },
             rooms: this.rooms,
             username: this.username,
         };
-        for (const [key, value] of Object.entries(this.highlightWords)) {
-            settings.highlightWords[key] = value.map((w) => cleanRegex(w));
+        for (
+            const [key, value] of Object.entries(
+                this.userDefinedSettings.highlightWords,
+            )
+        ) {
+            settings.userDefinedSettings.highlightWords[key] = value.map((w) =>
+                cleanRegex(w));
         }
         if (this.timeout) {
             clearTimeout(this.timeout);
@@ -112,21 +151,21 @@ export class Settings {
     }
 
     async addHighlightWord(roomid: string, word: string) {
-        if (this.highlightWords[roomid] === undefined) {
-            this.highlightWords[roomid] = [];
+        if (this.userDefinedSettings.highlightWords[roomid] === undefined) {
+            this.userDefinedSettings.highlightWords[roomid] = [];
         }
         const regex = new RegExp(word, 'i');
-        this.highlightWords[roomid]?.push(regex);
+        this.userDefinedSettings.highlightWords[roomid]?.push(regex);
         this.saveSettings();
     }
 
     removeHighlightWord(roomid: string, word: string) {
-        if (!this.highlightWords[roomid]) {
+        if (!this.userDefinedSettings.highlightWords[roomid]) {
             console.warn('removeHighlightWord', 'roomid not found', roomid);
             return;
         }
         const regex = new RegExp(word, 'i');
-        const words = this.highlightWords[roomid];
+        const words = this.userDefinedSettings.highlightWords[roomid];
         const index = words?.findIndex((w) => w.toString() === regex.toString());
         if (index === undefined || index === -1) {
             console.warn('removeHighlightWord', 'word not found', word);
@@ -136,23 +175,25 @@ export class Settings {
     }
 
     clearHighlightWords(roomid: string) {
-        if (!this.highlightWords[roomid]) {
+        if (!this.userDefinedSettings.highlightWords[roomid]) {
             console.warn('clearHighlightWords', 'roomid not found', roomid);
             return;
         }
-        this.highlightWords[roomid] = [];
+        this.userDefinedSettings.highlightWords[roomid] = [];
     }
 
     highlightMsg(roomid: string, message: string) {
     // Room highlights
-        for (const word of this.highlightWords[roomid] ?? []) {
+        for (const word of this.userDefinedSettings.highlightWords[roomid] ?? []) {
             if (word.test(message)) {
                 return true;
             }
         }
 
         // Global highlights
-        for (const word of this.highlightWords['global'] ?? []) {
+        for (
+            const word of this.userDefinedSettings.highlightWords['global'] ?? []
+        ) {
             if (word.test(message)) {
                 return true;
             }

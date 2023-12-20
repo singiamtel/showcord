@@ -33,7 +33,12 @@ export class Client {
     permanentRooms = [{
         ID: 'home',
         name: 'Home',
-    }]; // Client-side only rooms, joined automatically
+        defaultOpen: true,
+    }, {
+        ID: 'settings',
+        name: 'Settings',
+        defaultOpen: false,
+    }] as const; // Client-side only rooms, joined automatically
     private roomsJSON: any = undefined; // Server response to /cmd rooms
     private news: any = undefined; // Cached news
     private lastQueriedUser: { user: string; json: any } | undefined; // Cached user query
@@ -75,7 +80,7 @@ export class Client {
 
         console.log(`>>${message}`);
         try {
-            if (this.__parseSendMsg(ogMessage, room, raw)) return; // Already handled client-side
+            if (this.__parseSendMsg(ogMessage, raw)) return; // Already handled client-side
             this.socket.send(`${message}`);
         } catch (e) {
             if (e instanceof DOMException) {
@@ -198,7 +203,10 @@ export class Client {
             throw new Error('Auto-joining rooms before socket initialization ');
         }
         const filteredRooms = rooms.filter((e) =>
-            !this.permanentRooms.map((e) => e.ID).includes(e));
+        // e as value
+            !this.permanentRooms.map((e) => e.ID).includes(
+                e as typeof this.permanentRooms[number]['ID'],
+            ));
         if (useDefaultRooms && (!filteredRooms || filteredRooms.length === 0)) {
             for (const room of this.settings.defaultRooms) {
                 this.__send(`/join ${room}`, false);
@@ -396,7 +404,7 @@ export class Client {
         this.rooms.set(room.ID, room);
         const eventio = new CustomEvent('room', { detail: room });
         this.events.dispatchEvent(eventio);
-        this.settings.addRoom(room.ID);
+        this.settings.addRoom(room);
     }
 
     private _removeRoom(roomID: string) {
@@ -924,6 +932,7 @@ export class Client {
 
     private __createPermanentRooms() {
         this.permanentRooms.forEach((room) => {
+            // if (!room.defaultOpen) return;
             this._addRoom(
                 new Room({
                     ID: room.ID,
@@ -937,7 +946,6 @@ export class Client {
 
     private __parseSendMsg(
         message: string,
-        room: string | false,
         raw: boolean,
     ): boolean {
         if (!message.startsWith('/')) {
@@ -991,7 +999,7 @@ export class Client {
                     case 'list':
                     case 'roomlist':
                         {
-                            const words = this.settings.highlightWords[
+                            const words = this.settings.userDefinedSettings.highlightWords[
                                 subcmd === 'list' ? 'global' : this.selectedRoom
                             ]?.map((e) => cleanRegex(e));
 
