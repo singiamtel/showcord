@@ -42,7 +42,7 @@ export default function HTML(
                         onClick={() => {
                             client?.send(attribs.value, selectedPage || '');
                         }}
-                        className="text-white border border-gray-border, font-bold p-1 m-1 rounded text-sm"
+                        className="text-white border border-gray-601 dark:border-gray-border font-bold p-1 m-1 rounded text-sm"
                         data-parsed="true"
                     >
                         {domToReact(children, parserOptions)}
@@ -139,7 +139,7 @@ export default function HTML(
 
 export function Box(props: React.PropsWithChildren) {
     return (
-        <div className="p-2 ml-10 mr-10 m-2 text-white border border-solid border-gray-border bg-gray-600 rounded">
+        <div className="p-2 ml-10 mr-10 m-2 border border-solid border-gray-601 dark:border-gray-border bg-gray-sidebar-light dark:bg-gray-600 rounded">
             <span className="">
                 {props.children}
             </span>

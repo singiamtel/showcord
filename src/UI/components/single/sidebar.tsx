@@ -65,10 +65,10 @@ export default function Sidebar(props: HTMLAttributes<'div'>) {
             <div
                 className={twMerge(
                     props.className,
-                    'bg-gray-600 h-screen flex flex-col justify-between',
+                    'bg-gray-sidebar-light dark:bg-gray-600 h-screen flex flex-col justify-between',
                 )}
             >
-                <div className="text-center mr-2 ml-2 p-2 text-white font-bold text-lg h-16 whitespace-nowrap">
+                <div className="text-center mr-2 ml-2 p-2 font-bold text-lg h-16 whitespace-nowrap">
           Showcord!
                 </div>
                 <div className="flex flex-grow overflow-y-auto">

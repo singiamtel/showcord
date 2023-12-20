@@ -1,7 +1,8 @@
 import Linkify from 'linkify-react';
-import { HTMLAttributes } from 'react';
+import { HTMLAttributes, useState } from 'react';
 import manageURL from '../../utils/manageURL';
 import innerText from 'react-innertext';
+import { twMerge } from 'tailwind-merge';
 
 // ``code here`` marks inline code
 // ||text|| are spoilers
@@ -35,7 +36,7 @@ export function inlineCode(
     delete props.key;
     return (
         <code
-            className={'font-mono bg-gray-600 rounded p-1 '}
+            className={'font-mono bg-gray-601 dark:bg-gray-600 rounded p-1 '}
             {...props}
             key={key}
         />
@@ -65,14 +66,22 @@ export function spoiler(
     props: ExtendedProps,
 ) {
     const key = props.key;
+    const [visible, setVisible] = useState(false);
     delete props.key;
     return (
         <Linkify
             as="span"
-            className="bg-gray-700 text-gray-700 p-0.5 rounded hover:text-white"
+            className={twMerge(
+                'dark:bg-gray-700 dark:text-gray-700 p-0.5 rounded bg-gray-spoiler-light text-gray-spoiler-light ',
+                visible ? 'text-black dark:text-white' : 'hover:cursor-pointer',
+            )}
             {...props}
             key={key}
             options={options}
+            onClick={() => {
+                //set spoiler to visible
+                setVisible(true);
+            }}
         />
     );
 }
@@ -145,7 +154,13 @@ export function greentext(
     delete props.key;
     delete props.children;
     return (
-        <Linkify as="span" className="text-green-400" {...props} key={key} options={options}>
+        <Linkify
+            as="span"
+            className="text-green-400"
+            {...props}
+            key={key}
+            options={options}
+        >
       &gt;{children}
         </Linkify>
     );

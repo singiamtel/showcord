@@ -106,16 +106,17 @@ export default function Home(props: HTMLAttributes<'div'>) {
     return (
         <div
             className={twMerge(
-                'grid grid-cols-7 grid-rows-2 gap-6 m-6',
+                'grid grid-cols-7 grid-rows-2 gap-6 m-6 [&>*]:bg-gray-100 dark:[&>*]:bg-gray-600',
                 props.className,
             )}
         >
-            <div className="col-span-3 row-span-1 rounded-lg bg-gray-600 text-white flex flex-col justify-center items-center overflow-hidden relative ">
+            <div className="col-span-3 row-span-1 rounded-lg flex flex-col justify-center items-center overflow-hidden relative">
                 <img
                     src={targetFaceCluster}
                     alt="targetFaceCluster"
                     className="opacity-70 h-auto min-h-[110%]"
                 />
+                <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-black z-10 bg-gray-100 dark:bg-gray-600 opacity-10" />
                 <div className="flex flex-col justify-between p-4 absolute">
                     <h1 className="font-bold text-4xl text-center z-10 text-transparent">
             Welcome to Showcord!
@@ -125,7 +126,7 @@ export default function Home(props: HTMLAttributes<'div'>) {
                     </h2>
                 </div>
             </div>
-            <div className="col-span-2 row-span-1 bg-gray-600 p-4 rounded-lg text-white flex flex-col overflow-y-auto">
+            <div className="col-span-2 row-span-1 p-4 rounded-lg flex flex-col overflow-y-auto">
                 <h2 className="font-bold text-xl text-center mt-2">
           News
                 </h2>
@@ -133,7 +134,7 @@ export default function Home(props: HTMLAttributes<'div'>) {
                     <NewsCard key={idx} news={n} last={idx === news.length - 2} />
                 ))}
             </div>
-            <div className="col-span-2 row-span-2 p-4 rounded-lg overflow-y-auto text-white bg-gray-600">
+            <div className="col-span-2 row-span-2 p-4 rounded-lg overflow-y-auto">
                 <h2 className="font-bold text-xl text-center">
           Rooms
                 </h2>
@@ -150,7 +151,7 @@ export default function Home(props: HTMLAttributes<'div'>) {
                             onChange={(e) => {
                                 setInput(e.target.value);
                             }}
-                            className="w-full rounded my-1 p-2 placeholder-gray-175 bg-gray-375 text-white"
+                            className="w-full rounded my-1 p-2 placeholder-gray-175 bg-gray-376 dark:bg-gray-375"
                             placeholder="Search for a room"
                         />
                     </form>
@@ -181,10 +182,10 @@ export default function Home(props: HTMLAttributes<'div'>) {
                             </div>
                         )}
             </div>
-            <div className="col-span-5 bg-gray-600 p-4 rounded text-white flex items-center justify-center flex-col gap-8 ">
+            <div className="col-span-5 p-4 rounded text-white flex items-center justify-center flex-col gap-8 ">
                 <a
                     id="discord"
-                    className="max-h-full min-h-0 flex items-center gap-2 w-full p-8 rounded-lg hover:bg-gray-700 cursor-pointer text-white hover:text-white visited:text-white"
+                    className="max-h-full min-h-0 flex items-center gap-2 w-full p-8 rounded-lg hover:bg-gray-601 dark:hover:bg-gray-700 cursor-pointer visited:text-black dark:text-white dark:hover:text-white dark:visited:text-white"
                     target="_blank"
                     href="https://discord.gg/kxNdKdWxW2"
                 >
@@ -202,7 +203,7 @@ export default function Home(props: HTMLAttributes<'div'>) {
                 </a>
                 <a
                     id="github"
-                    className="max-h-full min-h-0 flex items-center gap-2 w-full p-8 rounded-lg hover:bg-gray-700 cursor-pointer text-white hover:text-white visited:text-white"
+                    className="max-h-full min-h-0 flex items-center gap-2 w-full p-8 rounded-lg hover:bg-gray-601 dark:hover:bg-gray-700 cursor-pointer visited:text-black dark:text-white dark:hover:text-white dark:visited:text-white"
                     target="_blank"
                     href="https://github.com/singiamtel/Showcord"
                 >

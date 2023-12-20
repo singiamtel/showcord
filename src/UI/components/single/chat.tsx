@@ -302,7 +302,7 @@ export function MessageComponent(
     if (type === 'simple') {
         return message ?
             (
-                <div className="text-white">
+                <div >
                     {' ' + message}
                 </div>
             ) :
@@ -322,7 +322,7 @@ export function MessageComponent(
     }
     if (type === 'log') {
         return (
-            <div className="pt-0.5 text-white">
+            <div className="pt-0.5 ">
                 <span className="text-gray-125 text-xs">
                     {time ? HHMMSS(time) : ''}
                 </span>
@@ -333,11 +333,11 @@ export function MessageComponent(
         );
     }
     return (
-        <div className={'pt-0.5 ' + (hld ? 'bg-yellow-hl-body' : '')}>
+        <div className={'pt-0.5 ' + (hld ? 'bg-yellow-hl-body-light dark:bg-yellow-hl-body' : '')}>
             <span className="text-gray-125 text-xs">
                 {time ? HHMMSS(time) : ''}
             </span>
-            <span className="text-white break-words">
+            <span className="break-words">
         &nbsp;
                 {type === 'roleplay' ?
                     (

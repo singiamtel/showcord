@@ -18,7 +18,7 @@ export default function Code({ message }: any) {
     const { relevance } = hljs.highlightAuto(str);
     return (
         <div
-            className={'ml-10 mr-10 m-2 text-white border border-solid border-gray-border bg-gray-600 rounded p-2 '}
+            className={'ml-10 mr-10 m-2 border border-solid border-gray-601 dark:border-gray-border bg-gray-601 dark:bg-gray-600 rounded p-2 '}
         >
             {relevance > 12.5 ?
                 (

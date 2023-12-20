@@ -79,7 +79,7 @@ export default function BigPanel(props: HTMLAttributes<'div'>) {
                 'flex break-normal',
             )}
         >
-            <div className={'bg-gray-300 flex flex-col w-full max-w-full'}>
+            <div className={'dark:bg-gray-300 flex flex-col w-full max-w-full'}>
                 <div className="h-[90%] max-h-[90%] flex-grow flex-shrink min-h-0 overflow-y-scroll">
                     <Chat
                         setUser={setUser}

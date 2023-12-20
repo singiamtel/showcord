@@ -4,8 +4,13 @@ import {
     MouseEventHandler,
     MutableRefObject,
     ReactNode,
+    useEffect,
 } from 'react';
-import { clamp, toID, removeFirstCharacterIfNotLetter } from '../../utils/generic';
+import {
+    clamp,
+    removeFirstCharacterIfNotLetter,
+    toID,
+} from '../../utils/generic';
 import { FaCommentAlt, FaUserPlus } from 'react-icons/fa';
 import { PiSwordBold } from 'react-icons/pi';
 import manageURL from '../../utils/manageURL';
@@ -29,10 +34,23 @@ export default function UserCard(
     const privateRooms = user ?
         Object.entries(user.rooms).filter((e: any) => e[1].isPrivate) :
         [];
+
+    useEffect(() => {
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                close();
+            }
+        };
+        window.addEventListener('keydown', onKeyDown);
+        return () => {
+            window.removeEventListener('keydown', onKeyDown);
+        };
+    }, []);
+
     return (
         <div
             ref={forwardRef}
-            className="fixed bg-gray-600 rounded-lg p-5 w-[400px] min-h-[150px] text-white shadow-sm shadow-black z-10"
+            className="fixed bg-gray-601 dark:bg-gray-600 rounded-lg p-5 w-[400px] min-h-[150px] shadow-sm shadow-black z-10"
             style={{
                 left: clamp(position.x, margin, window.innerWidth - 500 - margin),
                 top: clamp(position.y, margin, window.innerHeight - 300 - margin),
@@ -84,10 +102,12 @@ export default function UserCard(
                     </div>
                 </div>
                 <div id="usercard-avatar" className="w-20 h-20">
-                    {user?.avatar ?
+                    {user ?
                         (
                             <img
-                                src={Sprites.getAvatar(user.avatar)}
+                                src={user.avatar ?
+                                    Sprites.getAvatar(user.avatar) :
+                                    Sprites.getAvatar(167)}
                                 className="w-20 h-20"
                             />
                         ) :
@@ -132,7 +152,7 @@ function UserCardButton({
 }) {
     return (
         <button
-            className={'text-sm rounded-lg px-4 py-2 flex-grow-0 text-white border border-gray-700 flex flex-col justify-center items-center ' +
+            className={'text-sm rounded-lg px-4 py-2 flex-grow-0 border border-gray-700 flex flex-col justify-center items-center ' +
         (disabled ? 'opacity-50' : 'hover:bg-gray-700 hover:underline ')}
             onClick={onClick}
             title={alt}

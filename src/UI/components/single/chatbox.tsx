@@ -168,7 +168,7 @@ export default function ChatBox() {
                     />
                     <div className="flex flex-row">
                         <TextareaAutosize
-                            className="mr-5 ml-5 p-2 rounded-lg flex-grow bg-gray-375 text-white resize-none placeholder-gray-175"
+                            className="mr-5 ml-5 p-2 rounded-lg flex-grow bg-gray-376 dark:bg-gray-375 resize-none placeholder-gray-175"
                             value={input}
                             onChange={manageChanges}
                             onKeyDown={manageKeybinds}
@@ -207,7 +207,7 @@ const SearchBox = (
                 bottom: `${offset.marginBottom}px`,
                 width: `${offset.width}px`,
             }}
-            className={'absolute mr-5 ml-5 mb-2 rounded-lg text-white bg-gray-600 ' +
+            className={'absolute mr-5 ml-5 mb-2 rounded-lg text-white bg-gray-601 dark:bg-gray-600 ' +
         (display ? `` : 'hidden')}
         >
             <div>
