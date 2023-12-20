@@ -932,7 +932,7 @@ export class Client {
 
     private __createPermanentRooms() {
         this.permanentRooms.forEach((room) => {
-            // if (!room.defaultOpen) return;
+            if (!room.defaultOpen) return;
             this._addRoom(
                 new Room({
                     ID: room.ID,
