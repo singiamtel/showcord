@@ -38,7 +38,7 @@ export default function UserList({
     }, [client, room]);
 
     return (
-        <div className="bg-gray-601 dark:bg-gray-600 w-full h-full p-2 overflow-y-auto whitespace-nowrap">
+        <div className="bg-gray-sidebar-light dark:bg-gray-600 w-full h-full p-2 overflow-y-auto whitespace-nowrap">
             {users.map((user, index) => (
                 <div key={index}>
                     <Username

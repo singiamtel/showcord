@@ -5,7 +5,7 @@ import PS_contextProvider from './components/single/PS_context';
 import { useState } from 'react';
 
 export default function Home() {
-    const [darkMode, setDarkMode] = useState(false);
+    const [darkMode, setDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
     function toggleDarkMode() {
         setDarkMode(!darkMode);
     }

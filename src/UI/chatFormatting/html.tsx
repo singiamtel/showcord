@@ -42,7 +42,7 @@ export default function HTML(
                         onClick={() => {
                             client?.send(attribs.value, selectedPage || '');
                         }}
-                        className="text-white border border-gray-601 dark:border-gray-border font-bold p-1 m-1 rounded text-sm"
+                        className="border border-gray-601 dark:border-gray-border font-bold p-1 m-1 rounded text-sm"
                         data-parsed="true"
                     >
                         {domToReact(children, parserOptions)}
