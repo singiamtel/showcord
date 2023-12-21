@@ -108,3 +108,16 @@ table {
 table td, table th {
   padding: 4px;
 }
+
+.result{
+  display: flex;
+}
+
+.utilichart .col{
+  float: left;
+}
+
+.col{
+  margin: 5px;
+
+}
