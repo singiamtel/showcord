@@ -21,6 +21,10 @@ html{
   font-size: 16px;
 }
 
+:root {
+  color-scheme: dark light;
+}
+
 input{background-color: transparent;}
 textarea:focus, input:focus{
   outline: none;
