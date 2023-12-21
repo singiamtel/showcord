@@ -241,9 +241,7 @@ export default function PS_contextProvider(props: any) {
     // TODO: Unclear if this should be here
         const init = async () => {
             await loadCustomColors();
-            console.log('loaded custom colors');
             client.events.addEventListener('login', (username) => {
-                console.log('logged in as', username);
                 setUser((username as CustomEvent).detail);
                 setAvatar(client.settings.getAvatar());
             });

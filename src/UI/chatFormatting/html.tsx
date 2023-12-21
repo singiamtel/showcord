@@ -7,19 +7,12 @@ import parse, { domToReact } from 'html-react-parser';
 import { useContext } from 'react';
 import sanitizeHtml from 'sanitize-html-react';
 import { escape } from 'html-escaper';
-import { Icons, Sprites } from '@pkmn/img';
+import { Icons } from '@pkmn/img';
 import { Username } from '../components/Username';
-import innerText from 'react-innertext';
 
 export default function HTML(
     { message, raw }: { message: string; raw?: boolean },
 ) {
-    // console.log("HTMLmessage", message);
-    // console.log("HTMLsanitized", sanitizeHtml(message, sanitizeOptions));
-    // console.log(
-    //   "HTMLparsed",
-    //   parse(sanitizeHtml(message, sanitizeOptions), parserOptions),
-    // );
     const { client, selectedPage } = useContext(PS_context);
     const parserOptions = {
         replace: (domNode: any) => {
@@ -63,21 +56,25 @@ export default function HTML(
             if (domNode.name === 'psicon') {
                 const pokemon = Icons.getPokemon(attribs.pokemon);
                 return (
-                    <span
-                        style={{
-                            background:
-                `transparent url("${pokemon.url}") no-repeat scroll ${pokemon.left}px ${pokemon.top}px`,
-                            width: '40px',
-                            height: '30px',
-                            border: 0,
-                            display: 'inline-block',
-                            imageRendering: 'pixelated',
-                        }}
-                    />
+                    <span>
+                        <span
+                            style={{
+                                background:
+                  `transparent url("${pokemon.url}") no-repeat scroll ${pokemon.left}px ${pokemon.top}px`,
+                                width: '40px',
+                                height: '30px',
+                                border: 0,
+                                display: 'inline-block',
+                                imageRendering: 'pixelated',
+                                verticalAlign: '-7px',
+                            }}
+                        >
+                        </span>
+                        {domToReact(children, parserOptions)}
+                    </span>
                 );
             }
             if (domNode.name === 'username') {
-                console.log('domNode', domNode);
                 return <Username bold user={' ' + domNode.children[0].data} />;
             }
         },

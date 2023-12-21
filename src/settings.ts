@@ -35,7 +35,6 @@ export class Settings {
         }
         const settings = JSON.parse(settingsRaw);
         if (settings && settings.userDefinedSettings) {
-            console.log('before loaded settings', this.userDefinedSettings);
             this.rooms = settings.rooms;
             this.username = settings.username;
             // User defined settings
@@ -54,8 +53,6 @@ export class Settings {
                     ) => new RegExp(w, 'i'));
                 }
             }
-            console.log('loaded settings', JSON.stringify(this.userDefinedSettings));
-            console.log('loaded settings', this.userDefinedSettings);
         }
     }
 

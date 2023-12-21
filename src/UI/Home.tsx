@@ -122,7 +122,6 @@ function RoomList({ className }: { className?: string }) {
 
     const onSubmit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        console.log('submit');
 
         if (!client) return;
         client.join(input);
@@ -143,7 +142,6 @@ function RoomList({ className }: { className?: string }) {
             }
         }
         if ((e.key === 'Tab' && e.shiftKey) || e.key === 'ArrowLeft') {
-            console.log(formRef.current?.textContent);
             if (!formRef.current?.textContent) {
                 setRoom(-1);
                 e.preventDefault();

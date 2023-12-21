@@ -953,7 +953,6 @@ export class Client {
         }
         const splitted_message = message.split(' ');
         const cmd = splitted_message[0].slice(1);
-        console.log('__parse cmd', cmd);
         switch (cmd) {
             case 'highlight':
             case 'hl': {
