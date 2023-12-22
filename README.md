@@ -10,7 +10,7 @@ Custom client for [Pokémon Showdown](play.pokemonshowdown.com) built in React.j
 The client should always be:
 
 - Simple and easy to use
-- Safe (never manage any credentials, or put your account at risk)
+- Safe (it will never manage any credentials, or put your account at risk)
 - Compliant with Showdown's policies
 
 
