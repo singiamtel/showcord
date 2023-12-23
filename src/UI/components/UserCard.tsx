@@ -68,7 +68,7 @@ export default function UserCard(
                                 {name}
                             </a>
                         </strong>
-                        <div className="text-xs text-gray-100">
+                        <div className="text-xs dark:text-gray-100">
                             {parseStatus(user?.status)}
                         </div>
                     </div>
