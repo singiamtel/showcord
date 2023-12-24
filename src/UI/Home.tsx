@@ -278,10 +278,10 @@ export default function Home(props: HTMLAttributes<'div'>) {
                 props.className,
             )}
         >
+            <News className="col-span-5 row-span-1" />
+            <RoomList className="col-span-3 row-span-2" />
             <TargetFaceWelcome className="col-span-3 row-span-1" />
             <SocialLinks className="col-span-2 row-span-1" />
-            <RoomList className="col-span-3 row-span-2" />
-            <News className="col-span-5 row-span-1" />
         </div>
     );
 }
