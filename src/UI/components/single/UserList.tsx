@@ -1,7 +1,7 @@
 import { PS_context } from './PS_context';
 import { MouseEvent, useContext, useEffect, useState } from 'react';
 import { Username } from '../Username';
-import { User } from '../../../client/user';
+import { isStaff, User } from '../../../client/user';
 
 export default function UserList({
     clickUsername,
@@ -43,7 +43,7 @@ export default function UserList({
                 <div key={index}>
                     <Username
                         user={user.name}
-                        bold={user.name[0] !== ' '}
+                        bold={isStaff(user.name)}
                         alignRight
                         onClick={(e) => clickUsername(e)}
                         idle={user.status === '!'}

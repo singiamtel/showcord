@@ -1,23 +1,8 @@
 import { Message } from './message';
-import { User } from './user';
+import { rankOrder, RankSymbol, User } from './user';
 
 export const roomTypes = ['chat', 'battle', 'pm', 'permanent'] as const;
 export type RoomType = typeof roomTypes[number];
-
-export const rankOrder = {
-    '&': 9,
-    '#': 8,
-    '\u00a7': 7,
-    '@': 6,
-    '%': 5,
-    '*': 4,
-    '+': 3,
-    '^': 2,
-    ' ': 1,
-    '‽': 0,
-} as const;
-
-type RankSymbol = keyof typeof rankOrder;
 
 export class Room {
     type: RoomType;
@@ -157,7 +142,7 @@ export class Room {
         if (rankOrder[aSymbol] !== rankOrder[bSymbol]) {
             return rankOrder[bSymbol] - rankOrder[aSymbol];
         }
-        return a.name.localeCompare(b.name, 'en', { sensitivity: 'base' });
+        return a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }); // TODO: This fucks up custom ranks, like emojis made with /forcepromote
     };
 
     addUser(user: User) {
