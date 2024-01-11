@@ -17,6 +17,8 @@ export const rankOrder = {
     '‽': 0,
 } as const;
 
+type RankSymbol = keyof typeof rankOrder;
+
 export class Room {
     type: RoomType;
     ID: string;
@@ -150,8 +152,8 @@ export class Room {
 
     private rankSorter = (a: User, b: User) => {
     // the symbols should go first, then the spaces, then the interrobangs
-        const aSymbol = a.name.charAt(0) as keyof typeof rankOrder;
-        const bSymbol = b.name.charAt(0) as keyof typeof rankOrder;
+        const aSymbol = a.name.charAt(0) as RankSymbol;
+        const bSymbol = b.name.charAt(0) as RankSymbol;
         if (rankOrder[aSymbol] !== rankOrder[bSymbol]) {
             return rankOrder[bSymbol] - rankOrder[aSymbol];
         }
