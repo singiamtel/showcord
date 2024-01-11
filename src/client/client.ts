@@ -765,30 +765,6 @@ export class Client {
                     );
                 }
                 break;
-            case 'uhtmlchange':
-                {
-                    const room = this.room(roomID);
-                    if (!room) {
-                        console.error(
-                            'Received |uhtmlchange| from untracked room',
-                            roomID,
-                        );
-                        break;
-                    }
-                    room.changeUHTML(
-                        newMessage({
-                            name: args[0],
-                            user: '',
-                            type: 'raw',
-                            content: args.slice(1).join('|'),
-                        }),
-                    );
-
-                    this.events.dispatchEvent(
-                        new CustomEvent('message', { detail: message }),
-                    );
-                }
-                break;
             case 'raw': {
                 this.addMessageToRoom(
                     roomID,
@@ -836,6 +812,7 @@ export class Client {
         const { content, type, UHTMLName } = this.parseCMessageContent(
             tmpcontent.join('|'),
         );
+
         if (type === 'uhtmlchange') {
             const roomObj = this.room(room);
             if (!roomObj) {
@@ -852,6 +829,9 @@ export class Client {
                     type: 'raw',
                     content,
                 }),
+            );
+            this.events.dispatchEvent(
+                new CustomEvent('message', { detail: message }),
             );
 
             return;
