@@ -4,13 +4,11 @@ import ToastProvider from './components/single/ToastProvider';
 import PS_contextProvider from './components/single/PS_context';
 import { useState } from 'react';
 
-export default function Home() {
+export default function App() {
     const [darkMode, setDarkMode] = useState(window.matchMedia('(prefers-color-scheme: dark)').matches);
     function toggleDarkMode() {
         setDarkMode(!darkMode);
     }
-
-
     return (
         <div className={`${darkMode ? 'dark' : ''}`}>
             <PS_contextProvider>
