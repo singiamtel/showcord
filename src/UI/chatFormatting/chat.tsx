@@ -156,7 +156,7 @@ export function greentext(
     return (
         <Linkify
             as="span"
-            className="text-green-400"
+            className="text-green-400-light dark:text-green-400"
             {...props}
             key={key}
             options={options}
