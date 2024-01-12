@@ -6,6 +6,7 @@ import {
     useContext,
     useEffect,
     useLayoutEffect,
+    useRef,
 } from 'react';
 import { PS_context } from './PS_context';
 import useOnScreen from '../../hooks/useOnScreen';
@@ -210,10 +211,14 @@ export default function Chat({
     const { messages, selectedPage } = useContext(PS_context);
     const messagesEndRef = createRef<HTMLDivElement>();
     const isIntersecting = useOnScreen(messagesEndRef);
+    const ref = useRef<HTMLDivElement>(null);
 
     const scrollToBottom = useCallback(() => {
-        messagesEndRef.current!.scrollIntoView({ behavior: 'auto' });
-    }, [messagesEndRef]);
+        if (ref.current) {
+            const elHeight = ref.current.offsetHeight / 2;
+            ref.current.scrollTop = ref.current.scrollHeight - elHeight;
+        }
+    }, [ref.current]);
 
     useLayoutEffect(() => {
         if (isIntersecting) {
@@ -221,12 +226,19 @@ export default function Chat({
         }
     }, [messages]);
 
+    useLayoutEffect(() => {
+        scrollToBottom();
+    }, [ref.current, selectedPage]);
+
     useEffect(() => {
         setUser(null);
     }, [selectedPage]);
 
     return (
-        <div className="p-5 flex flex-col overflow-auto overflow-x-hidden break-words overflow-y-scroll h-full relative ">
+        <div
+            className="p-5 flex flex-col overflow-auto overflow-x-hidden break-words overflow-y-scroll h-full relative "
+            ref={ref}
+        >
             {username ?
                 (
                     <UserCard
@@ -302,7 +314,7 @@ export function MessageComponent(
     if (type === 'simple') {
         return message ?
             (
-                <div >
+                <div>
                     {' ' + message}
                 </div>
             ) :
@@ -333,7 +345,10 @@ export function MessageComponent(
         );
     }
     return (
-        <div className={'pt-0.5 ' + (hld ? 'bg-yellow-hl-body-light dark:bg-yellow-hl-body' : '')}>
+        <div
+            className={'pt-0.5 ' +
+        (hld ? 'bg-yellow-hl-body-light dark:bg-yellow-hl-body' : '')}
+        >
             <span className="text-gray-125 text-xs">
                 {time ? HHMMSS(time) : ''}
             </span>
