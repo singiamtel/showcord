@@ -21,7 +21,7 @@ export default function UserPanel() {
                                     src={avatar ?
                                         Sprites.getAvatar(avatar) :
                                         Sprites.getAvatar(167)}
-                                    className="w-10 h-10"
+                                    className="w-10 h-10 m-auto scale-[1.2]"
                                 />
                             </div>
                             <div className="flex flex-col justify-center">
