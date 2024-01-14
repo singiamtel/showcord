@@ -551,7 +551,7 @@ export class Client {
                     users.shift();
                     continue;
                 }
-                if (splitted_message[i].startsWith('|:|')) {
+                if (splitted_message[i].startsWith('|:|') || splitted_message[i].startsWith('|t:|')) {
                     if (!roomTypes.includes(type as RoomType)) {
                         console.error('Unknown room type', type);
                     }
