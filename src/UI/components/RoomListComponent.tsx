@@ -6,6 +6,7 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUser } from '@fortawesome/free-solid-svg-icons';
 import { notificationsEngine } from '../../client/notifications';
 import { AiOutlineClose } from 'react-icons/ai';
+import { GiBattleAxe } from 'react-icons/gi';
 
 export function RoomListComponent(
     { name, ID, notifications: { unread, mentions }, type }: {
@@ -45,8 +46,10 @@ export function RoomListComponent(
                     }}
                 >
                     {type === 'pm' ?
-                        <FontAwesomeIcon icon={faUser} height={16} width={16} /> :
-                        <HashtagIcon height={16} width={16} />}
+                        <FontAwesomeIcon icon={faUser} height={16} width={16} /> : type === 'battle' ?
+                            <GiBattleAxe height={16} width={16} /> :
+                            <HashtagIcon height={16} width={16} />
+                    }
                     <span className="text-left ml-2 max-w-full truncate">
                         <span className="truncate max-w-full">{name}</span>
                         {(unread > 0 && type !== 'pm') && (
