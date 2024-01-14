@@ -54,7 +54,7 @@ export default function HTML(
             }
 
             if (domNode.name === 'psicon') {
-                const pokemon = Icons.getPokemon(attribs.pokemon);
+                const pokemon = Icons.getPokemon(attribs.pokemon, { protocol: 'https', domain: 'home.showcord.com' });
                 return (
                     <span>
                         <span
