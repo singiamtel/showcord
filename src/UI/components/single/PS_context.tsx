@@ -8,6 +8,7 @@ import { createContext, useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 export const client = new Client();
+window.client = client;
 
 export const PS_context = createContext<
 {
