@@ -2,7 +2,7 @@ import axios from 'axios';
 import { toID } from '../utils/generic';
 
 // Author: Felucia
-function userColorHash(name) {
+function __userColorHash(name) {
     let MD5 = function (f) {
         function i(b, c) {
             var d, e, f, g, h;
@@ -624,6 +624,14 @@ export async function loadCustomColors() {
     } catch (e) {
         console.error('Couldn\'t fetch custom colours:', e);
     }
+}
+
+const cache = {};
+function userColorHash(name) {
+    if (cache[name]) return cache[name];
+    const color = __userColorHash(name);
+    cache[name] = color;
+    return color;
 }
 
 export function userColor(name) {
