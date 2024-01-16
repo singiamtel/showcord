@@ -9,8 +9,9 @@ export default function App() {
     function toggleDarkMode() {
         setDarkMode(!darkMode);
     }
+    window.toggleDarkMode = toggleDarkMode;
     return (
-        <div className={`${darkMode ? 'dark' : ''}`}>
+        <div className={`${darkMode ? 'dark' : 'dark'}`}>
             <PS_contextProvider>
                 <ToastProvider>
                     <div

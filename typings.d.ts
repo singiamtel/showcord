@@ -6,5 +6,6 @@ declare module 'namecolour';
 declare global {
     interface Window {
         client: Client;
+        toggleDarkMode: () => void;
     }
 }
