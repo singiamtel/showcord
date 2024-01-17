@@ -11,7 +11,7 @@ export default function App() {
     }
     window.toggleDarkMode = toggleDarkMode;
     return (
-        <div className={`${darkMode ? 'dark' : 'dark'}`}>
+        <div className={`${darkMode ? 'dark' : ''}`}>
             <PS_contextProvider>
                 <ToastProvider>
                     <div
