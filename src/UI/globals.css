@@ -121,3 +121,7 @@ table td, table th {
   margin: 5px;
 
 }
+
+span{
+  line-height: 1.3;
+}

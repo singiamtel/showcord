@@ -254,7 +254,7 @@ export default function Chat({
                 <ErrorBoundary
                     key={index}
                     fallbackRender={({ error: e }) => {
-                        console.error('Error', e.name, message.content);
+                        console.error(e.name, message.content, e);
                         return <div className="text-red-400">Error displaying message</div>;
                     }}
                 >

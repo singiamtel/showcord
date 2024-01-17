@@ -3,12 +3,13 @@
 
 import { PS_context } from '../components/single/PS_context';
 import manageURL from '../../utils/manageURL';
-import parse, { domToReact } from 'html-react-parser';
+import parse, { attributesToProps, domToReact } from 'html-react-parser';
 import { useContext } from 'react';
 import sanitizeHtml from 'sanitize-html-react';
 import { escape } from 'html-escaper';
 import { Icons } from '@pkmn/img';
 import { Username } from '../components/Username';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 
 export default function HTML(
     { message, raw }: { message: string; raw?: boolean },
@@ -76,6 +77,14 @@ export default function HTML(
             }
             if (domNode.name === 'username') {
                 return <Username bold user={' ' + domNode.children[0].data} />;
+            }
+            // Parse fa icons into react components
+            if (domNode.name === 'i' && attribs.class) {
+                const classes = attribs.class.split(' ');
+                const fa = classes.find((e:string) => e.startsWith('fa-'));
+                if (fa) {
+                    return <FontAwesomeIcon icon={fa} style={{ padding: '0 0.25rem' }} />;
+                }
             }
         },
     };
