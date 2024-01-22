@@ -27,14 +27,14 @@ export class Room {
             name: string;
             type: RoomType;
             connected: boolean;
-            open?: boolean;
+            open: boolean;
         },
     ) {
         this.ID = ID;
         this.name = name;
         this.type = type;
         this.connected = connected;
-        this.open = open || true;
+        this.open = open;
     }
 
     historyPrev() {

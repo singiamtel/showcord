@@ -3,10 +3,16 @@ import { client, PS_context } from './single/PS_context';
 import HashtagIcon from '../assets/hashtag';
 import Circle from './circle';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faUser } from '@fortawesome/free-solid-svg-icons';
+import { faCog, faHome, faUser } from '@fortawesome/free-solid-svg-icons';
 import { notificationsEngine } from '../../client/notifications';
 import { AiOutlineClose } from 'react-icons/ai';
 import { GiBattleAxe } from 'react-icons/gi';
+
+const customIcons = {
+    'home': <FontAwesomeIcon icon={faHome} height={16} width={16} />,
+    'settings': <FontAwesomeIcon icon={faCog} height={16} width={16} />,
+};
+
 
 export function RoomListComponent(
     { name, ID, notifications: { unread, mentions }, type }: {
@@ -17,6 +23,12 @@ export function RoomListComponent(
     },
 ) {
     const { setRoom, selectedPage: room } = useContext(PS_context);
+    const customIcon = customIcons[ID as keyof typeof customIcons];
+    const icon = customIcon ? customIcon : type === 'battle' ?
+        <GiBattleAxe height={16} width={16} /> :
+        type === 'pm' ?
+            <FontAwesomeIcon icon={faUser} height={16} width={16} /> :
+            <HashtagIcon height={16} width={16} />;
 
     return (
         <div
@@ -45,11 +57,7 @@ export function RoomListComponent(
                         setRoom(ID);
                     }}
                 >
-                    {type === 'pm' ?
-                        <FontAwesomeIcon icon={faUser} height={16} width={16} /> : type === 'battle' ?
-                            <GiBattleAxe height={16} width={16} /> :
-                            <HashtagIcon height={16} width={16} />
-                    }
+                    {icon}
                     <span className="text-left ml-2 max-w-full truncate">
                         <span className="truncate max-w-full">{name}</span>
                         {(unread > 0 && type !== 'pm') && (

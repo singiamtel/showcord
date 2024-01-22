@@ -31,7 +31,6 @@ export class Client {
     private joinAfterLogin: string[] = [];
     private challstr: string = '';
     private client_id = import.meta.env.VITE_OAUTH_CLIENTID;
-    private cleanUsername: string = ''; // For highlighting
     private selectedRoom: string = ''; // Used for notifications
     // Callbacks given to query commands, it's called after the server responds back with the info
     private userListener: ((json: any) => any) | undefined;
@@ -107,7 +106,7 @@ export class Client {
     /** Returns an array of all rooms
     */
     getRooms() {
-        return [...this.rooms.values()];
+        return [...this.rooms.values()].filter((r) => r.open);
     }
 
     createPM(user: string) {
@@ -129,6 +128,7 @@ export class Client {
             name: user,
             type: 'pm',
             connected: false,
+            open: true,
         });
         this._addRoom(newRoom);
     }
@@ -258,6 +258,11 @@ export class Client {
             unread: room.unread,
         }));
     }
+
+    openSettings() {
+        this._openRoom('settings');
+    }
+
 
     // --- Login ---
 
@@ -417,10 +422,21 @@ export class Client {
     // --- Room management ---
     private _addRoom(room: Room) {
         this.rooms.set(room.ID, room);
-        const eventio = new CustomEvent('room', { detail: room });
-        this.events.dispatchEvent(eventio);
+        this.events.dispatchEvent(new CustomEvent('room', { detail: room }));
         this.settings.addRoom(room);
     }
+
+    private _openRoom(roomID: string) {
+        const room = this.room(roomID);
+        if (room) {
+            room.open = true;
+            this.events.dispatchEvent(new CustomEvent('room', { detail: room }));
+            this.settings.changeRooms(this.rooms);
+            return;
+        }
+        console.warn('openRoom: room (' + roomID + ') is unknown');
+    }
+
 
     private _removeRoom(roomID: string) {
         this.rooms.delete(roomID);
@@ -571,6 +587,7 @@ export class Client {
                         name: name,
                         type: type as RoomType,
                         connected: true,
+                        open: true,
                     });
                     this._addRoom(room);
                     this.addUsers(roomID, users);
@@ -932,13 +949,14 @@ export class Client {
 
     private __createPermanentRooms() {
         this.permanentRooms.forEach((room) => {
-            if (!room.defaultOpen) return;
+            // if (!room.defaultOpen) return;
             this._addRoom(
                 new Room({
                     ID: room.ID,
                     name: room.name,
                     type: 'permanent',
                     connected: false,
+                    open: room.defaultOpen,
                 }),
             );
         });
@@ -1048,21 +1066,11 @@ export class Client {
                     this.autoSelectRoom = toID(args.join(''));
                 }
                 return false;
-            case 'status':
-                this.settings.setStatus(splitted_message.slice(1).join(' '));
-                return false;
+            // case 'status':
+                // this.settings.setStatus(splitted_message.slice(1).join(' '));
+                // return false;
             default:
                 return false;
-        // /highlight add [word 1], [word 2], [...] - Add the provided list of words to your highlight list.
-        // /highlight roomadd [word 1], [word 2], [...] - Add the provided list of words to the highlight list of whichever room you used the command in.
-        // /highlight list - List all words that currently highlight you.
-        // /highlight roomlist - List all words that currently highlight you in whichever room you used the command in.
-        // /highlight delete [word 1], [word 2], [...] - Delete the provided list of words from your entire highlight list.
-        // /highlight roomdelete [word 1], [word 2], [...] - Delete the provided list of words from the highlight list of whichever room you used the command in.
-        // /highlight clear - Clear your global highlight list.
-        // /highlight roomclear - Clear the highlight list of whichever room you used the command in.
-        // /highlight clearall - Clear your entire highlight list (all rooms and globally).
-        // Don't send to server
         }
     }
 }
