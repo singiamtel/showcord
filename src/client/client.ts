@@ -140,6 +140,7 @@ export class Client {
         this.settings.changeRooms(this.rooms);
     }
 
+
     async queryUser(user: string, callback: (json: any) => void) {
         if (!this.socket) {
             throw new Error('Getting user before socket initialization ' + user);
@@ -152,6 +153,15 @@ export class Client {
         }
         this.__send(`/cmd userdetails ${user}`, false);
         this.userListener = callback;
+    }
+
+    private async queryUserInternal(user: string) {
+        this.queryUser(user, (_json) => {
+            // This is risky as we could be logged in but not get a queryResponse for some reason
+            this.events.dispatchEvent(
+                new CustomEvent('login', { detail: this.settings.getUsername() }),
+            );
+        });
     }
 
     async queryRooms(callback: (json: any) => void) {
@@ -507,9 +517,6 @@ export class Client {
         this.rooms.forEach(async (room) => {
             room.runHighlight(this.forceHighlightMsg.bind(this));
         });
-        this.events.dispatchEvent(
-            new CustomEvent('login', { detail: this.settings.getUsername() }),
-        );
     }
 
     // --- Commands parser ---
@@ -683,10 +690,16 @@ export class Client {
                 if (args[0] === 'userdetails') {
                     try {
                         const tmpjson = JSON.parse(args.slice(1).join('|'));
+                        if (tmpjson.userid === toID(this.settings.getUsername())) {
+                            if (tmpjson.status) {
+                                this.settings.setStatus(tmpjson.status);
+                            }
+                        }
+
                         if (this.userListener) {
                             this.userListener(tmpjson);
                             this.userListener = undefined;
-                        } else {
+                        } else if (this.loggedIn) {
                             console.warn(
                                 'received queryresponse|userdetails but nobody asked for it',
                                 args,
@@ -730,9 +743,10 @@ export class Client {
                 {
                     if (!args[0].trim().toLowerCase().startsWith('guest')) {
                         this.autojoin(this.joinAfterLogin);
-                        this.loggedIn = true;
+                        // this.loggedIn = true;
                         this.settings.updateUsername(args[0], args[2]);
                         this.setUsername(args[0]);
+                        this.queryUserInternal(args[0]);
                     }
                 }
                 break;
