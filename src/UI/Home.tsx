@@ -248,6 +248,8 @@ function SocialLinks({ className }: { className?: string }) {
                 />
                 <span>
                     <p>
+              All of our code is open source and available on GitHub. Contribute,
+              explore, and help us evolve!
                     </p>
                 </span>
             </SocialLink>
