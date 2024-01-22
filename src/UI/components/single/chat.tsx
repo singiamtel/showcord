@@ -300,7 +300,7 @@ export function MessageComponent(
         user: string;
         type: string;
         time?: Date;
-        hld?: boolean;
+        hld?: boolean | null;
         prev?: Message;
         onNameClick?: (e: MouseEvent) => void;
     },
