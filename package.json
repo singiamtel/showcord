@@ -6,7 +6,8 @@
     "build": "tsc && vite build && cp sitemap.txt dist/ && cp robots.txt dist/",
     "serve": "vite preview",
     "lint": "eslint --ext .js,.jsx,.ts,.tsx src/",
-    "lint:fix": "eslint src/ --ext .js,.jsx,.ts,.tsx --fix"
+    "lint:fix": "eslint src/ --ext .js,.jsx,.ts,.tsx --fix",
+    "test": "vitest"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.0.8",
@@ -50,7 +51,8 @@
     "typescript": "^4.9.5",
     "vite": "^4.4.11",
     "vite-plugin-svgr": "^4.1.0",
-    "vite-tsconfig-paths": "^4.2.1"
+    "vite-tsconfig-paths": "^4.2.1",
+    "vitest": "^1.2.1"
   },
   "devDependencies": {
     "@svgr/webpack": "^8.1.0",

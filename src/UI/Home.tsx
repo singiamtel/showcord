@@ -200,6 +200,19 @@ function RoomList({ className }: { className?: string }) {
     );
 }
 
+function SocialLink({ id, href, children }: { id: string, href?: string, children: any }) {
+    return (
+        <a
+            id={id}
+            className="max-h-full min-h-0 flex items-center gap-2 w-full p-8 rounded-lg hover:bg-gray-601 dark:hover:bg-gray-700 cursor-pointer text-black visited:text-black dark:text-white dark:hover:text-white dark:visited:text-white overflow-ellipsis "
+            target="_blank"
+            href={href}
+        >
+            {children}
+        </a>
+    );
+}
+
 function SocialLinks({ className }: { className?: string }) {
     return (
         <div
@@ -208,10 +221,8 @@ function SocialLinks({ className }: { className?: string }) {
                 className,
             )}
         >
-            <a
+            <SocialLink
                 id="discord"
-                className="max-h-full min-h-0 flex items-center gap-2 w-full p-8 rounded-lg hover:bg-gray-601 dark:hover:bg-gray-700 cursor-pointer visited:text-black dark:text-white dark:hover:text-white dark:visited:text-white"
-                target="_blank"
                 href="https://discord.gg/kxNdKdWxW2"
             >
                 <img
@@ -220,17 +231,13 @@ function SocialLinks({ className }: { className?: string }) {
                     height="50"
                     width="50"
                 />
-                <span>
-                    <p>
+                <p className="text-center ">
             Found a bug or want to give us feedback? Join our Discord
-            community to share your thoughts and help us improve!
-                    </p>
-                </span>
-            </a>
-            <a
+            community to share your thoughts!
+                </p>
+            </SocialLink>
+            <SocialLink
                 id="github"
-                className="max-h-full min-h-0 flex items-center gap-2 w-full p-8 rounded-lg hover:bg-gray-601 dark:hover:bg-gray-700 cursor-pointer visited:text-black dark:text-white dark:hover:text-white dark:visited:text-white"
-                target="_blank"
                 href="https://github.com/singiamtel/Showcord"
             >
                 <img
@@ -241,15 +248,11 @@ function SocialLinks({ className }: { className?: string }) {
                 />
                 <span>
                     <p>
-            All of our code is open source and available on GitHub. Contribute,
-            explore, and help us evolve!
                     </p>
                 </span>
-            </a>
-            <a
+            </SocialLink>
+            <SocialLink
                 id="FAQ"
-                className="max-h-full min-h-0 flex items-center gap-2 w-full p-8 rounded-lg hover:bg-gray-601 dark:hover:bg-gray-700 cursor-pointer text-black visited:text-black dark:text-white dark:hover:text-white dark:visited:text-white"
-                target="_blank"
                 // href="https://github.com/singiamtel/Showcord"
             >
                 <img
@@ -263,7 +266,7 @@ function SocialLinks({ className }: { className?: string }) {
             Frequently asked questions
                     </p>
                 </span>
-            </a>
+            </SocialLink>
             <div id="links">
             </div>
         </div>

@@ -12,6 +12,4 @@ export default function manageURL(evt:MouseEvent<HTMLAnchorElement>) {
         evt.preventDefault();
         return;
     }
-    // console.log("this will open in new tab");
-    // window.open((evt.target as HTMLAnchorElement).href, "_blank");
 }

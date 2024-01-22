@@ -9,7 +9,7 @@ export function clamp(n: number, min: number, max: number) {
     return Math.min(Math.max(n, min), max);
 }
 
-export function cleanRegex(regex: RegExp) { // Convert regex to string
+export function regex2str(regex: RegExp) { // Convert regex to string
     return regex.toString().slice(1, -2);
 }
 

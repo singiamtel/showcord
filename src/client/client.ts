@@ -1,14 +1,20 @@
-import { Settings } from '../settings';
-import { cleanRegex, toID } from '../utils/generic';
+import { Settings } from './settings';
+import { regex2str, toID } from '../utils/generic';
 import newMessage, { Message } from './message';
 import { Room, RoomType, roomTypes } from './room';
 import { User } from './user';
 import { clientNotification, RoomNotification } from './notifications';
 
+type ClientConstructor = {
+    server_url?: string;
+    loginserver_url?: string;
+    autoLogin?: boolean;
+};
+
 export class Client {
-    private readonly server_url: string =
+    private server_url: string =
         'wss://sim3.psim.us/showdown/websocket/';
-    private readonly loginserver_url: string =
+    private loginserver_url: string =
         'https://play.pokemonshowdown.com/api/';
     private readonly newsURL = 'https://pokemonshowdown.com/news.json';
 
@@ -17,9 +23,9 @@ export class Client {
 
     private rooms: Map<string, Room> = new Map();
     events: EventTarget = new EventTarget();
-    private username: string = '';
     private autoSelectRoom: string = '';
     private loggedIn: boolean = false;
+    private shouldAutoLogin: boolean = true;
     private onOpen: (() => void)[] = []; // Append callbacks here to run when the socket opens
 
     private joinAfterLogin: string[] = [];
@@ -43,7 +49,10 @@ export class Client {
     private news: any = undefined; // Cached news
     private lastQueriedUser: { user: string; json: any } | undefined; // Cached user query
 
-    constructor() {
+    constructor(options?: ClientConstructor) {
+        if (options?.server_url) this.server_url = options.server_url;
+        if (options?.loginserver_url) this.loginserver_url = options.loginserver_url;
+        if (options?.autoLogin) this.shouldAutoLogin = options.autoLogin;
         this.__createPermanentRooms();
         this.socket = new WebSocket(this.server_url);
         this.__setupSocketListeners();
@@ -92,10 +101,11 @@ export class Client {
     }
 
     room(roomID: string) {
-    // rooms is a map
         return this.rooms.get(roomID);
     }
 
+    /** Returns an array of all rooms
+    */
     getRooms() {
         return [...this.rooms.values()];
     }
@@ -221,19 +231,7 @@ export class Client {
     }
 
     private highlightMsg(roomid: string, message: string) {
-        if (
-            this.cleanUsername &&
-      (message.includes(this.cleanUsername) ||
-        message.includes(toID(this.username)))
-        ) {
-            return true;
-        }
-        if (
-            this.settings.highlightMsg(roomid, message)
-        ) {
-            return true;
-        }
-        return false;
+        return this.settings.highlightMsg(roomid, message);
     }
 
     getNotifications(): RoomNotification[] {
@@ -338,7 +336,7 @@ export class Client {
     private async send_assertion(assertion: string) {
         const username = assertion.split(',')[1];
 
-        const storedName = this.settings.getUserName();
+        const storedName = this.settings.getUsername();
         this.__send(
             `/trn ${
                 toID(storedName) === toID(username) ? storedName : username
@@ -421,7 +419,7 @@ export class Client {
     ) {
         const room = this.room(roomID);
         if (
-            toID(message.user) !== toID(this.username) &&
+            toID(message.user) !== toID(this.settings.getUsername()) &&
       this.highlightMsg(roomID, message.content)
         ) {
             message.hld = true;
@@ -432,7 +430,7 @@ export class Client {
         if (room) {
             const settings = {
                 selected: this.selectedRoom === roomID,
-                selfSent: toID(this.username) === toID(message.user),
+                selfSent: toID(this.settings.getUsername()) === toID(message.user),
             };
             let shouldNotify = false;
             if (message.name) {
@@ -498,13 +496,13 @@ export class Client {
 
     private setUsername(username: string) {
     // gotta re-run highlightMsg on all messages
-        this.username = username;
+        this.settings.setUsername(username);
         this.cleanUsername = username.replace(/[\u{0080}-\u{FFFF}]/gu, '').trim();
         this.rooms.forEach(async (room) => {
             room.runHighlight(this.highlightMsg.bind(this));
         });
         this.events.dispatchEvent(
-            new CustomEvent('login', { detail: this.username }),
+            new CustomEvent('login', { detail: this.settings.getUsername() }),
         );
     }
 
@@ -620,7 +618,7 @@ export class Client {
                 {
                     const sender = toID(args[0]);
                     const receiver = toID(args[1]);
-                    if (sender === toID(this.username)) {
+                    if (sender === toID(this.settings.getUsername())) {
                         // sent message
                         roomID = `pm-${receiver}`;
                     } else {
@@ -631,7 +629,7 @@ export class Client {
                         args.slice(2).join('|'),
                     );
                     this.__createPM(
-                        sender === toID(this.username) ? args[1] : args[0],
+                        sender === toID(this.settings.getUsername()) ? args[1] : args[0],
                     );
                     this.addMessageToRoom(
                         roomID,
@@ -792,7 +790,7 @@ export class Client {
                 }
                 break;
             default:
-                console.error('Unknown cmd: ' + cmd);
+                console.error('Unknown cmd: ' + cmd, message.slice(0, 100));
         }
     }
 
@@ -895,7 +893,9 @@ export class Client {
             for (const cb of this.onOpen) {
                 cb();
             }
-            this.tryLogin();
+            if (this.shouldAutoLogin) {
+                this.tryLogin();
+            }
         };
         this.socket.onmessage = (event) => {
             console.log('<<', event.data);
@@ -978,9 +978,7 @@ export class Client {
                     case 'list':
                     case 'roomlist':
                         {
-                            const words = this.settings.userDefinedSettings.highlightWords[
-                                subcmd === 'list' ? 'global' : this.selectedRoom
-                            ]?.map((e) => cleanRegex(e));
+                            const words = this.settings.getHighlightWords(subcmd === 'list' ? 'global' : this.selectedRoom);
 
                             this.addMessageToRoom(
                                 this.selectedRoom,
@@ -1029,6 +1027,9 @@ export class Client {
                     }
                     this.autoSelectRoom = toID(args.join(''));
                 }
+                return false;
+            case 'status':
+                this.settings.setStatus(splitted_message.slice(1).join(' '));
                 return false;
             default:
                 return false;

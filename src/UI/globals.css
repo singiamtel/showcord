@@ -3,18 +3,18 @@
 @tailwind utilities;
 
 @layer utilities {
-  @responsive {
-    hide scrollbar for chrome, safari and opera 
+  /* @responsive { */
+    /* hide scrollbar for chrome, safari and opera  */
     .no-scrollbar::-webkit-scrollbar {
       display: none;
     }
 
-    hide scrollbar for ie, edge and firefox 
+    /* hide scrollbar for ie, edge and firefox  */
     .no-scrollbar {
       -ms-overflow-style: none; 
       scrollbar-width: none; 
     }
-  }
+  /* } */
 }
 
 html{
