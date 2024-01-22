@@ -1,4 +1,4 @@
-import { stringsToRegex } from '../utils/highlightMsg';
+import { highlightMsg, stringsToRegex } from '../utils/highlightMsg';
 import { Room } from './room';
 
 export interface UserDefinedSettings {
@@ -53,6 +53,11 @@ export class Settings {
             const userDefinedSettings = settings.userDefinedSettings;
             if (userDefinedSettings) {
                 this.userDefinedSettings = userDefinedSettings;
+            }
+            if (this.userDefinedSettings.highlightWords) {
+                for (const roomid in this.userDefinedSettings.highlightWords) {
+                    this.compileHighlightWords[roomid] = stringsToRegex([...this.userDefinedSettings.highlightWords[roomid], this.username]);
+                }
             }
         } catch (e) {
             console.error('Corrupted settings, removing...', e, settingsRaw);
@@ -110,8 +115,9 @@ export class Settings {
         return this.userDefinedSettings.highlightWords[roomid] ?? [];
     }
     setHighlightWords(roomid: string, words: string[]) {
-        this.userDefinedSettings.highlightWords[roomid] = words;
-        this.compileHighlightWords[roomid] = stringsToRegex(words);
+        this.userDefinedSettings.highlightWords[roomid] = [...new Set(words)];
+        this.compileHighlightWords[roomid] = stringsToRegex([...words, this.username]);
+        this.saveSettings();
     }
 
     removeRoom(roomid: string) {
@@ -135,7 +141,6 @@ export class Settings {
             return [];
         }
         const settings = JSON.parse(settingsRaw);
-        console.log('getSavedRooms', settings.rooms);
         return settings.rooms as {
             ID: string;
             lastReadTime: Date;
@@ -146,7 +151,8 @@ export class Settings {
         if (this.userDefinedSettings.highlightWords[roomid] === undefined) {
             this.userDefinedSettings.highlightWords[roomid] = [];
         }
-        this.userDefinedSettings.highlightWords[roomid]?.push(word);
+        // this.userDefinedSettings.highlightWords[roomid]?.push(word);
+        this.setHighlightWords(roomid, [...this.userDefinedSettings.highlightWords[roomid], word]);
         this.saveSettings();
     }
 
@@ -174,22 +180,15 @@ export class Settings {
     }
 
     highlightMsg(roomid: string, message: string) {
-    // Room highlights
-        // for (const word of this.userDefinedSettings.highlightWords[roomid] ?? []) {
-        //     if (word.test(message)) {
-        //         return true;
-        //     }
-        // }
-        //
-        // // Global highlights
-        // for (
-        //     const word of this.userDefinedSettings.highlightWords['global'] ?? []
-        // ) {
-        //     if (word.test(message)) {
-        //         return true;
-        //     }
-        // }
-        // return false;
+        if (!this.compileHighlightWords[roomid]) {
+            this.compileHighlightWords[roomid] = stringsToRegex([...this.getHighlightWords(roomid), this.username]);
+        }
+        if (highlightMsg(this.compileHighlightWords[roomid], message)) {
+            return true;
+        }
+        if (this.compileHighlightWords['global']) {
+            return highlightMsg(this.compileHighlightWords['global'], message);
+        }
         return false;
     }
 }

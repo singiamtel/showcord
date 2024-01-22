@@ -230,8 +230,15 @@ export class Client {
         );
     }
 
-    private highlightMsg(roomid: string, message: string) {
-        return this.settings.highlightMsg(roomid, message);
+    private highlightMsg(roomid: string, message: Message, force = false) {
+        if (message.hld !== null && !force) return message.hld;
+        const highlight = this.settings.highlightMsg(roomid, message.content);
+        message.hld = highlight;
+        return highlight;
+    }
+
+    private forceHighlightMsg(roomid: string, message: Message) {
+        return this.highlightMsg(roomid, message, true);
     }
 
     getNotifications(): RoomNotification[] {
@@ -420,9 +427,8 @@ export class Client {
         const room = this.room(roomID);
         if (
             toID(message.user) !== toID(this.settings.getUsername()) &&
-      this.highlightMsg(roomID, message.content)
+      this.highlightMsg(roomID, message)
         ) {
-            message.hld = true;
             this.events.dispatchEvent(
                 new CustomEvent('message', { detail: message }),
             );
@@ -491,7 +497,7 @@ export class Client {
             this.events.dispatchEvent(new CustomEvent('users', { detail: newName }));
             return;
         }
-        console.warn('updateUserName: room (' + roomID + ') is unknown');
+        console.warn('updateUsername: room (' + roomID + ') is unknown');
     }
 
     private setUsername(username: string) {
@@ -499,7 +505,7 @@ export class Client {
         this.settings.setUsername(username);
         this.cleanUsername = username.replace(/[\u{0080}-\u{FFFF}]/gu, '').trim();
         this.rooms.forEach(async (room) => {
-            room.runHighlight(this.highlightMsg.bind(this));
+            room.runHighlight(this.forceHighlightMsg.bind(this));
         });
         this.events.dispatchEvent(
             new CustomEvent('login', { detail: this.settings.getUsername() }),

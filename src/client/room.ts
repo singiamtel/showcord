@@ -168,12 +168,10 @@ export class Room {
         this.users = this.users.sort(this.rankSorter);
     }
 
-    runHighlight(callback: (roomID: string, content: string) => boolean): void {
+    runHighlight(callback: (roomID: string, content: Message) => boolean): void {
         for (const message of this.messages) {
             if (message.type === 'chat') {
-                if (callback(this.ID, message.content)) {
-                    message.hld = true;
-                }
+                callback(this.ID, message);
             }
         }
     }

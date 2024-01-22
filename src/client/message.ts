@@ -15,7 +15,8 @@ export type Message = {
     user?: string;
     timestamp?: Date;
     notify: boolean;
-    hld: boolean;
+    /** true if message is highlighted, false if not, null if not parsed yet */
+    hld: boolean | null
     name?: string; // only defined for uhtml messages
 };
 
@@ -38,7 +39,7 @@ export default function ({
         type,
         user,
         timestamp: timestamp ? new Date(Number(timestamp) * 1000) : undefined,
-        hld: hld ?? false,
+        hld: hld ?? null,
         name,
         notify: notify ?? false,
     };
