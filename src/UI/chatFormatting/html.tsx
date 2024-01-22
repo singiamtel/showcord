@@ -55,25 +55,47 @@ export default function HTML(
             }
 
             if (domNode.name === 'psicon') {
-                const pokemon = Icons.getPokemon(attribs.pokemon, { protocol: 'https', domain: 'home.showcord.com' });
-                return (
-                    <span>
-                        <span
-                            style={{
-                                background:
+                if (attribs.pokemon) {
+                    const pokemon = Icons.getPokemon(attribs.pokemon, { protocol: 'https', domain: 'home.showcord.com' });
+                    return (
+                        <span>
+                            <span
+                                style={{
+                                    background:
                   `transparent url("${pokemon.url}") no-repeat scroll ${pokemon.left}px ${pokemon.top}px`,
-                                width: '40px',
-                                height: '30px',
-                                border: 0,
-                                display: 'inline-block',
-                                imageRendering: 'pixelated',
-                                verticalAlign: '-7px',
-                            }}
-                        >
+                                    width: '40px',
+                                    height: '30px',
+                                    border: 0,
+                                    display: 'inline-block',
+                                    imageRendering: 'pixelated',
+                                    verticalAlign: '-7px',
+                                }}
+                            >
+                            </span>
+                            {domToReact(children, parserOptions)}
                         </span>
-                        {domToReact(children, parserOptions)}
-                    </span>
-                );
+                    );
+                } else if (attribs.item) {
+                    const item = Icons.getItem(attribs.item, { protocol: 'https', domain: 'home.showcord.com' });
+                    return (
+                        <span>
+                            <span
+                                style={{
+                                    background:
+                            `transparent url("${item.url}") no-repeat scroll ${item.left}px ${item.top}px`,
+                                    width: '40px',
+                                    height: '30px',
+                                    border: 0,
+                                    display: 'inline-block',
+                                    imageRendering: 'pixelated',
+                                    verticalAlign: '-7px',
+                                }}
+                            >
+                            </span>
+                            {domToReact(children, parserOptions)}
+                        </span>
+                    );
+                }
             }
             if (domNode.name === 'username') {
                 return <Username bold user={' ' + domNode.children[0].data} />;
