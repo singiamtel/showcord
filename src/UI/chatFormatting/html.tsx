@@ -83,8 +83,8 @@ export default function HTML(
                                 style={{
                                     background:
                             `transparent url("${item.url}") no-repeat scroll ${item.left}px ${item.top}px`,
-                                    width: '40px',
-                                    height: '30px',
+                                    width: '24px',
+                                    height: '24px',
                                     border: 0,
                                     display: 'inline-block',
                                     imageRendering: 'pixelated',
