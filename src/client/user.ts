@@ -15,7 +15,7 @@ export type RankSymbol = keyof typeof rankOrder;
 
 export function isStaff(username: string): boolean {
     const rank = username.charAt(0) as RankSymbol;
-    return rankOrder[rank] >= rankOrder['@'];
+    return rankOrder[rank] >= rankOrder['%'];
 }
 
 export class User {
