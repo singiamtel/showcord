@@ -1,4 +1,4 @@
-import { useContext, useEffect } from 'react';
+import { useContext } from 'react';
 import { PS_context } from './PS_context';
 import { userColor } from '../../../utils/namecolour';
 import { notificationsEngine } from '../../../client/notifications';
