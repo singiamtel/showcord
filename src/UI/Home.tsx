@@ -201,6 +201,14 @@ function RoomList({ className }: { className?: string }) {
 }
 
 function SocialLink({ id, href, children }: { id: string, href?: string, children: any }) {
+    const [matches, setMatches] = useState(
+        window.matchMedia('(min-width: 1500px)').matches
+    );
+    useEffect(() => {
+        window
+            .matchMedia('(min-width: 1500px)')
+            .addEventListener('change', e => setMatches(e.matches));
+    }, []);
     return (
         <a
             id={id}
@@ -208,7 +216,7 @@ function SocialLink({ id, href, children }: { id: string, href?: string, childre
             target="_blank"
             href={href}
         >
-            {children}
+            {matches ? children : <div className="flex justify-center items-center w-full">{children[0]}</div>}
         </a>
     );
 }
