@@ -50,7 +50,7 @@ export default function PS_contextProvider(props: any) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [updateMsgs, setUpdateMsgs] = useState<number>(0); // Used to force update on rooms change
     const [avatar, setAvatar] = useState<string | undefined>(undefined);
-    const [theme, setTheme] = useState<string>(client.settings.getTheme());
+    const [theme, setTheme] = useState<'light' | 'dark'>(client.settings.getTheme());
 
     /* --- Room handling --- */
 

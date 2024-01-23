@@ -16,7 +16,7 @@ export default defineConfig(({ command }) => {
         return {
             ...config,
             esbuild: {
-                jsxInject: 'import React from "react";',
+                // jsxInject: 'import React from "react";',
             },
         };
     } else {
