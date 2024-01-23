@@ -25,6 +25,8 @@ export type SavedSettings = {
 
 export class Settings {
     readonly defaultRooms = []; // ["lobby", "help", "overused"];
+    readonly defaultServerURL = 'wss://sim3.psim.us:443/showdown/websocket';
+    readonly defaultLoginServerURL = 'https://play.pokemonshowdown.com/api/';
     private rooms: SerializedRoom[] = [];
     /** Only serializable data should be here */
     private userDefinedSettings: UserDefinedSettings = {
@@ -32,8 +34,8 @@ export class Settings {
         theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
         chatStyle: 'normal',
         avatar: '',
-        serverURL: 'wss://sim3.psim.us/showdown/websocket/',
-        loginserverURL: 'https://play.pokemonshowdown.com/api/',
+        serverURL: this.defaultServerURL,
+        loginserverURL: this.defaultLoginServerURL,
         highlightOnSelf: true,
     };
     private compileHighlightWords: { [key: string]: RegExp } = {};
@@ -125,10 +127,10 @@ export class Settings {
     }
 
     getServerURL() {
-        return this.userDefinedSettings.serverURL ?? 'wss://sim3.psim.us/showdown/websocket/';
+        return this.userDefinedSettings.serverURL || this.defaultServerURL;
     }
     getLoginServerURL() {
-        return this.userDefinedSettings.loginserverURL ?? 'https://play.pokemonshowdown.com/api/';
+        return this.userDefinedSettings.loginserverURL || this.defaultLoginServerURL;
     }
     setServerURLs(serverURL: string, loginserverURL: string) {
         this.userDefinedSettings.serverURL = serverURL;

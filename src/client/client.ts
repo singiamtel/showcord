@@ -1,5 +1,5 @@
 import { Settings } from './settings';
-import { regex2str, toID } from '../utils/generic';
+import { toID } from '../utils/generic';
 import newMessage, { Message } from './message';
 import { Room, RoomType, roomTypes } from './room';
 import { User } from './user';
@@ -45,10 +45,19 @@ export class Client {
     private lastQueriedUser: { user: string; json: any } | undefined; // Cached user query
 
     constructor(options?: ClientConstructor) {
-        if (options?.autoLogin) this.shouldAutoLogin = options.autoLogin;
-        this.__createPermanentRooms();
-        this.socket = new WebSocket(this.settings.getServerURL());
-        this.__setupSocketListeners();
+        try {
+            if (options?.autoLogin) this.shouldAutoLogin = options.autoLogin;
+            this.__createPermanentRooms();
+            this.socket = new WebSocket(this.settings.getServerURL());
+            this.__setupSocketListeners();
+        } catch (e) {
+            if (e instanceof DOMException) {
+                console.log('DOMException: ', e);
+                this.settings.setServerURLs(this.settings.defaultServerURL, this.settings.defaultLoginServerURL);
+                window.location.reload();
+            }
+            console.error(e);
+        }
     }
 
     async send(message: string, room: string | false) {
@@ -381,6 +390,7 @@ export class Client {
         }
         try {
             const response_json = JSON.parse(response_test.slice(1));
+            console.log('response_json', response_json);
             if (response_json.success === false) {
                 console.error(`Couldn't login`, response_json);
                 return false;

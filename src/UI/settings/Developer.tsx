@@ -11,6 +11,8 @@ export default function DeveloperSettings(props: HTMLAttributes<'div'>) {
     const description = 'These settings are for advanced users only. Change them at your own risk.';
     const [serverURL, setServerURL] = useState(client.settings.getServerURL());
     const [loginserverURL, setLoginserverURL] = useState(client.settings.getLoginServerURL());
+    const defaultServerURL = client.settings.defaultServerURL;
+    const defaultLoginserverURL = 'https://play.pokemonshowdown.com/api/';
     return (
         <div className={twMerge('p-8', props.className)}>
             <h2 className="text-xl pb-4">
@@ -22,7 +24,9 @@ export default function DeveloperSettings(props: HTMLAttributes<'div'>) {
                 <Input
                     type={'url'}
                     value={serverURL}
+                    placeholder={defaultServerURL}
                     onChange={(e) => setServerURL(e.target.value)}
+
                 />
             </div>
             <div className="pt-4">
@@ -30,12 +34,13 @@ export default function DeveloperSettings(props: HTMLAttributes<'div'>) {
                 <Input
                     type={'url'}
                     value={loginserverURL}
+                    placeholder={defaultLoginserverURL}
                     onChange={(e) => setLoginserverURL(e.target.value)}
                 />
             </div>
             <div className="pt-4" id="saveSettings">
                 <Button onClick={() => {
-                    client.settings.setServerURLs(serverURL, loginserverURL);
+                    client.settings.setServerURLs(serverURL || defaultServerURL, loginserverURL || defaultLoginserverURL);
                     setTimeout(() => {
                         window.location.reload();
                     }, 500);
