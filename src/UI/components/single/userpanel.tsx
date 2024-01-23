@@ -30,7 +30,7 @@ export default function UserPanel() {
                                     />
                                 </div>
                                 <div className="flex flex-row justify-center items-center">
-                                    <Username user={user} />
+                                    <Username user={user} bold/>
                                 </div>
                             </div>
 
