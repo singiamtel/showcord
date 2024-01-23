@@ -5,6 +5,7 @@ import { notificationsEngine } from '../../../client/notifications';
 import { Sprites } from '@pkmn/img';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
+import { Username } from '../Username';
 
 export default function UserPanel() {
     const { client, user, avatar } = useContext(PS_context);
@@ -28,13 +29,8 @@ export default function UserPanel() {
                                         className="w-10 h-10 m-auto scale-[1.2]"
                                     />
                                 </div>
-                                <div className="flex flex-col justify-center">
-                                    <span
-                                        style={{ color: userColor(user) }}
-                                        className="font-bold"
-                                    >
-                                        {user}
-                                    </span>
+                                <div className="flex flex-row justify-center items-center">
+                                    <Username user={user} />
                                 </div>
                             </div>
 
