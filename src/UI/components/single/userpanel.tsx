@@ -39,7 +39,7 @@ export default function UserPanel() {
                                     </div>
                                 </div>
 
-                                <div className="flex flex-row justify-center items-center" onClick={() => client.openSettings()}>
+                                <div className="flex flex-row justify-center items-center cursor-pointer hover-color" onClick={() => client.openSettings()}>
                                     <FontAwesomeIcon icon={faCog} />
                                 </div>
                             </div>

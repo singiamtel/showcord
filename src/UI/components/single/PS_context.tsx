@@ -22,6 +22,7 @@ export const PS_context = createContext<
     setRooms: (rooms: Room[]) => void;
     notifications: RoomNotification[];
     avatar?: string;
+    theme: 'light' | 'dark'
 }
 >({
             client: client,
@@ -33,6 +34,7 @@ export const PS_context = createContext<
             rooms: [],
             setRooms: () => {},
             notifications: [],
+            theme: 'dark',
         });
 
 export default function PS_contextProvider(props: any) {
@@ -48,6 +50,7 @@ export default function PS_contextProvider(props: any) {
     const [messages, setMessages] = useState<Message[]>([]);
     const [updateMsgs, setUpdateMsgs] = useState<number>(0); // Used to force update on rooms change
     const [avatar, setAvatar] = useState<string | undefined>(undefined);
+    const [theme, setTheme] = useState<string>(client.settings.getTheme());
 
     /* --- Room handling --- */
 
@@ -137,10 +140,16 @@ export default function PS_contextProvider(props: any) {
             }
         };
 
+        const themeEventListener = (e: Event) => {
+            const theme = client.settings.getTheme();
+            setTheme(theme);
+        };
+
         client.events.addEventListener('room', newEventListener);
         client.events.addEventListener('selectroom', autoSelectRoomListener);
         client.events.addEventListener('leaveroom', removedEventListener);
         client.events.addEventListener('error', globalErrorListener);
+        client.events.addEventListener('theme', themeEventListener);
 
         return () => {
             client.events.removeEventListener('room', newEventListener);
@@ -265,6 +274,7 @@ export default function PS_contextProvider(props: any) {
                 setRooms,
                 notifications,
                 avatar,
+                theme,
             }}
         >
             {props.children}

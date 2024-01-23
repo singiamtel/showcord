@@ -21,7 +21,7 @@ export default function RoomCard(
 ) {
     return (
         <button
-            className={'rounded-lg mr-2 my-2 p-2 bg-gray-251 dark:bg-gray-300 hover:bg-gray-351 dark:hover:bg-gray-175 text-left w-full'}
+            className={'rounded-lg mr-2 my-2 p-2 bg-gray-251 dark:bg-gray-300 hover:bg-gray-351 dark:hover:bg-gray-175 text-left w-full transition-colors'}
             onClick={(e) => {
                 e.preventDefault();
                 onClick(room.title);

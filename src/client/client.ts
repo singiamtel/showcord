@@ -12,10 +12,6 @@ type ClientConstructor = {
 };
 
 export class Client {
-    private server_url: string =
-        'wss://sim3.psim.us/showdown/websocket/';
-    private loginserver_url: string =
-        'https://play.pokemonshowdown.com/api/';
     private readonly newsURL = 'https://pokemonshowdown.com/news.json';
 
     settings: Settings = new Settings();
@@ -49,11 +45,9 @@ export class Client {
     private lastQueriedUser: { user: string; json: any } | undefined; // Cached user query
 
     constructor(options?: ClientConstructor) {
-        if (options?.server_url) this.server_url = options.server_url;
-        if (options?.loginserver_url) this.loginserver_url = options.loginserver_url;
         if (options?.autoLogin) this.shouldAutoLogin = options.autoLogin;
         this.__createPermanentRooms();
-        this.socket = new WebSocket(this.server_url);
+        this.socket = new WebSocket(this.settings.getServerURL());
         this.__setupSocketListeners();
     }
 
@@ -102,6 +96,12 @@ export class Client {
     room(roomID: string) {
         return this.rooms.get(roomID);
     }
+
+    setTheme(theme: 'light' | 'dark') {
+        this.settings.setTheme(theme);
+        this.events.dispatchEvent(new CustomEvent('theme', { detail: theme }));
+    }
+
 
     /** Returns an array of all rooms
     */
@@ -261,6 +261,9 @@ export class Client {
 
     openSettings() {
         this._openRoom('settings');
+        this.events.dispatchEvent(
+            new CustomEvent('selectroom', { detail: 'settings' }),
+        );
     }
 
 
@@ -396,7 +399,7 @@ export class Client {
             return false;
         }
         const response = await fetch(
-            `${this.loginserver_url}oauth/api/getassertion?challenge=${challstr}&token=${token}&client_id=${this.client_id}`,
+            `${this.settings.getLoginServerURL()}oauth/api/getassertion?challenge=${challstr}&token=${token}&client_id=${this.client_id}`,
         );
         return await this.parseLoginserverResponse(response);
     }
@@ -408,7 +411,7 @@ export class Client {
         }
         try {
             const response = await fetch(
-                `${this.loginserver_url}oauth/api/refreshtoken?token=${token}&client_id=${this.client_id}`,
+                `${this.settings.getLoginServerURL()}oauth/api/refreshtoken?token=${token}&client_id=${this.client_id}`,
             );
             const result = await this.parseLoginserverResponse(response);
             if (result) localStorage.setItem('ps-token', result);
@@ -430,6 +433,9 @@ export class Client {
         const room = this.room(roomID);
         if (room) {
             room.open = true;
+            // move room to bottom
+            this.rooms.delete(roomID);
+            this.rooms.set(roomID, room);
             this.events.dispatchEvent(new CustomEvent('room', { detail: room }));
             this.settings.changeRooms(this.rooms);
             return;
@@ -529,7 +535,6 @@ export class Client {
     private setUsername(username: string) {
     // gotta re-run highlightMsg on all messages
         this.settings.setUsername(username);
-        this.cleanUsername = username.replace(/[\u{0080}-\u{FFFF}]/gu, '').trim();
         this.rooms.forEach(async (room) => {
             room.runHighlight(this.forceHighlightMsg.bind(this));
         });
@@ -990,7 +995,7 @@ export class Client {
                                 user: '',
                                 name: '',
                                 type: 'log',
-                                content: `Added "${args.join(' ')}" to highlight list`,
+                                content: `Added "${args.join(' ')}" to ${subcmd === 'add' ? 'global' : 'room'} highlight list`,
                             }),
                         );
                         // TODO: display help

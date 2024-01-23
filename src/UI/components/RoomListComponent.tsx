@@ -35,7 +35,7 @@ export function RoomListComponent(
             className={'relative flex w-full cursor-pointer '}
         >
             <div
-                className={' flex flex-row hover:bg-gray-351 dark:hover:bg-gray-350 w-full ' + (
+                className={' flex flex-row hover-color w-full ' + (
                     ID === room ?
                         ' bg-gray-451 dark:bg-gray-450 dark:hover:bg-gray-450 ' :
                         mentions > 0 || unread > 0 ?

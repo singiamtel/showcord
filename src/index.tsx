@@ -5,6 +5,7 @@ import { StrictMode } from 'react';
 import '@fontsource/roboto-mono';
 import './UI/globals.css';
 import 'react-toastify/dist/ReactToastify.css';
+import PS_contextProvider from './UI/components/single/PS_context';
 
 const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement,
@@ -12,6 +13,8 @@ const root = ReactDOM.createRoot(
 
 root.render(
     <StrictMode>
-        <App />
+        <PS_contextProvider>
+            <App />
+        </PS_contextProvider>
     </StrictMode>,
 );

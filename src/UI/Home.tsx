@@ -204,7 +204,7 @@ function SocialLink({ id, href, children }: { id: string, href?: string, childre
     return (
         <a
             id={id}
-            className="max-h-full min-h-0 flex items-center gap-2 w-full p-8 rounded-lg hover:bg-gray-601 dark:hover:bg-gray-700 cursor-pointer text-black visited:text-black dark:text-white dark:hover:text-white dark:visited:text-white overflow-ellipsis "
+            className="max-h-full min-h-0 flex items-center gap-2 w-full p-8 rounded-lg cursor-pointer text-black visited:text-black dark:text-white dark:hover:text-white dark:visited:text-white overflow-ellipsis hover-color bg-gray-251 dark:bg-gray-300 "
             target="_blank"
             href={href}
         >

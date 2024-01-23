@@ -1,0 +1,79 @@
+import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { HTMLAttributes, useContext, useState } from 'react';
+import { twMerge } from 'tailwind-merge';
+import { PS_context } from '../components/single/PS_context';
+
+export default function HighlightingSettings(props: HTMLAttributes<'div'>) {
+    const { client } = useContext(PS_context);
+    const [highlightWords, setHighlightWords] = useState(client.settings.getHighlightWordsMap());
+    const [hlOnSelf, setHlOnSelf] = useState(client.settings.getHighlightOnSelf());
+    console.log(`highlightWords`, highlightWords);
+    // global goes first
+    const rooms = Object.keys(highlightWords).sort((a, b) => {
+        if (a === 'global') {
+            return -1;
+        }
+        if (b === 'global') {
+            return 1;
+        }
+        return 0;
+    });//.filter((room) => room !== 'global');
+    const refreshHighlightWords = () => {
+        setHighlightWords({ ...client.settings.getHighlightWordsMap() });
+    };
+
+    return (
+        <div className={twMerge('p-8', props.className)}>
+            <h2 className="text-xl">
+              Highlighting settings
+            </h2>
+
+            <div id="theme" className="mt-4">
+                <div className="ml-2 flex items-center" onClick={() => {}} >
+                    <span className='pr-4 flex items-center'>
+                        <Switch checked={hlOnSelf} onCheckedChange={() => {
+                            client.settings.setHighlightOnSelf(!hlOnSelf);
+                            setHlOnSelf(client.settings.getHighlightOnSelf());
+                        }} />
+                    </span>
+                    <Label htmlFor="theme">Highlight on your username</Label>
+                </div>
+            </div>
+            <div className="pt-8">
+        Highlight words by room:
+
+                { rooms.length ? rooms.map((room) => {
+                    const words = highlightWords[room];
+                    return (
+                        <div key={room} className="p-2">
+                            <h3 className="py-4">
+                                {room[0].toUpperCase() + room.slice(1)}
+                            </h3>
+                            <ul>
+                                {words.map((word) => (
+                                    <li key={word} className="flex items-center font-mono">
+                                        <button
+                                            className="bg-red-pastel hover:bg-red-600 text-black dark:text-white rounded px-2 py-1 mr-2"
+                                            onClick={() => {
+                                                client.settings.removeHighlightWord(room, word);
+                                                refreshHighlightWords();
+                                            }
+                                            }
+                                        > X </button>
+                                        {word}
+
+                                    </li>
+                                ))}
+                            </ul>
+                        </div>
+                    );
+                }) : <p className="py-4 text-sm">No words to highlight</p>
+                }
+
+            </div>
+
+        </div>
+    );
+}

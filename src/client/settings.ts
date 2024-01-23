@@ -6,6 +6,9 @@ export interface UserDefinedSettings {
     theme: 'light' | 'dark';
     chatStyle: 'compact' | 'normal'; // compact = IRC style
     avatar: string;
+    serverURL: string;
+    loginserverURL: string;
+    highlightOnSelf: boolean;
 }
 
 export type SerializedRoom = {
@@ -26,12 +29,14 @@ export class Settings {
     /** Only serializable data should be here */
     private userDefinedSettings: UserDefinedSettings = {
         highlightWords: {},
-        theme: 'dark',
+        theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
         chatStyle: 'normal',
         avatar: '',
+        serverURL: 'wss://sim3.psim.us/showdown/websocket/',
+        loginserverURL: 'https://play.pokemonshowdown.com/api/',
+        highlightOnSelf: true,
     };
     private compileHighlightWords: { [key: string]: RegExp } = {};
-    private timeout: any;
     private username = '';
     private status = ''; // if status is set, it will be restored on login
     private notes: Map<string, string> = new Map();
@@ -66,10 +71,6 @@ export class Settings {
     }
 
     private saveSettings() {
-        if (this.timeout) {
-            clearTimeout(this.timeout);
-            this.timeout = null;
-        }
         const savedSettings : SavedSettings = {
             rooms: this.rooms,
             username: this.username,
@@ -105,18 +106,55 @@ export class Settings {
         this.status = status;
     }
 
+    getTheme() {
+        return this.userDefinedSettings.theme;
+    }
+
+    setTheme(theme: 'light' | 'dark') {
+        console.log(`setTheme ${theme}`);
+        this.userDefinedSettings.theme = theme;
+        this.saveSettings();
+    }
+
     getUsername() {
         return this.username;
     }
     setUsername(username: string) {
         this.username = username;
+        this.saveSettings();
     }
+
+    getServerURL() {
+        return this.userDefinedSettings.serverURL ?? 'wss://sim3.psim.us/showdown/websocket/';
+    }
+    getLoginServerURL() {
+        return this.userDefinedSettings.loginserverURL ?? 'https://play.pokemonshowdown.com/api/';
+    }
+    setServerURLs(serverURL: string, loginserverURL: string) {
+        this.userDefinedSettings.serverURL = serverURL;
+        this.userDefinedSettings.loginserverURL = loginserverURL;
+        this.saveSettings();
+    }
+
+
     getHighlightWords(roomid: string) {
         return this.userDefinedSettings.highlightWords[roomid] ?? [];
+    }
+    getHighlightWordsMap() {
+        return this.userDefinedSettings.highlightWords;
     }
     setHighlightWords(roomid: string, words: string[]) {
         this.userDefinedSettings.highlightWords[roomid] = [...new Set(words)];
         this.compileHighlightWords[roomid] = stringsToRegex([...words, this.username]);
+        this.saveSettings();
+    }
+
+    getHighlightOnSelf() {
+        return this.userDefinedSettings.highlightOnSelf;
+    }
+
+    setHighlightOnSelf(highlightOnSelf: boolean) {
+        this.userDefinedSettings.highlightOnSelf = highlightOnSelf;
         this.saveSettings();
     }
 
@@ -161,13 +199,16 @@ export class Settings {
             console.warn('removeHighlightWord', 'roomid not found', roomid);
             return;
         }
-        const regex = new RegExp(word, 'i');
         const words = this.userDefinedSettings.highlightWords[roomid];
-        const index = words?.findIndex((w) => w.toString() === regex.toString());
+        const index = words?.findIndex((w) => w === word);
         if (index === undefined || index === -1) {
             console.warn('removeHighlightWord', 'word not found', word);
         } else {
-            delete words[index];
+            // delete words[index];
+            this.setHighlightWords(roomid, words.filter((w) => w !== word));
+            if (this.userDefinedSettings.highlightWords[roomid].length === 0) {
+                delete this.userDefinedSettings.highlightWords[roomid];
+            }
         }
     }
 

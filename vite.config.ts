@@ -1,9 +1,15 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
+import path from 'path';
 
 export default defineConfig(({ command }) => {
     const config = {
         base: `${process.env.PUBLIC_URL ?? ''}/`,
+        resolve: {
+            alias: {
+                '@': path.resolve(__dirname, './src'),
+            },
+        },
     };
 
     if (command === 'build') {
