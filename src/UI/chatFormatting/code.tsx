@@ -16,11 +16,12 @@ export default function Code({ message }: any) {
         .replace(summaryOpenRegex, '').slice(1);
     const str = HTMLtoPlain(msg);
     const { relevance } = hljs.highlightAuto(str);
+    const threshold = 12.5;
     return (
         <div
             className={'ml-10 mr-10 m-2 border border-solid border-gray-601 dark:border-gray-border bg-gray-601 dark:bg-gray-600 rounded p-2 '}
         >
-            {relevance > 12.5 ?
+            {relevance > threshold ?
                 (
                     <Highlight
                         className={'whitespace-pre-wrap text-sm '}
