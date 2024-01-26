@@ -3,7 +3,6 @@ import { Room } from './room';
 
 export interface UserDefinedSettings {
     highlightWords: { [key: string]: string[] };
-    theme: 'light' | 'dark';
     chatStyle: 'compact' | 'normal'; // compact = IRC style
     avatar: string;
     serverURL: string;
@@ -29,9 +28,10 @@ export class Settings {
     readonly defaultLoginServerURL = 'https://play.pokemonshowdown.com/api/';
     private rooms: SerializedRoom[] = [];
     /** Only serializable data should be here */
+
+    theme: 'dark' | 'light' = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
     private userDefinedSettings: UserDefinedSettings = {
         highlightWords: {},
-        theme: window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light',
         chatStyle: 'normal',
         avatar: '',
         serverURL: this.defaultServerURL,
@@ -46,6 +46,11 @@ export class Settings {
     constructor() {
         if (typeof window === 'undefined') {
             return;
+        }
+        const theme = localStorage.getItem('theme');
+        if (theme) {
+            console.assert(theme === 'dark' || theme === 'light', 'Invalid theme', theme);
+            this.theme = theme as 'dark' | 'light';
         }
         const settingsRaw = localStorage.getItem('settings');
         if (!settingsRaw) {
@@ -79,6 +84,7 @@ export class Settings {
             userDefinedSettings: this.userDefinedSettings,
         };
         localStorage.setItem('settings', JSON.stringify(savedSettings));
+        localStorage.setItem('theme', this.theme);
     }
 
 
@@ -109,12 +115,12 @@ export class Settings {
     }
 
     getTheme() {
-        return this.userDefinedSettings.theme;
+        return this.theme;
     }
 
     setTheme(theme: 'light' | 'dark') {
         console.log(`setTheme ${theme}`);
-        this.userDefinedSettings.theme = theme;
+        this.theme = theme;
         this.saveSettings();
     }
 
