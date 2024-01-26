@@ -43,7 +43,7 @@ export default function PS_contextProvider(props: any) {
     const [selectedPageType, setSelectedPageType] = useState<'room' | 'user'>(
         'room',
     );
-    const [rooms, setRooms] = useState<Room[]>([]);
+    const [rooms, setRooms] = useState<Room[]>(client.getRooms());
     const [notifications, setNotifications] = useState<RoomNotification[]>([]);
     const [update, setUpdate] = useState<number>(0); // Used to force update on rooms change
     const [previousRooms, setPreviousRooms] = useState<string[]>(['home']);
@@ -108,7 +108,7 @@ export default function PS_contextProvider(props: any) {
             setRooms(newRoomsOrdered);
             if (e.type === 'leaveroom' && selectedPage === (e as CustomEvent).detail) {
                 setRoom('home');
-            }
+            } else if (!selectedPage) { setRoom('home'); }
         };
 
         const globalErrorListener = (e: Event) => {
