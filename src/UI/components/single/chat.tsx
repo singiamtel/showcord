@@ -378,7 +378,13 @@ export function MessageComponent(
                                 colon
                                 bold
                             />&nbsp;
-                            <FormatMsgDisplay msg={message} />
+                            {
+                                type === 'announce' ?
+                                    <span className="bg-blue-400 text-white rounded p-1">
+                                        <FormatMsgDisplay msg={message} />
+                                    </span> :
+                                    <FormatMsgDisplay msg={message} />
+                            }
                         </>
                     )}
             </span>

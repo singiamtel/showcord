@@ -4,6 +4,7 @@ type MessageTypes =
   | 'chat'
   | 'raw'
   | 'log'
+  | 'announce'
   | 'simple'
   | 'error'
   | 'roleplay'

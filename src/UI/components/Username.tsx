@@ -1,7 +1,6 @@
 import { userColor } from '../../utils/namecolour';
 import { MouseEventHandler } from 'react';
 
-
 export function Username(
     { user, alignRight, onClick, colon, idle, bold, colorless }: {
         user: string;
@@ -28,9 +27,9 @@ export function Username(
             <a
                 onClick={onClick}
                 style={{
-                    color: colorless ? 'white' : idle ? '#888888' : userColor(user),
+                    color: colorless ? '' : idle ? '#888888' : userColor(user),
                 }}
-                className={(onClick ? 'hover:underline hover:cursor-pointer ' : '') +
+                className={'text-black dark:text-white ' + (onClick ? 'hover:underline hover:cursor-pointer ' : '') +
                     (bold ? 'font-bold ' : '')}
                 data-message="true"
                 data-username={user.slice(1)}
