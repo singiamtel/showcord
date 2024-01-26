@@ -13,7 +13,7 @@ window.client = client;
 export const PS_context = createContext<
 {
     client: Client;
-    selectedPage: string | null;
+    selectedPage: string;
     selectedPageType: 'user' | 'room';
     setRoom:(room: string | 1 | -1) => void;
     messages: Message[];
@@ -26,7 +26,7 @@ export const PS_context = createContext<
 }
 >({
             client: client,
-            selectedPage: null,
+            selectedPage: '',
             selectedPageType: 'room',
             setRoom: () => {},
             messages: [],
@@ -39,14 +39,14 @@ export const PS_context = createContext<
 
 export default function PS_contextProvider(props: any) {
     const [user, setUser] = useState<string | undefined>();
-    const [selectedPage, setSelectedPage] = useState<string | null>('home');
+    const [selectedPage, setSelectedPage] = useState<string>('home');
     const [selectedPageType, setSelectedPageType] = useState<'room' | 'user'>(
         'room',
     );
     const [rooms, setRooms] = useState<Room[]>([]);
     const [notifications, setNotifications] = useState<RoomNotification[]>([]);
     const [update, setUpdate] = useState<number>(0); // Used to force update on rooms change
-    const [previousRooms, setPreviousRooms] = useState<string[]>([]);
+    const [previousRooms, setPreviousRooms] = useState<string[]>(['home']);
     const [messages, setMessages] = useState<Message[]>([]);
     const [updateMsgs, setUpdateMsgs] = useState<number>(0); // Used to force update on rooms change
     const [avatar, setAvatar] = useState<string | undefined>(undefined);
@@ -77,6 +77,7 @@ export default function PS_contextProvider(props: any) {
             }
             tmpPR.push(room);
             if (tmpPR.length > 5) tmpPR.shift();
+            console.log('Setting previous rooms to', tmpPR);
             setPreviousRooms(tmpPR);
             setSelectedPage(room);
             client.selectRoom(room);
@@ -87,40 +88,26 @@ export default function PS_contextProvider(props: any) {
     }, [client, rooms, selectedPage, previousRooms]);
 
     useEffect(() => {
-        if (!client) {
-            return;
-        }
-        const newRooms = client.getRooms();
-        // Keep the same order we had before
-        const newRoomsOrdered = newRooms.sort((a, b) => {
-            const indexA = rooms.findIndex((e) => e.ID === a.ID);
-            const indexB = rooms.findIndex((e) => e.ID === b.ID);
-            if (indexA === -1 || indexB === -1) {
-                return 0;
-            }
-            return indexA - indexB;
-        });
-        setRooms(newRoomsOrdered);
-    }, [client, update]);
+        // if (!rooms.find((e) => e.ID === selectedPage)) {
+        //     setRoom('home');
+        // }
+    }, [rooms, selectedPage]);
 
     useEffect(() => {
-        if (!client) {
-            return;
-        }
-        const newEventListener = async (_: Event) => {
-            setUpdate(update + 1);
-        };
-
-        const removedEventListener = () => {
-            setUpdate(update + 1);
-            if (rooms.length > 0) {
-                if (
-                    selectedPageType === 'room' &&
-          (!selectedPage)
-                ) {
-                    const previousRoom = previousRooms[previousRooms.length - 1];
-                    setRoom(previousRoom);
+        const changeRoomsEventListener = (e: Event) => {
+            const newRooms = client.getRooms();
+            // Keep the same order we had before
+            const newRoomsOrdered = newRooms.sort((a, b) => {
+                const indexA = rooms.findIndex((e) => e.ID === a.ID);
+                const indexB = rooms.findIndex((e) => e.ID === b.ID);
+                if (indexA === -1 || indexB === -1) {
+                    return 0;
                 }
+                return indexA - indexB;
+            });
+            setRooms(newRoomsOrdered);
+            if (e.type === 'leaveroom' && selectedPage === (e as CustomEvent).detail) {
+                setRoom('home');
             }
         };
 
@@ -140,24 +127,24 @@ export default function PS_contextProvider(props: any) {
             }
         };
 
-        const themeEventListener = (e: Event) => {
+        const themeEventListener = (_e: Event) => {
             const theme = client.settings.getTheme();
             setTheme(theme);
         };
 
-        client.events.addEventListener('room', newEventListener);
+        client.events.addEventListener('room', changeRoomsEventListener);
         client.events.addEventListener('selectroom', autoSelectRoomListener);
-        client.events.addEventListener('leaveroom', removedEventListener);
+        client.events.addEventListener('leaveroom', changeRoomsEventListener);
         client.events.addEventListener('error', globalErrorListener);
         client.events.addEventListener('theme', themeEventListener);
 
         return () => {
-            client.events.removeEventListener('room', newEventListener);
+            client.events.removeEventListener('room', changeRoomsEventListener);
             client.events.removeEventListener(
                 'selectroom',
                 autoSelectRoomListener,
             );
-            client.events.removeEventListener('leaveroom', removedEventListener);
+            client.events.removeEventListener('leaveroom', changeRoomsEventListener);
             client.events.removeEventListener('error', globalErrorListener);
         };
     }, [
@@ -171,23 +158,6 @@ export default function PS_contextProvider(props: any) {
     ]);
 
     useEffect(() => {
-        if (!client) return;
-        client.events.addEventListener('leaveroom', (_) => {
-            // if the current room was deleted, go to the last room
-            if (
-                selectedPageType === 'room' && selectedPage &&
-        !client.room(selectedPage)
-            ) {
-                const lastRoom = previousRooms[previousRooms.length - 2];
-                if (lastRoom) {
-                    setRoom(lastRoom);
-                }
-            }
-        });
-    }, [client, previousRooms, selectedPage, selectedPageType, setRoom]);
-
-    useEffect(() => {
-        if (!client) return;
         client.autojoin(client.settings.getSavedRooms().map((e) => e.ID), true);
     }, [client]);
 
@@ -195,9 +165,6 @@ export default function PS_contextProvider(props: any) {
 
     /* --- Message handling --- */
     const handleMsgEvent = useCallback(async (setMessages: any) => {
-        if (!client) {
-            return;
-        }
         if (!selectedPage) {
             return;
         }
@@ -207,7 +174,6 @@ export default function PS_contextProvider(props: any) {
     }, [client, selectedPage]);
 
     useEffect(() => {
-        if (!client) return;
         if (!selectedPage) return;
 
         setMessages([...client.room(selectedPage)?.messages ?? []]);

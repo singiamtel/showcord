@@ -223,8 +223,20 @@ export class Client {
         if (room.connected) {
             this.__send(`/leave ${roomID}`, false);
         } else {
-            this._removeRoom(roomID);
+            if (this.permanentRooms.map((e) => e.ID).includes(roomID as any)) {
+                this._closeRoom(roomID);
+            } else { this._removeRoom(roomID); }
         }
+    }
+
+    _closeRoom(roomID: string) {
+        const room = this.room(roomID);
+        if (!room) {
+            console.warn('Trying to close non-existent room', roomID);
+            return;
+        }
+        room.open = false;
+        this.events.dispatchEvent(new CustomEvent('leaveroom', { detail: roomID }));
     }
 
     async autojoin(rooms: string[], useDefaultRooms = false) {

@@ -73,7 +73,7 @@ export function RoomListComponent(
                 </button>
                 {
                     /* Should display closing button?*/
-                    (room === ID && !client.permanentRooms.some((e) => e.ID === room)) ?
+                    (room === ID && room !== 'home') ?
                         <ClosingButton room={room} /> :
                         ''
                 }
