@@ -8,7 +8,7 @@ import { createContext, useCallback, useEffect, useState } from 'react';
 import { toast } from 'react-toastify';
 
 export const client = new Client();
-window.client = client;
+window.client = client; // Only for debugging
 
 export const PS_context = createContext<
 {
@@ -69,7 +69,7 @@ export default function PS_contextProvider(props: any) {
                 return;
             }
         }
-        if (client?.room(room)) {
+        if (client.room(room)) {
             const tmpPR = previousRooms;
             if (tmpPR.includes(room)) {
                 const index = previousRooms.indexOf(room);
@@ -86,12 +86,6 @@ export default function PS_contextProvider(props: any) {
         }
         setSelectedPageType('room');
     }, [client, rooms, selectedPage, previousRooms]);
-
-    useEffect(() => {
-        // if (!rooms.find((e) => e.ID === selectedPage)) {
-        //     setRoom('home');
-        // }
-    }, [rooms, selectedPage]);
 
     useEffect(() => {
         const changeRoomsEventListener = (e: Event) => {
@@ -159,7 +153,7 @@ export default function PS_contextProvider(props: any) {
 
     useEffect(() => {
         client.autojoin(client.settings.getSavedRooms().map((e) => e.ID), true);
-    }, [client]);
+    }, []);
 
     /* --- End room handling --- */
 

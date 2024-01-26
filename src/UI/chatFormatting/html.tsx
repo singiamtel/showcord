@@ -3,7 +3,7 @@
 
 import { PS_context } from '../components/single/PS_context';
 import manageURL from '../../utils/manageURL';
-import parse, { attributesToProps, domToReact } from 'html-react-parser';
+import parse, { domToReact } from 'html-react-parser';
 import { useContext } from 'react';
 import sanitizeHtml from 'sanitize-html-react';
 import { escape } from 'html-escaper';
