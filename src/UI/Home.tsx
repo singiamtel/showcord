@@ -14,7 +14,7 @@ import { InfinitySpin } from 'react-loader-spinner';
 import MiniSearch, { SearchResult } from 'minisearch';
 import NewsCard from './components/NewsCard';
 
-import targetFaceCluster from './assets/cluster_target_face_nobg.png';
+import targetFaceCluster from './assets/cluster_target_face_nobg.webp';
 
 import github from './assets/github.png';
 import discord from './assets/discord.png';
