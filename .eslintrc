@@ -10,7 +10,7 @@
     "plugin:@typescript-eslint/recommended"
   ],
   "env":{
-    "browser"
+    "browser": true
   },
   "rules": {
     "@typescript-eslint/quotes": [
