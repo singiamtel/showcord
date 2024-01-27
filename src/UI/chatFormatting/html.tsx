@@ -184,7 +184,7 @@ export default function HTML(
 
 export function Box(props: Readonly<React.PropsWithChildren>) {
     const child = props.children as React.ReactElement;
-    const classes = child.props.className;
+    const classes = child?.props?.className || '';
     const blueStyle = classes?.includes('broadcast-blue') ? 'bg-blue-100 dark:bg-blue-600 text-white' : '';
     const redStyle = classes?.includes('broadcast-red') ? 'bg-red-400 dark:bg-red-600 text-white' : '';
     const greenStyle = classes?.includes('broadcast-green') ? 'bg-green-600 dark:bg-green-600 text-white' : '';
