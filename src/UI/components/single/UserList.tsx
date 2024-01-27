@@ -27,7 +27,7 @@ export default function UserList({
             if (!selectedRoom) {
                 return;
             }
-            setUsers(selectedRoom.users);
+            setUsers([...selectedRoom.users]);
         };
 
         refreshUsers();

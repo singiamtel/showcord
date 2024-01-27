@@ -52,7 +52,7 @@ export class Client {
             this.__setupSocketListeners();
         } catch (e) {
             if (e instanceof DOMException) {
-                console.log('DOMException: ', e);
+                console.warn('DOMException: ', e);
                 this.settings.setServerURLs(this.settings.defaultServerURL, this.settings.defaultLoginServerURL);
                 window.location.reload();
             }
@@ -402,7 +402,6 @@ export class Client {
         }
         try {
             const response_json = JSON.parse(response_test.slice(1));
-            console.log('response_json', response_json);
             if (response_json.success === false) {
                 console.error(`Couldn't login`, response_json);
                 return false;
@@ -699,7 +698,7 @@ export class Client {
                     );
                 }
                 break;
-                // case 'j':
+            case 'j':
             case 'J': {
                 const room = this.room(roomID);
                 if (!room) {
@@ -712,7 +711,7 @@ export class Client {
                 this.addUsers(roomID, [new User({ name: args[0], ID: toID(args[0]) })]);
                 break;
             }
-            // case 'l':
+            case 'l':
             case 'L': {
                 const room = this.room(roomID);
                 if (!room) {
@@ -725,7 +724,7 @@ export class Client {
                 this.removeUser(roomID, args[0]);
                 break;
             }
-            // case 'n':
+            case 'n':
             case 'N': {
                 this.updateUsername(roomID, args[0], args[1]);
                 break;

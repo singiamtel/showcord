@@ -1,3 +1,4 @@
+import { toID } from '@/utils/generic';
 import { Message } from './message';
 import { rankOrder, RankSymbol, User } from './user';
 
@@ -164,6 +165,7 @@ export class Room {
         }
         const [name, status] = newName.split('@');
         user.name = name;
+        user.ID = toID(name);
         user.status = status;
         this.users = this.users.sort(this.rankSorter);
     }
