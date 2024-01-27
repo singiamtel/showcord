@@ -68,6 +68,7 @@ module.exports = {
                 pastel: '#D4EDDA',
                 400: '#96F04A',
                 '400-light': '#96F04A',
+                '600': '#35E717',
             },
         },
         fontFamily: {

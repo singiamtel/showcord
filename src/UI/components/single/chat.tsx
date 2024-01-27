@@ -381,7 +381,7 @@ export function MessageComponent(
                             {
                                 type === 'announce' ?
                                     <span className="bg-blue-400 text-white rounded p-1">
-                                        <FormatMsgDisplay msg={message} />
+                                        <FormatMsgDisplay msg={message.trim()} />
                                     </span> :
                                     <FormatMsgDisplay msg={message} />
                             }

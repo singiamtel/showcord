@@ -10,9 +10,10 @@ import { escape } from 'html-escaper';
 import { Icons } from '@pkmn/img';
 import { Username } from '../components/Username';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { twMerge } from 'tailwind-merge';
 
 export default function HTML(
-    { message, raw }: { message: string; raw?: boolean },
+    { message, raw }: Readonly<{ message: string; raw?: boolean }>,
 ) {
     const { client, selectedPage } = useContext(PS_context);
     const parserOptions = {
@@ -181,12 +182,15 @@ export default function HTML(
     );
 }
 
-export function Box(props: React.PropsWithChildren) {
+export function Box(props: Readonly<React.PropsWithChildren>) {
+    const child = props.children as React.ReactElement;
+    const classes = child.props.className;
+    const blueStyle = classes?.includes('broadcast-blue') ? 'bg-blue-100 dark:bg-blue-600 text-white' : '';
+    const redStyle = classes?.includes('broadcast-red') ? 'bg-red-400 dark:bg-red-600 text-white' : '';
+    const greenStyle = classes?.includes('broadcast-green') ? 'bg-green-600 dark:bg-green-600 text-white' : '';
     return (
-        <div className="p-2 ml-10 mr-10 m-2 border border-solid border-gray-601 dark:border-gray-border bg-gray-sidebar-light dark:bg-gray-600 rounded">
-            <span className="">
-                {props.children}
-            </span>
+        <div className={twMerge('p-2 ml-10 mr-10 m-2 border border-solid border-gray-601 dark:border-gray-border bg-gray-sidebar-light dark:bg-gray-600 rounded', blueStyle, redStyle, greenStyle) }>
+            {props.children}
         </div>
     );
 }
