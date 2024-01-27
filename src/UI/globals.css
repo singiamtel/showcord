@@ -198,6 +198,6 @@ span{
   line-height: 1.3;
 }
 
-.color-hover{
+.hover-color{
   @apply hover:bg-gray-351 dark:hover:bg-gray-350 transition-colors;
 }
