@@ -5,7 +5,11 @@ export function stringsToRegex(strings: string[]) {
     return new RegExp(strings.map((s) => toID(s)).join('|'), 'i');
 }
 
-export function highlightMsg(highlight: RegExp, message: string) {
+export function highlightMsg(highlight: RegExp, message: string) : boolean {
     const cleanMessage = message.replace(/[^a-z0-9]/gi, '');
-    return highlight.test(cleanMessage);
+    const hl = highlight.test(cleanMessage);
+    if (hl) {
+        console.log('highlighted', message, highlight);
+    }
+    return hl;
 }
