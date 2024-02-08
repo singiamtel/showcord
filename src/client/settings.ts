@@ -17,6 +17,7 @@ export type SerializedRoom = {
 };
 
 export type SavedSettings = {
+    version: number;
     rooms: SerializedRoom[];
     username: string;
     userDefinedSettings: UserDefinedSettings;
@@ -26,6 +27,7 @@ export class Settings {
     readonly defaultRooms = []; // ["lobby", "help", "overused"];
     readonly defaultServerURL = 'wss://sim3.psim.us:443/showdown/websocket';
     readonly defaultLoginServerURL = 'https://play.pokemonshowdown.com/api/';
+    readonly version = 1; // used to invalidate settings when the format changes
     private rooms: SerializedRoom[] = [];
     /** Only serializable data should be here */
 
@@ -38,7 +40,7 @@ export class Settings {
         loginserverURL: this.defaultLoginServerURL,
         highlightOnSelf: true,
     };
-    private compileHighlightWords: { [key: string]: RegExp } = {};
+    private compileHighlightWords: { [key: string]: RegExp | null } = {};
     private username = '';
     private status = ''; // if status is set, it will be restored on login
     private notes: Map<string, string> = new Map();
@@ -58,6 +60,9 @@ export class Settings {
         }
         try {
             const settings = JSON.parse(settingsRaw) as SavedSettings;
+            if (settings.version !== this.version) {
+                throw new Error('Settings version mismatch');
+            }
             settings.rooms.forEach((r) => {
                 this.rooms.push(r);
             });
@@ -68,7 +73,12 @@ export class Settings {
             }
             if (this.userDefinedSettings.highlightWords) {
                 for (const roomid in this.userDefinedSettings.highlightWords) {
-                    this.compileHighlightWords[roomid] = stringsToRegex([...this.userDefinedSettings.highlightWords[roomid], this.username]);
+                    const strings = this.userDefinedSettings.highlightWords[roomid] ?? [];
+                    if (this.username && this.userDefinedSettings.highlightOnSelf) {
+                        strings.push(this.username);
+                    }
+                    console.log('roomid', roomid, 'strings', strings);
+                    this.compileHighlightWords[roomid] = stringsToRegex(strings);
                 }
             }
         } catch (e) {
@@ -79,6 +89,7 @@ export class Settings {
 
     private saveSettings() {
         const savedSettings : SavedSettings = {
+            version: this.version,
             rooms: this.rooms,
             username: this.username,
             userDefinedSettings: this.userDefinedSettings,
@@ -153,7 +164,12 @@ export class Settings {
     }
     setHighlightWords(roomid: string, words: string[]) {
         this.userDefinedSettings.highlightWords[roomid] = [...new Set(words)];
-        this.compileHighlightWords[roomid] = stringsToRegex([...words, this.username]);
+
+        const strings = this.userDefinedSettings.highlightWords[roomid] ?? [];
+        if (this.username && this.userDefinedSettings.highlightOnSelf) {
+            strings.push(this.username);
+        }
+        this.compileHighlightWords[roomid] = stringsToRegex(strings);
         this.saveSettings();
     }
 
@@ -230,7 +246,11 @@ export class Settings {
 
     highlightMsg(roomid: string, message: string) {
         if (!this.compileHighlightWords[roomid]) {
-            this.compileHighlightWords[roomid] = stringsToRegex([...this.getHighlightWords(roomid), this.username]);
+            const strings = this.userDefinedSettings.highlightWords[roomid] ?? [];
+            if (this.username && this.userDefinedSettings.highlightOnSelf) {
+                strings.push(this.username);
+            }
+            this.compileHighlightWords[roomid] = stringsToRegex(strings);
         }
         if (highlightMsg(this.compileHighlightWords[roomid], message)) {
             return true;
