@@ -28,7 +28,7 @@ const minisearch = new MiniSearch({
     idField: 'title',
 });
 
-function TargetFaceWelcome({ className }: { className?: string }) {
+function TargetFaceWelcome({ className }: Readonly<{ className?: string }>) {
     return (
         <div
             className={twMerge(
@@ -39,7 +39,7 @@ function TargetFaceWelcome({ className }: { className?: string }) {
             <img
                 src={targetFaceCluster}
                 alt="targetFaceCluster"
-                className="opacity-70 h-auto min-h-[110%]"
+                className="opacity-70 h-auto w-full"
             />
             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-black z-10 bg-gray-100 dark:bg-gray-600 opacity-10" />
             <div className="flex flex-col justify-between p-4 absolute">
@@ -54,7 +54,7 @@ function TargetFaceWelcome({ className }: { className?: string }) {
     );
 }
 
-function News({ className }: { className?: string }) {
+function News({ className }: Readonly<{ className?: string }>) {
     const [news, setNews] = useState<any[]>([]);
     const { client } = useContext(PS_context);
     useEffect(() => {
@@ -78,7 +78,7 @@ function News({ className }: { className?: string }) {
     );
 }
 
-function RoomList({ className }: { className?: string }) {
+function RoomList({ className }: Readonly<{ className?: string }>) {
     const { client } = useContext(PS_context);
     const [roomsJSON, setRoomsJSON] = useState<any>({});
     const [input, setInput] = useState<string>('');
@@ -150,7 +150,7 @@ function RoomList({ className }: { className?: string }) {
         }
     };
     return (
-        <div className={twMerge('p-4 rounded-lg overflow-y-auto', className)}>
+        <div className={twMerge('p-4 rounded-lg overflow-y-auto max-h-[70vh] md:max-h-full', className)}>
             <h2 className="font-bold text-xl text-center">
         Rooms
             </h2>
@@ -283,18 +283,18 @@ function SocialLinks({ className }: { className?: string }) {
     );
 }
 
-export default function Home(props: HTMLAttributes<'div'>) {
+export default function Home(props: Readonly<HTMLAttributes<'div'>>) {
     return (
         <div
             className={twMerge(
-                'grid grid-cols-8 grid-rows-2 gap-6 m-6 [&>*]:bg-gray-100 dark:[&>*]:bg-gray-600',
+                'flex flex-col flex-grow md:grid md:grid-cols-8 md:grid-rows-2 gap-6 p-4 [&>*]:bg-gray-100 dark:[&>*]:bg-gray-600 overflow-y-scroll h-full',
                 props.className,
             )}
         >
-            <News className="col-span-5 row-span-1" />
-            <RoomList className="col-span-3 row-span-2" />
-            <TargetFaceWelcome className="col-span-3 row-span-1" />
-            <SocialLinks className="col-span-2 row-span-1" />
+            <News className="md:col-span-5 row-span-1 col-span-8 order-3" />
+            <RoomList className="md:col-span-3 row-span-2 col-span-8 order-2" />
+            <TargetFaceWelcome className="md:col-span-3 row-span-1 col-span-8 order-1" />
+            <SocialLinks className="md:col-span-2 row-span-1 col-span-8 order-4" />
         </div>
     );
 }

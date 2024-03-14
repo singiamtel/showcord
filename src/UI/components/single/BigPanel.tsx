@@ -18,26 +18,11 @@ import Chat from './chat';
 import Home from '../../Home';
 import SettingsPage from '../../SettingsPage';
 
-export default function BigPanel(props: HTMLAttributes<'div'>) {
+export default function BigPanel(props: Readonly<HTMLAttributes<'div'>>) {
     const { selectedPage: room, rooms } = useContext(PS_context);
     const roomType = rooms?.find((r) => r.ID === room)?.type;
-    if (!room) return null;
-    if (roomType === 'permanent') {
-        if (room === 'home') {
-            return <Home className={props.className} />;
-        }
-        if (room === 'settings') {
-            return <SettingsPage className={props.className} />;
-        } else {
-            return (
-                <div className={twMerge(props.className, 'flex flex-col text-red-400')}>
-          Unknown room type: "{roomType}"
-                </div>
-            );
-        }
-    }
 
-    const [user, setUser] = useState<any | null>(null);
+    const [user, setUser] = useState<any>(undefined);
     const [username, setUsername] = useState<string | null>(null);
     const [position, setPosition] = useState<{ x: number; y: number }>({
         x: 0,
@@ -72,11 +57,28 @@ export default function BigPanel(props: HTMLAttributes<'div'>) {
         closeWindow();
     }, [isOutside]);
 
+    if (!room) return null;
+    if (roomType === 'permanent') {
+        if (room === 'home') {
+            return <Home className={props.className} />;
+        }
+        if (room === 'settings') {
+            return <SettingsPage className={props.className} />;
+        } else {
+            return (
+                <div className={twMerge(props.className, 'flex flex-col text-red-400')}>
+          Unknown room type: "{roomType}"
+                </div>
+            );
+        }
+    }
+
     return (
         <div
+            id="big-panel"
             className={twMerge(
                 props.className,
-                'flex break-normal',
+                'flex break-normal h-screen',
             )}
         >
             <div className={'dark:bg-gray-300 flex flex-col w-full max-w-full'}>

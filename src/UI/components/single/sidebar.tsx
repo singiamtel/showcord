@@ -24,7 +24,7 @@ import {
 } from '@dnd-kit/sortable';
 import SortableItem from '../../../utils/Sortable';
 
-export default function Sidebar(props: HTMLAttributes<'div'>) {
+export default function Sidebar(props: Readonly<HTMLAttributes<'div'>>) {
     const { rooms, setRooms } = useContext(PS_context);
 
     const mouseSensor = useSensor(MouseSensor, {
@@ -63,9 +63,10 @@ export default function Sidebar(props: HTMLAttributes<'div'>) {
             modifiers={[restrictToVerticalAxis, restrictToParentElement]}
         >
             <div
+                id='sidebar'
                 className={twMerge(
-                    props.className,
                     'bg-gray-sidebar-light dark:bg-gray-600 h-screen flex flex-col justify-between',
+                    props.className,
                 )}
             >
                 <div className="text-center mr-2 ml-2 p-2 font-bold text-lg h-16 whitespace-nowrap">

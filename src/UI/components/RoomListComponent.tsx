@@ -15,24 +15,25 @@ const customIcons = {
 
 
 export function RoomListComponent(
-    { name, ID, notifications: { unread, mentions }, type }: {
+    { name, ID, notifications: { unread, mentions }, type }: Readonly<{
         name: string;
         ID: string;
         type: string;
         notifications: { unread: number; mentions: number };
-    },
+    }>,
 ) {
     const { setRoom, selectedPage: room } = useContext(PS_context);
     const customIcon = customIcons[ID as keyof typeof customIcons];
-    const icon = customIcon ? customIcon : type === 'battle' ?
+    const icon = customIcon ?? (type === 'battle' ?
         <GiBattleAxe height={16} width={16} /> :
         type === 'pm' ?
             <FontAwesomeIcon icon={faUser} height={16} width={16} /> :
-            <HashtagIcon height={16} width={16} />;
+            <HashtagIcon height={16} width={16} />
+    );
 
     return (
         <div
-            className={'relative flex w-full cursor-pointer '}
+            className="relative flex w-full cursor-pointer"
         >
             <div
                 className={' flex flex-row hover-color w-full ' + (
@@ -82,7 +83,7 @@ export function RoomListComponent(
     );
 }
 
-function ClosingButton({ room }: { room: string }) {
+function ClosingButton({ room }: Readonly<{ room: string }>) {
     return (
         <button className="p-1" onClick={() => client.leaveRoom(room)}>
             <AiOutlineClose className='hover:text-red-600' opacity={0.4} />
