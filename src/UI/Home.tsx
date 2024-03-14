@@ -221,7 +221,7 @@ function SocialLink({ id, href, children }: { id: string, href?: string, childre
     );
 }
 
-function SocialLinks({ className }: { className?: string }) {
+function SocialLinks({ className }: Readonly<{ className?: string }>) {
     return (
         <div
             className={twMerge(
@@ -291,10 +291,10 @@ export default function Home(props: Readonly<HTMLAttributes<'div'>>) {
                 props.className,
             )}
         >
-            <News className="md:col-span-5 row-span-1 col-span-8 order-3" />
-            <RoomList className="md:col-span-3 row-span-2 col-span-8 order-2" />
-            <TargetFaceWelcome className="md:col-span-3 row-span-1 col-span-8 order-1" />
-            <SocialLinks className="md:col-span-2 row-span-1 col-span-8 order-4" />
+            <News className="md:col-span-5 row-span-1 col-span-8 order-3 md:order-none" />
+            <RoomList className="md:col-span-3 row-span-2 col-span-8 order-2 md:order-none" />
+            <TargetFaceWelcome className="md:col-span-3 row-span-1 col-span-8 order-1 md:order-none" />
+            <SocialLinks className="md:col-span-2 row-span-1 col-span-8 order-4 md:order-none" />
         </div>
     );
 }
