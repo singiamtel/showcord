@@ -37,6 +37,7 @@ export function Username(
                 {user.slice(1)}
                 {colon && ':'}
             </a>
+
         </>
     );
 }

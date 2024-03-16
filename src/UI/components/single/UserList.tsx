@@ -2,6 +2,7 @@ import { PS_context } from './PS_context';
 import { MouseEvent, useContext, useEffect, useState } from 'react';
 import { Username } from '../Username';
 import { isStaff, User } from '../../../client/user';
+import { Input } from '@/components/ui/input';
 
 export default function UserList({
     clickUsername,
@@ -18,6 +19,9 @@ export default function UserList({
 }) {
     const { selectedPage: room, client } = useContext(PS_context);
     const [users, setUsers] = useState<User[]>([]);
+    const [search, setSearch] = useState<string>('');
+
+    const filteredUsers = users.filter((user) => user.name.toLowerCase().includes(search.toLowerCase()));
 
     useEffect(() => {
         if (!client) return;
@@ -37,9 +41,30 @@ export default function UserList({
         };
     }, [client, room]);
 
+    // separate users into staff and regular users
+    const staff = filteredUsers.filter((user) => isStaff(user.name));
+    const regular = filteredUsers.filter((user) => !isStaff(user.name));
+
     return (
         <div className="bg-gray-sidebar-light dark:bg-gray-600 w-full h-full p-2 overflow-y-auto whitespace-nowrap">
-            {users.map((user, index) => (
+            <input className="w-full text-sm h-10 py-1 mb-2 px-2 bg-gray-251 placeholder:text-gray-150 dark:bg-gray-700 rounded-md" type="text" placeholder="Search users" value={search} onChange={(e) => setSearch(e.target.value)} />
+            {staff.length > 0 && <h2 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-2">Staff</h2>}
+            {staff.map((user, index) => (
+                <div key={index}>
+                    <Username
+                        user={user.name}
+                        bold={isStaff(user.name)}
+                        alignRight
+                        onClick={(e) => clickUsername(e)}
+                        idle={user.status === '!'}
+                    />
+                </div>
+            ))}
+            {
+                staff.length > 0 && regular.length > 0 && <hr className="my-2" />
+            }
+            {regular.length > 0 && <h2 className="text-sm font-bold text-gray-500 dark:text-gray-400 mb-2">Users</h2>}
+            {regular.map((user, index) => (
                 <div key={index}>
                     <Username
                         user={user.name}
