@@ -38,7 +38,7 @@ export default function DeveloperSettings(props: HTMLAttributes<'div'>) {
             </div>
             <div className="pt-4" id="saveSettings">
                 <Button onClick={() => {
-                    client.settings.setServerURLs(serverURL || client.settings.defaultServerURL, loginserverURL || client.settings.defaultLoginserverURL);
+                    client.settings.setServerURLs(serverURL || client.settings.defaultServerURL, loginserverURL || client.settings.defaultLoginServerURL);
                     setTimeout(() => {
                         window.location.reload();
                     }, 500);
