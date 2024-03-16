@@ -77,7 +77,6 @@ export default function PS_contextProvider(props: any) {
             }
             tmpPR.push(room);
             if (tmpPR.length > 5) tmpPR.shift();
-            console.log('Setting previous rooms to', tmpPR);
             setPreviousRooms(tmpPR);
             setSelectedPage(room);
             client.selectRoom(room);

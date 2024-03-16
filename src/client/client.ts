@@ -4,6 +4,7 @@ import newMessage, { Message } from './message';
 import { Room, RoomType, roomTypes } from './room';
 import { User } from './user';
 import { clientNotification, RoomNotification } from './notifications';
+import { split } from 'postcss/lib/list';
 
 type ClientConstructor = {
     server_url?: string;
@@ -447,6 +448,7 @@ export class Client {
     private _addRoom(room: Room) {
         this.rooms.set(room.ID, room);
         this.events.dispatchEvent(new CustomEvent('room', { detail: room }));
+        this.events.dispatchEvent(new CustomEvent('message', { detail: room })); // Just in case. Fixes pagehtml
         this.settings.addRoom(room);
     }
 
@@ -571,6 +573,7 @@ export class Client {
             this.challstr = splitted_challstr.join('|');
             return;
         }
+
         let i = 0;
         const splitted_message = message.split('\n');
         const isGlobalOrLobby = splitted_message[0][0] !== '>';
@@ -584,13 +587,14 @@ export class Client {
         if (splitted_message[i].startsWith('|init|')) {
             let name = '';
             let users: User[] = [];
+            let addedYet = false;
             const type = splitted_message[i].split('|')[2];
             i++;
             for (; i < splitted_message.length; i++) { // start at 2 because first line is room id and second line is cmd
                 if (splitted_message[i] === '') continue;
                 if (splitted_message[i].startsWith('|title|')) {
                     name = splitted_message[i].slice(7);
-                    continue;
+                    // continue;
                 }
                 if (splitted_message[i].startsWith('|users|')) {
                     const parsedUsers = splitted_message[i].split('|')[2].split(
@@ -604,18 +608,21 @@ export class Client {
                     users.shift();
                     continue;
                 }
-                if (splitted_message[i].startsWith('|:|') || splitted_message[i].startsWith('|t:|')) {
+                if (splitted_message[i].startsWith('|:|') || splitted_message[i].startsWith('|t:|') || (type === 'html' && name && !addedYet)) {
+                    console.log('adding room because of ', splitted_message[i]);
                     if (!roomTypes.includes(type as RoomType)) {
-                        console.error('Unknown room type', type);
+                        console.error('Unknown room type', type, 'in room', roomID);
+                        return;
                     }
                     const room = new Room({
                         ID: roomID,
                         name: name,
                         type: type as RoomType,
-                        connected: true,
+                        connected: type === 'chat' || type === 'battle',
                         open: true,
                     });
                     this._addRoom(room);
+                    addedYet = true;
                     this.addUsers(roomID, users);
                     if (toID(this.autoSelectRoom) === roomID) {
                         this.autoSelectRoom = '';
@@ -796,6 +803,28 @@ export class Client {
             case 'deinit':
                 this._removeRoom(roomID);
                 break;
+            case 'pagehtml':
+            {
+                const content = args.join('|');
+                const room = this.room(roomID);
+                if (!room) {
+                    console.error('Received |pagehtml| from untracked room', roomID);
+                    return;
+                }
+                room.addUHTML(
+                    newMessage({
+                        name: 'pagehtml',
+                        user: '',
+                        type: 'raw',
+                        content,
+                    }),
+                    {
+                        selected: this.selectedRoom === roomID,
+                        selfSent: false,
+                    },
+                );
+                break;
+            }
             case 'uhtml':
             case 'html':
                 {
