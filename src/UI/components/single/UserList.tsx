@@ -2,7 +2,6 @@ import { PS_context } from './PS_context';
 import { MouseEvent, useContext, useEffect, useState } from 'react';
 import { Username } from '../Username';
 import { isStaff, User } from '../../../client/user';
-import { Input } from '@/components/ui/input';
 
 export default function UserList({
     clickUsername,

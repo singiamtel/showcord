@@ -564,24 +564,20 @@ export class Client {
         });
     }
 
-    // Hopefully this code will become cleaner with time (lol)
-    private parseSocketMsg(chunk: string) {
-        const i = 0;
+    private parseSocketChunk(chunk: string) {
         const split = chunk.split('\n');
         const roomID = split[0][0] === '>' ? split[0].slice(1) : 'lobby';
-
         for (const [idx, line] of split.entries()) {
             if (line === '') continue;
             if (idx === 0 && line[0] === '>') {
                 continue;
             }
             const { args, kwArgs } = Protocol.parseBattleLine(line);
-            const success = this.parseSingleLiner(args, kwArgs, roomID);
+            const success = this.parseSocketLine(args, kwArgs, roomID);
             if (!success) {
                 console.error('Failed to parse', line);
                 console.error(chunk);
             }
-
             const room = this.room(roomID);
             if (room instanceof BattleRoom) {
                 room.feedBattle(line);
@@ -598,7 +594,7 @@ export class Client {
         return room;
     }
 
-    private parseSingleLiner(
+    private parseSocketLine(
         args: Protocol.ArgType | Protocol.BattleArgType,
         kwArgs: Protocol.BattleArgsKWArgType | Record<string, never>,
         roomID: string
@@ -1005,17 +1001,20 @@ export class Client {
         switch (cmd) {
             case '/raw':
                 type = 'boxedHTML';
+                content = content.slice(5);
                 break;
             case '/uhtmlchange':{
                 const [name, ...html] = content.split(',');
                 UHTMLName = name.split(' ')[1];
                 type = 'uhtmlchange';
+                content = html.join(',');
                 break;
             }
             case '/uhtml':{
                 const [name, ...html] = content.split(',');
                 UHTMLName = name.split(' ')[1];
                 type = 'boxedHTML';
+                content = html.join(',');
                 break;
             }
             case '/error':
@@ -1061,7 +1060,7 @@ export class Client {
         };
         this.socket.onmessage = (event) => {
             console.debug('[socket-input]:\n', event.data);
-            this.parseSocketMsg(event.data);
+            this.parseSocketChunk(event.data);
         };
         this.socket.onerror = (event) => {
             console.error(event);
