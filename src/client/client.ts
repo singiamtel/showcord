@@ -596,10 +596,9 @@ export class Client {
 
     private parseSocketLine(
         args: Protocol.ArgType | Protocol.BattleArgType,
-        kwArgs: Protocol.BattleArgsKWArgType | Record<string, never>,
+        _kwArgs: Protocol.BattleArgsKWArgType | Record<string, never>,
         roomID: string
     ): boolean {
-        // const [_, cmd, ...args] = message.split('|');
         switch (args[0]) {
             case 'challstr': {
                 this.challstr = args[1];
@@ -648,7 +647,7 @@ export class Client {
                 room.addUsers(users);
                 break;
             }
-            case 'chat':{
+            case 'chat': {
                 const username = args[1];
                 const messageContent = args[2];
                 const room = this.requiresRoom('chat', roomID);
@@ -728,7 +727,7 @@ export class Client {
                 break;
             }
             case 'queryresponse': {
-                // type QueryType = 'userdetails' | 'roomlist' | 'rooms' | 'laddertop' | 'roominfo' | 'savereplay' | 'debug';
+                // 'userdetails' | 'roomlist' | 'rooms' | 'laddertop' | 'roominfo' | 'savereplay' | 'debug'
                 const queryType = args[1];
                 switch (queryType) {
                     case 'userdetails':
@@ -901,7 +900,7 @@ export class Client {
                         newMessage({
                             user: '',
                             type: 'error',
-                            content: args.join('|'),
+                            content: args[1],
                         }),
                     );
                 }
@@ -934,11 +933,11 @@ export class Client {
             case 'player':
             case 'gen':
             case 'tier':
-                break;
             case 'sentchoice':
                 break;
             default:
             {
+                // assertNever(args[0]);
                 console.error('Unknown cmd', args[0], args);
                 return false;
             }
@@ -1003,14 +1002,14 @@ export class Client {
                 type = 'boxedHTML';
                 content = content.slice(5);
                 break;
-            case '/uhtmlchange':{
+            case '/uhtmlchange': {
                 const [name, ...html] = content.split(',');
                 UHTMLName = name.split(' ')[1];
                 type = 'uhtmlchange';
                 content = html.join(',');
                 break;
             }
-            case '/uhtml':{
+            case '/uhtml': {
                 const [name, ...html] = content.split(',');
                 UHTMLName = name.split(' ')[1];
                 type = 'boxedHTML';
@@ -1086,6 +1085,13 @@ export class Client {
         });
     }
 
+    /**
+     * Handles every user-sent message.
+     *
+     * Some messages are not actually sent to the server but hijacked and handled by the client instead
+     *
+     * Returns true if the message has been handled, false otherwise
+     */
     private __parseSendMsg(
         message: string,
         raw: boolean,
