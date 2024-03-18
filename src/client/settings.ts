@@ -77,7 +77,6 @@ export class Settings {
                     if (this.username && this.userDefinedSettings.highlightOnSelf) {
                         strings.push(this.username);
                     }
-                    console.log('roomid', roomid, 'strings', strings);
                     this.compileHighlightWords[roomid] = stringsToRegex(strings);
                 }
             }
@@ -128,7 +127,6 @@ export class Settings {
     }
 
     setTheme(theme: 'light' | 'dark') {
-        console.log(`setTheme ${theme}`);
         this.theme = theme;
         this.saveSettings();
     }

@@ -49,7 +49,6 @@ export default function Sidebar(props: Readonly<HTMLAttributes<'div'>>) {
                 const oldIndex = rooms.findIndex((item) => item.ID === active.id);
                 const newIndex = rooms.findIndex((item) => item.ID === over.id);
                 const tmp = arrayMove(rooms, oldIndex, newIndex);
-                // console.log('tmp:', tmp.map((e) => e.id));
                 setRooms(tmp);
             }
         }

@@ -92,7 +92,7 @@ export class Client {
             }
         }
 
-        console.log(`>>${message}`);
+        console.debug('[socket-output]:\n', message);
         try {
             if (this.__parseSendMsg(ogMessage, raw)) return; // Already handled client-side
             this.socket.send(`${message}`);
@@ -447,7 +447,6 @@ export class Client {
 
     // --- Room management ---
     private _addRoom(room: Room) {
-        console.log('adding room', room);
         this.rooms.set(room.ID, room);
         this.events.dispatchEvent(new CustomEvent('room', { detail: room }));
         this.events.dispatchEvent(new CustomEvent('message', { detail: room })); // Just in case. Fixes pagehtml
@@ -574,7 +573,6 @@ export class Client {
         for (const [idx, line] of split.entries()) {
             if (line === '') continue;
             if (idx === 0 && line[0] === '>') {
-                console.log('ignoring line', line);
                 continue;
             }
             const { args, kwArgs } = Protocol.parseBattleLine(line);
@@ -613,7 +611,6 @@ export class Client {
             }
             case 'init': {
                 const type = args[1];
-                console.log('got the init', args);
                 const shouldConnect = type === 'chat' || type === 'battle';
                 const isBattle = type === 'battle';
                 const newRoom = isBattle ? new BattleRoom(
@@ -636,7 +633,6 @@ export class Client {
             }
             case 'title': {
                 const name = args[1];
-                console.log('title', args);
                 const room = this.requiresRoom('title', roomID);
                 if (!room) return false;
                 room.rename(name);
@@ -647,14 +643,12 @@ export class Client {
                 const room = this.requiresRoom('userlist', roomID);
                 if (!room) return false;
                 const parsedUsers = args[1].split(',');
-                console.log('parsedUsers', parsedUsers);
                 const users = parsedUsers.map((tmpuser) => {
                     const [user, status] = tmpuser.slice(1).split('@');
                     const name = tmpuser.slice(0, 1) + user;
                     return new User({ name, ID: toID(name), status });
                 });
                 users.shift();
-                console.log('adding users', users);
                 room.addUsers(users);
                 break;
             }
@@ -1007,34 +1001,45 @@ export class Client {
         } {
         let type: Message['type'] | 'uhtmlchange' = 'chat';
         let UHTMLName = undefined;
-        if (content.startsWith('/raw')) {
-            type = 'boxedHTML';
-            content = content.slice(4);
-        } else if (content.startsWith('/uhtmlchange')) {
-            const [name, ...html] = content.split(',');
-            UHTMLName = name.split(' ')[1];
-            type = 'uhtmlchange';
-            content = html.join(',');
-        } else if (content.startsWith('/uhtml')) {
-            const [name, ...html] = content.split(',');
-            UHTMLName = name.split(' ')[1];
-            type = 'boxedHTML';
-            content = html.join(',');
-        } else if (content.startsWith('/error')) {
-            type = 'error';
-            content = content.slice(6);
-        } else if (content.startsWith('/text')) {
-            type = 'log';
-            content = content.slice(5);
-        } else if (content.startsWith('/announce')) {
-            type = 'announce';
-            content = content.slice(9);
-        } else if (content.startsWith('/log')) {
-            type = 'log';
-            content = content.slice(4);
-        } else if (content.startsWith('/me')) {
-            type = 'roleplay';
-            content = content.slice(3);
+        const cmd = content.split(' ')[0];
+        switch (cmd) {
+            case '/raw':
+                type = 'boxedHTML';
+                break;
+            case '/uhtmlchange':{
+                const [name, ...html] = content.split(',');
+                UHTMLName = name.split(' ')[1];
+                type = 'uhtmlchange';
+                break;
+            }
+            case '/uhtml':{
+                const [name, ...html] = content.split(',');
+                UHTMLName = name.split(' ')[1];
+                type = 'boxedHTML';
+                break;
+            }
+            case '/error':
+                type = 'error';
+                content = content.slice(6);
+                break;
+            case '/text':
+                type = 'log';
+                content = content.slice(5);
+                break;
+            case '/announce':
+                type = 'announce';
+                content = content.slice(9);
+                break;
+            case '/log':
+                type = 'log';
+                content = content.slice(4);
+                break;
+            case '/me':
+                type = 'roleplay';
+                content = content.slice(3);
+                break;
+            default:
+                break;
         }
         if (UHTMLName) {
             return { type, content, UHTMLName };
@@ -1055,7 +1060,7 @@ export class Client {
             }
         };
         this.socket.onmessage = (event) => {
-            console.debug('socketLog:\n', event.data);
+            console.debug('[socket-input]:\n', event.data);
             this.parseSocketMsg(event.data);
         };
         this.socket.onerror = (event) => {

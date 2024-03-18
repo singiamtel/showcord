@@ -65,7 +65,6 @@ export default function PS_contextProvider(props: any) {
                 else if (newIndex < 0) room = roomNames[roomNames.length - 1];
                 else room = roomNames[newIndex];
             } else {
-                console.log('No rooms found');
                 return;
             }
         }
@@ -113,7 +112,6 @@ export default function PS_contextProvider(props: any) {
         };
 
         const autoSelectRoomListener = (e: Event) => {
-            console.log('Received selectroom event', e);
             const roomID = (e as CustomEvent)?.detail;
             if (roomID) {
                 setRoom(roomID);
@@ -176,7 +174,6 @@ export default function PS_contextProvider(props: any) {
         };
 
         const notificationsEventListener: EventListener = (event) => {
-            console.log('Received notification', (event as CustomEvent).detail);
             notificationsEngine.sendNotification((event as CustomEvent).detail);
         };
 

@@ -8,7 +8,6 @@ export default function HighlightingSettings(props: HTMLAttributes<'div'>) {
     const { client } = useContext(PS_context);
     const [highlightWords, setHighlightWords] = useState(client.settings.getHighlightWordsMap());
     const [hlOnSelf, setHlOnSelf] = useState(client.settings.getHighlightOnSelf());
-    console.log(`highlightWords`, highlightWords);
     // global goes first
     const rooms = Object.keys(highlightWords).sort((a, b) => {
         if (a === 'global') {

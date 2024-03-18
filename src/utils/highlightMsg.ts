@@ -10,8 +10,5 @@ export function highlightMsg(highlight: RegExp | null, message: string) : boolea
     if (!highlight) return false;
     const cleanMessage = message.replace(/[^a-z0-9]/gi, '');
     const hl = highlight.test(cleanMessage);
-    if (hl) {
-        console.log('highlighted', message, highlight);
-    }
     return hl;
 }

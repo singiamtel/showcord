@@ -30,13 +30,11 @@ export class BattleRoom extends Room {
     }
 
     feedBattle(line: string) {
-        console.log('feedBattle', line);
         if (!this.battle) {
             console.error('feedBattle called on non-battle room');
             return;
         }
         const { args, kwArgs } = Protocol.parseBattleLine(line);
-        console.log('feedBattle', args, kwArgs);
 
         const html = this.formatter!.formatHTML(args, kwArgs); // fix type...
         try {
