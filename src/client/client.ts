@@ -1,10 +1,12 @@
 import { Settings } from './settings';
 import { toID } from '../utils/generic';
 import newMessage, { Message } from './message';
-import { Room, RoomType, roomTypes } from './room';
+import { Room } from './room/room';
 import { User } from './user';
 import { clientNotification, RoomNotification } from './notifications';
-import { split } from 'postcss/lib/list';
+import { Protocol } from '@pkmn/protocol';
+import { assertNever, assert } from '@/lib/utils';
+import { BattleRoom } from './room/battleRoom';
 
 type ClientConstructor = {
     server_url?: string;
@@ -26,7 +28,7 @@ export class Client {
     private onOpen: (() => void)[] = []; // Append callbacks here to run when the socket opens
 
     private joinAfterLogin: string[] = [];
-    private challstr: string = '';
+    challstr: string = '';
     private client_id = import.meta.env.VITE_OAUTH_CLIENTID;
     private selectedRoom: string = ''; // Used for notifications
     // Callbacks given to query commands, it's called after the server responds back with the info
@@ -245,7 +247,7 @@ export class Client {
             throw new Error('Auto-joining rooms before socket initialization ');
         }
         const filteredRooms = rooms.filter((e) =>
-        // e as value
+            // e as value
             !this.permanentRooms.map((e) => e.ID).includes(
                 e as typeof this.permanentRooms[number]['ID'],
             ));
@@ -292,24 +294,24 @@ export class Client {
     // --- Login ---
 
     async login() {
-    // Order of login methods:
-    // 1. Assertion in URL (from oauth login)
-    // - This happens right after oauth login
-    // - We also need to store the token in localstorage
-    //
-    // 2. Assertion from token
-    // - This happens when we have a token stored in localstorage
-    // - We try to get an assertion from the token, and send it to the server
-    // - If it fails we drop the token and go to #3
-    //
-    // 3. Normal login
-    // Redirect to oauth login page
+        // Order of login methods:
+        // 1. Assertion in URL (from oauth login)
+        // - This happens right after oauth login
+        // - We also need to store the token in localstorage
+        //
+        // 2. Assertion from token
+        // - This happens when we have a token stored in localstorage
+        // - We try to get an assertion from the token, and send it to the server
+        // - If it fails we drop the token and go to #3
+        //
+        // 3. Normal login
+        // Redirect to oauth login page
         while (!this.challstr) {
             await new Promise((resolve) => setTimeout(resolve, 100));
         }
         // Oauth login method
         const url =
-      `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${this.client_id}&challenge=${this.challstr}`;
+            `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${this.client_id}&challenge=${this.challstr}`;
         const nWindow = (window as any).n = open(
             url,
             undefined,
@@ -385,8 +387,7 @@ export class Client {
 
         const storedName = this.settings.getUsername();
         this.__send(
-            `/trn ${
-                toID(storedName) === toID(username) ? storedName : username
+            `/trn ${toID(storedName) === toID(username) ? storedName : username
             },0,${assertion}`,
             false,
         );
@@ -395,7 +396,7 @@ export class Client {
     private async parseLoginserverResponse(
         response: Response,
     ): Promise<string | false> {
-    // Loginserver responses are just weird
+        // Loginserver responses are just weird
         const response_test = await response.text();
         if (response_test[0] === ';') {
             console.error('AssertionError: Received ; from loginserver');
@@ -446,6 +447,7 @@ export class Client {
 
     // --- Room management ---
     private _addRoom(room: Room) {
+        console.log('adding room', room);
         this.rooms.set(room.ID, room);
         this.events.dispatchEvent(new CustomEvent('room', { detail: room }));
         this.events.dispatchEvent(new CustomEvent('message', { detail: room })); // Just in case. Fixes pagehtml
@@ -482,7 +484,7 @@ export class Client {
         const room = this.room(roomID);
         if (
             toID(message.user) !== toID(this.settings.getUsername()) &&
-      this.highlightMsg(roomID, message)
+            this.highlightMsg(roomID, message)
         ) {
             this.events.dispatchEvent(
                 new CustomEvent('message', { detail: message }),
@@ -556,148 +558,159 @@ export class Client {
     }
 
     private setUsername(username: string) {
-    // gotta re-run highlightMsg on all messages
+        // gotta re-run highlightMsg on all messages
         this.settings.setUsername(username);
         this.rooms.forEach(async (room) => {
             room.runHighlight(this.forceHighlightMsg.bind(this));
         });
     }
 
-    // --- Commands parser ---
     // Hopefully this code will become cleaner with time (lol)
-    private async parseSocketMsg(message: string) {
-        if (message.startsWith('|challstr|')) {
-            const splitted_challstr = message.split('|');
-            splitted_challstr.shift();
-            splitted_challstr.shift();
-            this.challstr = splitted_challstr.join('|');
-            return;
-        }
+    private parseSocketMsg(chunk: string) {
+        const i = 0;
+        const split = chunk.split('\n');
+        const roomID = split[0][0] === '>' ? split[0].slice(1) : 'lobby';
 
-        let i = 0;
-        const splitted_message = message.split('\n');
-        const isGlobalOrLobby = splitted_message[0][0] !== '>';
-        let roomID: string;
-        if (isGlobalOrLobby) {
-            roomID = 'lobby';
-        } else {
-            i++;
-            roomID = splitted_message[0].slice(1);
-        }
-        if (splitted_message[i].startsWith('|init|')) {
-            let name = '';
-            let users: User[] = [];
-            let addedYet = false;
-            const type = splitted_message[i].split('|')[2];
-            i++;
-            for (; i < splitted_message.length; i++) { // start at 2 because first line is room id and second line is cmd
-                if (splitted_message[i] === '') continue;
-                if (splitted_message[i].startsWith('|title|')) {
-                    name = splitted_message[i].slice(7);
-                    // continue;
-                }
-                if (splitted_message[i].startsWith('|users|')) {
-                    const parsedUsers = splitted_message[i].split('|')[2].split(
-                        ',',
-                    );
-                    users = parsedUsers.map((tmpuser) => {
-                        const [user, status] = tmpuser.slice(1).split('@');
-                        const name = tmpuser.slice(0, 1) + user;
-                        return new User({ name, ID: toID(name), status });
-                    });
-                    users.shift();
-                    continue;
-                }
-                if (splitted_message[i].startsWith('|:|') || splitted_message[i].startsWith('|t:|') || (type === 'html' && name && !addedYet)) {
-                    console.log('adding room because of ', splitted_message[i]);
-                    if (!roomTypes.includes(type as RoomType)) {
-                        console.error('Unknown room type', type, 'in room', roomID);
-                        return;
-                    }
-                    const room = new Room({
-                        ID: roomID,
-                        name: name,
-                        type: type as RoomType,
-                        connected: type === 'chat' || type === 'battle',
-                        open: true,
-                    });
-                    this._addRoom(room);
-                    addedYet = true;
-                    this.addUsers(roomID, users);
-                    if (toID(this.autoSelectRoom) === roomID) {
-                        this.autoSelectRoom = '';
-                        this.events.dispatchEvent(
-                            new CustomEvent('selectroom', { detail: roomID }),
-                        );
-                    }
-                    continue;
-                }
-                this.parseSingleLiner(splitted_message[i], roomID);
+        for (const [idx, line] of split.entries()) {
+            if (line === '') continue;
+            if (idx === 0 && line[0] === '>') {
+                console.log('ignoring line', line);
+                continue;
             }
-        }
+            const { args, kwArgs } = Protocol.parseBattleLine(line);
+            const success = this.parseSingleLiner(args, kwArgs, roomID);
+            if (!success) {
+                console.error('Failed to parse', line);
+                console.error(chunk);
+            }
 
-        for (; i < splitted_message.length; i++) {
-            this.parseSingleLiner(splitted_message[i], roomID);
+            const room = this.room(roomID);
+            if (room instanceof BattleRoom) {
+                room.feedBattle(line);
+            }
         }
     }
 
-    private parseSingleLiner(
-        message: string,
-        roomID: string,
-    ): void {
-        if (!message.startsWith('|')) {
-            const chatMessage = newMessage({
-                timestamp: Math.floor(Date.now() / 1000).toString(),
-                type: 'simple',
-                content: message,
-            });
-            return this.addMessageToRoom(roomID, chatMessage);
+    private requiresRoom(cmd: string, roomID: string) {
+        const room = this.room(roomID);
+        if (!room) {
+            console.error(`requiresRoom: room is undefined for cmd ${cmd}`);
+            return false;
         }
+        return room;
+    }
 
-        const [_, cmd, ...args] = message.split('|');
-        switch (cmd) {
-            case 'c':
-            case 'c:': {
-                const room = this.room(roomID);
-                if (!room) {
-                    console.warn(
-                        'Trying to add message to non-existent room (' + roomID + ')',
-                        message,
-                    );
-                    return;
-                }
-
-                const chatMessage = this.parseCMessage(message, cmd === 'c:', roomID);
+    private parseSingleLiner(
+        args: Protocol.ArgType | Protocol.BattleArgType,
+        kwArgs: Protocol.BattleArgsKWArgType | Record<string, never>,
+        roomID: string
+    ): boolean {
+        // const [_, cmd, ...args] = message.split('|');
+        switch (args[0]) {
+            case 'challstr': {
+                this.challstr = args[1];
+                break;
+            }
+            case 'init': {
+                const type = args[1];
+                console.log('got the init', args);
+                const shouldConnect = type === 'chat' || type === 'battle';
+                const isBattle = type === 'battle';
+                const newRoom = isBattle ? new BattleRoom(
+                    {
+                        ID: roomID,
+                        name: roomID,
+                        type: type,
+                        connected: true,
+                        open: true,
+                    }
+                ) : new Room({
+                    ID: roomID,
+                    name: roomID,
+                    type: type,
+                    connected: shouldConnect,
+                    open: true,
+                });
+                this._addRoom(newRoom);
+                break;
+            }
+            case 'title': {
+                const name = args[1];
+                console.log('title', args);
+                const room = this.requiresRoom('title', roomID);
+                if (!room) return false;
+                room.rename(name);
+                this.events.dispatchEvent(new CustomEvent('room', { detail: room }));
+                break;
+            }
+            case 'users': {
+                const room = this.requiresRoom('userlist', roomID);
+                if (!room) return false;
+                const parsedUsers = args[1].split(',');
+                console.log('parsedUsers', parsedUsers);
+                const users = parsedUsers.map((tmpuser) => {
+                    const [user, status] = tmpuser.slice(1).split('@');
+                    const name = tmpuser.slice(0, 1) + user;
+                    return new User({ name, ID: toID(name), status });
+                });
+                users.shift();
+                console.log('adding users', users);
+                room.addUsers(users);
+                break;
+            }
+            case 'chat':{
+                const username = args[1];
+                const messageContent = args[2];
+                const room = this.requiresRoom('chat', roomID);
+                if (!room) return false;
+                const chatMessage = this.parseCMessage(messageContent, username, undefined, room);
                 if (!chatMessage) {
                     this.events.dispatchEvent(
-                        new CustomEvent('message', { detail: message }),
+                        new CustomEvent('message', { detail: chatMessage }),
                     );
-                    return;
+                    return false;
                 }
-                this.addMessageToRoom(roomID, chatMessage);
+                this.addMessageToRoom(room.ID, chatMessage);
+                break;
+            }
+            case 'c:': {
+                const timestamp = args[1];
+                const username = args[2];
+                const messageContent = args[3];
+                const room = this.requiresRoom('c:', roomID);
+                if (!room) return false;
+                const chatMessage = this.parseCMessage(messageContent, username, timestamp, room);
+                if (!chatMessage) {
+                    this.events.dispatchEvent(
+                        new CustomEvent('message', { detail: chatMessage }),
+                    );
+                    return false;
+                }
+                this.addMessageToRoom(room.ID, chatMessage);
                 break;
             }
             case 'pm':
                 {
-                    const sender = toID(args[0]);
-                    const receiver = toID(args[1]);
+                    const sender = toID(args[1]);
+                    const receiver = toID(args[2]);
+                    let inferredRoomid = '';
                     if (sender === toID(this.settings.getUsername())) {
                         // sent message
-                        roomID = `pm-${receiver}`;
+                        inferredRoomid = `pm-${receiver}`;
                     } else {
                         // received message
-                        roomID = `pm-${sender}`;
+                        inferredRoomid = `pm-${sender}`;
                     }
                     const { content, type } = this.parseCMessageContent(
-                        args.slice(2).join('|'),
+                        args.slice(3).join('|'),
                     );
                     this.__createPM(
-                        sender === toID(this.settings.getUsername()) ? args[1] : args[0],
+                        sender === toID(this.settings.getUsername()) ? args[2] : args[1],
                     );
                     this.addMessageToRoom(
-                        roomID,
+                        inferredRoomid,
                         newMessage({
-                            user: args[0],
+                            user: args[1],
                             content,
                             timestamp: Math.floor(Date.now() / 1000).toString(),
                             type,
@@ -705,117 +718,124 @@ export class Client {
                     );
                 }
                 break;
-            case 'j':
-            case 'J': {
-                const room = this.room(roomID);
-                if (!room) {
-                    console.error(
-                        'Received |J| from untracked room',
-                        roomID,
-                    );
-                    return;
-                }
-                this.addUsers(roomID, [new User({ name: args[0], ID: toID(args[0]) })]);
+            case 'join': {
+                const room = this.requiresRoom('join', roomID);
+                if (!room) return false;
+                const username = args[1];
+                this.addUsers(room.ID, [new User({ name: username, ID: toID(username) })]);
                 break;
             }
-            case 'l':
-            case 'L': {
-                const room = this.room(roomID);
-                if (!room) {
-                    console.error(
-                        'Received |L| from untracked room',
-                        roomID,
-                    );
-                    return;
-                }
-                this.removeUser(roomID, args[0]);
+            case 'leave': {
+                const room = this.requiresRoom('leave', roomID);
+                if (!room) return false;
+                this.removeUser(room.ID, args[1]);
                 break;
             }
-            case 'n':
-            case 'N': {
-                this.updateUsername(roomID, args[0], args[1]);
+            case 'name': {
+                const args1 = args[1];
+                const args2 = args[2];
+                this.updateUsername(roomID, args1, args2);
                 break;
             }
             case 'queryresponse': {
-                if (args[0] === 'userdetails') {
-                    try {
-                        const tmpjson = JSON.parse(args.slice(1).join('|'));
-                        if (tmpjson.userid === toID(this.settings.getUsername())) {
-                            if (tmpjson.status) {
-                                this.settings.setStatus(tmpjson.status);
-                            }
-                        }
+                // type QueryType = 'userdetails' | 'roomlist' | 'rooms' | 'laddertop' | 'roominfo' | 'savereplay' | 'debug';
+                const queryType = args[1];
+                switch (queryType) {
+                    case 'userdetails':
 
-                        if (this.userListener) {
-                            this.userListener(tmpjson);
-                            this.userListener = undefined;
-                        } else if (this.loggedIn) {
-                            console.warn(
-                                'received queryresponse|userdetails but nobody asked for it',
-                                args,
-                            );
+                        try {
+                            const tmpjson = JSON.parse(args[2]);
+                            if (tmpjson.userid === toID(this.settings.getUsername())) {
+                                if (tmpjson.status) {
+                                    this.settings.setStatus(tmpjson.status);
+                                }
+                            }
+
+                            if (this.userListener) {
+                                this.userListener(tmpjson);
+                                this.userListener = undefined;
+                            } else if (this.loggedIn) {
+                                console.warn(
+                                    'received queryresponse|userdetails but nobody asked for it',
+                                    args,
+                                );
+                            }
+                        } catch (e) {
+                            console.error('Error parsing userdetails', args);
                         }
-                    } catch (e) {
-                        console.error('Error parsing userdetails', args);
-                    }
-                } else if (args[0] === 'rooms') {
-                    try {
-                        const tmpjson = JSON.parse(args.slice(1).join('|'));
-                        this.roomsJSON = tmpjson;
-                        if (this.roomListener) {
-                            this.roomListener(tmpjson);
-                            this.roomListener = undefined;
+                        break;
+                    case 'rooms':
+                        try {
+                            const tmpjson = JSON.parse(args[2]);
+                            this.roomsJSON = tmpjson;
+                            if (this.roomListener) {
+                                this.roomListener(tmpjson);
+                                this.roomListener = undefined;
+                            }
+                        } catch (e) {
+                            console.error('Error parsing roomsdetails', args);
                         }
-                    } catch (e) {
-                        console.error('Error parsing roomsdetails', args);
-                    }
-                } else {
-                    console.error('Unknown queryresponse', args);
+                        break;
+                    default:
+                        // assertNever(queryType);
+                        console.error('Unknown queryresponse', args);
+                        break;
                 }
                 break;
             }
-            case 'noinit':
-                if (args[0] === 'namerequired') {
-                    this.joinAfterLogin.push(roomID);
-                } else if (args[0] === 'nonexistent') {
-                    this.events.dispatchEvent(
-                        new CustomEvent('error', { detail: args[1] }),
-                    );
-                } else if (args[0] === 'joinfailed') {
-                    this.events.dispatchEvent(
-                        new CustomEvent('error', { detail: args[1] }),
-                    );
-                } else {
-                    console.error('Unknown noinit', args);
+            case 'noinit': {
+                const reason = args[1];
+                switch (reason) {
+                    case 'namerequired':
+                        this.joinAfterLogin.push(roomID);
+                        break;
+                    case 'nonexistent':
+                        this.events.dispatchEvent(
+                            new CustomEvent('error', { detail: args[2] }),
+                        );
+                        break;
+                    case 'joinfailed':
+
+                        this.events.dispatchEvent(
+                            new CustomEvent('error', { detail: args[2] }),
+                        );
+                        break;
+                    default:
+                        // assertNever(reason);
+                        console.error('Unknown noinit', args);
                 }
                 break;
+            }
             case 'updateuser':
                 {
-                    if (!args[0].trim().toLowerCase().startsWith('guest')) {
+                    const username = args[1];
+                    const named = args[2];
+                    const avatar = args[3];
+                    if (!username.trim().toLowerCase().startsWith('guest')) {
                         this.autojoin(this.joinAfterLogin);
-                        // this.loggedIn = true;
-                        this.settings.updateUsername(args[0], args[2]);
-                        this.setUsername(args[0]);
-                        this.queryUserInternal(args[0]);
+                        this.loggedIn = true;
+                        assert(named === '1', 'Couldn\'t guard against guest');
+                        this.settings.updateUsername(username, avatar);
+                        this.setUsername(username);
+                        this.queryUserInternal(username);
                     }
                 }
                 break;
             case 'deinit':
                 this._removeRoom(roomID);
                 break;
-            case 'pagehtml':
-            {
-                const content = args.join('|');
+            case 'pagehtml': {
+                const content = args[1];
                 const room = this.room(roomID);
                 if (!room) {
                     console.error('Received |pagehtml| from untracked room', roomID);
-                    return;
+                    return false;
                 }
                 room.addUHTML(
                     newMessage({
                         name: 'pagehtml',
                         user: '',
-                        type: 'raw',
+                        type: 'boxedHTML',
                         content,
                     }),
                     {
@@ -826,32 +846,47 @@ export class Client {
                 break;
             }
             case 'uhtml':
-            case 'html':
                 {
-                    const name = cmd === 'uhtml' ? args[0] : undefined;
-                    if (name) {
-                        args.shift();
-                    }
-                    const uhtml = args.join('|');
-                    const room = this.room(roomID);
-                    if (!room) {
-                        console.error('Received |' + cmd + '| from untracked room', roomID);
-                        return;
-                    }
+                    const name = args[1];
+                    const uhtml = args[2];
+                    const room = this.requiresRoom('uhtml', roomID);
+                    if (!room) return false;
                     room.addUHTML(
                         newMessage({
                             name,
                             user: '',
-                            type: 'raw',
+                            type: 'boxedHTML',
                             content: uhtml,
                         }),
                         {
-                            selected: this.selectedRoom === roomID,
+                            selected: this.selectedRoom === room.ID,
                             selfSent: false,
                         },
                     );
                     this.events.dispatchEvent(
-                        new CustomEvent('message', { detail: message }),
+                        new CustomEvent('message', { detail: name }),
+                    );
+                }
+                break;
+            case 'html':
+                {
+                    const uhtml = args[1];
+                    const room = this.requiresRoom('html', roomID);
+                    if (!room) return false;
+                    room.addUHTML(
+                        newMessage({
+                            name: '',
+                            user: '',
+                            type: 'boxedHTML',
+                            content: uhtml,
+                        }),
+                        {
+                            selected: this.selectedRoom === room.ID,
+                            selfSent: false,
+                        },
+                    );
+                    this.events.dispatchEvent(
+                        new CustomEvent('message', { detail: 'html' }),
                     );
                 }
                 break;
@@ -860,8 +895,8 @@ export class Client {
                     roomID,
                     newMessage({
                         user: '',
-                        type: 'raw',
-                        content: args.join('|'),
+                        type: 'boxedHTML',
+                        content: args[1],
                     }),
                 );
                 break;
@@ -881,42 +916,69 @@ export class Client {
                     );
                 }
                 break;
+            case 'customgroups':
+            case 'formats':
+            case 'tournament':
+            case 'updatesearch':
+                break;
+            // battles
+            case 'move':
+            case '-fail':
+            case '-resisted':
+            case '-damage':
+            case 'done':
+            case '-heal':
+            case '-ability':
+            case '-boost':
+            case 'upkeep':
+            case 'turn':
+            case 'request':
+            case ':':
+            case 't:':
+            case 'teamsize':
+            case 'rule':
+            case 'start':
+            case 'switch':
+            case 'battle':
+            case 'gametype':
+            case 'player':
+            case 'gen':
+            case 'tier':
+                break;
+            case 'sentchoice':
+                break;
             default:
-                console.error('Unknown cmd: ' + cmd, message.slice(0, 100));
+            {
+                console.error('Unknown cmd', args[0], args);
+                return false;
+            }
         }
+        return true;
     }
 
     private parseCMessage(
         message: string,
-        hasTimestamp: boolean,
-        room: string,
+        user: string,
+        timestamp: string | undefined,
+        room: Room
     ): Message | undefined {
-        const splitted_message = message.slice(1).split('|');
-        let _, msgTime, user, tmpcontent: (string | undefined)[];
-        if (hasTimestamp) {
-            [_, msgTime, user, ...tmpcontent] = splitted_message;
-        } else {
-            [_, user, ...tmpcontent] = splitted_message;
-            msgTime = Math.floor(Date.now() / 1000).toString();
-        }
         const { content, type, UHTMLName } = this.parseCMessageContent(
-            tmpcontent.join('|'),
+            message
         );
 
         if (type === 'uhtmlchange') {
-            const roomObj = this.room(room);
-            if (!roomObj) {
+            if (!room) {
                 console.error(
                     'Received |uhtmlchange| from untracked room',
                     room,
                 );
                 return;
             }
-            roomObj.changeUHTML(
+            room.changeUHTML(
                 newMessage({
                     name: UHTMLName,
                     user: '',
-                    type: 'raw',
+                    type: 'boxedHTML',
                     content,
                 }),
             );
@@ -928,7 +990,7 @@ export class Client {
         }
 
         return newMessage({
-            timestamp: msgTime,
+            timestamp,
             user,
             name: UHTMLName,
             type,
@@ -946,7 +1008,7 @@ export class Client {
         let type: Message['type'] | 'uhtmlchange' = 'chat';
         let UHTMLName = undefined;
         if (content.startsWith('/raw')) {
-            type = 'raw';
+            type = 'boxedHTML';
             content = content.slice(4);
         } else if (content.startsWith('/uhtmlchange')) {
             const [name, ...html] = content.split(',');
@@ -956,7 +1018,7 @@ export class Client {
         } else if (content.startsWith('/uhtml')) {
             const [name, ...html] = content.split(',');
             UHTMLName = name.split(' ')[1];
-            type = 'raw';
+            type = 'boxedHTML';
             content = html.join(',');
         } else if (content.startsWith('/error')) {
             type = 'error';
@@ -993,7 +1055,7 @@ export class Client {
             }
         };
         this.socket.onmessage = (event) => {
-            console.log('<<', event.data);
+            console.debug('socketLog:\n', event.data);
             this.parseSocketMsg(event.data);
         };
         this.socket.onerror = (event) => {
@@ -1125,10 +1187,12 @@ export class Client {
                 }
                 return false;
             // case 'status':
-                // this.settings.setStatus(splitted_message.slice(1).join(' '));
-                // return false;
+            // this.settings.setStatus(splitted_message.slice(1).join(' '));
+            // return false;
             default:
                 return false;
         }
     }
 }
+
+export const client = new Client();

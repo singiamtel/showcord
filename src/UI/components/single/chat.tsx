@@ -15,7 +15,7 @@ import { HHMMSS } from '../../../utils/date';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import Linkify from 'linkify-react';
-import { Message } from '../../../client/message';
+import { Message, MessageType } from '../../../client/message';
 import Code from '../../chatFormatting/code';
 import UserCard from '../UserCard';
 import { Username } from '../Username';
@@ -298,18 +298,21 @@ export function MessageComponent(
     { message, user, type, time, hld, prev, onNameClick }: {
         message: string;
         user: string;
-        type: string;
+        type: MessageType;
         time?: Date;
         hld?: boolean | null;
         prev?: Message;
         onNameClick?: (e: MouseEvent) => void;
     },
 ) {
-    if (type === 'raw') {
+    if (type === 'boxedHTML') {
         if (prev?.content.startsWith('!code')) {
             return <Code message={message} />;
         }
         return <HTML message={message} />;
+    }
+    if (type === 'rawHTML') {
+        return <span className='pt-0.5'><HTML message={message} raw /></span>;
     }
     if (type === 'simple') {
         return message ?

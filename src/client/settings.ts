@@ -1,5 +1,5 @@
 import { highlightMsg, stringsToRegex } from '../utils/highlightMsg';
-import { Room } from './room';
+import { Room } from './room/room';
 
 export interface UserDefinedSettings {
     highlightWords: { [key: string]: string[] };
@@ -102,8 +102,6 @@ export class Settings {
     addRoom(room: Room) {
         if (!this.rooms.find((r) => r.ID === room.ID)) {
             this.rooms.push(room);
-        } else {
-            console.warn('addRoom', 'room already exists', room.ID);
         }
     }
 

@@ -1,6 +1,6 @@
 import { toID } from '@/utils/generic';
-import { Message } from './message';
-import { rankOrder, RankSymbol, User } from './user';
+import { Message } from '../message';
+import { rankOrder, RankSymbol, User } from '../user';
 
 export const roomTypes = ['chat', 'battle', 'pm', 'permanent', 'html'] as const;
 export type RoomType = typeof roomTypes[number];
@@ -103,6 +103,10 @@ export class Room {
 
     removeUser(username: string) {
         this.users = this.users.filter((u) => u.name !== username);
+    }
+
+    rename(name: string) {
+        this.name = name;
     }
 
     addUHTML(

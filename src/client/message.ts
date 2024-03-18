@@ -1,8 +1,9 @@
 import { Optional } from '../utils/generic';
 
-type MessageTypes =
+export type MessageType =
   | 'chat'
-  | 'raw'
+  | 'rawHTML'
+  | 'boxedHTML'
   | 'log'
   | 'announce'
   | 'simple'
@@ -12,7 +13,7 @@ type MessageTypes =
 
 export type Message = {
     content: string;
-    type: MessageTypes;
+    type: MessageType;
     user?: string;
     timestamp?: Date;
     notify: boolean;
