@@ -647,6 +647,24 @@ export class Client {
                 room.addUsers(users);
                 break;
             }
+            case '': {
+                const messageContent = args[1];
+                const room = this.requiresRoom('chat', roomID);
+                if (!room) return false;
+                const chatMessage = newMessage({
+                    user: '',
+                    content: messageContent,
+                    type: 'log',
+                });
+                if (!chatMessage) {
+                    this.events.dispatchEvent(
+                        new CustomEvent('message', { detail: chatMessage }),
+                    );
+                    return false;
+                }
+                this.addMessageToRoom(room.ID, chatMessage);
+                break;
+            }
             case 'chat': {
                 const username = args[1];
                 const messageContent = args[2];
