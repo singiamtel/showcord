@@ -13,7 +13,7 @@ const summaryCloseRegex = /<[/]summary\s*>/gi;
 
 export default function Code({ message }: any) {
     const msg = message.replace(brRegex, '\n').replace(summaryCloseRegex, '\n')
-        .replace(summaryOpenRegex, '').slice(1);
+        .replace(summaryOpenRegex, '');
     const str = HTMLtoPlain(msg);
     const { relevance } = hljs.highlightAuto(str);
     const threshold = 12.5;
