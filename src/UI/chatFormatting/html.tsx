@@ -56,7 +56,7 @@ export default function HTML(
             }
             if (domNode.name === 'psicon') {
                 if (attribs.pokemon) {
-                    const pokemon = Icons.getPokemon(attribs.pokemon, { protocol: 'https', domain: 'home.showcord.com' });
+                    const pokemon = Icons.getPokemon(attribs.pokemon, { protocol: 'https', domain: 'cdn.crob.at' });
                     return (
                         <span>
                             <span
@@ -76,7 +76,7 @@ export default function HTML(
                         </span>
                     );
                 } else if (attribs.item) {
-                    const item = Icons.getItem(attribs.item, { protocol: 'https', domain: 'home.showcord.com' });
+                    const item = Icons.getItem(attribs.item, { protocol: 'https', domain: 'cdn.crob.at' });
                     return (
                         <span>
                             <span
