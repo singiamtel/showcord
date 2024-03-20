@@ -38,6 +38,8 @@ next-env.d.ts
 secrets.ts
 mine.md
 dist/
+local/
 
 # Sentry Auth Token
 .env.sentry-build-plugin
+
