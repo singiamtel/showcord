@@ -2,6 +2,7 @@ import { PS_context } from './PS_context';
 import { MouseEvent, useContext, useEffect, useState } from 'react';
 import { Username } from '../Username';
 import { isStaff, User } from '../../../client/user';
+import { toID } from '@/utils/generic';
 
 export default function UserList({
     clickUsername,
@@ -20,7 +21,7 @@ export default function UserList({
     const [users, setUsers] = useState<User[]>([]);
     const [search, setSearch] = useState<string>('');
 
-    const filteredUsers = users.filter((user) => user.name.toLowerCase().includes(search.toLowerCase()));
+    const filteredUsers = users.filter((user) => toID(user.name).includes(toID(search)));
 
     useEffect(() => {
         if (!client) return;
