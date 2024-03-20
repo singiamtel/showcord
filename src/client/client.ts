@@ -580,7 +580,7 @@ export class Client {
             }
             const room = this.room(roomID);
             if (room instanceof BattleRoom) {
-                room.feedBattle(line);
+                room.feedBattle(line) && this.events.dispatchEvent(new CustomEvent('message', { detail: line }));
             }
         }
     }
@@ -913,7 +913,6 @@ export class Client {
                 }
                 break;
             case 'raw': {
-                console.log('raw', args[1]);
                 this.addMessageToRoom(
                     roomID,
                     newMessage({
@@ -952,6 +951,8 @@ export class Client {
             case 'done':
             case '-heal':
             case '-ability':
+            case '-message':
+            case 'win':
             case '-boost':
             case 'upkeep':
             case 'turn':

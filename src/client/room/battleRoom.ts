@@ -28,7 +28,10 @@ export class BattleRoom extends Room {
         (window as any).battle = this.battle; // TODO: remove
     }
 
-    feedBattle(line: string) {
+    /**
+     * Returns whether a new message was added to the battle.
+     */
+    feedBattle(line: string): boolean {
         assert(this.battle);
         const { args, kwArgs } = Protocol.parseBattleLine(line);
 
@@ -56,6 +59,8 @@ export class BattleRoom extends Room {
                 }),
                 { selected: true, selfSent: false },
             );
+            return true;
         }
+        return false;
     }
 }
