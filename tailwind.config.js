@@ -67,7 +67,7 @@ module.exports = {
             green: {
                 pastel: '#D4EDDA',
                 400: '#96F04A',
-                '400-light': '#96F04A',
+                '400-light': '#187902',
                 '600': '#35E717',
             },
         },
