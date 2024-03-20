@@ -2,10 +2,11 @@ import { Battle } from '@pkmn/client';
 import { LogFormatter } from '@pkmn/view';
 import { Generations } from '@pkmn/data';
 import { Dex } from '@pkmn/dex';
-import { ArgName, ArgType, BattleArgsKWArgType, Handler, Protocol } from '@pkmn/protocol';
+import { Protocol } from '@pkmn/protocol';
 
 import { Room, RoomType } from './room';
-import newMessage, { Message } from '../message';
+import newMessage from '../message';
+import { assert } from '@/lib/utils';
 
 
 export class BattleRoom extends Room {
@@ -22,18 +23,13 @@ export class BattleRoom extends Room {
     ) {
         super({ ID, name, type, connected, open });
 
-        if (type === 'battle') {
-            this.battle = new Battle(new Generations(Dex));
-            this.formatter = new LogFormatter('p1', this.battle); // TODO: dont use p1
-            (window as any).battle = this.battle; // TODO: remove
-        }
+        this.battle = new Battle(new Generations(Dex));
+        this.formatter = new LogFormatter('p1', this.battle); // TODO: dont use p1
+        (window as any).battle = this.battle; // TODO: remove
     }
 
     feedBattle(line: string) {
-        if (!this.battle) {
-            console.error('feedBattle called on non-battle room');
-            return;
-        }
+        assert(this.battle);
         const { args, kwArgs } = Protocol.parseBattleLine(line);
 
         const html = this.formatter!.formatHTML(args, kwArgs); // fix type...

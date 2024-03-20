@@ -35,6 +35,7 @@ import {
 } from '../../chatFormatting/chat';
 import { userColor } from '../../../utils/namecolour';
 import manageURL from '../../../utils/manageURL';
+import { assertNever } from '@/lib/utils';
 
 // ``code here`` marks inline code
 // ||text|| are spoilers
@@ -106,6 +107,7 @@ const cleanTag = (input: string, tag: keyof typeof elements) => {
         case 'roomlink':
             return input.replace(elements.roomlink.pattern, '$1');
         default:
+            assertNever(tag);
             console.error('cleanTag: unknown tag', tag);
             return '';
     }

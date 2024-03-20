@@ -92,7 +92,7 @@ export class Client {
             }
         }
 
-        console.debug('[socket-output]:\n', message);
+        console.debug('[socket-input]\n', message);
         try {
             if (this.__parseSendMsg(ogMessage, raw)) return; // Already handled client-side
             this.socket.send(`${message}`);
@@ -880,6 +880,7 @@ export class Client {
                 }
                 break;
             case 'raw': {
+                console.log('raw', args[1]);
                 this.addMessageToRoom(
                     roomID,
                     newMessage({
@@ -1058,7 +1059,7 @@ export class Client {
             }
         };
         this.socket.onmessage = (event) => {
-            console.debug('[socket-input]:\n', event.data);
+            console.debug('[socket-output]\n' + event.data);
             this.parseSocketChunk(event.data);
         };
         this.socket.onerror = (event) => {
