@@ -691,7 +691,7 @@ export class Client {
                     this.events.dispatchEvent(
                         new CustomEvent('message', { detail: chatMessage }),
                     );
-                    return false;
+                    break;
                 }
                 this.addMessageToRoom(room.ID, chatMessage);
                 break;
@@ -842,13 +842,28 @@ export class Client {
                     newMessage({
                         name: 'pagehtml',
                         user: '',
-                        type: 'boxedHTML',
+                        type: 'rawHTML',
                         content,
                     }),
                     {
                         selected: this.selectedRoom === roomID,
                         selfSent: false,
                     },
+                );
+                break;
+            }
+            case 'uhtmlchange':{
+                const name = args[1];
+                const uhtml = args[2];
+                const room = this.requiresRoom('uhtmlchange', roomID);
+                if (!room) return false;
+                room.changeUHTML(
+                    newMessage({
+                        name,
+                        user: '',
+                        type: 'boxedHTML',
+                        content: uhtml,
+                    }),
                 );
                 break;
             }
