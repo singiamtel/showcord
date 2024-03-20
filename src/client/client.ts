@@ -917,7 +917,7 @@ export class Client {
                     roomID,
                     newMessage({
                         user: '',
-                        type: 'boxedHTML',
+                        type: 'rawHTML',
                         content: args[1],
                     }),
                 );
@@ -1034,7 +1034,7 @@ export class Client {
         const cmd = content.split(' ')[0];
         switch (cmd) {
             case '/raw':
-                type = 'boxedHTML';
+                type = 'rawHTML';
                 content = content.slice(5);
                 break;
             case '/uhtmlchange': {
