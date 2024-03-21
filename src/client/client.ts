@@ -246,11 +246,10 @@ export class Client {
         if (!this.socket) {
             throw new Error('Auto-joining rooms before socket initialization ');
         }
-        const filteredRooms = rooms.filter((e) =>
-            // e as value
+        const filteredRooms = rooms.filter((room) =>
             !this.permanentRooms.map((e) => e.ID).includes(
-                e as typeof this.permanentRooms[number]['ID'],
-            ));
+                room as typeof this.permanentRooms[number]['ID'],
+            ) && !room.startsWith('pm-'));
         if (useDefaultRooms && (!filteredRooms || filteredRooms.length === 0)) {
             for (const room of this.settings.defaultRooms) {
                 this.__send(`/join ${room}`, false);

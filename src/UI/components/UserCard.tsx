@@ -20,13 +20,13 @@ import { client } from './single/PS_context';
 const margin = 15;
 
 export default function UserCard(
-    { user, name, position, forwardRef, close }: {
+    { user, name, position, forwardRef, close }: Readonly<{
         user: any;
         name: string;
         position: { x: number; y: number };
         forwardRef: MutableRefObject<any>;
         close: () => void;
-    },
+    }>,
 ) {
     const publicRooms = user ?
         Object.entries(user.rooms).filter((e: any) => !e[1].isPrivate) :
