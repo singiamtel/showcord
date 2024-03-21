@@ -6,6 +6,7 @@ import '@fontsource/roboto-mono';
 import './UI/globals.css';
 import 'react-toastify/dist/ReactToastify.css';
 import PS_contextProvider from './UI/components/single/PS_context';
+import { Analytics } from '@vercel/analytics/react';
 
 const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement,
@@ -13,6 +14,7 @@ const root = ReactDOM.createRoot(
 
 root.render(
     <StrictMode>
+        <Analytics/>
         <PS_contextProvider>
             <App />
         </PS_contextProvider>
