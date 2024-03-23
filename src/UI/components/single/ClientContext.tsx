@@ -28,7 +28,7 @@ const ClientContext = createContext<ClientContextType | undefined>(undefined);
 
 export default function ClientContextProvider(props: React.PropsWithChildren) {
     const [user, setUser] = useState<string | undefined>();
-    const [selectedRoom, setSelectedRoom] = useState<Room | undefined>();
+    const [selectedRoom, setSelectedRoom] = useState<Room | undefined>(client.room('home'));
     const [rooms, setRooms] = useState<Room[]>(client.getRooms());
     const [notifications, setNotifications] = useState<RoomNotification[]>([]);
     const [update, setUpdate] = useState<number>(0); // Used to force update on rooms change
