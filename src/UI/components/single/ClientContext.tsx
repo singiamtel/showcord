@@ -79,11 +79,6 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
         }
     }, [client, rooms, selectedRoom, previousRooms]);
 
-    useEffect(() => {
-        console.log('Updated rooms', rooms);
-    }, [rooms]);
-
-
     const globalErrorListener = (e: Event) => {
         const error = (e as CustomEvent).detail;
         console.warn('Received error from socket', error);

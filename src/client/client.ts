@@ -119,7 +119,6 @@ export class Client {
     */
     getRooms() {
         const tmp = [...this.rooms.values()].filter((r) => r.open);
-        console.log('Getting rooms', tmp);
         return tmp;
     }
 
@@ -449,7 +448,6 @@ export class Client {
     // --- Room management ---
     private _addRoom(room: Room) {
         this.rooms.set(room.ID, room);
-        console.log('SENDING EVENT', room.ID);
         this.events.dispatchEvent(new CustomEvent('room', { detail: room.ID }));
         this.events.dispatchEvent(new CustomEvent('message', { detail: room.ID })); // Just in case. Fixes pagehtml
         this.settings.addRoom(room);
