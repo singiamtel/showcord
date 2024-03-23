@@ -4,7 +4,6 @@ import {
 } from 'react';
 
 import { PS_context } from './PS_context';
-import UserList from './UserList';
 
 import ChatBox from './chatbox';
 import Chat from './chat';

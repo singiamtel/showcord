@@ -1,17 +1,18 @@
 import { PS_context } from './PS_context';
-import { useContext, useEffect, useState } from 'react';
+import { HTMLAttributes, useContext, useEffect, useLayoutEffect, useState } from 'react';
 import { Username } from '../Username';
 import { isStaff, User } from '../../../client/user';
 import { toID } from '@/utils/generic';
+import { cn } from '@/lib/utils';
 
-export default function UserList() {
+export default function UserList(props: HTMLAttributes<HTMLDivElement>) {
     const { selectedPage: room, client } = useContext(PS_context);
     const [users, setUsers] = useState<User[]>([]);
     const [search, setSearch] = useState<string>('');
 
     const filteredUsers = users.filter((user) => toID(user.name).includes(toID(search)));
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         if (!client) return;
         const refreshUsers = () => {
             if (!room) return;
@@ -34,7 +35,7 @@ export default function UserList() {
     const regular = filteredUsers.filter((user) => !isStaff(user.name));
 
     return (
-        <div className="bg-gray-sidebar-light dark:bg-gray-600 w-full h-full p-2 overflow-y-auto whitespace-nowrap">
+        <div className={cn('bg-gray-sidebar-light dark:bg-gray-600 w-full p-2 overflow-y-auto whitespace-nowrap', props.className)}>
             <input
                 className="w-full text-sm h-10 py-1 mb-2 px-2 bg-gray-251 placeholder:text-gray-150 dark:bg-gray-700 rounded-md"
                 type="text"

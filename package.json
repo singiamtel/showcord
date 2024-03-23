@@ -38,6 +38,7 @@
     "clsx": "^2.1.0",
     "core-js": "^3.36.1",
     "eslint": "8.57.0",
+    "framer-motion": "^11.0.20",
     "highlight.js": "^11.9.0",
     "html-escaper": "^3.0.3",
     "html-react-parser": "^5.1.9",

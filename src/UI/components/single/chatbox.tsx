@@ -2,6 +2,7 @@ import {
     ChangeEventHandler,
     createRef,
     FormEvent,
+    HTMLAttributes,
     KeyboardEvent,
     useContext,
     useEffect,
@@ -12,6 +13,7 @@ import {
 import MiniSearch, { SearchResult } from 'minisearch';
 import TextareaAutosize from 'react-textarea-autosize';
 import { PS_context } from './PS_context';
+import { cn } from '@/lib/utils';
 
 type SearchBoxOffset = {
     width: number;
@@ -25,7 +27,8 @@ const minisearch = new MiniSearch({
 });
 
 // minisearch.addAll(cmds);
-export default function ChatBox() {
+
+export default function ChatBox(props: HTMLAttributes<HTMLDivElement>) {
     const [input, setInput] = useState<string>('');
     const [cursorPos, setCursorPos] = useState(input.length);
     const [displaySearchbox, setDisplaySearchbox] = useState<boolean>(false);
@@ -158,30 +161,28 @@ export default function ChatBox() {
     }, []);
 
     return (
-        <>
-            <div className="w-full">
-                <form onSubmit={submit} ref={formRef} className="w-full">
-                    <SearchBox
-                        offset={searchBoxOffset}
-                        display={displaySearchbox}
-                        text={input}
-                    />
-                    <div className="flex flex-row">
-                        <TextareaAutosize
-                            className="mr-5 ml-5 p-2 rounded-lg flex-grow bg-gray-376 dark:bg-gray-375 resize-none placeholder-gray-175"
-                            value={input}
-                            onChange={manageChanges}
-                            onKeyDown={manageKeybinds}
-                            ref={textAreaRef}
-                            placeholder={`Message ${
-                                room ? client.room(room)?.name.trim() : ''
-                            }`}
-                        >
-                        </TextareaAutosize>
-                    </div>
-                </form>
-            </div>
-        </>
+        <div className={cn(props.className, 'w-full')}>
+            <form onSubmit={submit} ref={formRef} className="w-full">
+                <SearchBox
+                    offset={searchBoxOffset}
+                    display={displaySearchbox}
+                    text={input}
+                />
+                <div className="flex flex-row">
+                    <TextareaAutosize
+                        className="mr-5 ml-5 p-2 rounded-lg flex-grow bg-gray-376 dark:bg-gray-375 resize-none placeholder-gray-175"
+                        value={input}
+                        onChange={manageChanges}
+                        onKeyDown={manageKeybinds}
+                        ref={textAreaRef}
+                        placeholder={`Message ${
+                            room ? client.room(room)?.name.trim() : ''
+                        }`}
+                    >
+                    </TextareaAutosize>
+                </div>
+            </form>
+        </div>
     );
 }
 

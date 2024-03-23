@@ -21,8 +21,7 @@ export default function ChatRoom(props: HTMLAttributes<HTMLDivElement>) {
                 <ChatBox />
             </div>
             <div className="w-64">
-                <UserList
-                />
+                <UserList className="h-full" />
             </div>
         </div>
 
