@@ -28,7 +28,7 @@ export class Settings {
     readonly defaultRooms = []; // ["lobby", "help", "overused"];
     readonly defaultServerURL = 'wss://sim3.psim.us:443/showdown/websocket';
     readonly defaultLoginServerURL = 'https://play.pokemonshowdown.com/api/';
-    readonly version = 1; // used to invalidate settings when the format changes
+    readonly version = 2; // used to invalidate settings when the format changes
     private rooms: SerializedRoom[] = [];
     /** Only serializable data should be here */
 
