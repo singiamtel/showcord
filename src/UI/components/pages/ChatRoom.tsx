@@ -1,13 +1,13 @@
-import { twMerge } from 'tailwind-merge';
 import ChatBox from '../single/chatbox';
 import UserList from '../single/UserList';
 import Chat from '../single/chat';
+import { cn } from '@/lib/utils';
 
 export default function ChatRoom(props: any) {
     return (
         <div
             id="big-panel"
-            className={twMerge(
+            className={cn(
                 props.className,
                 'flex break-normal h-screen',
             )}
@@ -17,9 +17,7 @@ export default function ChatRoom(props: any) {
                     <Chat
                     />
                 </div>
-                <div className="flex-grow">
-                    <ChatBox />
-                </div>
+                <ChatBox />
             </div>
             <div className="w-64">
                 <UserList

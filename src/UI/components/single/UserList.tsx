@@ -35,7 +35,13 @@ export default function UserList() {
 
     return (
         <div className="bg-gray-sidebar-light dark:bg-gray-600 w-full h-full p-2 overflow-y-auto whitespace-nowrap">
-            <input className="w-full text-sm h-10 py-1 mb-2 px-2 bg-gray-251 placeholder:text-gray-150 dark:bg-gray-700 rounded-md" type="text" placeholder="Search users" value={search} onChange={(e) => setSearch(e.target.value)} />
+            <input
+                className="w-full text-sm h-10 py-1 mb-2 px-2 bg-gray-251 placeholder:text-gray-150 dark:bg-gray-700 rounded-md"
+                type="text"
+                placeholder="Search users"
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+            />
             {staff.length > 0 && <h2 className="text-sm font-bold text-gray-500 dark:text-gray-175 mb-2">Staff</h2>}
             {staff.map((user, index) => (
                 <div key={index}>

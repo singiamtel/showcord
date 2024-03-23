@@ -1,10 +1,7 @@
 import {
     HTMLAttributes,
     useContext,
-    useRef,
-    useState,
 } from 'react';
-import { twMerge } from 'tailwind-merge';
 
 import { PS_context } from './PS_context';
 import UserList from './UserList';
@@ -13,6 +10,7 @@ import ChatBox from './chatbox';
 import Chat from './chat';
 import Home from '../../Home';
 import SettingsPage from '../../SettingsPage';
+import { cn } from '@/lib/utils';
 
 export default function BigPanel(props: Readonly<HTMLAttributes<'div'>>) {
     const { selectedPage: room, rooms } = useContext(PS_context);
@@ -27,7 +25,7 @@ export default function BigPanel(props: Readonly<HTMLAttributes<'div'>>) {
             return <SettingsPage className={props.className} />;
         } else {
             return (
-                <div className={twMerge(props.className, 'flex flex-col text-red-400')}>
+                <div className={cn(props.className, 'flex flex-col text-red-400')}>
           Unknown room type: "{roomType}"
                 </div>
             );
@@ -37,7 +35,7 @@ export default function BigPanel(props: Readonly<HTMLAttributes<'div'>>) {
     return (
         <div
             id="big-panel"
-            className={twMerge(
+            className={cn(
                 props.className,
                 'flex break-normal h-screen',
             )}

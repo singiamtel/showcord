@@ -1,7 +1,6 @@
 import { HTMLAttributes, useContext } from 'react';
 import { PS_context } from './PS_context';
 import { RoomListComponent } from '../RoomListComponent';
-import { twMerge } from 'tailwind-merge';
 import {
     restrictToParentElement,
     restrictToVerticalAxis,
@@ -23,6 +22,7 @@ import {
     verticalListSortingStrategy,
 } from '@dnd-kit/sortable';
 import SortableItem from '../../../utils/Sortable';
+import { cn } from '@/lib/utils';
 
 export default function Sidebar(props: Readonly<HTMLAttributes<'div'>>) {
     const { rooms, setRooms } = useContext(PS_context);
@@ -63,7 +63,7 @@ export default function Sidebar(props: Readonly<HTMLAttributes<'div'>>) {
         >
             <div
                 id='sidebar'
-                className={twMerge(
+                className={cn(
                     'bg-gray-sidebar-light dark:bg-gray-600 h-screen flex flex-col justify-between',
                     props.className,
                 )}
