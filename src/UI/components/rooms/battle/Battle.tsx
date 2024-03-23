@@ -4,26 +4,25 @@ import { useClientContext } from '../../single/ClientContext';
 import { BattleRoom } from '@/client/room/battleRoom';
 import { Icons, Sprites } from '@pkmn/img';
 import type { Pokemon as PokemonType } from '@pkmn/client';
+import { Username } from '../../Username';
 
 function Pokemon({ pokemon, sprite = false }: Readonly<{pokemon: PokemonType | null, sprite?: boolean}>) {
     if (!pokemon) return null;
     if (sprite) {
         const data = Icons.getPokemon(pokemon.speciesForme, { protocol: 'https', domain: 'cdn.crob.at' });
         return (
-            <span>
-                <span
-                    style={{
-                        background:
+            <span
+                style={{
+                    background:
                   `transparent url("${data.url}") no-repeat scroll ${data.left}px ${data.top}px`,
-                        width: '40px',
-                        height: '30px',
-                        border: 0,
-                        display: 'inline-block',
-                        imageRendering: 'pixelated',
-                        verticalAlign: '-7px',
-                    }}
-                >
-                </span>
+                    width: '40px',
+                    height: '30px',
+                    border: 0,
+                    display: 'inline-block',
+                    imageRendering: 'pixelated',
+                    verticalAlign: '-7px',
+                }}
+            >
             </span>
         );
     }
@@ -35,10 +34,12 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
     const { currentRoom: battle } = useClientContext() as {currentRoom: BattleRoom | undefined};
     assert(battle?.type === 'battle', 'Trying to render BattleWindow in a room that is not a BattleRoom');
     return <div className={cn(props.className, 'h-full w-full bg-gray-125 grid grid-cols-12')}>
-        <div className='col-span-2' id="side-1">
-            Side 1
+        <div className='col-span-2 flex flex-col items-center' id="side-1">
+            <div className='text-center w-full'>
+                <Username bold user={' ' + battle.battle.p1.name} />
+            </div>
             <img src={Sprites.getAvatar(battle.battle.p1.avatar)} />
-            <div className='h-full w-full'>
+            <div className='w-[120px] grid grid-cols-3'>
                 {battle.battle.p1.team.map((pokemon, idx) => pokemon && <Pokemon key={idx} pokemon={pokemon} sprite />)}
             </div>
         </div>
@@ -47,9 +48,14 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
             {battle.battle.p2.active.map((pokemon, idx) => pokemon && <Pokemon key={idx} pokemon={pokemon} />)}
 
         </div>
-        <div className='col-span-2' id="side-2">
-            Side 2
+        <div className='col-span-2 flex flex-col items-center' id="side-2">
+            <div className='text-center w-full'>
+                <Username bold user={' ' + battle.battle.p2.name} />
+            </div>
             <img src={Sprites.getAvatar(battle.battle.p2.avatar)} />
+            <div className='w-[120px] grid grid-cols-3'>
+                {battle.battle.p2.team.map((pokemon, idx) => pokemon && <Pokemon key={idx} pokemon={pokemon} sprite />)}
+            </div>
         </div>
     </div>;
 }
