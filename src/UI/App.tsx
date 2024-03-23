@@ -17,7 +17,7 @@ export default function App() {
             <ToastProvider>
                 <TrainerCardProvider>
                     <div
-                        className={`grid grid-cols-7 grid-rows-1 md:h-screen overflow-y-scroll md:overflow-hidden text-black dark:text-white dark:bg-gray-300 w-screen dark:[color-scheme:dark]`}
+                        className={`grid grid-cols-7 grid-rows-1 md:h-screen text-black dark:text-white dark:bg-gray-300 w-screen dark:[color-scheme:dark]`}
                     >
                         <Sidebar className="md:col-span-1 col-span-7 hidden md:flex" />
                         <BigPanel className="md:col-span-6 col-span-7" />

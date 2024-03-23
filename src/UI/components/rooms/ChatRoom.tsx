@@ -13,8 +13,8 @@ export default function ChatRoom(props: HTMLAttributes<HTMLDivElement>) {
                 'flex break-normal h-screen',
             )}
         >
-            <div className={'dark:bg-gray-300 flex flex-col w-full max-w-full'}>
-                <div className="h-[90%] max-h-[90%] flex-grow flex-shrink min-h-0">
+            <div className="dark:bg-gray-300 flex flex-col max-h-full h-full w-full max-w-full">
+                <div className="flex-grow flex-shrink min-h-0">
                     <Chat
                     />
                 </div>

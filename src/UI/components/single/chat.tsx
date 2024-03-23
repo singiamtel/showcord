@@ -1,6 +1,7 @@
 import {
     createRef,
     Fragment,
+    HTMLAttributes,
     useCallback,
     useContext,
     useLayoutEffect,
@@ -32,7 +33,7 @@ import {
 } from '../../chatFormatting/chat';
 import { userColor } from '../../../utils/namecolour';
 import manageURL from '../../../utils/manageURL';
-import { assertNever } from '@/lib/utils';
+import { assertNever, cn } from '@/lib/utils';
 
 // ``code here`` marks inline code
 // ||text|| are spoilers
@@ -188,7 +189,7 @@ export function FormatMsgDisplay(
     return <>{jsxElements}</>;
 }
 
-export default function Chat() {
+export default function Chat(props: HTMLAttributes<HTMLDivElement>) {
     const { messages, selectedPage } = useContext(PS_context);
     const messagesEndRef = createRef<HTMLDivElement>();
     const isIntersecting = useOnScreen(messagesEndRef);
@@ -213,7 +214,10 @@ export default function Chat() {
 
     return (
         <div
-            className="p-5 flex flex-col overflow-auto overflow-x-hidden break-words overflow-y-scroll h-full relative "
+            className={cn(
+                'p-5 flex flex-col overflow-auto overflow-x-hidden break-words overflow-y-scroll h-full relative',
+                props.className,
+            )}
             ref={ref}
         >
             {messages.map((message, index, arr) => (

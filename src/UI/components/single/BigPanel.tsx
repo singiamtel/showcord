@@ -60,7 +60,7 @@ export default function BigPanel(props: Readonly<HTMLAttributes<'div'>>) {
             )}
         >
             <div className={'dark:bg-gray-300 flex flex-col w-full max-w-full'}>
-                <div className="h-[90%] max-h-[90%] flex-grow flex-shrink min-h-0">
+                <div className="flex-grow flex-shrink min-h-0">
                     <Chat
                     />
                 </div>
