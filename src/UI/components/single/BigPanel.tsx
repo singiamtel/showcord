@@ -11,6 +11,10 @@ import Chat from './chat';
 import Home from '../../Home';
 import SettingsPage from '../../SettingsPage';
 import { cn } from '@/lib/utils';
+import ChatRoom from '../rooms/ChatRoom';
+import BattleRoom from '../rooms/BattleRoom';
+import PmRoom from '../rooms/PmRoom';
+import HtmlRoom from '../rooms/HtmlRoom';
 
 export default function BigPanel(props: Readonly<HTMLAttributes<'div'>>) {
     const { selectedPage: room, rooms } = useContext(PS_context);
@@ -32,6 +36,21 @@ export default function BigPanel(props: Readonly<HTMLAttributes<'div'>>) {
         }
     }
 
+    if (roomType === 'chat') {
+        return <ChatRoom className={props.className}/>;
+    }
+    if (roomType === 'battle') {
+        return <BattleRoom className={props.className}/>;
+    }
+    if (roomType === 'html') {
+        return <HtmlRoom className={props.className}/>;
+    }
+    if (roomType === 'pm') {
+        return <PmRoom className={props.className}/>;
+    }
+
+    // fallback, should never be reached
+    console.error('Unknown room type:', roomType);
     return (
         <div
             id="big-panel"
@@ -49,14 +68,6 @@ export default function BigPanel(props: Readonly<HTMLAttributes<'div'>>) {
                     <ChatBox />
                 </div>
             </div>
-
-            {roomType === 'chat' || roomType === 'battle' ?
-                (
-                    <div className="w-64">
-                        <UserList />
-                    </div>
-                ) :
-                null}
         </div>
     );
 }

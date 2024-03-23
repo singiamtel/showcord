@@ -2,8 +2,9 @@ import ChatBox from '../single/chatbox';
 import UserList from '../single/UserList';
 import Chat from '../single/chat';
 import { cn } from '@/lib/utils';
+import { HTMLAttributes } from 'react';
 
-export default function ChatRoom(props: any) {
+export default function ChatRoom(props: HTMLAttributes<HTMLDivElement>) {
     return (
         <div
             id="big-panel"
