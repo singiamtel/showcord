@@ -1,10 +1,10 @@
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { HTMLAttributes, useState } from 'react';
-import { twMerge } from 'tailwind-merge';
 import { useClientContext } from '../components/single/ClientContext';
+import { cn } from '@/lib/utils';
 
-export default function HighlightingSettings(props: HTMLAttributes<'div'>) {
+export default function HighlightingSettings(props: Readonly<HTMLAttributes<'div'>>) {
     const { client } = useClientContext();
     const [highlightWords, setHighlightWords] = useState(client.settings.getHighlightWordsMap());
     const [hlOnSelf, setHlOnSelf] = useState(client.settings.getHighlightOnSelf());
@@ -23,7 +23,7 @@ export default function HighlightingSettings(props: HTMLAttributes<'div'>) {
     };
 
     return (
-        <div className={twMerge('p-8', props.className)}>
+        <div className={cn('p-8', props.className)}>
             <h2 className="text-xl">
               Highlighting settings
             </h2>

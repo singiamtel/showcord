@@ -14,10 +14,10 @@ const emoji: { [key: string]: string } = {
     Gaming: '🎮',
     Entertainment: '🎬',
     'On-site games': '🎲',
-};
+} as const;
 
 export default function RoomCard(
-    { room, onClick }: { room: RoomQuery; onClick: (str: string) => void },
+    { room, onClick }: Readonly<{ room: RoomQuery; onClick: (str: string) => void }>,
 ) {
     return (
         <button

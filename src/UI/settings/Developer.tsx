@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useClientContext } from '../components/single/ClientContext';
 
-export default function DeveloperSettings(props: HTMLAttributes<'div'>) {
+export default function DeveloperSettings(props: Readonly<HTMLAttributes<'div'>>) {
     const description = 'These settings are for advanced users only. Change them at your own risk.';
     const { client } = useClientContext();
     const [serverURL, setServerURL] = useState(client.settings.getServerURL());

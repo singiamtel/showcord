@@ -4,7 +4,8 @@ import { Room } from './room/room';
 
 export interface UserDefinedSettings {
     highlightWords: { [key: string]: string[] };
-    chatStyle: 'compact' | 'normal'; // compact = IRC style
+    // compact = IRC style
+    chatStyle: 'compact' | 'normal'; // TODO: implement normal style
     avatar: string;
     serverURL: string;
     loginserverURL: string;

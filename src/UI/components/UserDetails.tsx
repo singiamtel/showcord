@@ -9,7 +9,7 @@ interface UserDetailsProps {
     border?: boolean;
 }
 
-export function UserDetails(props: HTMLAttributes<HTMLDivElement> & UserDetailsProps) {
+export function UserDetails(props: Readonly<HTMLAttributes<HTMLDivElement> & UserDetailsProps>) {
     return (
         <div className="flex flex-row items-center">
             <div className={cn('w-12 h-12 rounded-full overflow-hidden mr-2 bg-gray-251 dark:bg-gray-250 border-gray-351 dark:border-gray-700', props.border && 'border-2', props.className)}>

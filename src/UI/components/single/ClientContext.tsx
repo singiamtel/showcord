@@ -26,7 +26,7 @@ interface ClientContextType {
 
 const ClientContext = createContext<ClientContextType | undefined>(undefined);
 
-export default function ClientContextProvider(props: React.PropsWithChildren) {
+export default function ClientContextProvider(props: Readonly<React.PropsWithChildren>) {
     const [user, setUser] = useState<string | undefined>();
     const [selectedRoom, setSelectedRoom] = useState<Room | undefined>(client.room('home'));
     const [rooms, setRooms] = useState<Room[]>(client.getRooms());
@@ -106,7 +106,6 @@ export default function ClientContextProvider(props: React.PropsWithChildren) {
 
     useEffect(() => {
         const changeRoomsEventListener = (e: Event) => {
-            console.log('Change rooms event', e);
             const newRooms = client.getRooms();
             // Keep the same order we had before
             const newRoomsOrdered = newRooms.sort((a, b) => {
@@ -124,7 +123,6 @@ export default function ClientContextProvider(props: React.PropsWithChildren) {
         };
 
 
-        console.log('Adding event listeners');
         client.events.addEventListener('room', changeRoomsEventListener);
         client.events.addEventListener('selectroom', autoSelectRoomListener);
         client.events.addEventListener('leaveroom', changeRoomsEventListener);
@@ -132,7 +130,6 @@ export default function ClientContextProvider(props: React.PropsWithChildren) {
         client.events.addEventListener('theme', themeEventListener);
 
         return () => {
-            console.log('Removing event listeners');
             client.events.removeEventListener('room', changeRoomsEventListener);
             client.events.removeEventListener(
                 'selectroom',

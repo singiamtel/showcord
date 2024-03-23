@@ -1,9 +1,9 @@
+import { library } from '@fortawesome/fontawesome-svg-core';
+import { faBarChart, faPieChart } from '@fortawesome/free-solid-svg-icons';
+
 import Sidebar from './components/single/Sidebar';
 import BigPanel from './components/single/BigPanel';
 import ToastProvider from './components/single/ToastProvider';
-
-import { library } from '@fortawesome/fontawesome-svg-core';
-import { faBarChart, faPieChart } from '@fortawesome/free-solid-svg-icons';
 import { TrainerCardProvider } from './components/single/TrainerCard/TrainerCardContext';
 import { client } from './components/single/ClientContext';
 

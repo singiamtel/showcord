@@ -41,7 +41,7 @@ class NotificationsEngine {
                 const message = notification.roomType === 'pm' ?
                     `PM from ${notification.user}: ${notification.message}` :
                     `${notification.room} - ${notification.user}: ${notification.message}`;
-                toast(limitString(message, 150));
+                toast(limitString(message, 150)); //TODO: Move to UI
             }
         } else {
             if (this.permission !== 'granted') return;

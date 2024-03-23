@@ -134,7 +134,7 @@ const encloseInTag = (
 };
 
 export function FormatMsgDisplay(
-    { msg, recursed = false }: { msg: string; recursed?: boolean },
+    { msg, recursed = false }: Readonly<{ msg: string; recursed?: boolean }>,
 ) {
     if (!msg) return <>{msg}</>;
     const jsxElements = [];
@@ -188,7 +188,7 @@ export function FormatMsgDisplay(
     return <>{jsxElements}</>;
 }
 
-export default function Chat(props: HTMLAttributes<HTMLDivElement>) {
+export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const { messages, currentRoom } = useClientContext();
     const messagesEndRef = createRef<HTMLDivElement>();
     const isIntersecting = useOnScreen(messagesEndRef);
@@ -260,17 +260,17 @@ const options = {
         onClick: manageURL,
         className: 'text-blue-500 underline cursor-pointer',
     },
-};
+} as const;
 
 export function MessageComponent(
-    { message, user, type, time, hld, prev }: {
+    { message, user, type, time, hld, prev }: Readonly<{
         message: string;
         user: string;
         type: MessageType;
         time?: Date;
         hld?: boolean | null;
         prev?: Message;
-    },
+    }>,
 ) {
     if (type === 'boxedHTML') {
         if (prev?.content.startsWith('!code')) {

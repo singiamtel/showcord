@@ -27,7 +27,7 @@ const minisearch = new MiniSearch({
 
 // minisearch.addAll(cmds);
 
-export default function ChatBox(props: HTMLAttributes<HTMLDivElement>) {
+export default function ChatBox(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const [input, setInput] = useState<string>('');
     const [cursorPos, setCursorPos] = useState(input.length);
     const [displaySearchbox, setDisplaySearchbox] = useState<boolean>(false);
@@ -186,11 +186,11 @@ export default function ChatBox(props: HTMLAttributes<HTMLDivElement>) {
 }
 
 const SearchBox = (
-    { offset, display, text }: {
+    { offset, display, text }: Readonly<{
         offset: SearchBoxOffset;
         display: boolean;
         text: string;
-    },
+    }>,
 ) => {
     const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
     useEffect(() => {
@@ -219,7 +219,7 @@ const SearchBox = (
     );
 };
 
-const Suggestion = ({ suggestion }: { suggestion: SearchResult }) => (
+const Suggestion = ({ suggestion }: Readonly<{ suggestion: SearchResult }>) => (
     <div className="flex flex-row">
         <div className="flex flex-col">
             <div className="text-white">{suggestion.name}</div>

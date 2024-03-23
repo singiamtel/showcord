@@ -1,17 +1,17 @@
 import { HTMLAttributes, useEffect, useState } from 'react';
-import { twMerge } from 'tailwind-merge';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useClientContext } from '../components/single/ClientContext';
+import { cn } from '@/lib/utils';
 
-export default function AppearanceSettings(props: HTMLAttributes<'div'>) {
+export default function AppearanceSettings(props: Readonly<HTMLAttributes<'div'>>) {
     const { client, theme: currentTheme } = useClientContext();
     const [theme, setTheme] = useState<'light' | 'dark'>(currentTheme);
     useEffect(() => {
         client.setTheme(theme);
     }, [theme]);
     return (
-        <div className={twMerge('p-8', props.className)}>
+        <div className={cn('p-8', props.className)}>
             <h2 className="text-xl">
               Appearance settings
             </h2>

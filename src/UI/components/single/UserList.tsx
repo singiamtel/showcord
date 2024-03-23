@@ -5,7 +5,7 @@ import { isStaff, User } from '../../../client/user';
 import { toID } from '@/utils/generic';
 import { cn } from '@/lib/utils';
 
-export default function UserList(props: HTMLAttributes<HTMLDivElement>) {
+export default function UserList(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const { client, currentRoom: room } = useClientContext();
     const [users, setUsers] = useState<User[]>([]);
     const [search, setSearch] = useState<string>('');

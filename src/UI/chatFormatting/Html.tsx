@@ -1,7 +1,6 @@
 // recognize HTML commands and try to parse them
 // if they have no parser, just return the sanitized HTML
 
-import { useClientContext } from '../components/single/ClientContext';
 import manageURL from '../../utils/manageURL';
 import parse, { domToReact } from 'html-react-parser';
 import sanitizeHtml from 'sanitize-html-react';
@@ -10,11 +9,12 @@ import { Icons } from '@pkmn/img';
 import { Username } from '../components/Username';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { twMerge } from 'tailwind-merge';
+import { useClientContext } from '../components/single/ClientContext';
 
 export default function HTML(
     { message, raw }: Readonly<{ message: string; raw?: boolean }>,
 ) {
-    const { client, currentRoom: room } = useClientContext();
+    const { client, currentRoom } = useClientContext();
     const parserOptions = {
         replace: (domNode: any) => {
             const { attribs, children } = domNode;
@@ -26,9 +26,7 @@ export default function HTML(
                     <a
                         href={attribs.href}
                         target="_blank"
-                        onClick={(e) => {
-                            manageURL(e, client);
-                        }}
+                        onClick={(e) => manageURL(e, client) }
                         className="novisited cursor-pointer text-blue-500 underline"
                     >
                         {domToReact(children, parserOptions)}
@@ -39,7 +37,7 @@ export default function HTML(
                 return (
                     <button
                         onClick={() => {
-                            client.send(attribs.value, room?.ID || '');
+                            client.send(attribs.value, currentRoom?.ID || '');
                         }}
                         className="border border-gray-601 dark:border-gray-border font-bold p-1 m-1 rounded text-sm"
                         data-parsed="true"
@@ -192,7 +190,7 @@ export function Box(props: Readonly<React.PropsWithChildren>) {
     const redStyle = classes?.includes('broadcast-red') ? 'bg-red-400 dark:bg-red-600 text-white' : '';
     const greenStyle = classes?.includes('broadcast-green') ? 'bg-green-600 dark:bg-green-600 text-white' : '';
     return (
-        <div className={twMerge('p-2 ml-10 mr-10 m-2 border border-solid border-gray-601 dark:border-gray-border bg-gray-sidebar-light dark:bg-gray-600 rounded', blueStyle, redStyle, greenStyle) }>
+        <div className={twMerge('p-2 ml-10 mr-10 m-2 border border-solid border-gray-601 dark:border-gray-border bg-gray-sidebar-light dark:bg-gray-600 rounded ', blueStyle, redStyle, greenStyle) }>
             {props.children}
         </div>
     );

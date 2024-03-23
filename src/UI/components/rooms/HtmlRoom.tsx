@@ -3,7 +3,7 @@ import { HTMLAttributes } from 'react';
 import Chat from '../single/Chat';
 import { cn } from '@/lib/utils';
 
-export default function HtmlRoom(props: HTMLAttributes<HTMLDivElement>) {
+export default function HtmlRoom(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     return (
         <div
             id="big-panel"

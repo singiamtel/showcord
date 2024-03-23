@@ -1,13 +1,13 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { FC, ReactNode } from 'react';
+import { ReactNode } from 'react';
 
 interface SortableItemProps {
     id: string;
     children: ReactNode;
 }
 
-const SortableItem: FC<SortableItemProps> = ({ id, children }) => {
+function SortableItem({ id, children }: Readonly<SortableItemProps>) {
     const {
         attributes,
         listeners,
@@ -38,6 +38,6 @@ const SortableItem: FC<SortableItemProps> = ({ id, children }) => {
             {children}
         </div>
     );
-};
+}
 
 export default SortableItem;

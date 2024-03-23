@@ -12,7 +12,7 @@ interface TrainerCardContextType {
 
 const TrainerCardContext = createContext<TrainerCardContextType | undefined>(undefined);
 
-export const TrainerCardProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export function TrainerCardProvider({ children }: Readonly<{ children: React.ReactNode }>) {
     const { client } = useClientContext();
     const [isOpen, setIsOpen] = useState(false);
     const openCard = () => setIsOpen(true);
@@ -28,12 +28,6 @@ export const TrainerCardProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setUsername(null);
         setPosition({ x: 0, y: 0 });
     };
-
-    // const closeWindow = useCallback(() => {
-    //     setUser(null);
-    //     setUsername(null);
-    // }, [setUser, setUsername]);
-
 
     const { isOutside: clickedOutside } = useClickOutside(wrapperRef);
 
@@ -60,13 +54,8 @@ export const TrainerCardProvider: React.FC<{ children: React.ReactNode }> = ({ c
     }, [clickedOutside]);
 
 
-    // useEffect(() => {
-    //     setUser(null);
-    // }, [selectedPage]);
-
     return (
         <TrainerCardContext.Provider value={{ isOpen, openCard, closeCard, clickUsername }}>
-
             <TrainerCard
                 user={user}
                 name={username}
@@ -77,7 +66,7 @@ export const TrainerCardProvider: React.FC<{ children: React.ReactNode }> = ({ c
             {children}
         </TrainerCardContext.Provider>
     );
-};
+}
 
 export const useTrainerCard = () => {
     const context = useContext(TrainerCardContext);

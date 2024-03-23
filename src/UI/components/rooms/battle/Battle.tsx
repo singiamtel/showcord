@@ -5,7 +5,7 @@ import { BattleRoom } from '@/client/room/battleRoom';
 import { Icons, Sprites } from '@pkmn/img';
 import type { Pokemon as PokemonType } from '@pkmn/client';
 
-function Pokemon({ pokemon, sprite = false }: {pokemon: PokemonType | null, sprite?: boolean}) {
+function Pokemon({ pokemon, sprite = false }: Readonly<{pokemon: PokemonType | null, sprite?: boolean}>) {
     if (!pokemon) return null;
     if (sprite) {
         const data = Icons.getPokemon(pokemon.speciesForme, { protocol: 'https', domain: 'cdn.crob.at' });
@@ -31,7 +31,7 @@ function Pokemon({ pokemon, sprite = false }: {pokemon: PokemonType | null, spri
     return <img src={data.url} width={data.w} height={data.h} data-name={pokemon.name} />;
 }
 
-export default function BattleWindow(props: HTMLAttributes<HTMLDivElement>) {
+export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const { currentRoom: battle } = useClientContext() as {currentRoom: BattleRoom | undefined};
     assert(battle?.type === 'battle', 'Trying to render BattleWindow in a room that is not a BattleRoom');
     return <div className={cn(props.className, 'h-full w-full bg-gray-125 grid grid-cols-12')}>

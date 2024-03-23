@@ -11,7 +11,7 @@ import BattleWindow from './battle/Battle';
 import BattleControls from './battle/BattleControls';
 import Calcs from './battle/Calcs';
 
-export default function BattleRoom(props: HTMLAttributes<HTMLDivElement>) {
+export default function BattleRoom(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const [userListOpen, setUserListOpen] = useState(false);
 
     return (

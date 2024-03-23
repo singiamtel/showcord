@@ -10,7 +10,7 @@ export interface News {
 }
 
 export default function NewsCard(
-    { news, last }: { news: News; last?: boolean },
+    { news, last }: Readonly<{ news: News; last?: boolean }>,
 ) {
     return (
         <div className="m-2">

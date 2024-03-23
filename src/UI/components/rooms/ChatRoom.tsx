@@ -4,7 +4,7 @@ import Chat from '../single/Chat';
 import { cn } from '@/lib/utils';
 import { HTMLAttributes } from 'react';
 
-export default function ChatRoom(props: HTMLAttributes<HTMLDivElement>) {
+export default function ChatRoom(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     return (
         <div
             id="big-panel"

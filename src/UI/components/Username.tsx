@@ -2,14 +2,14 @@ import { userColor } from '../../utils/namecolour';
 import { useTrainerCard } from './single/TrainerCard/TrainerCardContext';
 
 export function Username(
-    { user, alignRight, colon, idle, bold, colorless }: {
+    { user, alignRight, colon, idle, bold, colorless }: Readonly<{
         user: string;
         idle?: boolean;
         alignRight?: boolean;
         colon?: boolean;
         bold?: boolean;
         colorless?: boolean;
-    }
+    }>,
 ) {
     const { clickUsername } = useTrainerCard();
     const rank = user.charAt(0);

@@ -3,7 +3,7 @@ import Chat from '../single/Chat';
 import { cn } from '@/lib/utils';
 import { HTMLAttributes } from 'react';
 
-export default function PmRoom(props: HTMLAttributes<HTMLDivElement>) {
+export default function PmRoom(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     return (
         <div
             id="big-panel"

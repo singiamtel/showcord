@@ -174,9 +174,6 @@ function UserCardButton({
 function roomLink(room: string, last: boolean, close: () => void, key: number) {
     const { client } = useClientContext();
     const hasRank = rankOrder[room.charAt(0) as keyof typeof rankOrder] !== undefined;
-    if (toID(room).startsWith('battle')) {
-        return;
-    }
     return (
         <Fragment key={key}>
             <span id="rank" className="text-[#9D9488] font-mono whitespace-pre">

@@ -198,7 +198,7 @@ function RoomList({ className }: Readonly<{ className?: string }>) {
     );
 }
 
-function SocialLink({ id, href, children }: { id: string, href?: string, children: any }) {
+function SocialLink({ id, href, children }: Readonly<{ id: string, href?: string, children: any }>) {
     const [matches, setMatches] = useState(
         window.matchMedia('(min-width: 1500px)').matches
     );
@@ -296,5 +296,3 @@ export default function Home(props: Readonly<HTMLAttributes<'div'>>) {
         </div>
     );
 }
-
-// {"chat":[{"title":"Lobby","desc":"Still haven't decided on a room for you? Relax here amidst the chaos.","userCount":626,"section":"Official"},

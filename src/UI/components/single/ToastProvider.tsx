@@ -5,7 +5,7 @@ interface ToastProviderProps {
     children: React.ReactNode;
 }
 
-export default function ToastProvider({ children }: ToastProviderProps) {
+export default function ToastProvider({ children }: Readonly<ToastProviderProps>) {
     return (
         <>
             {children}

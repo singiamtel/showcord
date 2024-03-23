@@ -1,26 +1,27 @@
 import { HTMLAttributes, useState } from 'react';
-import { twMerge } from 'tailwind-merge';
 import AppearanceSettings from './settings/Appearance';
 import DeveloperSettings from './settings/Developer';
 import HighlightingSettings from './settings/Highlighting';
+import { cn } from '@/lib/utils';
 
-function SettingsButton(props: HTMLAttributes<'button'> & { onClick: () => void, active?: boolean }) {
+function SettingsButton(props: Readonly<HTMLAttributes<'button'> & { onClick: () => void, active?: boolean }>) {
     return (
-        <button className={twMerge('text-gray-250 p-1.5 rounded flex hover-color dark:text-gray-351 ', props.className, props.active ? 'bg-gray-451 dark:bg-gray-450 dark:hover:bg-gray-450' : '')} onClick={props.onClick}>
+        <button className={cn('text-gray-250 p-1.5 rounded flex hover-color dark:text-gray-351 ', props.className, props.active ? 'bg-gray-451 dark:bg-gray-450 dark:hover:bg-gray-450' : '')} onClick={props.onClick}>
             {props.children}
         </button>
     );
 }
 
-export default function SettingsPage(props: HTMLAttributes<'div'>) {
-    const settingsTabs = {
-        'appearance': AppearanceSettings,
-        'highlighting': HighlightingSettings,
-        'developer': DeveloperSettings,
-    };
+const settingsTabs = {
+    'appearance': AppearanceSettings,
+    'highlighting': HighlightingSettings,
+    'developer': DeveloperSettings,
+} as const;
+
+export default function SettingsPage(props: Readonly<HTMLAttributes<'div'>>) {
     const [page, setPage] = useState<keyof typeof settingsTabs>('appearance');
     return (
-        <div className={twMerge('grid grid-cols-4', props.className)}>
+        <div className={cn('grid grid-cols-4', props.className)}>
             <div className="col-span-1 bg-gray-100 dark:bg-gray-75 p-8 flex flex-col border-r-2" id="settings-sidebar">
 
                 <div className="font-bold text-sm text-gray-250 mb-2 ml-2 dark:text-gray-251">
