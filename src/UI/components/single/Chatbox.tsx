@@ -160,7 +160,7 @@ export default function ChatBox(props: Readonly<HTMLAttributes<HTMLDivElement>>)
     }, []);
 
     return (
-        <div className={cn(props.className, 'w-full')}>
+        <div className={cn(props.className, 'w-full m-2')}>
             <form onSubmit={submit} ref={formRef} className="w-full">
                 <SearchBox
                     offset={searchBoxOffset}
