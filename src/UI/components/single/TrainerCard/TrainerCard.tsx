@@ -10,19 +10,19 @@ import {
     clamp,
     removeFirstCharacterIfNotLetter,
     toID,
-} from '../../utils/generic';
+} from '../../../../utils/generic';
 import { FaCommentAlt, FaUserPlus } from 'react-icons/fa';
 import { PiSwordBold } from 'react-icons/pi';
-import manageURL from '../../utils/manageURL';
-import { rankOrder } from '../../client/user';
-import { client } from './single/PS_context';
+import manageURL from '../../../../utils/manageURL';
+import { rankOrder } from '../../../../client/user';
+import { client } from '../PS_context';
 
 const margin = 15;
 
-export default function UserCard(
+export default function TrainerCard(
     { user, name, position, forwardRef, close }: Readonly<{
         user: any;
-        name: string;
+        name: string | null;
         position: { x: number; y: number };
         forwardRef: MutableRefObject<any>;
         close: () => void;
@@ -46,6 +46,8 @@ export default function UserCard(
             window.removeEventListener('keydown', onKeyDown);
         };
     }, []);
+
+    if (!name) return null;
 
     return (
         <div

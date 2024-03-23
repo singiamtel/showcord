@@ -1,17 +1,17 @@
 import { userColor } from '../../utils/namecolour';
-import { MouseEventHandler } from 'react';
+import { useTrainerCard } from './single/TrainerCard/TrainerCardContext';
 
 export function Username(
-    { user, alignRight, onClick, colon, idle, bold, colorless }: {
+    { user, alignRight, colon, idle, bold, colorless }: {
         user: string;
         idle?: boolean;
         alignRight?: boolean;
-        onClick?: MouseEventHandler<HTMLAnchorElement>;
         colon?: boolean;
         bold?: boolean;
         colorless?: boolean;
     }
 ) {
+    const { clickUsername } = useTrainerCard();
     const rank = user.charAt(0);
     const rankDisplay = alignRight ?
         rank.padEnd(1, ' ') :
@@ -25,11 +25,11 @@ export function Username(
                 {rankDisplay}
             </span>
             <a
-                onClick={onClick}
+                onClick={clickUsername}
                 style={{
                     color: colorless ? '' : idle ? '#888888' : userColor(user),
                 }}
-                className={'text-black dark:text-white ' + (onClick ? 'hover:underline hover:cursor-pointer ' : '') +
+                className={'text-black dark:text-white hover:underline hover:cursor-pointer ' +
                     (bold ? 'font-bold ' : '')}
                 data-message="true"
                 data-username={user.slice(1)}

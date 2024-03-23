@@ -25,7 +25,6 @@ export class BattleRoom extends Room {
 
         this.battle = new Battle(new Generations(Dex));
         this.formatter = new LogFormatter('p1', this.battle); // TODO: dont use p1
-        (window as any).battle = this.battle; // TODO: remove
     }
 
     /**

@@ -1,22 +1,10 @@
 import { PS_context } from './PS_context';
-import { MouseEvent, useContext, useEffect, useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import { Username } from '../Username';
 import { isStaff, User } from '../../../client/user';
 import { toID } from '@/utils/generic';
 
-export default function UserList({
-    clickUsername,
-}: {
-    setUser: (user: any) => void;
-    username: string | null;
-    setUsername: (username: string) => void;
-    setPosition: (position: { x: number; y: number }) => void;
-    user: any | null;
-    position: { x: number; y: number };
-    wrapperRef: React.MutableRefObject<any>;
-    closeWindow: () => void;
-    clickUsername: (e: MouseEvent) => void;
-}) {
+export default function UserList() {
     const { selectedPage: room, client } = useContext(PS_context);
     const [users, setUsers] = useState<User[]>([]);
     const [search, setSearch] = useState<string>('');
@@ -55,7 +43,6 @@ export default function UserList({
                         user={user.name}
                         bold={isStaff(user.name)}
                         alignRight
-                        onClick={(e) => clickUsername(e)}
                         idle={user.status === '!'}
                     />
                 </div>
@@ -70,7 +57,6 @@ export default function UserList({
                         user={user.name}
                         bold={isStaff(user.name)}
                         alignRight
-                        onClick={(e) => clickUsername(e)}
                         idle={user.status === '!'}
                     />
                 </div>

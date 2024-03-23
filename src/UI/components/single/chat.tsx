@@ -4,7 +4,6 @@ import {
     MouseEvent,
     useCallback,
     useContext,
-    useEffect,
     useLayoutEffect,
     useRef,
 } from 'react';
@@ -17,7 +16,6 @@ import { ErrorBoundary } from 'react-error-boundary';
 import Linkify from 'linkify-react';
 import { Message, MessageType } from '../../../client/message';
 import Code from '../../chatFormatting/code';
-import UserCard from '../UserCard';
 import { Username } from '../Username';
 
 import {
@@ -191,25 +189,7 @@ export function FormatMsgDisplay(
     return <>{jsxElements}</>;
 }
 
-export default function Chat({
-    setUser,
-    username,
-    user,
-    position,
-    wrapperRef,
-    closeWindow,
-    clickUsername,
-}: {
-    setUser: (user: any) => void;
-    username: string | null;
-    setUsername: (username: string) => void;
-    setPosition: (position: { x: number; y: number }) => void;
-    user: any | null;
-    position: { x: number; y: number };
-    wrapperRef: React.MutableRefObject<any>;
-    closeWindow: () => void;
-    clickUsername: (e: MouseEvent) => void;
-}) {
+export default function Chat() {
     const { messages, selectedPage } = useContext(PS_context);
     const messagesEndRef = createRef<HTMLDivElement>();
     const isIntersecting = useOnScreen(messagesEndRef);
@@ -232,26 +212,11 @@ export default function Chat({
         scrollToBottom();
     }, [ref.current, selectedPage]);
 
-    useEffect(() => {
-        setUser(null);
-    }, [selectedPage]);
-
     return (
         <div
             className="p-5 flex flex-col overflow-auto overflow-x-hidden break-words overflow-y-scroll h-full relative "
             ref={ref}
         >
-            {username ?
-                (
-                    <UserCard
-                        user={user}
-                        name={username}
-                        position={position}
-                        forwardRef={wrapperRef}
-                        close={closeWindow}
-                    />
-                ) :
-                null}
             {messages.map((message, index, arr) => (
                 <ErrorBoundary
                     key={index}
@@ -268,7 +233,6 @@ export default function Chat({
                         type={message.type}
                         hld={message.hld}
                         prev={arr[index - 1]}
-                        onNameClick={clickUsername}
                     />
                 </ErrorBoundary>
             ))}
@@ -297,14 +261,13 @@ const options = {
 };
 
 export function MessageComponent(
-    { message, user, type, time, hld, prev, onNameClick }: {
+    { message, user, type, time, hld, prev }: {
         message: string;
         user: string;
         type: MessageType;
         time?: Date;
         hld?: boolean | null;
         prev?: Message;
-        onNameClick?: (e: MouseEvent) => void;
     },
 ) {
     if (type === 'boxedHTML') {
@@ -367,7 +330,6 @@ export function MessageComponent(
                             </strong>{' '}
                             <Username
                                 user={user}
-                                onClick={(e) => onNameClick && onNameClick(e)}
                                 colorless
                             />
                             <em>
@@ -379,7 +341,6 @@ export function MessageComponent(
                         <>
                             <Username
                                 user={user}
-                                onClick={(e) => onNameClick && onNameClick(e)}
                                 colon
                                 bold
                             />&nbsp;
