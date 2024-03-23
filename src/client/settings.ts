@@ -1,3 +1,4 @@
+import { toID } from '@/utils/generic';
 import { highlightMsg, stringsToRegex } from '../utils/highlightMsg';
 import { Room } from './room/room';
 
@@ -41,9 +42,37 @@ export class Settings {
         highlightOnSelf: true,
     };
     private compileHighlightWords: { [key: string]: RegExp | null } = {};
-    private username = '';
+    private name = '';
     private status = ''; // if status is set, it will be restored on login
     private notes: Map<string, string> = new Map();
+
+    get username(): string {
+        return this.name;
+    }
+
+    updateUser(username: string, avatar: string) {
+        this.name = username;
+        this.userDefinedSettings.avatar = avatar;
+        this.saveSettings();
+    }
+
+    get avatar() {
+        return this.userDefinedSettings.avatar;
+    }
+
+    set avatar(avatar: string) {
+        this.userDefinedSettings.avatar = avatar;
+        this.saveSettings();
+    }
+
+    set username(username: string) {
+        this.name = username;
+        this.saveSettings();
+    }
+
+    get userID() {
+        return toID(this.name);
+    }
 
     constructor() {
         if (typeof window === 'undefined') {
@@ -66,7 +95,7 @@ export class Settings {
             settings.rooms.forEach((r) => {
                 this.rooms.push(r);
             });
-            this.username = settings.username;
+            this.name = settings.username;
             const userDefinedSettings = settings.userDefinedSettings;
             if (userDefinedSettings) {
                 this.userDefinedSettings = userDefinedSettings;
@@ -93,7 +122,11 @@ export class Settings {
             username: this.username,
             userDefinedSettings: this.userDefinedSettings,
         };
-        localStorage.setItem('settings', JSON.stringify(savedSettings));
+        try {
+            localStorage.setItem('settings', JSON.stringify(savedSettings));
+        } catch (e) {
+            console.error('Error saving settings', e, savedSettings);
+        }
         localStorage.setItem('theme', this.theme);
     }
 
@@ -102,12 +135,6 @@ export class Settings {
         if (!this.rooms.find((r) => r.ID === room.ID)) {
             this.rooms.push(room);
         }
-    }
-
-    updateUsername(username: string, avatar: string) {
-        this.username = username;
-        this.userDefinedSettings.avatar = avatar;
-        this.saveSettings();
     }
 
     getAvatar() {
@@ -128,14 +155,6 @@ export class Settings {
 
     setTheme(theme: 'light' | 'dark') {
         this.theme = theme;
-        this.saveSettings();
-    }
-
-    getUsername() {
-        return this.username;
-    }
-    setUsername(username: string) {
-        this.username = username;
         this.saveSettings();
     }
 

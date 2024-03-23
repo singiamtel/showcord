@@ -1,7 +1,7 @@
 import { Battle } from '@pkmn/client';
 import { LogFormatter } from '@pkmn/view';
 import { Generations } from '@pkmn/data';
-import { Dex } from '@pkmn/dex';
+import { Dex, SideID } from '@pkmn/dex';
 import { Protocol } from '@pkmn/protocol';
 
 import { Room, RoomType } from './room';
@@ -10,7 +10,7 @@ import { assert } from '@/lib/utils';
 
 
 export class BattleRoom extends Room {
-    battle: Battle | null = null;
+    battle: Battle;
     formatter: LogFormatter | null = null;
     constructor(
         { ID, name, type, connected, open }: {
@@ -24,17 +24,19 @@ export class BattleRoom extends Room {
         super({ ID, name, type, connected, open });
 
         this.battle = new Battle(new Generations(Dex));
-        this.formatter = new LogFormatter('p1', this.battle); // TODO: dont use p1
+    }
+
+    setFormatter(perspective: SideID) {
+        assert(!this.formatter, 'Trying to create formatter twice');
+        this.formatter = new LogFormatter(perspective, this.battle);
     }
 
     /**
      * Returns whether a new message was added to the battle.
      */
     feedBattle(line: string): boolean {
-        assert(this.battle);
         const { args, kwArgs } = Protocol.parseBattleLine(line);
 
-        const html = this.formatter!.formatHTML(args, kwArgs); // fix type...
         try {
             // pre handler
             //   add(pre, key, args, kwArgs);
@@ -47,18 +49,23 @@ export class BattleRoom extends Room {
 
         this.battle.update();
 
-        if (html) {
-            this.addMessage(
-                newMessage({
-                    type: 'rawHTML',
-                    name: '',
-                    content: html,
-                    notify: false,
-                    hld: false,
-                }),
-                { selected: true, selfSent: false },
-            );
-            return true;
+        if (this.formatter) {
+            const html = this.formatter.formatHTML(args, kwArgs);
+            if (html) {
+                this.addMessage(
+                    newMessage({
+                        type: 'rawHTML',
+                        name: '',
+                        content: html,
+                        notify: false,
+                        hld: false,
+                    }),
+                    { selected: true, selfSent: false },
+                );
+                return true;
+            }
+        } else {
+            console.debug('Ignoring line', line);
         }
         return false;
     }

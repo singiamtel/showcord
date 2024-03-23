@@ -171,7 +171,7 @@ export class Client {
         this.queryUser(user, (_json) => {
             // This is risky as we could be logged in but not get a queryResponse for some reason
             this.events.dispatchEvent(
-                new CustomEvent('login', { detail: this.settings.getUsername() }),
+                new CustomEvent('login', { detail: this.settings.username }),
             );
         });
     }
@@ -384,7 +384,7 @@ export class Client {
     private async send_assertion(assertion: string) {
         const username = assertion.split(',')[1];
 
-        const storedName = this.settings.getUsername();
+        const storedName = this.settings.username;
         this.__send(
             `/trn ${toID(storedName) === toID(username) ? storedName : username
             },0,${assertion}`,
@@ -481,7 +481,7 @@ export class Client {
     ) {
         const room = this.room(roomID);
         if (
-            toID(message.user) !== toID(this.settings.getUsername()) &&
+            toID(message.user) !== toID(this.settings.username) &&
             this.highlightMsg(roomID, message)
         ) {
             this.events.dispatchEvent(
@@ -491,7 +491,7 @@ export class Client {
         if (room) {
             const settings = {
                 selected: this.selectedRoom === roomID,
-                selfSent: toID(this.settings.getUsername()) === toID(message.user),
+                selfSent: toID(this.settings.username) === toID(message.user),
             };
             let shouldNotify = false;
             if (message.name) {
@@ -557,7 +557,7 @@ export class Client {
 
     private setUsername(username: string) {
         // gotta re-run highlightMsg on all messages
-        this.settings.setUsername(username);
+        this.settings.username = username;
         this.rooms.forEach(async (room) => {
             room.runHighlight(this.forceHighlightMsg.bind(this));
         });
@@ -700,7 +700,7 @@ export class Client {
                     const sender = toID(args[1]);
                     const receiver = toID(args[2]);
                     let inferredRoomid = '';
-                    if (sender === toID(this.settings.getUsername())) {
+                    if (sender === toID(this.settings.username)) {
                         // sent message
                         inferredRoomid = `pm-${receiver}`;
                     } else {
@@ -711,7 +711,7 @@ export class Client {
                         args.slice(3).join('|'),
                     );
                     this.__createPM(
-                        sender === toID(this.settings.getUsername()) ? args[2] : args[1],
+                        sender === toID(this.settings.username) ? args[2] : args[1],
                     );
                     this.addMessageToRoom(
                         inferredRoomid,
@@ -751,7 +751,7 @@ export class Client {
 
                         try {
                             const tmpjson = JSON.parse(args[2]);
-                            if (tmpjson.userid === toID(this.settings.getUsername())) {
+                            if (tmpjson.userid === toID(this.settings.username)) {
                                 if (tmpjson.status) {
                                     this.settings.setStatus(tmpjson.status);
                                 }
@@ -821,7 +821,7 @@ export class Client {
                         this.autojoin(this.joinAfterLogin);
                         this.loggedIn = true;
                         assert(named === '1', 'Couldn\'t guard against guest');
-                        this.settings.updateUsername(username, avatar);
+                        this.settings.updateUser(username, avatar);
                         this.setUsername(username);
                         this.queryUserInternal(username);
                     }
@@ -943,6 +943,21 @@ export class Client {
             case 'updatesearch':
                 break;
             // battles
+            case 'player':
+                {
+                    console.log('player', args);
+                    const room = this.requiresRoom('player', roomID);
+                    if (!(room instanceof BattleRoom)) {
+                        console.error('Received |player| from non-battle room', roomID);
+                        return false;
+                    }
+                    const perspective = args[1];
+                    const playerName = args[2];
+                    if (toID(playerName) === this.settings.userID) {
+                        room.setFormatter(perspective);
+                    }
+                }
+                break;
             case 'move':
             case '-fail':
             case '-resisted':
@@ -964,7 +979,6 @@ export class Client {
             case 'switch':
             case 'battle':
             case 'gametype':
-            case 'player':
             case 'gen':
             case 'tier':
             case 'sentchoice':

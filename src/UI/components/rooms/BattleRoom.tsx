@@ -1,7 +1,7 @@
 import { HTMLAttributes, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faCommentAlt, faUsers } from '@fortawesome/free-solid-svg-icons';
-import { AnimatePresence, cubicBezier, motion } from 'framer-motion';
+import { faUsers } from '@fortawesome/free-solid-svg-icons';
+import { AnimatePresence, motion } from 'framer-motion';
 
 import ChatBox from '../single/chatbox';
 import UserList from '../single/UserList';
@@ -35,15 +35,10 @@ export default function BattleRoom(props: HTMLAttributes<HTMLDivElement>) {
                         setUserListOpen(!userListOpen);
                     }}
                 >
-                    {
-                        userListOpen ?
-                            <FontAwesomeIcon icon={faCommentAlt} height={16} width={16} /> :
-                            <FontAwesomeIcon icon={faUsers} height={16} width={16} />
-                    }
-
+                    <FontAwesomeIcon icon={faUsers} height={16} width={16} className={userListOpen ? 'text-blue-200' : 'text-gray-400'}/>
                 </div>
                 <div
-                    className="dark:bg-gray-300 flex flex-col min-h-0 w-full max-w-full"
+                    className="dark:bg-gray-300 flex flex-col min-h-0 h-full w-full max-w-full"
                 >
                     <AnimatePresence initial={false} mode="wait">
                         {userListOpen &&
@@ -86,8 +81,8 @@ export default function BattleRoom(props: HTMLAttributes<HTMLDivElement>) {
                         </motion.div>
                         }
                     </AnimatePresence>
-                    <Chat className='p-2 transition-all'/>
-                    <ChatBox className='transition-all'/>
+                    <Chat className='p-2 h-full'/>
+                    <ChatBox className='p-2 flex-grow-1'/>
                 </div>
 
             </div>
