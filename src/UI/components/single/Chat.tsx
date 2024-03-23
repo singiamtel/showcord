@@ -3,13 +3,12 @@ import {
     Fragment,
     HTMLAttributes,
     useCallback,
-    useContext,
     useLayoutEffect,
     useRef,
 } from 'react';
-import { PS_context } from './PS_context';
+import { useClientContext } from './ClientContext';
 import useOnScreen from '../../hooks/useOnScreen';
-import HTML from '../../chatFormatting/html';
+import HTML from '../../chatFormatting/Html';
 import { HHMMSS } from '../../../utils/date';
 import { ErrorBoundary } from 'react-error-boundary';
 
@@ -190,7 +189,7 @@ export function FormatMsgDisplay(
 }
 
 export default function Chat(props: HTMLAttributes<HTMLDivElement>) {
-    const { messages, selectedPage } = useContext(PS_context);
+    const { messages, currentRoom } = useClientContext();
     const messagesEndRef = createRef<HTMLDivElement>();
     const isIntersecting = useOnScreen(messagesEndRef);
     const ref = useRef<HTMLDivElement>(null);
@@ -210,7 +209,7 @@ export default function Chat(props: HTMLAttributes<HTMLDivElement>) {
 
     useLayoutEffect(() => {
         scrollToBottom();
-    }, [ref.current, selectedPage]);
+    }, [ref.current, currentRoom]);
 
     return (
         <div

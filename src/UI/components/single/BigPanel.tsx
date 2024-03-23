@@ -1,12 +1,11 @@
 import {
     HTMLAttributes,
-    useContext,
 } from 'react';
 
-import { PS_context } from './PS_context';
+import { useClientContext } from './ClientContext';
 
-import ChatBox from './chatbox';
-import Chat from './chat';
+import ChatBox from './Chatbox';
+import Chat from './Chat';
 import Home from '../../Home';
 import SettingsPage from '../../SettingsPage';
 import { cn } from '@/lib/utils';
@@ -16,15 +15,15 @@ import PmRoom from '../rooms/PmRoom';
 import HtmlRoom from '../rooms/HtmlRoom';
 
 export default function BigPanel(props: Readonly<HTMLAttributes<'div'>>) {
-    const { selectedPage: room, rooms } = useContext(PS_context);
-    const roomType = rooms?.find((r) => r.ID === room)?.type;
+    const { currentRoom: room } = useClientContext();
+    const roomType = room?.type;
 
     if (!room) return null;
     if (roomType === 'permanent') {
-        if (room === 'home') {
+        if (room.ID === 'home') {
             return <Home className={props.className} />;
         }
-        if (room === 'settings') {
+        if (room.ID === 'settings') {
             return <SettingsPage className={props.className} />;
         } else {
             return (

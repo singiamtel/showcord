@@ -1,7 +1,6 @@
-import { useContext } from 'react';
-import { client, PS_context } from './single/PS_context';
+import { client, useClientContext } from './single/ClientContext';
 import HashtagIcon from '../assets/hashtag';
-import Circle from './circle';
+import Circle from './Circle';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog, faHome, faUser } from '@fortawesome/free-solid-svg-icons';
 import { notificationsEngine } from '../../client/notifications';
@@ -22,7 +21,7 @@ export function RoomListComponent(
         notifications: { unread: number; mentions: number };
     }>,
 ) {
-    const { setRoom, selectedPage: room } = useContext(PS_context);
+    const { setRoom, currentRoom: room } = useClientContext();
     const customIcon = customIcons[ID as keyof typeof customIcons];
     const icon = customIcon ?? (type === 'battle' ?
         <GiBattleAxe height={16} width={16} /> :
@@ -37,7 +36,7 @@ export function RoomListComponent(
         >
             <div
                 className={' flex flex-row hover-color w-full ' + (
-                    ID === room ?
+                    ID === room?.ID ?
                         ' bg-gray-451 dark:bg-gray-450 dark:hover:bg-gray-450 ' :
                         mentions > 0 || unread > 0 ?
                             ' ' :
@@ -74,8 +73,8 @@ export function RoomListComponent(
                 </button>
                 {
                     /* Should display closing button?*/
-                    (room === ID && room !== 'home') ?
-                        <ClosingButton room={room} /> :
+                    (room?.ID === ID && room?.ID !== 'home') ?
+                        <ClosingButton room={room.ID} /> :
                         ''
                 }
             </div>

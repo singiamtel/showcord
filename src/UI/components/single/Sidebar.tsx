@@ -1,11 +1,10 @@
-import { HTMLAttributes, useContext } from 'react';
-import { PS_context } from './PS_context';
+import { HTMLAttributes } from 'react';
 import { RoomListComponent } from '../RoomListComponent';
 import {
     restrictToParentElement,
     restrictToVerticalAxis,
 } from '@dnd-kit/modifiers';
-import UserPanel from './userpanel';
+import UserPanel from './Userpanel';
 import 'allotment/dist/style.css';
 import {
     closestCenter,
@@ -23,9 +22,10 @@ import {
 } from '@dnd-kit/sortable';
 import SortableItem from '../../../utils/Sortable';
 import { cn } from '@/lib/utils';
+import { useClientContext } from './ClientContext';
 
 export default function Sidebar(props: Readonly<HTMLAttributes<'div'>>) {
-    const { rooms, setRooms } = useContext(PS_context);
+    const { rooms, setRooms } = useClientContext();
 
     const mouseSensor = useSensor(MouseSensor, {
     // Require the mouse to move by 10 pixels before activating

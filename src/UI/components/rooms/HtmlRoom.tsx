@@ -1,6 +1,6 @@
 
 import { HTMLAttributes } from 'react';
-import Chat from '../single/chat';
+import Chat from '../single/Chat';
 import { cn } from '@/lib/utils';
 
 export default function HtmlRoom(props: HTMLAttributes<HTMLDivElement>) {

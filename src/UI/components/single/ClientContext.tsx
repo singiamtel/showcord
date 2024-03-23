@@ -1,48 +1,33 @@
+import { assertNever } from '@/lib/utils';
 import { Client } from '../../../client/client';
 import { Message } from '../../../client/message';
 import { notificationsEngine, RoomNotification } from '../../../client/notifications';
 import { Room } from '../../../client/room/room';
 import { loadCustomColors } from '../../../utils/namecolour';
-import { createContext, useCallback, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 import { toast } from 'react-toastify';
 
 export const client = new Client();
 window.client = client; // Only for debugging
 
-export const PS_context = createContext<
-{
-    client: Client;
-    selectedPage: string;
-    selectedPageType: 'user' | 'room';
-    setRoom:(room: string | 1 | -1) => void;
+interface ClientContextType {
+    rooms: Room[];
+    currentRoom: Room | undefined;
+    setRoom:(room: string | 1 | -1 | Room) => void;
     messages: Message[];
     user?: string; // Will be an object with user info
-    rooms: Room[];
     setRooms: (rooms: Room[]) => void;
     notifications: RoomNotification[];
     avatar?: string;
     theme: 'light' | 'dark'
 }
->({
-            client: client,
-            selectedPage: '',
-            selectedPageType: 'room',
-            setRoom: () => {},
-            messages: [],
-            user: undefined,
-            rooms: [],
-            setRooms: () => {},
-            notifications: [],
-            theme: 'dark',
-        });
 
-export default function PS_contextProvider(props: any) {
+const ClientContext = createContext<ClientContextType | undefined>(undefined);
+
+export default function ClientContextProvider(props: any) {
     const [user, setUser] = useState<string | undefined>();
-    const [selectedPage, setSelectedPage] = useState<string>('home');
-    const [selectedPageType, setSelectedPageType] = useState<'room' | 'user'>(
-        'room',
-    );
+    const [selectedRoom, setSelectedRoom] = useState<Room | undefined>();
     const [rooms, setRooms] = useState<Room[]>(client.getRooms());
     const [notifications, setNotifications] = useState<RoomNotification[]>([]);
     const [update, setUpdate] = useState<number>(0); // Used to force update on rooms change
@@ -54,36 +39,44 @@ export default function PS_contextProvider(props: any) {
 
     /* --- Room handling --- */
 
-    const setRoom = useCallback((room: string | 1 | -1) => {
-        if (typeof room === 'number') {
-            if (rooms) {
-                if (!selectedPage) return;
-                const roomNames = rooms.map((r) => r.ID);
-                const index = roomNames.indexOf(selectedPage);
-                const newIndex = index + room;
-                if (newIndex >= roomNames.length) room = roomNames[0];
-                else if (newIndex < 0) room = roomNames[roomNames.length - 1];
-                else room = roomNames[newIndex];
-            } else {
-                return;
-            }
+    const setRoom = useCallback((newRoom: string | 1 | -1 | Room) => {
+        if (newRoom instanceof Room) {
+            setSelectedRoom(newRoom);
+            return;
         }
-        if (client.room(room)) {
+        if (typeof newRoom === 'number') {
+            if (rooms) {
+                if (!selectedRoom) return;
+                const index = rooms.indexOf(selectedRoom);
+                const newIndex = index + newRoom;
+                if (newIndex >= rooms.length) {
+                    setSelectedRoom(rooms[0]);
+                } else if (newIndex < 0) {
+                    setSelectedRoom(rooms[rooms.length - 1]);
+                } else {
+                    setSelectedRoom(rooms[newIndex]);
+                }
+                return;
+            } else { return; }
+        }
+        const roomObj = client.room(newRoom);
+        if (roomObj) {
             const tmpPR = previousRooms;
-            if (tmpPR.includes(room)) {
-                const index = previousRooms.indexOf(room);
+            if (tmpPR.includes(newRoom)) {
+                const index = previousRooms.indexOf(newRoom);
                 tmpPR.splice(index, 1);
             }
-            tmpPR.push(room);
+            tmpPR.push(newRoom);
             if (tmpPR.length > 5) tmpPR.shift();
             setPreviousRooms(tmpPR);
-            setSelectedPage(room);
-            client.selectRoom(room);
+            setSelectedRoom(roomObj);
+            client.selectRoom(newRoom);
+            return;
         } else {
-            console.warn('Trying to set room that does not exist (' + room + ')');
+            console.warn('Trying to set room that does not exist (' + newRoom + ')');
+            return;
         }
-        setSelectedPageType('room');
-    }, [client, rooms, selectedPage, previousRooms]);
+    }, [client, rooms, selectedRoom, previousRooms]);
 
     useEffect(() => {
         const changeRoomsEventListener = (e: Event) => {
@@ -98,9 +91,9 @@ export default function PS_contextProvider(props: any) {
                 return indexA - indexB;
             });
             setRooms(newRoomsOrdered);
-            if (e.type === 'leaveroom' && selectedPage === (e as CustomEvent).detail) {
+            if (e.type === 'leaveroom' && selectedRoom?.ID === (e as CustomEvent).detail) {
                 setRoom('home');
-            } else if (!selectedPage) { setRoom('home'); }
+            } else if (!selectedRoom) { setRoom('home'); }
         };
 
         const globalErrorListener = (e: Event) => {
@@ -141,8 +134,7 @@ export default function PS_contextProvider(props: any) {
     }, [
         client,
         setRooms,
-        selectedPage,
-        selectedPageType,
+        selectedRoom,
         setRoom,
         update,
         setUpdate,
@@ -156,18 +148,18 @@ export default function PS_contextProvider(props: any) {
 
     /* --- Message handling --- */
     const handleMsgEvent = useCallback(async (setMessages: any) => {
-        if (!selectedPage) {
+        if (!selectedRoom) {
             return;
         }
-        const msgs = client.room(selectedPage)?.messages ?? [];
+        const msgs = selectedRoom.messages ?? [];
         setNotifications(client.getNotifications());
         setMessages([...msgs]);
-    }, [client, selectedPage]);
+    }, [client, selectedRoom]);
 
     useEffect(() => {
-        if (!selectedPage) return;
+        if (!selectedRoom) return;
 
-        setMessages([...client.room(selectedPage)?.messages ?? []]);
+        setMessages([...selectedRoom.messages ?? []]);
 
         const eventListener = () => {
             setUpdateMsgs(updateMsgs + 1);
@@ -190,8 +182,7 @@ export default function PS_contextProvider(props: any) {
         };
     }, [
         client,
-        selectedPage,
-        selectedPageType,
+        selectedRoom,
         setMessages,
         handleMsgEvent,
         updateMsgs,
@@ -218,11 +209,9 @@ export default function PS_contextProvider(props: any) {
     /* --- End user handling --- */
 
     return (
-        <PS_context.Provider
+        <ClientContext.Provider
             value={{
-                client: client,
-                selectedPage,
-                selectedPageType,
+                currentRoom: selectedRoom,
                 setRoom,
                 user,
                 messages,
@@ -234,6 +223,14 @@ export default function PS_contextProvider(props: any) {
             }}
         >
             {props.children}
-        </PS_context.Provider>
+        </ClientContext.Provider>
     );
+}
+
+export function useClientContext() {
+    const context = useContext(ClientContext);
+    if (!context) {
+        throw new Error('useClientContext must be used within a ClientContextProvider');
+    }
+    return context;
 }

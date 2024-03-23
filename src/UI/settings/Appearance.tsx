@@ -1,11 +1,12 @@
-import { HTMLAttributes, useContext, useEffect, useState } from 'react';
+import { HTMLAttributes, useEffect, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
-import { PS_context } from '../components/single/PS_context';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { useClientContext } from '../components/single/ClientContext';
+import { client } from '@/client/client';
 
 export default function AppearanceSettings(props: HTMLAttributes<'div'>) {
-    const { client, theme: currentTheme } = useContext(PS_context);
+    const { theme: currentTheme } = useClientContext();
     const [theme, setTheme] = useState<'light' | 'dark'>(currentTheme);
     useEffect(() => {
         client.setTheme(theme);

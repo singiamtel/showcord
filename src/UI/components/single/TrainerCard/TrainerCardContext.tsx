@@ -1,7 +1,7 @@
 import { MouseEventHandler, createContext, useContext, useEffect, useRef, useState } from 'react';
 import TrainerCard from './TrainerCard';
 import useClickOutside from '@/UI/hooks/useClickOutside';
-import { client } from '../PS_context';
+import { client } from '../ClientContext';
 
 interface TrainerCardContextType {
     isOpen: boolean;

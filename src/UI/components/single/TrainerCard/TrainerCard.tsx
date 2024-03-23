@@ -15,7 +15,7 @@ import { FaCommentAlt, FaUserPlus } from 'react-icons/fa';
 import { PiSwordBold } from 'react-icons/pi';
 import manageURL from '../../../../utils/manageURL';
 import { rankOrder } from '../../../../client/user';
-import { client } from '../PS_context';
+import { client } from '../ClientContext';
 
 const margin = 15;
 

@@ -4,7 +4,6 @@ import {
     FormEvent,
     HTMLAttributes,
     KeyboardEvent,
-    useContext,
     useEffect,
     useLayoutEffect,
     useRef,
@@ -12,8 +11,8 @@ import {
 } from 'react';
 import MiniSearch, { SearchResult } from 'minisearch';
 import TextareaAutosize from 'react-textarea-autosize';
-import { PS_context } from './PS_context';
 import { cn } from '@/lib/utils';
+import { client, useClientContext } from './ClientContext';
 
 type SearchBoxOffset = {
     width: number;
@@ -36,14 +35,14 @@ export default function ChatBox(props: HTMLAttributes<HTMLDivElement>) {
         width: 0,
         marginBottom: 0,
     });
-    const { client, selectedPage: room, setRoom } = useContext(PS_context);
+    const { currentRoom: room, setRoom } = useClientContext();
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
     const formRef = createRef<HTMLFormElement>();
 
     const submit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         if (!client || !room) return;
-        client.send(input, room);
+        client.send(input, room.ID);
         setInput('');
     };
 
@@ -70,7 +69,7 @@ export default function ChatBox(props: HTMLAttributes<HTMLDivElement>) {
         if (e.key === 'Tab' && !e.shiftKey && e.currentTarget.value && room) {
             e.preventDefault();
 
-            const users = client.room(room)?.users;
+            const users = room?.users;
             if (!users) return;
 
             const { selectionStart: cursorPos, value: text } = e.currentTarget;
@@ -99,14 +98,14 @@ export default function ChatBox(props: HTMLAttributes<HTMLDivElement>) {
         if (e.key === 'ArrowUp') {
             // Previous message in history
             if (!room) return;
-            const prev = client.room(room)?.historyPrev();
+            const prev = room.historyPrev();
             if (!prev) return;
             setInput(prev);
             e.preventDefault();
         }
         if (e.key === 'ArrowDown') {
             if (!room) return;
-            const prev = client.room(room)?.historyNext();
+            const prev = room.historyNext();
             if (!prev) {
                 setInput('');
             } else {
@@ -176,7 +175,7 @@ export default function ChatBox(props: HTMLAttributes<HTMLDivElement>) {
                         onKeyDown={manageKeybinds}
                         ref={textAreaRef}
                         placeholder={`Message ${
-                            room ? client.room(room)?.name.trim() : ''
+                            room ? room.name.trim() : ''
                         }`}
                     >
                     </TextareaAutosize>

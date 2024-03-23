@@ -1,5 +1,5 @@
-import ChatBox from '../single/chatbox';
-import Chat from '../single/chat';
+import ChatBox from '../single/Chatbox';
+import Chat from '../single/Chat';
 import { cn } from '@/lib/utils';
 import { HTMLAttributes } from 'react';
 

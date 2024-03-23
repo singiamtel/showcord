@@ -5,7 +5,7 @@ import { StrictMode } from 'react';
 import '@fontsource/roboto-mono';
 import './UI/globals.css';
 import 'react-toastify/dist/ReactToastify.css';
-import PS_contextProvider from './UI/components/single/PS_context';
+import ClientContextProvider from './UI/components/single/ClientContext';
 import { Analytics } from '@vercel/analytics/react';
 
 const root = ReactDOM.createRoot(
@@ -15,8 +15,8 @@ const root = ReactDOM.createRoot(
 root.render(
     <StrictMode>
         <Analytics/>
-        <PS_contextProvider>
+        <ClientContextProvider>
             <App />
-        </PS_contextProvider>
+        </ClientContextProvider>
     </StrictMode>,
 );

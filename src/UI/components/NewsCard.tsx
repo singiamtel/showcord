@@ -1,4 +1,4 @@
-import HTML from '../chatFormatting/html';
+import HTML from '../chatFormatting/Html';
 
 export interface News {
     author: string;

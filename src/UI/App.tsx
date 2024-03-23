@@ -1,17 +1,15 @@
-import Sidebar from './components/single/sidebar';
+import Sidebar from './components/single/Sidebar';
 import BigPanel from './components/single/BigPanel';
 import ToastProvider from './components/single/ToastProvider';
-import { PS_context } from './components/single/PS_context';
-import { useContext } from 'react';
 
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faBarChart, faPieChart } from '@fortawesome/free-solid-svg-icons';
 import { TrainerCardProvider } from './components/single/TrainerCard/TrainerCardContext';
+import { client } from '@/client/client';
 
 library.add(faBarChart, faPieChart);
 
 export default function App() {
-    const { client } = useContext(PS_context);
     return (
         <div className={`${client.settings.getTheme() === 'dark' ? 'dark' : ''}`}>
             <ToastProvider>

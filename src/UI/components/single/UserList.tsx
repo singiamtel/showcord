@@ -1,26 +1,21 @@
-import { PS_context } from './PS_context';
-import { HTMLAttributes, useContext, useEffect, useLayoutEffect, useState } from 'react';
+import { client, useClientContext } from './ClientContext';
+import { HTMLAttributes, useLayoutEffect, useState } from 'react';
 import { Username } from '../Username';
 import { isStaff, User } from '../../../client/user';
 import { toID } from '@/utils/generic';
 import { cn } from '@/lib/utils';
 
 export default function UserList(props: HTMLAttributes<HTMLDivElement>) {
-    const { selectedPage: room, client } = useContext(PS_context);
+    const { currentRoom: room } = useClientContext();
     const [users, setUsers] = useState<User[]>([]);
     const [search, setSearch] = useState<string>('');
 
     const filteredUsers = users.filter((user) => toID(user.name).includes(toID(search)));
 
     useLayoutEffect(() => {
-        if (!client) return;
         const refreshUsers = () => {
             if (!room) return;
-            const selectedRoom = client?.room(room);
-            if (!selectedRoom) {
-                return;
-            }
-            setUsers([...selectedRoom.users]);
+            setUsers([...room.users]);
         };
 
         refreshUsers();

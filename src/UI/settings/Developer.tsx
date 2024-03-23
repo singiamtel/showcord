@@ -1,13 +1,12 @@
-import { HTMLAttributes, useContext, useState } from 'react';
+import { HTMLAttributes, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { AlertDestructive } from '@/utils/AlertDestructive';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { PS_context } from '../components/single/PS_context';
 import { Button } from '@/components/ui/button';
+import { client } from '@/client/client';
 
 export default function DeveloperSettings(props: HTMLAttributes<'div'>) {
-    const { client } = useContext(PS_context);
     const description = 'These settings are for advanced users only. Change them at your own risk.';
     const [serverURL, setServerURL] = useState(client.settings.getServerURL());
     const [loginserverURL, setLoginserverURL] = useState(client.settings.getLoginServerURL());

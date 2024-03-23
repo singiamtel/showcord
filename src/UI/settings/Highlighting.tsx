@@ -1,11 +1,10 @@
+import { client } from '@/client/client';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { HTMLAttributes, useContext, useState } from 'react';
+import { HTMLAttributes, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
-import { PS_context } from '../components/single/PS_context';
 
 export default function HighlightingSettings(props: HTMLAttributes<'div'>) {
-    const { client } = useContext(PS_context);
     const [highlightWords, setHighlightWords] = useState(client.settings.getHighlightWordsMap());
     const [hlOnSelf, setHlOnSelf] = useState(client.settings.getHighlightOnSelf());
     // global goes first

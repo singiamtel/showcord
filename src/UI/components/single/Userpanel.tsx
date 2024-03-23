@@ -1,12 +1,11 @@
-import { useContext } from 'react';
-import { PS_context } from './PS_context';
 import { notificationsEngine } from '../../../client/notifications';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
 import { UserDetails } from '../UserDetails';
+import { client, useClientContext } from './ClientContext';
 
 export default function UserPanel() {
-    const { client, user, avatar } = useContext(PS_context);
+    const { user, avatar } = useClientContext();
 
     return (
         <div className="h-26 p-3 flex items-center bg-gray-251 dark:bg-gray-600">

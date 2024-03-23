@@ -3,9 +3,9 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faUsers } from '@fortawesome/free-solid-svg-icons';
 import { AnimatePresence, motion } from 'framer-motion';
 
-import ChatBox from '../single/chatbox';
+import ChatBox from '../single/Chatbox';
 import UserList from '../single/UserList';
-import Chat from '../single/chat';
+import Chat from '../single/Chat';
 import { cn } from '@/lib/utils';
 import BattleWindow from './battle/Battle';
 import BattleControls from './battle/BattleControls';
@@ -22,7 +22,7 @@ export default function BattleRoom(props: HTMLAttributes<HTMLDivElement>) {
                 'flex break-normal h-screen overflow-x-hidden',
             )}
         >
-            <div className="flex flex-col w-3/4">
+            <div className="flex flex-col w-3/4 justify-center items-center gap-8 p-8">
                 <BattleWindow/>
                 <BattleControls/>
                 <Calcs/>

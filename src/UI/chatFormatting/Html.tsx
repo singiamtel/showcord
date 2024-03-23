@@ -1,21 +1,21 @@
 // recognize HTML commands and try to parse them
 // if they have no parser, just return the sanitized HTML
 
-import { PS_context } from '../components/single/PS_context';
+import { useClientContext } from '../components/single/ClientContext';
 import manageURL from '../../utils/manageURL';
 import parse, { domToReact } from 'html-react-parser';
-import { useContext } from 'react';
 import sanitizeHtml from 'sanitize-html-react';
 import { escape } from 'html-escaper';
 import { Icons } from '@pkmn/img';
 import { Username } from '../components/Username';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { twMerge } from 'tailwind-merge';
+import { client } from '@/client/client';
 
 export default function HTML(
     { message, raw }: Readonly<{ message: string; raw?: boolean }>,
 ) {
-    const { client, selectedPage } = useContext(PS_context);
+    const { currentRoom: room } = useClientContext();
     const parserOptions = {
         replace: (domNode: any) => {
             const { attribs, children } = domNode;
@@ -38,7 +38,7 @@ export default function HTML(
                 return (
                     <button
                         onClick={() => {
-                            client?.send(attribs.value, selectedPage || '');
+                            client.send(attribs.value, room?.ID || '');
                         }}
                         className="border border-gray-601 dark:border-gray-border font-bold p-1 m-1 rounded text-sm"
                         data-parsed="true"

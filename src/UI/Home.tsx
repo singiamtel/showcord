@@ -8,7 +8,6 @@ import {
     useRef,
     useState,
 } from 'react';
-import { PS_context } from './components/single/PS_context';
 import RoomCard from './components/RoomCard';
 import { InfinitySpin } from 'react-loader-spinner';
 import MiniSearch, { SearchResult } from 'minisearch';
@@ -21,6 +20,8 @@ import discord from './assets/discord.png';
 import FAQ from './assets/FAQ.png';
 
 import { twMerge } from 'tailwind-merge';
+import { client } from '@/client/client';
+import { useClientContext } from './components/single/ClientContext';
 
 const minisearch = new MiniSearch({
     fields: ['title', 'desc'],
@@ -56,11 +57,9 @@ function TargetFaceWelcome({ className }: Readonly<{ className?: string }>) {
 
 function News({ className }: Readonly<{ className?: string }>) {
     const [news, setNews] = useState<any[]>([]);
-    const { client } = useContext(PS_context);
     useEffect(() => {
-        if (!client) return;
         client.queryNews(setNews);
-    }, [client]);
+    }, []);
     return (
         <div
             className={twMerge(
@@ -79,13 +78,12 @@ function News({ className }: Readonly<{ className?: string }>) {
 }
 
 function RoomList({ className }: Readonly<{ className?: string }>) {
-    const { client } = useContext(PS_context);
     const [roomsJSON, setRoomsJSON] = useState<any>({});
     const [input, setInput] = useState<string>('');
     const [miniSearchResults, setMiniSearchResults] = useState<SearchResult[]>(
         [],
     );
-    const { setRoom } = useContext(PS_context);
+    const { setRoom } = useClientContext();
 
     const formRef = createRef<HTMLFormElement>();
     const inputRef = useRef<HTMLInputElement>(null);
