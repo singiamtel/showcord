@@ -1,4 +1,4 @@
-import { client, useClientContext } from './ClientContext';
+import { useClientContext } from './ClientContext';
 import { HTMLAttributes, useLayoutEffect, useState } from 'react';
 import { Username } from '../Username';
 import { isStaff, User } from '../../../client/user';
@@ -6,7 +6,7 @@ import { toID } from '@/utils/generic';
 import { cn } from '@/lib/utils';
 
 export default function UserList(props: HTMLAttributes<HTMLDivElement>) {
-    const { currentRoom: room } = useClientContext();
+    const { client, currentRoom: room } = useClientContext();
     const [users, setUsers] = useState<User[]>([]);
     const [search, setSearch] = useState<string>('');
 

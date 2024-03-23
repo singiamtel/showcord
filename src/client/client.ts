@@ -118,7 +118,9 @@ export class Client {
     /** Returns an array of all rooms
     */
     getRooms() {
-        return [...this.rooms.values()].filter((r) => r.open);
+        const tmp = [...this.rooms.values()].filter((r) => r.open);
+        console.log('Getting rooms', tmp);
+        return tmp;
     }
 
     createPM(user: string) {
@@ -447,8 +449,9 @@ export class Client {
     // --- Room management ---
     private _addRoom(room: Room) {
         this.rooms.set(room.ID, room);
-        this.events.dispatchEvent(new CustomEvent('room', { detail: room }));
-        this.events.dispatchEvent(new CustomEvent('message', { detail: room })); // Just in case. Fixes pagehtml
+        console.log('SENDING EVENT', room.ID);
+        this.events.dispatchEvent(new CustomEvent('room', { detail: room.ID }));
+        this.events.dispatchEvent(new CustomEvent('message', { detail: room.ID })); // Just in case. Fixes pagehtml
         this.settings.addRoom(room);
     }
 
@@ -468,6 +471,7 @@ export class Client {
 
 
     private _removeRoom(roomID: string) {
+        console.log('Removing room', roomID);
         this.rooms.delete(roomID);
         const eventio = new CustomEvent('leaveroom', { detail: roomID });
         this.events.dispatchEvent(eventio);
@@ -1252,5 +1256,3 @@ export class Client {
         }
     }
 }
-
-export const client = new Client();

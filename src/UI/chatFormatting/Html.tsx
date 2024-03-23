@@ -10,12 +10,11 @@ import { Icons } from '@pkmn/img';
 import { Username } from '../components/Username';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { twMerge } from 'tailwind-merge';
-import { client } from '@/client/client';
 
 export default function HTML(
     { message, raw }: Readonly<{ message: string; raw?: boolean }>,
 ) {
-    const { currentRoom: room } = useClientContext();
+    const { client, currentRoom: room } = useClientContext();
     const parserOptions = {
         replace: (domNode: any) => {
             const { attribs, children } = domNode;
@@ -27,7 +26,9 @@ export default function HTML(
                     <a
                         href={attribs.href}
                         target="_blank"
-                        onClick={manageURL}
+                        onClick={(e) => {
+                            manageURL(e, client);
+                        }}
                         className="novisited cursor-pointer text-blue-500 underline"
                     >
                         {domToReact(children, parserOptions)}

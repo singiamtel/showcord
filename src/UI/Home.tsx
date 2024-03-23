@@ -3,7 +3,6 @@ import {
     FormEvent,
     HTMLAttributes,
     KeyboardEventHandler,
-    useContext,
     useEffect,
     useRef,
     useState,
@@ -20,7 +19,6 @@ import discord from './assets/discord.png';
 import FAQ from './assets/FAQ.png';
 
 import { twMerge } from 'tailwind-merge';
-import { client } from '@/client/client';
 import { useClientContext } from './components/single/ClientContext';
 
 const minisearch = new MiniSearch({
@@ -57,6 +55,7 @@ function TargetFaceWelcome({ className }: Readonly<{ className?: string }>) {
 
 function News({ className }: Readonly<{ className?: string }>) {
     const [news, setNews] = useState<any[]>([]);
+    const { client } = useClientContext();
     useEffect(() => {
         client.queryNews(setNews);
     }, []);
@@ -78,6 +77,7 @@ function News({ className }: Readonly<{ className?: string }>) {
 }
 
 function RoomList({ className }: Readonly<{ className?: string }>) {
+    const { client } = useClientContext();
     const [roomsJSON, setRoomsJSON] = useState<any>({});
     const [input, setInput] = useState<string>('');
     const [miniSearchResults, setMiniSearchResults] = useState<SearchResult[]>(

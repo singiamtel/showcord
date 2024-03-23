@@ -1,7 +1,7 @@
 import { MouseEventHandler, createContext, useContext, useEffect, useRef, useState } from 'react';
 import TrainerCard from './TrainerCard';
 import useClickOutside from '@/UI/hooks/useClickOutside';
-import { client } from '../ClientContext';
+import { useClientContext } from '../ClientContext';
 
 interface TrainerCardContextType {
     isOpen: boolean;
@@ -13,6 +13,7 @@ interface TrainerCardContextType {
 const TrainerCardContext = createContext<TrainerCardContextType | undefined>(undefined);
 
 export const TrainerCardProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+    const { client } = useClientContext();
     const [isOpen, setIsOpen] = useState(false);
     const openCard = () => setIsOpen(true);
     const closeCard = () => setIsOpen(false);
@@ -49,7 +50,7 @@ export const TrainerCardProvider: React.FC<{ children: React.ReactNode }> = ({ c
         setUsername(username);
         setPosition({ x: e.clientX, y: e.clientY });
         setUser(null);
-        client?.queryUser(username, (user: any) => {
+        client.queryUser(username, (user: any) => {
             setUser(user);
         });
     };

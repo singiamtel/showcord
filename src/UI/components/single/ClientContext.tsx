@@ -12,6 +12,7 @@ export const client = new Client();
 window.client = client; // Only for debugging
 
 interface ClientContextType {
+    client: Client;
     rooms: Room[];
     currentRoom: Room | undefined;
     setRoom:(room: string | 1 | -1 | Room) => void;
@@ -25,7 +26,7 @@ interface ClientContextType {
 
 const ClientContext = createContext<ClientContextType | undefined>(undefined);
 
-export default function ClientContextProvider(props: any) {
+export default function ClientContextProvider(props: React.PropsWithChildren) {
     const [user, setUser] = useState<string | undefined>();
     const [selectedRoom, setSelectedRoom] = useState<Room | undefined>();
     const [rooms, setRooms] = useState<Room[]>(client.getRooms());
@@ -79,7 +80,33 @@ export default function ClientContextProvider(props: any) {
     }, [client, rooms, selectedRoom, previousRooms]);
 
     useEffect(() => {
+        console.log('Updated rooms', rooms);
+    }, [rooms]);
+
+
+    const globalErrorListener = (e: Event) => {
+        const error = (e as CustomEvent).detail;
+        console.warn('Received error from socket', error);
+        if (error) {
+            toast.error(error);
+        }
+    };
+
+    const autoSelectRoomListener = (e: Event) => {
+        const roomID = (e as CustomEvent)?.detail;
+        if (roomID) {
+            setRoom(roomID);
+        }
+    };
+
+    const themeEventListener = (_e: Event) => {
+        const theme = client.settings.getTheme();
+        setTheme(theme);
+    };
+
+    useEffect(() => {
         const changeRoomsEventListener = (e: Event) => {
+            console.log('Change rooms event', e);
             const newRooms = client.getRooms();
             // Keep the same order we had before
             const newRoomsOrdered = newRooms.sort((a, b) => {
@@ -91,31 +118,13 @@ export default function ClientContextProvider(props: any) {
                 return indexA - indexB;
             });
             setRooms(newRoomsOrdered);
-            if (e.type === 'leaveroom' && selectedRoom?.ID === (e as CustomEvent).detail) {
+            if (e.type === 'leaveroom' && selectedRoom?.ID === (e as CustomEvent).detail.ID) {
                 setRoom('home');
             } else if (!selectedRoom) { setRoom('home'); }
         };
 
-        const globalErrorListener = (e: Event) => {
-            const error = (e as CustomEvent).detail;
-            console.warn('Received error from socket', error);
-            if (error) {
-                toast.error(error);
-            }
-        };
 
-        const autoSelectRoomListener = (e: Event) => {
-            const roomID = (e as CustomEvent)?.detail;
-            if (roomID) {
-                setRoom(roomID);
-            }
-        };
-
-        const themeEventListener = (_e: Event) => {
-            const theme = client.settings.getTheme();
-            setTheme(theme);
-        };
-
+        console.log('Adding event listeners');
         client.events.addEventListener('room', changeRoomsEventListener);
         client.events.addEventListener('selectroom', autoSelectRoomListener);
         client.events.addEventListener('leaveroom', changeRoomsEventListener);
@@ -123,6 +132,7 @@ export default function ClientContextProvider(props: any) {
         client.events.addEventListener('theme', themeEventListener);
 
         return () => {
+            console.log('Removing event listeners');
             client.events.removeEventListener('room', changeRoomsEventListener);
             client.events.removeEventListener(
                 'selectroom',
@@ -132,7 +142,6 @@ export default function ClientContextProvider(props: any) {
             client.events.removeEventListener('error', globalErrorListener);
         };
     }, [
-        client,
         setRooms,
         selectedRoom,
         setRoom,
@@ -211,6 +220,7 @@ export default function ClientContextProvider(props: any) {
     return (
         <ClientContext.Provider
             value={{
+                client,
                 currentRoom: selectedRoom,
                 setRoom,
                 user,

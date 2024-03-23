@@ -3,10 +3,9 @@ import { twMerge } from 'tailwind-merge';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useClientContext } from '../components/single/ClientContext';
-import { client } from '@/client/client';
 
 export default function AppearanceSettings(props: HTMLAttributes<'div'>) {
-    const { theme: currentTheme } = useClientContext();
+    const { client, theme: currentTheme } = useClientContext();
     const [theme, setTheme] = useState<'light' | 'dark'>(currentTheme);
     useEffect(() => {
         client.setTheme(theme);

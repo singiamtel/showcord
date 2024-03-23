@@ -3,6 +3,7 @@ import { HTMLAttributes, useState } from 'react';
 import manageURL from '../../utils/manageURL';
 import innerText from 'react-innertext';
 import { twMerge } from 'tailwind-merge';
+import { useClientContext } from '../components/single/ClientContext';
 
 // ``code here`` marks inline code
 // ||text|| are spoilers
@@ -43,9 +44,10 @@ export function inlineCode(
     );
 }
 
-export function roomLink(
+export function RoomLink(
     props: ExtendedProps,
 ) {
+    const { client } = useClientContext();
     const key = props.key;
     delete props.key;
     return (
@@ -54,7 +56,9 @@ export function roomLink(
             <a
                 href={`/${innerText(props.children)}`}
                 className="text-blue-500 underline cursor-pointer"
-                onClick={manageURL}
+                onClick={(e) => {
+                    manageURL(e, client);
+                }}
                 {...props}
             />
       »

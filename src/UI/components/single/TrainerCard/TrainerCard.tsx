@@ -15,7 +15,7 @@ import { FaCommentAlt, FaUserPlus } from 'react-icons/fa';
 import { PiSwordBold } from 'react-icons/pi';
 import manageURL from '../../../../utils/manageURL';
 import { rankOrder } from '../../../../client/user';
-import { client } from '../ClientContext';
+import { useClientContext } from '../ClientContext';
 
 const margin = 15;
 
@@ -28,6 +28,7 @@ export default function TrainerCard(
         close: () => void;
     }>,
 ) {
+    const { client } = useClientContext();
     const publicRooms = user ?
         Object.entries(user.rooms).filter((e: any) => !e[1].isPrivate) :
         [];
@@ -171,8 +172,8 @@ function UserCardButton({
 }
 
 function roomLink(room: string, last: boolean, close: () => void, key: number) {
-    const hasRank =
-    rankOrder[room.charAt(0) as keyof typeof rankOrder] !== undefined;
+    const { client } = useClientContext();
+    const hasRank = rankOrder[room.charAt(0) as keyof typeof rankOrder] !== undefined;
     if (toID(room).startsWith('battle')) {
         return;
     }
@@ -186,7 +187,7 @@ function roomLink(room: string, last: boolean, close: () => void, key: number) {
                     href={'/' + (removeFirstCharacterIfNotLetter(room))}
                     target="_blank"
                     onClick={(e) => {
-                        manageURL(e);
+                        manageURL(e, client);
                         close();
                     }}
                     className="hover:underline"

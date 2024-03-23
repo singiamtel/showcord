@@ -1,4 +1,4 @@
-import { client, useClientContext } from './single/ClientContext';
+import { useClientContext } from './single/ClientContext';
 import HashtagIcon from '../assets/hashtag';
 import Circle from './Circle';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -83,6 +83,7 @@ export function RoomListComponent(
 }
 
 function ClosingButton({ room }: Readonly<{ room: string }>) {
+    const { client } = useClientContext();
     return (
         <button className="p-1" onClick={() => client.leaveRoom(room)}>
             <AiOutlineClose className='hover:text-red-600' opacity={0.4} />

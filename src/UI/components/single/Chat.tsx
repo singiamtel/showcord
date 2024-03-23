@@ -24,7 +24,7 @@ import {
     inlineCode,
     italic,
     link,
-    roomLink,
+    RoomLink,
     spoiler,
     strikethrough,
     subscript,
@@ -77,7 +77,7 @@ const elements: {
     link: { pattern: /\[\[(.+?)?\]\]/g, element: link },
     greentext: { pattern: /^>.*/g, element: greentext },
     fakeCommand: { pattern: /^\/\/.*/g, element: fakeCommand },
-    roomlink: { pattern: /<<(.+?)?>>/g, element: roomLink },
+    roomlink: { pattern: /<<(.+?)?>>/g, element: RoomLink },
 } as const;
 
 const cleanTag = (input: string, tag: keyof typeof elements) => {

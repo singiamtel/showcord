@@ -5,7 +5,7 @@ import ToastProvider from './components/single/ToastProvider';
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faBarChart, faPieChart } from '@fortawesome/free-solid-svg-icons';
 import { TrainerCardProvider } from './components/single/TrainerCard/TrainerCardContext';
-import { client } from '@/client/client';
+import { client } from './components/single/ClientContext';
 
 library.add(faBarChart, faPieChart);
 
