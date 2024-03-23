@@ -4,7 +4,7 @@ import {
     restrictToParentElement,
     restrictToVerticalAxis,
 } from '@dnd-kit/modifiers';
-import UserPanel from './Userpanel';
+import UserPanel from './UserPanel';
 import 'allotment/dist/style.css';
 import {
     closestCenter,
