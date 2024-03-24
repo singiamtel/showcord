@@ -278,7 +278,6 @@ export function ChallengeMessage(
 
     const formatID = message.split('|')[0];
     const format = client.formatName(formatID) || { gen: 9, name: `Unknown(${formatID})` };
-    console.log('format name', format, formatID);
     return (
         <div className="p-2 bg-blue-pastel rounded-md flex flex-col justify-center items-center">
                 You received a challenge from <Username user={user} bold />

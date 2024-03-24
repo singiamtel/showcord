@@ -61,7 +61,6 @@ export default function formatParser(formats: string[]) {
         name: '',
         column: 1,
     };
-    console.log('Parsing Formats', formats);
     for (const format of formats) {
         if (nextIsCategory) {
             currentCategory.name = format;
@@ -96,7 +95,6 @@ export default function formatParser(formats: string[]) {
             throw new Error(`Unknown format: ${format}`);
         }
     }
-    console.log('Parsed Formats', result);
     return result;
 }
 

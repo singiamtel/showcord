@@ -22,7 +22,6 @@ export function SwitchRequest({ req, battle }: Readonly<{ req: Protocol.SwitchRe
     useEffect(() => {
         if (selected) {
             // req.send();
-            console.log('builder.toString()', builder.toString());
             client.send(`/${builder.toString()}|${req.rqid}`, battle.ID);
         }
     }, [selected]);
@@ -34,7 +33,6 @@ export function SwitchRequest({ req, battle }: Readonly<{ req: Protocol.SwitchRe
 
             onClick={() => {
                 builder.addChoice(`switch ${idx + 1}`);
-                console.log('builder.choices', builder.choices);
                 setSelected(mon.name);
             }}
         />)}

@@ -987,7 +987,6 @@ export class Client {
                 const formats = args.slice(1);
                 // formats
                 this.formats = formatParser(formats);
-                console.log('Parsed formats', args, this.formats);
             }
                 break;
             case 'customgroups':

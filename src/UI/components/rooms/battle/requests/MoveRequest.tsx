@@ -25,7 +25,6 @@ export function MoveRequest({ req, battle }: Readonly<{ req: Protocol.MoveReques
     useEffect(() => {
         if (selected) {
             // req.send();
-            console.log('builder.toString()', builder.toString());
             client.send(`/${builder.toString()}|${req.rqid}`, battle.ID);
             setUndo(true);
         } else {
@@ -54,7 +53,6 @@ export function MoveRequest({ req, battle }: Readonly<{ req: Protocol.MoveReques
     >{active[0].moves.map((move, idx: number) => <MoveButton key={idx} move={move}
             onClick={() => {
                 builder.addChoice(`move ${idx + 1}`);
-                console.log('builder.choices', builder.choices);
                 setSelected(move.name);
             }}
         />)}</div>;
