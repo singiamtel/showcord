@@ -18,6 +18,10 @@ module.exports = {
         },
         colors: {
             primary: '#0F4C81',
+            text: {
+                DEFAULT: '#000000',
+                'dark': '#FFFFFF',
+            },
             secondary: '#F2F2F2',
             white: '#FFFFFF',
             black: '#000000',
