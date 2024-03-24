@@ -7,6 +7,7 @@ import { clientNotification, RoomNotification } from './notifications';
 import { Protocol } from '@pkmn/protocol';
 import { assertNever, assert } from '@/lib/utils';
 import { BattleRoom } from './room/battleRoom';
+import formatParser, { Formats } from './formatParser';
 
 type ClientConstructor = {
     server_url?: string;
@@ -50,6 +51,14 @@ export class Client {
     private roomsJSON: any = undefined; // Server response to /cmd rooms
     private news: any = undefined; // Cached news
     private lastQueriedUser: { user: string; json: any } | undefined; // Cached user query
+    private formats: Formats | undefined;
+
+    formatName(formatID: string) {
+        // search all categories and return the name of the format
+        const allFormats = this.formats?.categories.flatMap((c) => c.formats);
+        const format = allFormats?.find((f) => f.ID === formatID);
+        return format;
+    }
 
     constructor(options?: ClientConstructor) {
         // if running test suite, don't do anything
@@ -748,6 +757,7 @@ export class Client {
                                 }),
                             );
                         }
+                        break;
                     }
                     this.addMessageToRoom(
                         inferredRoomid,
@@ -973,8 +983,14 @@ export class Client {
                     );
                 }
                 break;
+            case 'formats': {
+                const formats = args.slice(1);
+                // formats
+                this.formats = formatParser(formats);
+                console.log('Parsed formats', args, this.formats);
+            }
+                break;
             case 'customgroups':
-            case 'formats':
             case 'tournament':
             case 'updatesearch':
                 break;

@@ -32,7 +32,8 @@ import {
 import { RoomLink } from '@/UI/chatFormatting/RoomLink';
 import { userColor } from '../../../utils/namecolour';
 import manageURL from '../../../utils/manageURL';
-import { assertNever, cn } from '@/lib/utils';
+import { assert, assertNever, cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 
 // ``code here`` marks inline code
 // ||text|| are spoilers
@@ -262,6 +263,37 @@ const options = {
     },
 } as const;
 
+export function ChallengeMessage(
+    { message, user }: Readonly<{
+        message: string;
+        user: string;
+    }>,
+) {
+    const { client, currentRoom } = useClientContext();
+
+    function acceptChallenge() {
+        assert(currentRoom, 'currentRoom');
+        client.send('/accept', currentRoom.ID);
+    }
+
+    const formatID = message.split('|')[0];
+    const format = client.formatName(formatID) || { gen: 9, name: `Unknown(${formatID})` };
+    console.log('format name', format, formatID);
+    return (
+        <div className="p-2 bg-blue-pastel rounded-md flex flex-col justify-center items-center">
+                You received a challenge from <Username user={user} bold />
+            <strong>
+                <span className='text-sm text-gray-125'>[Gen {format.gen}]</span> {format.name}
+            </strong>
+            <Button
+                onClick={() => {
+                    acceptChallenge();
+                }}
+            >Accept</Button>
+        </div>
+    );
+}
+
 export function MessageComponent(
     { message, user, type, time, hld, prev }: Readonly<{
         message: string;
@@ -301,6 +333,9 @@ export function MessageComponent(
                 {' ' + message}
             </div>
         );
+    }
+    if (type === 'challenge') {
+        return <ChallengeMessage message={message} user={user} />;
     }
     if (type === 'log') {
         return (
