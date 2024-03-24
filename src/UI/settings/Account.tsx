@@ -18,7 +18,8 @@ export default function AccountSettings(props: Readonly<HTMLAttributes<'div'>>) 
                 {username ? (
                     <>
                         <div>
-                            <span className='p-1 rounded border'><Username onClick={() => {}} user={client.username} /></span>
+                            Logged in as
+                            <span className='p-1 m-1 rounded border'><Username onClick={() => {}} user={client.username} /></span>
                         </div>
 
                         <Button variant="destructive" className='mt-4' onClick={() => {
