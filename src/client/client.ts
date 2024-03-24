@@ -48,6 +48,10 @@ export class Client {
     private lastQueriedUser: { user: string; json: any } | undefined; // Cached user query
 
     constructor(options?: ClientConstructor) {
+        // if running test suite, don't do anything
+        if (import.meta.env.VITEST) {
+            return;
+        }
         try {
             if (options?.autoLogin) this.shouldAutoLogin = options.autoLogin;
             this.__createPermanentRooms();
