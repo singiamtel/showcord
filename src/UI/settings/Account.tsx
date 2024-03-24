@@ -19,7 +19,9 @@ export default function AccountSettings(props: Readonly<HTMLAttributes<'div'>>) 
                     <>
                         <div>
                             Logged in as
-                            <span className='p-1 m-1 rounded border'><Username onClick={() => {}} user={client.username} /></span>
+                            <span className='p-1 m-1 rounded border'><Username onClick={() => {
+                                open('https://play.pokemonshowdown.com/api/oauth/authorized', '_blank');
+                            }} user={client.username} /></span>
                         </div>
 
                         <Button variant="destructive" className='mt-4' onClick={() => {
