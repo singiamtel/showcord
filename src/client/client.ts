@@ -481,7 +481,6 @@ export class Client {
 
 
     private _removeRoom(roomID: string) {
-        console.log('Removing room', roomID);
         this.rooms.delete(roomID);
         const eventio = new CustomEvent('leaveroom', { detail: roomID });
         this.events.dispatchEvent(eventio);
@@ -586,14 +585,14 @@ export class Client {
                 continue;
             }
             const { args, kwArgs } = Protocol.parseBattleLine(line);
+            const room = this.room(roomID);
+            if (room instanceof BattleRoom) {
+                room.feedBattle(line) && this.events.dispatchEvent(new CustomEvent('message', { detail: line }));
+            }
             const success = this.parseSocketLine(args, kwArgs, roomID);
             if (!success) {
                 console.error('Failed to parse', line);
                 console.error(chunk);
-            }
-            const room = this.room(roomID);
-            if (room instanceof BattleRoom) {
-                room.feedBattle(line) && this.events.dispatchEvent(new CustomEvent('message', { detail: line }));
             }
         }
     }
@@ -959,7 +958,6 @@ export class Client {
             // battles
             case 'player':
                 {
-                    console.log('player', args);
                     const room = this.requiresRoom('player', roomID);
                     if (!(room instanceof BattleRoom)) {
                         console.error('Received |player| from non-battle room', roomID);
@@ -972,11 +970,40 @@ export class Client {
                     }
                 }
                 break;
+            case 'request':{
+                const room = this.requiresRoom('request', roomID);
+                if (!room) return false;
+                if (!(room instanceof BattleRoom)) {
+                    console.error('Received |request| from non-battle room', roomID);
+                    return false;
+                }
+                this.events.dispatchEvent(
+                    new CustomEvent('request', { detail: room.battle.request }),
+                );
+                break;
+            }
             case 'move':
             case '-fail':
+            case '-status':
+            case 'cant':
+            case '-item':
+            case '-enditem':
+            case '-unboost':
+            case '-formechange':
+            case '-clearnegativeboost':
+            case '-supereffective':
+            case '-end':
+            case '-singleturn':
+            case '-miss':
+            case '-crit':
+            case '-immune':
+            case '-sidestart':
+            case '-sideend':
+            case '-start':
             case '-resisted':
             case '-damage':
             case 'done':
+            case 'faint':
             case '-heal':
             case '-ability':
             case '-message':
@@ -984,7 +1011,6 @@ export class Client {
             case '-boost':
             case 'upkeep':
             case 'turn':
-            case 'request':
             case ':':
             case 't:':
             case 'teamsize':

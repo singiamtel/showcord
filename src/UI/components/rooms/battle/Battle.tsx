@@ -20,6 +20,7 @@ function Pokemon({ pokemon, sprite = false, side }: Readonly<{
         const data = Icons.getPokemon(pokemon.speciesForme, { protocol: 'https', domain: 'cdn.crob.at' });
         return (
             <span
+                title={pokemon.name}
                 style={{
                     background:
                   `transparent url("${data.url}") no-repeat scroll ${data.left}px ${data.top}px`,
@@ -35,7 +36,7 @@ function Pokemon({ pokemon, sprite = false, side }: Readonly<{
         );
     }
     const data = Sprites.getPokemon(pokemon.speciesForme, { side }); // TODO: Mirror sprites and use cdn.crob.at too
-    return <img src={data.url} width={data.w} height={data.h} data-name={pokemon.name} />;
+    return <img src={data.url} width={data.w} height={data.h} data-name={pokemon.name} alt={`${pokemon.name} sprite`} title={pokemon.name} />;
 }
 
 export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivElement>>) {

@@ -24,7 +24,9 @@ export default function BattleRoom(props: Readonly<HTMLAttributes<HTMLDivElement
         >
             <div className="flex flex-col w-3/4 justify-center items-center gap-8 p-8">
                 <BattleWindow/>
-                <BattleControls/>
+                <div className="flex flex-col w-full h-full justify-center items-center bg-gray-125">
+                    <BattleControls/>
+                </div>
                 <Calcs/>
             </div>
 

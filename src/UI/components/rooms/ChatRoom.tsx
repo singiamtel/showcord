@@ -21,7 +21,7 @@ export default function ChatRoom(props: Readonly<HTMLAttributes<HTMLDivElement>>
                 <ChatBox />
             </div>
             <div className="w-64">
-                <UserList className="h-full" />
+                <UserList searchable className="h-full" />
             </div>
         </div>
 
