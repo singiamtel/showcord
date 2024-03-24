@@ -225,6 +225,12 @@ export class Settings {
         }[] ?? [];
     }
 
+    logout() {
+        localStorage.removeItem('ps-token');
+        this.username = '';
+        this.saveSettings();
+    }
+
     addHighlightWord(roomid: string, word: string) {
         if (this.userDefinedSettings.highlightWords[roomid] === undefined) {
             this.userDefinedSettings.highlightWords[roomid] = [];

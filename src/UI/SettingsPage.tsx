@@ -3,6 +3,7 @@ import AppearanceSettings from './settings/Appearance';
 import DeveloperSettings from './settings/Developer';
 import HighlightingSettings from './settings/Highlighting';
 import { cn } from '@/lib/utils';
+import AccountSettings from './settings/Account';
 
 function SettingsButton(props: Readonly<HTMLAttributes<'button'> & { onClick: () => void, active?: boolean }>) {
     return (
@@ -16,6 +17,7 @@ const settingsTabs = {
     'appearance': AppearanceSettings,
     'highlighting': HighlightingSettings,
     'developer': DeveloperSettings,
+    'account': AccountSettings,
 } as const;
 
 export default function SettingsPage(props: Readonly<HTMLAttributes<'div'>>) {
@@ -36,6 +38,10 @@ export default function SettingsPage(props: Readonly<HTMLAttributes<'div'>>) {
 
                 <SettingsButton onClick={() => { setPage('developer'); }} active={page === 'developer'}>
                   Developer settings
+                </SettingsButton>
+
+                <SettingsButton onClick={() => { setPage('account'); }} active={page === 'account'}>
+                  Account
                 </SettingsButton>
             </div>
 

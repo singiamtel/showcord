@@ -27,6 +27,10 @@ export class Client {
     private shouldAutoLogin: boolean = true;
     private onOpen: (() => void)[] = []; // Append callbacks here to run when the socket opens
 
+    get username() {
+        return this.settings.username;
+    }
+
     private joinAfterLogin: string[] = [];
     challstr: string = '';
     private client_id = import.meta.env.VITE_OAUTH_CLIENTID;
@@ -296,6 +300,10 @@ export class Client {
 
 
     // --- Login ---
+
+    logout() {
+        this.settings.logout();
+    }
 
     async login() {
         // Order of login methods:

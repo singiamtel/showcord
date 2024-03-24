@@ -3,7 +3,7 @@ import { userColor } from '../../utils/namecolour';
 import { useTrainerCard } from './single/TrainerCard/TrainerCardContext';
 
 export function Username(
-    { user, alignRight, colon, idle, bold, colorless = false, className }: Readonly<{
+    { user, alignRight, colon, idle, bold, colorless = false, className, onClick }: Readonly<{
         user: string;
         idle?: boolean;
         alignRight?: boolean;
@@ -11,6 +11,7 @@ export function Username(
         bold?: boolean;
         colorless?: boolean;
         className?: string;
+        onClick?: () => void;
     }>,
 ) {
     const { clickUsername } = useTrainerCard();
@@ -27,7 +28,7 @@ export function Username(
                 {rankDisplay}
             </span>
             <a
-                onClick={clickUsername}
+                onClick={onClick ?? clickUsername}
                 style={{
                     color: colorless ? '' : idle ? '#888888' : userColor(user),
                 }}
