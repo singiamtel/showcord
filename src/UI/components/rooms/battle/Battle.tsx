@@ -6,7 +6,15 @@ import { Icons, Sprites } from '@pkmn/img';
 import type { Pokemon as PokemonType } from '@pkmn/client';
 import { Username } from '../../Username';
 
-function Pokemon({ pokemon, sprite = false }: Readonly<{pokemon: PokemonType | null, sprite?: boolean}>) {
+function Pokemon({ pokemon, sprite = false, side }: Readonly<{
+    pokemon: PokemonType | null,
+    sprite: true,
+    side?: undefined
+} | {
+    pokemon: PokemonType | null,
+    sprite: false,
+    side: 'p1' | 'p2'
+}>) {
     if (!pokemon) return null;
     if (sprite) {
         const data = Icons.getPokemon(pokemon.speciesForme, { protocol: 'https', domain: 'cdn.crob.at' });
@@ -26,7 +34,7 @@ function Pokemon({ pokemon, sprite = false }: Readonly<{pokemon: PokemonType | n
             </span>
         );
     }
-    const data = Sprites.getPokemon(pokemon.speciesForme,); // TODO: Mirror sprites and use cdn.crob.at too
+    const data = Sprites.getPokemon(pokemon.speciesForme, { side }); // TODO: Mirror sprites and use cdn.crob.at too
     return <img src={data.url} width={data.w} height={data.h} data-name={pokemon.name} />;
 }
 
@@ -44,8 +52,8 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
             </div>
         </div>
         <div className='col-span-8 h-full bg-gray-100 flex justify-around items-center' id="battle">
-            {battle.battle.p1.active.map((pokemon, idx) => pokemon && <Pokemon key={idx} pokemon={pokemon} />)}
-            {battle.battle.p2.active.map((pokemon, idx) => pokemon && <Pokemon key={idx} pokemon={pokemon} />)}
+            {battle.battle.p1.active.map((pokemon, idx) => pokemon && <Pokemon sprite={false} key={idx} pokemon={pokemon} side='p1' />)}
+            {battle.battle.p2.active.map((pokemon, idx) => pokemon && <Pokemon sprite={false} key={idx} pokemon={pokemon} side='p2' />)}
 
         </div>
         <div className='col-span-2 flex flex-col items-center' id="side-2">
