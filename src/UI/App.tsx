@@ -5,11 +5,12 @@ import Sidebar from './components/single/Sidebar';
 import BigPanel from './components/single/BigPanel';
 import ToastProvider from './components/single/ToastProvider';
 import { TrainerCardProvider } from './components/single/TrainerCard/TrainerCardContext';
-import { client } from './components/single/ClientContext';
+import { useClientContext } from './components/single/ClientContext';
 
 library.add(faBarChart, faPieChart);
 
 export default function App() {
+    const { client } = useClientContext();
     return (
         <div className={`${client.settings.getTheme() === 'dark' ? 'dark' : ''}`}>
             <ToastProvider>
