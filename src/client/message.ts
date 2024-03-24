@@ -9,7 +9,8 @@ export type MessageType =
   | 'simple'
   | 'error'
   | 'roleplay'
-  | 'uhtmlchange';
+  | 'uhtmlchange'
+  | 'challenge';
 
 export type Message = {
     content: string;

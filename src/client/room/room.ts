@@ -15,7 +15,6 @@ export class Room {
     mentions = 0;
     connected = false;
     open = false;
-
     messages: Message[] = [];
     users: User[] = [];
     private readonly messageLimit = 200;
@@ -56,6 +55,17 @@ export class Room {
         this.mentions = 0;
         this.unread = 0;
         this.prevIndex = this.lastSentMessages.length;
+    }
+
+    endChallenge() {
+        const challengeMessage = this.messages.find((m) => m.type === 'challenge');
+        if (!challengeMessage) {
+            console.error(
+                `endChallenge(): Tried to end non-existent challenge message for room ${this.name}`,
+            );
+            return;
+        }
+        this.messages.splice(this.messages.indexOf(challengeMessage), 1);
     }
 
     addMessage(

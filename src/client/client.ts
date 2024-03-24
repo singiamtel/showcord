@@ -726,6 +726,29 @@ export class Client {
                     this.__createPM(
                         sender === toID(this.settings.username) ? args[2] : args[1],
                     );
+
+                    if (type === 'challenge') {
+                        if (!content.trim()) {
+                            // end challenge
+                            const room = this.requiresRoom('pm', inferredRoomid);
+                            if (!room) return false;
+                            room.endChallenge();
+                            this.events.dispatchEvent(
+                                new CustomEvent('message', { detail: { room: inferredRoomid, end: true } }),
+                            );
+                        } else {
+                            // start challenge
+                            this.addMessageToRoom(
+                                inferredRoomid,
+                                newMessage({
+                                    user: args[1],
+                                    content,
+                                    timestamp: Math.floor(Date.now() / 1000).toString(),
+                                    type,
+                                }),
+                            );
+                        }
+                    }
                     this.addMessageToRoom(
                         inferredRoomid,
                         newMessage({
@@ -1078,11 +1101,11 @@ export class Client {
     private parseCMessageContent(
         content: string,
     ): {
-            type: Message['type'] | 'uhtmlchange';
+            type: Message['type'];
             content: string;
             UHTMLName?: string;
         } {
-        let type: Message['type'] | 'uhtmlchange' = 'chat';
+        let type: Message['type'] = 'chat';
         let UHTMLName = undefined;
         const cmd = content.split(' ')[0];
         switch (cmd) {
@@ -1123,6 +1146,10 @@ export class Client {
             case '/me':
                 type = 'roleplay';
                 content = content.slice(3);
+                break;
+            case '/challenge':
+                type = 'challenge';
+                content = content.slice(11);
                 break;
             default:
                 break;
