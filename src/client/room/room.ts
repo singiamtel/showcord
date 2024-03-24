@@ -155,7 +155,10 @@ export class Room {
         const aSymbol = a.name.charAt(0) as RankSymbol;
         const bSymbol = b.name.charAt(0) as RankSymbol;
         if (rankOrder[aSymbol] !== rankOrder[bSymbol]) {
-            return rankOrder[bSymbol] - rankOrder[aSymbol];
+            const result = rankOrder[bSymbol] - rankOrder[aSymbol];
+            if (!isNaN(result)) {
+                return result;
+            }
         }
         return a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }); // TODO: This fucks up custom ranks, like emojis made with /forcepromote
     };
