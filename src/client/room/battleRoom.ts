@@ -12,6 +12,7 @@ import { assert } from '@/lib/utils';
 export class BattleRoom extends Room {
     battle: Battle;
     formatter: LogFormatter | null = null;
+    perspective: SideID = 'p1';
     constructor(
         { ID, name, type, connected, open }: {
             ID: string;
@@ -28,7 +29,12 @@ export class BattleRoom extends Room {
 
     setFormatter(perspective: SideID) {
         assert(!this.formatter, 'Trying to create formatter twice');
+        this.perspective = perspective;
         this.formatter = new LogFormatter(perspective, this.battle);
+    }
+
+    get currentPokemon() {
+        return this.battle.getPokemon(this.perspective);
     }
 
     /**

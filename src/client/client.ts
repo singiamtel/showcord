@@ -1048,6 +1048,7 @@ export class Client {
             case 'win':
             case '-boost':
             case 'upkeep':
+            case 'expire':
             case 'turn':
             case ':':
             case 't:':

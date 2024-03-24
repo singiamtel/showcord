@@ -2,7 +2,7 @@ import { useClientContext } from '@/UI/components/single/ClientContext';
 import { BattleRoom } from '@/client/room/battleRoom';
 import { Protocol } from '@pkmn/protocol';
 import { ChoiceBuilder } from '@pkmn/view';
-import { HTMLAttributes, useEffect, useReducer, useState } from 'react';
+import { HTMLAttributes, useEffect, useState } from 'react';
 
 function MoveButton(props: Readonly<HTMLAttributes<HTMLButtonElement> & { move: Protocol.Request.ActivePokemon['moves'][number]; }>) {
     return <button
@@ -14,25 +14,18 @@ function MoveButton(props: Readonly<HTMLAttributes<HTMLButtonElement> & { move: 
 export function MoveRequest({ req, battle }: Readonly<{ req: Protocol.MoveRequest; battle: BattleRoom }>) {
     const active = req.active;
     const { client } = useClientContext();
-    const [builder] = useState(new ChoiceBuilder(req));
+    const [builder, setBuilder] = useState(new ChoiceBuilder(req));
     const [selected, setSelected] = useState<string | null>(null);
     const [undo, setUndo] = useState(false);
 
-    (window as any).choiceBuilder = builder;
-    if (!active || !active[0]) {
-        return null;
-    }
     useEffect(() => {
         if (selected) {
-            // req.send();
             client.send(`/${builder.toString()}|${req.rqid}`, battle.ID);
             setUndo(true);
-        } else {
-            if (undo) {
-                client.send(`/undo`, battle.ID);
-                builder.choices.length = 0;
-                setUndo(false);
-            }
+        } else if (undo) {
+            client.send(`/undo`, battle.ID);
+            builder.choices.length = 0;
+            setUndo(false);
         }
     }, [selected]);
 
@@ -41,6 +34,10 @@ export function MoveRequest({ req, battle }: Readonly<{ req: Protocol.MoveReques
         builder.choices.length = 0;
         setUndo(false);
     }, [active]);
+
+    if (!active[0]) {
+        return null;
+    }
 
     return selected ? <div className='flex flex-col gap-4'>
         {battle.battle?.sides[0]?.active[0]?.name} will use {selected}

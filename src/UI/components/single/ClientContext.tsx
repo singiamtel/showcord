@@ -4,7 +4,7 @@ import { Message } from '../../../client/message';
 import { notificationsEngine, RoomNotification } from '../../../client/notifications';
 import { Room } from '../../../client/room/room';
 import { loadCustomColors } from '../../../utils/namecolour';
-import { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { toast } from 'react-toastify';
 
@@ -72,10 +72,8 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
             setPreviousRooms(tmpPR);
             setSelectedRoom(roomObj);
             client.selectRoom(newRoom);
-            return;
         } else {
             console.warn('Trying to set room that does not exist (' + newRoom + ')');
-            return;
         }
     }, [client, rooms, selectedRoom, previousRooms]);
 
@@ -101,9 +99,9 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
 
     useEffect(() => {
         const changeRoomsEventListener = (e: Event) => {
-            const newRooms = client.getRooms();
+            const newRooms = client.getRooms() as ReadonlyArray<Room>;
             // Keep the same order we had before
-            const newRoomsOrdered = newRooms.sort((a, b) => {
+            const newRoomsOrdered = newRooms.toSorted((a, b) => {
                 const indexA = rooms.findIndex((e) => e.ID === a.ID);
                 const indexB = rooms.findIndex((e) => e.ID === b.ID);
                 if (indexA === -1 || indexB === -1) {
@@ -112,9 +110,9 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
                 return indexA - indexB;
             });
             setRooms(newRoomsOrdered);
-            if (e.type === 'leaveroom' && selectedRoom?.ID === (e as CustomEvent).detail.ID) {
+            if ((e.type === 'leaveroom' && selectedRoom?.ID === (e as CustomEvent).detail.ID) || !selectedRoom) {
                 setRoom('home');
-            } else if (!selectedRoom) { setRoom('home'); }
+            }
         };
 
 
@@ -209,20 +207,22 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
 
     /* --- End user handling --- */
 
+    const ProviderValue = useMemo(() => ({
+        client,
+        currentRoom: selectedRoom,
+        setRoom,
+        user,
+        messages,
+        rooms,
+        setRooms,
+        notifications,
+        avatar,
+        theme,
+    }), [selectedRoom, user, messages, rooms, notifications, avatar, theme]);
+
     return (
         <ClientContext.Provider
-            value={{
-                client,
-                currentRoom: selectedRoom,
-                setRoom,
-                user,
-                messages,
-                rooms,
-                setRooms,
-                notifications,
-                avatar,
-                theme,
-            }}
+            value={ProviderValue}
         >
             {props.children}
         </ClientContext.Provider>

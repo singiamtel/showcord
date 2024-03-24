@@ -25,7 +25,7 @@ const minisearch = new MiniSearch({
     idField: 'name',
 });
 
-// minisearch.addAll(cmds);
+// minisearch.addAll(cmds); // Disabled for now
 
 export default function ChatBox(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const [input, setInput] = useState<string>('');
@@ -121,11 +121,8 @@ export default function ChatBox(props: Readonly<HTMLAttributes<HTMLDivElement>>)
     }, [cursorPos, textAreaRef]);
 
     const manageChanges: ChangeEventHandler<HTMLTextAreaElement> = (e) => {
-    // if (!formRef.current?.textContent) {
-    // }
         if (e.target.value.startsWith('/')) {
-            // calculate vertical offset including the size of the box
-            // setDisplaySearchbox(true);
+            // setDisplaySearchbox(true); // Disabled for now
         } else {
             setDisplaySearchbox(false);
         }
@@ -139,8 +136,8 @@ export default function ChatBox(props: Readonly<HTMLAttributes<HTMLDivElement>>)
       searchBoxOffset.marginBottom === size?.height
         ) return;
         setSearchBoxOffset({
-            width: size?.width || 0,
-            marginBottom: size?.height || 0,
+            width: size?.width ?? 0,
+            marginBottom: size?.height ?? 0,
         });
     }, [formRef, searchBoxOffset.width, searchBoxOffset.marginBottom]);
 
