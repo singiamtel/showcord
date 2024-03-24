@@ -4,30 +4,18 @@ import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfil
 import nodePolyfills from 'rollup-plugin-node-polyfills';
 import path from 'path';
 
-export default defineConfig(({ command }) => {
-    const config = {
-        base: `${process.env.PUBLIC_URL ?? ''}/`,
-        resolve: {
-            alias: {
-                '@': path.resolve(__dirname, './src'),
-                events: 'rollup-plugin-node-polyfills/polyfills/events',
-            },
+export default defineConfig(({ command }) => ({
+    base: `${process.env.PUBLIC_URL ?? ''}/`,
+    resolve: {
+        alias: {
+            '@': path.resolve(__dirname, './src'),
+            events: 'rollup-plugin-node-polyfills/polyfills/events',
         },
-    };
-
-    if (command === 'build') {
-        return {
-            ...config,
-            esbuild: {
-                // jsxInject: 'import React from "react";',
-            },
-        };
-    } else {
-        return {
-            ...config,
-            // plugins: [react()],
-            plugins: [react()],
-            // swc options
-        };
-    }
-});
+    },
+    plugins: [react()],
+    test: {
+        globals: true,
+        environment: 'happy-dom',
+        setupFiles: ['./test/setupTests.js'],
+    },
+}));

@@ -24,12 +24,12 @@ import {
     inlineCode,
     italic,
     link,
-    RoomLink,
     spoiler,
     strikethrough,
     subscript,
     superscript,
 } from '../../chatFormatting/chat';
+import { RoomLink } from '@/UI/chatFormatting/RoomLink';
 import { userColor } from '../../../utils/namecolour';
 import manageURL from '../../../utils/manageURL';
 import { assertNever, cn } from '@/lib/utils';
@@ -67,7 +67,7 @@ const elements: {
         element: (props: any) => JSX.Element;
     };
 } = {
-    code: { pattern: /``(.+?)``/g, element: inlineCode },
+    code: { pattern: /`+(.+?)`+/g, element: inlineCode },
     spoiler: { pattern: /\|\|(.+?)\|\|/g, element: spoiler },
     bold: { pattern: /\*\*(.+?)\*\*/g, element: bold },
     italic: { pattern: /__(.+?)__/g, element: italic },
@@ -111,7 +111,7 @@ const cleanTag = (input: string, tag: keyof typeof elements) => {
 };
 
 let deepKey = 0;
-const encloseInTag = (
+export const encloseInTag = (
     input: string,
     tag: keyof typeof elements,
 ): false | { length: number; element: JSX.Element } => {

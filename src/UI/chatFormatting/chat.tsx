@@ -3,7 +3,6 @@ import { HTMLAttributes, useState } from 'react';
 import manageURL from '../../utils/manageURL';
 import innerText from 'react-innertext';
 import { twMerge } from 'tailwind-merge';
-import { useClientContext } from '../components/single/ClientContext';
 
 // ``code here`` marks inline code
 // ||text|| are spoilers
@@ -16,7 +15,7 @@ import { useClientContext } from '../components/single/ClientContext';
 // >text is greentext
 // /me is an emote
 
-interface ExtendedProps extends HTMLAttributes<HTMLSpanElement> {
+export interface ExtendedProps extends HTMLAttributes<HTMLSpanElement> {
     children: string | JSX.Element;
     key?: number;
 }
@@ -41,28 +40,6 @@ export function inlineCode(
             {...props}
             key={key}
         />
-    );
-}
-
-export function RoomLink(
-    props: ExtendedProps,
-) {
-    const { client } = useClientContext();
-    const key = props.key;
-    delete props.key;
-    return (
-        <span key={key}>
-      «
-            <a
-                href={`/${innerText(props.children)}`}
-                className="text-blue-500 underline cursor-pointer"
-                onClick={(e) => {
-                    manageURL(e, client);
-                }}
-                {...props}
-            />
-      »
-        </span>
     );
 }
 
