@@ -7,6 +7,7 @@ import { clientNotification, RoomNotification } from './notifications';
 import { Protocol } from '@pkmn/protocol';
 import { assertNever, assert } from '@/lib/utils';
 import { BattleRoom } from './room/battleRoom';
+import formatParser, { Formats } from './formatParser';
 
 type ClientConstructor = {
     server_url?: string;
@@ -50,6 +51,14 @@ export class Client {
     private roomsJSON: any = undefined; // Server response to /cmd rooms
     private news: any = undefined; // Cached news
     private lastQueriedUser: { user: string; json: any } | undefined; // Cached user query
+    private formats: Formats | undefined;
+
+    formatName(formatID: string) {
+        // search all categories and return the name of the format
+        const allFormats = this.formats?.categories.flatMap((c) => c.formats);
+        const format = allFormats?.find((f) => f.ID === formatID);
+        return format;
+    }
 
     constructor(options?: ClientConstructor) {
         // if running test suite, don't do anything
@@ -726,6 +735,30 @@ export class Client {
                     this.__createPM(
                         sender === toID(this.settings.username) ? args[2] : args[1],
                     );
+
+                    if (type === 'challenge') {
+                        if (!content.trim()) {
+                            // end challenge
+                            const room = this.requiresRoom('pm', inferredRoomid);
+                            if (!room) return false;
+                            room.endChallenge();
+                            this.events.dispatchEvent(
+                                new CustomEvent('message', { detail: { room: inferredRoomid, end: true } }),
+                            );
+                        } else {
+                            // start challenge
+                            this.addMessageToRoom(
+                                inferredRoomid,
+                                newMessage({
+                                    user: args[1],
+                                    content,
+                                    timestamp: Math.floor(Date.now() / 1000).toString(),
+                                    type,
+                                }),
+                            );
+                        }
+                        break;
+                    }
                     this.addMessageToRoom(
                         inferredRoomid,
                         newMessage({
@@ -950,8 +983,14 @@ export class Client {
                     );
                 }
                 break;
+            case 'formats': {
+                const formats = args.slice(1);
+                // formats
+                this.formats = formatParser(formats);
+                console.log('Parsed formats', args, this.formats);
+            }
+                break;
             case 'customgroups':
-            case 'formats':
             case 'tournament':
             case 'updatesearch':
                 break;
@@ -1078,11 +1117,11 @@ export class Client {
     private parseCMessageContent(
         content: string,
     ): {
-            type: Message['type'] | 'uhtmlchange';
+            type: Message['type'];
             content: string;
             UHTMLName?: string;
         } {
-        let type: Message['type'] | 'uhtmlchange' = 'chat';
+        let type: Message['type'] = 'chat';
         let UHTMLName = undefined;
         const cmd = content.split(' ')[0];
         switch (cmd) {
@@ -1123,6 +1162,10 @@ export class Client {
             case '/me':
                 type = 'roleplay';
                 content = content.slice(3);
+                break;
+            case '/challenge':
+                type = 'challenge';
+                content = content.slice(11);
                 break;
             default:
                 break;
