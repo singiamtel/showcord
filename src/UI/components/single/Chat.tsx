@@ -304,12 +304,12 @@ export function MessageComponent(
     }>,
 ) {
     if (type === 'boxedHTML') {
-        if (prev?.content.startsWith('!code')) {
-            return <Code message={message} />;
-        }
         return <HTML message={message} />;
     }
     if (type === 'rawHTML') {
+        if (prev?.content.startsWith('!code')) {
+            return <Code message={message} />;
+        }
         return <span className='pt-0.5'><HTML message={message} raw /></span>;
     }
     if (type === 'simple') {
