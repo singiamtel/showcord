@@ -17,7 +17,7 @@ export default function PmRoom(props: Readonly<HTMLAttributes<HTMLDivElement>>) 
                     <Chat
                     />
                 </div>
-                <ChatBox />
+                <ChatBox className='p-2' />
             </div>
         </div>
     );

@@ -63,7 +63,7 @@ export default function BigPanel(props: Readonly<HTMLAttributes<'div'>>) {
                     />
                 </div>
                 <div className="flex-grow">
-                    <ChatBox />
+                    <ChatBox className='p-2' />
                 </div>
             </div>
         </div>
