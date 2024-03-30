@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { useClientContext } from '../components/single/ClientContext';
+import { Settings } from '@/client/settings';
 
 export default function DeveloperSettings(props: Readonly<HTMLAttributes<'div'>>) {
     const description = 'These settings are for advanced users only. Change them at your own risk.';
@@ -14,7 +15,7 @@ export default function DeveloperSettings(props: Readonly<HTMLAttributes<'div'>>
     return (
         <form onSubmit={(e) => {
             e.preventDefault();
-            client.settings.setServerURLs(serverURL || client.settings.defaultServerURL, loginserverURL || client.settings.defaultLoginServerURL);
+            client.settings.setServerURLs(serverURL || Settings.defaultServerURL, loginserverURL || Settings.defaultLoginServerURL);
             setTimeout(() => {
                 window.location.reload();
             }, 500);
@@ -29,7 +30,7 @@ export default function DeveloperSettings(props: Readonly<HTMLAttributes<'div'>>
                     <Input
                         type={'url'}
                         value={serverURL}
-                        placeholder={client.settings.defaultServerURL}
+                        placeholder={Settings.defaultServerURL}
                         onChange={(e) => setServerURL(e.target.value)}
 
                     />
@@ -39,7 +40,7 @@ export default function DeveloperSettings(props: Readonly<HTMLAttributes<'div'>>
                     <Input
                         type={'url'}
                         value={loginserverURL}
-                        placeholder={client.settings.defaultLoginServerURL}
+                        placeholder={Settings.defaultLoginServerURL}
                         onChange={(e) => setLoginserverURL(e.target.value)}
                     />
                 </div>

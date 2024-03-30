@@ -26,9 +26,11 @@ export type SavedSettings = {
 }
 
 export class Settings {
-    readonly defaultRooms = []; // ["lobby", "help", "overused"];
-    readonly defaultServerURL = 'wss://sim3.psim.us:443/showdown/websocket';
-    readonly defaultLoginServerURL = 'https://play.pokemonshowdown.com/api/';
+    static readonly defaultRooms = []; // ["lobby", "help", "overused"];
+    static readonly defaultServerURL = 'wss://sim3.psim.us:443/showdown/websocket';
+    static readonly defaultLoginServerURL = 'https://play.pokemonshowdown.com/api/';
+    static readonly defaultNewsURL = 'https://pokemonshowdown.com/news.json';
+
     readonly version = 2; // used to invalidate settings when the format changes
     private rooms: SerializedRoom[] = [];
     /** Only serializable data should be here */
@@ -38,8 +40,8 @@ export class Settings {
         highlightWords: {},
         chatStyle: 'normal',
         avatar: '',
-        serverURL: this.defaultServerURL,
-        loginserverURL: this.defaultLoginServerURL,
+        serverURL: Settings.defaultServerURL,
+        loginserverURL: Settings.defaultLoginServerURL,
         highlightOnSelf: true,
     };
     private compileHighlightWords: { [key: string]: RegExp | null } = {};
@@ -160,17 +162,16 @@ export class Settings {
     }
 
     getServerURL() {
-        return this.userDefinedSettings.serverURL || this.defaultServerURL;
+        return this.userDefinedSettings.serverURL || Settings.defaultServerURL;
     }
     getLoginServerURL() {
-        return this.userDefinedSettings.loginserverURL || this.defaultLoginServerURL;
+        return this.userDefinedSettings.loginserverURL || Settings.defaultLoginServerURL;
     }
     setServerURLs(serverURL: string, loginserverURL: string) {
         this.userDefinedSettings.serverURL = serverURL;
         this.userDefinedSettings.loginserverURL = loginserverURL;
         this.saveSettings();
     }
-
 
     getHighlightWords(roomid: string) {
         return this.userDefinedSettings.highlightWords[roomid] ?? [];
@@ -201,7 +202,6 @@ export class Settings {
     removeRoom(roomid: string) {
         const index = this.rooms.findIndex((r) => r.ID === roomid);
         if (index !== -1) {
-            // this.rooms.splice(index, 1);
             this.rooms[index].open = false;
         }
     }

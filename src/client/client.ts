@@ -16,9 +16,7 @@ type ClientConstructor = {
 };
 
 export class Client {
-    private readonly newsURL = 'https://pokemonshowdown.com/news.json';
-
-    settings: Settings = new Settings();
+    readonly settings: Settings = new Settings();
     private socket: WebSocket | undefined;
 
     private rooms: Map<string, Room> = new Map();
@@ -73,7 +71,7 @@ export class Client {
         } catch (e) {
             if (e instanceof DOMException) {
                 console.warn('DOMException: ', e);
-                this.settings.setServerURLs(this.settings.defaultServerURL, this.settings.defaultLoginServerURL);
+                this.settings.setServerURLs(Settings.defaultServerURL, Settings.defaultLoginServerURL);
                 window.location.reload();
             }
             console.error(e);
@@ -210,7 +208,7 @@ export class Client {
         if (this.news) {
             return callback(this.news);
         }
-        fetch(this.newsURL).then((res) => res.json()).then((json) => {
+        fetch(Settings.defaultNewsURL).then((res) => res.json()).then((json) => {
             this.news = json;
             callback(json);
         });
@@ -243,11 +241,9 @@ export class Client {
         }
         if (room.connected) {
             this.__send(`/leave ${roomID}`, false);
-        } else {
-            if (this.permanentRooms.map((e) => e.ID).includes(roomID as any)) {
-                this._closeRoom(roomID);
-            } else { this._removeRoom(roomID); }
-        }
+        } else if (this.permanentRooms.map((e) => e.ID).includes(roomID as any)) {
+            this._closeRoom(roomID);
+        } else { this._removeRoom(roomID); }
     }
 
     _closeRoom(roomID: string) {
@@ -269,7 +265,7 @@ export class Client {
                 room as typeof this.permanentRooms[number]['ID'],
             ) && !room.startsWith('pm-'));
         if (useDefaultRooms && (!filteredRooms || filteredRooms.length === 0)) {
-            for (const room of this.settings.defaultRooms) {
+            for (const room of Settings.defaultRooms) {
                 this.__send(`/join ${room}`, false);
             }
             return;
@@ -350,7 +346,7 @@ export class Client {
                     if (token) {
                         localStorage.setItem(
                             'ps-token',
-                            url.searchParams.get('token') || 'notoken',
+                            url.searchParams.get('token') ?? 'notoken',
                         );
                     }
                     nWindow.close();
@@ -382,7 +378,6 @@ export class Client {
             if (token) {
                 localStorage.setItem('ps-token', token);
             }
-            return;
         } else if (
             (assertion = await this.assertionFromToken(this.challstr) || null)
         ) {
@@ -419,7 +414,7 @@ export class Client {
     ): Promise<string | false> {
         // Loginserver responses are just weird
         const response_test = await response.text();
-        if (response_test[0] === ';') {
+        if (response_test.startsWith(';')) {
             console.error('AssertionError: Received ; from loginserver');
             return false;
         }
@@ -587,10 +582,10 @@ export class Client {
 
     private parseSocketChunk(chunk: string) {
         const split = chunk.split('\n');
-        const roomID = split[0][0] === '>' ? split[0].slice(1) : 'lobby';
+        const roomID = split[0].startsWith('>') ? split[0].slice(1) : 'lobby';
         for (const [idx, line] of split.entries()) {
             if (line === '') continue;
-            if (idx === 0 && line[0] === '>') {
+            if (idx === 0 && line.startsWith('>')) {
                 continue;
             }
             const { args, kwArgs } = Protocol.parseBattleLine(line);
@@ -842,12 +837,7 @@ export class Client {
                         this.joinAfterLogin.push(roomID);
                         break;
                     case 'nonexistent':
-                        this.events.dispatchEvent(
-                            new CustomEvent('error', { detail: args[2] }),
-                        );
-                        break;
                     case 'joinfailed':
-
                         this.events.dispatchEvent(
                             new CustomEvent('error', { detail: args[2] }),
                         );
@@ -896,7 +886,7 @@ export class Client {
                     },
                 );
                 this.events.dispatchEvent(
-                    new CustomEvent('message', { detail: name }),
+                    new CustomEvent('message', { detail: 'pagehtml' }),
                 );
                 break;
             }
@@ -975,19 +965,14 @@ export class Client {
                 break;
             }
             case 'error':
-                {
-                    // this.events.dispatchEvent(
-                    //     new CustomEvent('error', { detail: args.join('|') }),
-                    // );
-                    this.addMessageToRoom(
-                        roomID,
-                        newMessage({
-                            user: '',
-                            type: 'error',
-                            content: args[1],
-                        }),
-                    );
-                }
+                this.addMessageToRoom(
+                    roomID,
+                    newMessage({
+                        user: '',
+                        type: 'error',
+                        content: args[1],
+                    }),
+                );
                 break;
             case 'formats': {
                 const formats = args.slice(1);
@@ -1300,20 +1285,18 @@ export class Client {
                         return true;
                     case 'clear':
                     case 'roomclear':
-                        {
-                            this.settings.clearHighlightWords(
-                                subcmd === 'clear' ? 'global' : this.selectedRoom,
-                            );
-                            this.addMessageToRoom(
-                                this.selectedRoom,
-                                newMessage({
-                                    user: '',
-                                    name: '',
-                                    type: 'log',
-                                    content: `Cleared highlight list`,
-                                }),
-                            );
-                        }
+                        this.settings.clearHighlightWords(
+                            subcmd === 'clear' ? 'global' : this.selectedRoom,
+                        );
+                        this.addMessageToRoom(
+                            this.selectedRoom,
+                            newMessage({
+                                user: '',
+                                name: '',
+                                type: 'log',
+                                content: `Cleared highlight list`,
+                            }),
+                        );
                         return true;
 
                     default:
