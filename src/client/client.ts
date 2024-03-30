@@ -895,6 +895,9 @@ export class Client {
                         selfSent: false,
                     },
                 );
+                this.events.dispatchEvent(
+                    new CustomEvent('message', { detail: name }),
+                );
                 break;
             }
             case 'uhtmlchange':{
@@ -909,6 +912,9 @@ export class Client {
                         type: 'boxedHTML',
                         content: uhtml,
                     }),
+                );
+                this.events.dispatchEvent(
+                    new CustomEvent('message', { detail: name }),
                 );
                 break;
             }
