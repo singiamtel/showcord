@@ -1,5 +1,5 @@
 import { assertNever } from '@/lib/utils';
-import { Client } from '../../../client/client';
+import { Client, client } from '../../../client/client';
 import { Message } from '../../../client/message';
 import { notificationsEngine, RoomNotification } from '../../../client/notifications';
 import { Room } from '../../../client/room/room';
@@ -7,9 +7,6 @@ import { loadCustomColors } from '../../../utils/namecolour';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 
 import { toast } from 'react-toastify';
-
-export const client = new Client();
-window.client = client; // Only for debugging
 
 interface ClientContextType {
     client: Client;
@@ -21,7 +18,6 @@ interface ClientContextType {
     setRooms: (rooms: Room[]) => void;
     notifications: RoomNotification[];
     avatar?: string;
-    theme: 'light' | 'dark'
 }
 
 const ClientContext = createContext<ClientContextType | undefined>(undefined);
@@ -36,7 +32,6 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
     const [messages, setMessages] = useState<Message[]>([]);
     const [updateMsgs, setUpdateMsgs] = useState<number>(0); // Used to force update on rooms change
     const [avatar, setAvatar] = useState<string | undefined>(undefined);
-    const [theme, setTheme] = useState<'light' | 'dark'>(client.settings.getTheme());
 
     /* --- Room handling --- */
 
@@ -92,11 +87,6 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
         }
     };
 
-    const themeEventListener = (_e: Event) => {
-        const theme = client.settings.getTheme();
-        setTheme(theme);
-    };
-
     useEffect(() => {
         const changeRoomsEventListener = (e: Event) => {
             const newRooms = client.getRooms() as ReadonlyArray<Room>;
@@ -120,7 +110,6 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
         client.events.addEventListener('selectroom', autoSelectRoomListener);
         client.events.addEventListener('leaveroom', changeRoomsEventListener);
         client.events.addEventListener('error', globalErrorListener);
-        client.events.addEventListener('theme', themeEventListener);
 
         return () => {
             client.events.removeEventListener('room', changeRoomsEventListener);
@@ -199,7 +188,7 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
             await loadCustomColors();
             client.events.addEventListener('login', (username) => {
                 setUser((username as CustomEvent).detail);
-                setAvatar(client.settings.getAvatar());
+                setAvatar(client.settings.avatar);
             });
         };
         init();
@@ -217,8 +206,7 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
         setRooms,
         notifications,
         avatar,
-        theme,
-    }), [selectedRoom, user, messages, rooms, notifications, avatar, theme]);
+    }), [selectedRoom, user, messages, rooms, notifications, avatar]);
 
     return (
         <ClientContext.Provider

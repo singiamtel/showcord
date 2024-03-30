@@ -26,16 +26,14 @@ export type SavedSettings = {
 }
 
 export class Settings {
-    static readonly defaultRooms = []; // ["lobby", "help", "overused"];
+    static readonly defaultRooms = [];
     static readonly defaultServerURL = 'wss://sim3.psim.us:443/showdown/websocket';
     static readonly defaultLoginServerURL = 'https://play.pokemonshowdown.com/api/';
     static readonly defaultNewsURL = 'https://pokemonshowdown.com/news.json';
 
     readonly version = 2; // used to invalidate settings when the format changes
     private rooms: SerializedRoom[] = [];
-    /** Only serializable data should be here */
-
-    theme: 'dark' | 'light' = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    /** Only serializable data should be here, as it saves directly to localStorage */
     private userDefinedSettings: UserDefinedSettings = {
         highlightWords: {},
         chatStyle: 'normal',
@@ -44,37 +42,82 @@ export class Settings {
         loginserverURL: Settings.defaultLoginServerURL,
         highlightOnSelf: true,
     };
+
     private compileHighlightWords: { [key: string]: RegExp | null } = {};
     private name = '';
-    private status = ''; // if status is set, it will be restored on login
     private notes: Map<string, string> = new Map();
 
-    get username(): string {
-        return this.name;
-    }
-
-    updateUser(username: string, avatar: string) {
-        this.name = username;
-        this.userDefinedSettings.avatar = avatar;
-        this.saveSettings();
-    }
-
-    get avatar() {
-        return this.userDefinedSettings.avatar;
-    }
-
-    set avatar(avatar: string) {
-        this.userDefinedSettings.avatar = avatar;
-        this.saveSettings();
-    }
+    get username(): string { return this.name; }
 
     set username(username: string) {
         this.name = username;
         this.saveSettings();
     }
 
-    get userID() {
-        return toID(this.name);
+    get avatar() { return this.userDefinedSettings.avatar; }
+
+    set avatar(avatar: string) {
+        this.userDefinedSettings.avatar = avatar;
+        this.saveSettings();
+    }
+
+    get userID() { return toID(this.name); }
+
+    private __theme: 'dark' | 'light' = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    get theme() { return this.__theme; }
+    set theme(theme: 'light' | 'dark') {
+        this.__theme = theme;
+        this.saveSettings();
+    }
+
+    private __status = '';
+    get status() { return this.__status; }
+    set status(status: string) { this.__status = status; }
+
+    get serverURL() {
+        return this.userDefinedSettings.serverURL || Settings.defaultServerURL;
+    }
+
+    set serverURL(serverURL: string) {
+        this.userDefinedSettings.serverURL = serverURL;
+        this.saveSettings();
+    }
+
+    get loginServerURL() {
+        return this.userDefinedSettings.loginserverURL || Settings.defaultLoginServerURL;
+    }
+
+    set loginServerURL(loginServerURL: string) {
+        this.userDefinedSettings.loginserverURL = loginServerURL;
+        this.saveSettings();
+    }
+
+    getHighlightWords(roomid: string) {
+        return this.userDefinedSettings.highlightWords[roomid] ?? [];
+    }
+
+    getHighlightWordsMap() {
+        return this.userDefinedSettings.highlightWords;
+    }
+
+    setHighlightWords(roomid: string, words: string[]) {
+        this.userDefinedSettings.highlightWords[roomid] = [...new Set(words)];
+
+        const strings = this.userDefinedSettings.highlightWords[roomid] ?? [];
+        if (this.username && this.userDefinedSettings.highlightOnSelf) {
+            strings.push(this.username);
+        }
+        this.compileHighlightWords[roomid] = stringsToRegex(strings);
+        this.saveSettings();
+    }
+
+    getHighlightOnSelf() {
+        return this.userDefinedSettings.highlightOnSelf;
+    }
+
+    setHighlightOnSelf(highlightOnSelf: boolean) {
+        this.userDefinedSettings.highlightOnSelf = highlightOnSelf;
+        this.saveSettings();
     }
 
     constructor() {
@@ -118,6 +161,12 @@ export class Settings {
         }
     }
 
+    updateUser(username: string, avatar: string) {
+        this.name = username;
+        this.userDefinedSettings.avatar = avatar;
+        this.saveSettings();
+    }
+
     private saveSettings() {
         const savedSettings : SavedSettings = {
             version: this.version,
@@ -140,64 +189,6 @@ export class Settings {
         }
     }
 
-    getAvatar() {
-        return this.userDefinedSettings.avatar;
-    }
-
-    getStatus() {
-        return this.status;
-    }
-
-    setStatus(status: string) {
-        this.status = status;
-    }
-
-    getTheme() {
-        return this.theme;
-    }
-
-    setTheme(theme: 'light' | 'dark') {
-        this.theme = theme;
-        this.saveSettings();
-    }
-
-    getServerURL() {
-        return this.userDefinedSettings.serverURL || Settings.defaultServerURL;
-    }
-    getLoginServerURL() {
-        return this.userDefinedSettings.loginserverURL || Settings.defaultLoginServerURL;
-    }
-    setServerURLs(serverURL: string, loginserverURL: string) {
-        this.userDefinedSettings.serverURL = serverURL;
-        this.userDefinedSettings.loginserverURL = loginserverURL;
-        this.saveSettings();
-    }
-
-    getHighlightWords(roomid: string) {
-        return this.userDefinedSettings.highlightWords[roomid] ?? [];
-    }
-    getHighlightWordsMap() {
-        return this.userDefinedSettings.highlightWords;
-    }
-    setHighlightWords(roomid: string, words: string[]) {
-        this.userDefinedSettings.highlightWords[roomid] = [...new Set(words)];
-
-        const strings = this.userDefinedSettings.highlightWords[roomid] ?? [];
-        if (this.username && this.userDefinedSettings.highlightOnSelf) {
-            strings.push(this.username);
-        }
-        this.compileHighlightWords[roomid] = stringsToRegex(strings);
-        this.saveSettings();
-    }
-
-    getHighlightOnSelf() {
-        return this.userDefinedSettings.highlightOnSelf;
-    }
-
-    setHighlightOnSelf(highlightOnSelf: boolean) {
-        this.userDefinedSettings.highlightOnSelf = highlightOnSelf;
-        this.saveSettings();
-    }
 
     removeRoom(roomid: string) {
         const index = this.rooms.findIndex((r) => r.ID === roomid);

@@ -10,12 +10,13 @@ import { Settings } from '@/client/settings';
 export default function DeveloperSettings(props: Readonly<HTMLAttributes<'div'>>) {
     const description = 'These settings are for advanced users only. Change them at your own risk.';
     const { client } = useClientContext();
-    const [serverURL, setServerURL] = useState(client.settings.getServerURL());
-    const [loginserverURL, setLoginserverURL] = useState(client.settings.getLoginServerURL());
+    const [serverURL, setServerURL] = useState(client.settings.serverURL);
+    const [loginserverURL, setLoginserverURL] = useState(client.settings.loginServerURL);
     return (
         <form onSubmit={(e) => {
             e.preventDefault();
-            client.settings.setServerURLs(serverURL || Settings.defaultServerURL, loginserverURL || Settings.defaultLoginServerURL);
+            client.settings.serverURL = serverURL || Settings.defaultServerURL;
+            client.settings.loginServerURL = loginserverURL || Settings.defaultLoginServerURL;
             setTimeout(() => {
                 window.location.reload();
             }, 500);

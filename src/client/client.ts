@@ -9,6 +9,8 @@ import { assertNever, assert } from '@/lib/utils';
 import { BattleRoom } from './room/battleRoom';
 import formatParser, { Formats } from './formatParser';
 
+import { create } from 'zustand';
+
 type ClientConstructor = {
     server_url?: string;
     loginserver_url?: string;
@@ -66,12 +68,13 @@ export class Client {
         try {
             if (options?.autoLogin) this.shouldAutoLogin = options.autoLogin;
             this.__createPermanentRooms();
-            this.socket = new WebSocket(this.settings.getServerURL());
+            this.socket = new WebSocket(this.settings.serverURL);
             this.__setupSocketListeners();
         } catch (e) {
             if (e instanceof DOMException) {
                 console.warn('DOMException: ', e);
-                this.settings.setServerURLs(Settings.defaultServerURL, Settings.defaultLoginServerURL);
+                this.settings.serverURL = Settings.defaultServerURL;
+                this.settings.loginServerURL = Settings.defaultLoginServerURL;
                 window.location.reload();
             }
             console.error(e);
@@ -125,8 +128,9 @@ export class Client {
     }
 
     setTheme(theme: 'light' | 'dark') {
-        this.settings.setTheme(theme);
+        this.settings.theme = theme;
         this.events.dispatchEvent(new CustomEvent('theme', { detail: theme }));
+        useClientStore.setState({ theme });
     }
 
 
@@ -438,7 +442,7 @@ export class Client {
             return false;
         }
         const response = await fetch(
-            `${this.settings.getLoginServerURL()}oauth/api/getassertion?challenge=${challstr}&token=${token}&client_id=${this.client_id}`,
+            `${this.settings.loginServerURL}oauth/api/getassertion?challenge=${challstr}&token=${token}&client_id=${this.client_id}`,
         );
         return await this.parseLoginserverResponse(response);
     }
@@ -450,7 +454,7 @@ export class Client {
         }
         try {
             const response = await fetch(
-                `${this.settings.getLoginServerURL()}oauth/api/refreshtoken?token=${token}&client_id=${this.client_id}`,
+                `${this.settings.loginServerURL}oauth/api/refreshtoken?token=${token}&client_id=${this.client_id}`,
             );
             const result = await this.parseLoginserverResponse(response);
             if (result) localStorage.setItem('ps-token', result);
@@ -794,7 +798,7 @@ export class Client {
                             const tmpjson = JSON.parse(args[2]);
                             if (tmpjson.userid === toID(this.settings.username)) {
                                 if (tmpjson.status) {
-                                    this.settings.setStatus(tmpjson.status);
+                                    this.settings.status = tmpjson.status;
                                 }
                             }
 
@@ -1324,3 +1328,35 @@ export class Client {
         }
     }
 }
+
+
+export const client = new Client();
+window.client = client; // Only for debugging
+
+interface UseClientStoreType {
+    rooms: Room[];
+    setRooms: (rooms: Room[]) => void;
+    selectedRoom: Room | undefined;
+    setSelectedRoom: (room: Room) => void;
+    // messages: Message[]; // only messages from the current room
+    messages: Record<Room['ID'], Message[]>; // messages from all rooms
+    // setMessages: (messages: Record<Room['ID'], Message[]>, room: Room['ID']) => void;
+    notifications: RoomNotification[];
+    // setNotifications: (notifications: RoomNotification[]) => void;
+    avatar: string;
+    theme: 'light' | 'dark';
+    user: string | undefined
+}
+
+export const useClientStore = create<UseClientStoreType>((set) => ({
+    rooms: [],
+    setRooms: (rooms) => set({ rooms }),
+    selectedRoom: client.room('home'),
+    setSelectedRoom: (room) => set({ selectedRoom: room }),
+    messages: {},
+    notifications: [],
+    avatar: 'lucas',
+    theme: client.settings.theme,
+    user: undefined,
+}));
+

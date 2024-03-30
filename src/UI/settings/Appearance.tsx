@@ -3,9 +3,11 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useClientContext } from '../components/single/ClientContext';
 import { cn } from '@/lib/utils';
+import { useClientStore } from '@/client/client';
 
 export default function AppearanceSettings(props: Readonly<HTMLAttributes<'div'>>) {
-    const { client, theme: currentTheme } = useClientContext();
+    const { client } = useClientContext();
+    const currentTheme = useClientStore(state => state.theme);
     const [theme, setTheme] = useState<'light' | 'dark'>(currentTheme);
     useEffect(() => {
         client.setTheme(theme);
@@ -17,7 +19,7 @@ export default function AppearanceSettings(props: Readonly<HTMLAttributes<'div'>
             </h2>
 
             <div id="theme" className="mt-4">
-                <div className="ml-2 flex items-center" onClick={() => {}} >
+                <div className="ml-2 flex items-center" >
                     <span className='pr-4 flex items-center'>
                         <Switch checked={theme === 'dark'} onCheckedChange={() => {
                             setTheme(theme === 'dark' ? 'light' : 'dark');
