@@ -129,7 +129,6 @@ export class Client {
 
     setTheme(theme: 'light' | 'dark') {
         this.settings.theme = theme;
-        this.events.dispatchEvent(new CustomEvent('theme', { detail: theme }));
         useClientStore.setState({ theme });
     }
 
