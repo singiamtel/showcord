@@ -1,6 +1,6 @@
 import { test, expect, suite } from 'vitest';
-import { render, screen, fireEvent } from '@testing-library/react';
-import { FormatMsgDisplay } from './Chat';
+import { render } from '@testing-library/react';
+import { FormatMsgDisplay } from '@/UI/chatFormatting/MessageParser';
 
 suite('inlineCode', () => {
     test('should render code', () => {
