@@ -57,7 +57,7 @@
     --accent: 217.2 32.6% 17.5%;
     --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 355 70% 72%;
     --destructive-foreground: 210 40% 98%;
 
     --border: 217.2 32.6% 17.5%;
@@ -77,7 +77,6 @@
 }
 
 @layer utilities {
-
   /* @responsive { */
   /* hide scrollbar for chrome, safari and opera  */
   .no-scrollbar::-webkit-scrollbar {
@@ -146,15 +145,15 @@ input:focus {
 }
 
 a {
-  color: #05A8FC;
+  color: #05a8fc;
 }
 
 a:visited {
-  color: #C589F9;
+  color: #c589f9;
 }
 
 .novisited:visited {
-  color: #05A8FC;
+  color: #05a8fc;
 }
 
 /* width */
@@ -200,7 +199,6 @@ table th {
 
 .col {
   margin: 5px;
-
 }
 
 span {
