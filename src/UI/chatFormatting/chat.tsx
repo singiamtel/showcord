@@ -1,8 +1,9 @@
 import Linkify from 'linkify-react';
-import { HTMLAttributes, useState } from 'react';
+import { Fragment, HTMLAttributes, useState } from 'react';
 import manageURL from '../../utils/manageURL';
 import innerText from 'react-innertext';
 import { twMerge } from 'tailwind-merge';
+import { assertNever } from '@/lib/utils';
 
 // ``code here`` marks inline code
 // ||text|| are spoilers
@@ -20,7 +21,7 @@ export interface ExtendedProps extends HTMLAttributes<HTMLSpanElement> {
     key?: number;
 }
 
-const options = {
+export const options = {
     defaultProtocol: 'https',
     target: '_blank',
     attributes: {
@@ -69,7 +70,7 @@ export function spoiler(
 
 export function bold(
     props: ExtendedProps,
-) {
+): React.ReactElement {
     const key = props.key;
     delete props.key;
     return <Linkify as="strong" {...props} key={key} options={options} />;
@@ -160,3 +161,14 @@ export function fakeCommand(
         </Linkify>
     );
 }
+
+// ``code here`` marks inline code
+// ||text|| are spoilers
+// **text** is bold
+// __text__ is italic
+// ~~text~~ is strikethrough
+// ^^text^^ is superscript
+// \\text\\ is subscript
+// [[text]] is a link
+// >text is greentext
+// /me is an emote

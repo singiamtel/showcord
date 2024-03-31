@@ -172,7 +172,6 @@ export class Settings {
             userDefinedSettings: this.userDefinedSettings,
         };
         try {
-            console.log('Saving settings', this.rooms, new Error().stack);
             localStorage.setItem('settings', JSON.stringify(savedSettings));
         } catch (e) {
             console.error('Error saving settings', e, savedSettings);

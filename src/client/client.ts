@@ -23,7 +23,7 @@ interface UseClientStoreType {
     setCurrentRoom: (roomID: Room) => void;
     // messages: Message[]; // only messages from the current room
     messages: Record<Room['ID'], Message[]>; // messages from all rooms
-    // setMessages: (messages: Record<Room['ID'], Message[]>, room: Room['ID']) => void;
+    newMessage: (room: Room, message: Message) => void;
     notifications: RoomNotification[];
     // setNotifications: (notifications: RoomNotification[]) => void;
     avatar: string;
@@ -40,6 +40,19 @@ export const useClientStore = create<UseClientStoreType>((set) => ({
         }));
     },
     messages: {},
+    newMessage: (room: Room, message: Message) => {
+        set((state) => {
+            console.log('newMessage', room, message, state.messages);
+            if (!state.messages[room.ID]) {
+                return {
+                    messages: { ...state.messages, [room.ID]: [message] },
+                };
+            }
+            return {
+                messages: { ...state.messages, [room.ID]: [...state.messages[room.ID], message] },
+            };
+        });
+    },
     notifications: [],
     avatar: 'lucas',
     theme: localStorage.getItem('theme') as 'light' | 'dark' ?? 'dark',
@@ -531,49 +544,47 @@ export class Client {
         retry = true,
     ) {
         const room = this.room(roomID);
-        if (
-            toID(message.user) !== toID(this.settings.username) &&
-            this.highlightMsg(roomID, message)
-        ) {
-            this.events.dispatchEvent(
-                new CustomEvent('message', { detail: message }),
-            );
-        }
-        if (room) {
-            const settings = {
-                selected: this.selectedRoom === roomID,
-                selfSent: toID(this.settings.username) === toID(message.user),
-            };
-            let shouldNotify = false;
-            if (message.name) {
-                room.addUHTML(message, settings);
-            } else {
-                shouldNotify = room.addMessage(message, settings);
-            }
-            this.events.dispatchEvent(
-                new CustomEvent('message', { detail: message }),
-            );
-            if (shouldNotify) {
-                this.events.dispatchEvent(
-                    new CustomEvent('notification', {
-                        detail: {
-                            user: message.user,
-                            message: message.content,
-                            room: roomID,
-                            roomType: room.type,
-                        } as clientNotification,
-                    }),
-                );
-            }
-
+        // if (
+        //     toID(message.user) !== toID(this.settings.username) &&
+        //     this.highlightMsg(roomID, message)
+        // ) {
+        //     this.events.dispatchEvent(
+        //         new CustomEvent('message', { detail: message }),
+        //     );
+        // }
+        if (!room) {
+            console.warn('addMessageToRoom: room (' + roomID + ') is unknown. Message:', message);
             return;
-        } else if (retry) {
-            setTimeout(() => this.addMessageToRoom(roomID, message, false), 1000);
         }
-        console.warn(
-            'addMessageToRoom: room (' + roomID + ') is unknown. Message:',
-            message,
-        );
+        const settings = {
+            selected: this.selectedRoom === roomID,
+            selfSent: toID(this.settings.username) === toID(message.user),
+        };
+        let shouldNotify = false;
+        if (message.name) {
+            room.addUHTML(message, settings);
+        } else {
+            shouldNotify = room.addMessage(message, settings);
+        }
+        // this.events.dispatchEvent(
+        //     new CustomEvent('message', { detail: message }),
+        // );
+        console.log('addMessageToRoom', roomID, message);
+        useClientStore.getState().newMessage(room, message);
+        if (shouldNotify) {
+            this.events.dispatchEvent(
+                new CustomEvent('notification', {
+                    detail: {
+                        user: message.user,
+                        message: message.content,
+                        room: roomID,
+                        roomType: room.type,
+                    } as clientNotification,
+                }),
+            );
+        }
+
+        return;
     }
 
     private addUsers(roomID: string, users: User[] /*  */) {
@@ -627,6 +638,7 @@ export class Client {
             if (room instanceof BattleRoom) {
                 room.feedBattle(line) && this.events.dispatchEvent(new CustomEvent('message', { detail: line }));
             }
+
             const success = this.parseSocketLine(args, kwArgs, roomID);
             if (!success) {
                 console.error('Failed to parse', line);
@@ -823,7 +835,6 @@ export class Client {
                 const queryType = args[1];
                 switch (queryType) {
                     case 'userdetails':
-
                         try {
                             const tmpjson = JSON.parse(args[2]);
                             if (tmpjson.userid === toID(this.settings.username)) {
