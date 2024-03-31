@@ -90,7 +90,6 @@ export default function formatParser(formats: string[]) {
                 ID: toID(`gen${gen}${name}`),
                 settings: formatSettings,
             });
-            // console.log(`${gen}: ${name.trim()}`, formatSettings);
         } else {
             throw new Error(`Unknown format: ${format}`);
         }

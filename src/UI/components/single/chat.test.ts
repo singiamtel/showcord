@@ -6,7 +6,6 @@ suite('inlineCode', () => {
     test('should render code', () => {
         const JSX = FormatMsgDisplay({ msg: '`test`' });
         const { container } = render(JSX);
-        // console.log(container.querySelector('code'));
         expect(container.querySelector('code')?.textContent).toEqual('test');
     });
 
@@ -15,7 +14,6 @@ suite('inlineCode', () => {
         const expected = ['used', 'bug', 'still', 'solved'];
         const JSX = FormatMsgDisplay({ msg: message });
         const { container } = render(JSX);
-        // console.log(container.querySelector('code'));
         const codeElements = container.querySelectorAll('code');
         expect(codeElements.length).toEqual(expected.length);
         codeElements.forEach((el, i) => {

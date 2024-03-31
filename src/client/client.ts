@@ -42,7 +42,6 @@ export const useClientStore = create<UseClientStoreType>((set) => ({
     messages: {},
     newMessage: (room: Room, message: Message) => {
         set((state) => {
-            console.log('newMessage', room, message, state.messages);
             if (!state.messages[room.ID]) {
                 return {
                     messages: { ...state.messages, [room.ID]: [message] },
@@ -569,7 +568,6 @@ export class Client {
         // this.events.dispatchEvent(
         //     new CustomEvent('message', { detail: message }),
         // );
-        console.log('addMessageToRoom', roomID, message);
         useClientStore.getState().newMessage(room, message);
         if (shouldNotify) {
             this.events.dispatchEvent(
@@ -1224,7 +1222,6 @@ export class Client {
                 this.tryLogin();
             }
             const savedRooms = client.settings.rooms;
-            console.log('Saved rooms', savedRooms);
             this.autojoin(savedRooms.map((e) => e.ID), true);
         };
 
