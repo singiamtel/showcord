@@ -14,6 +14,7 @@ import BattleRoom from '../rooms/BattleRoom';
 import PmRoom from '../rooms/PmRoom';
 import HtmlRoom from '../rooms/HtmlRoom';
 import { useClientStore } from '@/client/client';
+import { ErrorBoundary } from 'react-error-boundary';
 
 export default function BigPanel(props: Readonly<HTMLAttributes<'div'>>) {
     const room = useClientStore(state => state.currentRoom);
@@ -60,8 +61,12 @@ export default function BigPanel(props: Readonly<HTMLAttributes<'div'>>) {
         >
             <div className={'dark:bg-gray-300 flex flex-col w-full max-w-full'}>
                 <div className="flex-grow flex-shrink min-h-0">
-                    <Chat
-                    />
+                    <ErrorBoundary fallbackRender={({ error: e }) => {
+                        console.error(e);
+                        return <div className="text-red-400">Error displaying messages</div>;
+                    }}>
+                        <Chat />
+                    </ErrorBoundary>
                 </div>
                 <div className="flex-grow">
                     <ChatBox className='p-2' />

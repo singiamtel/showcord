@@ -85,7 +85,6 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
                 >
                 </div>
             </div>
-            {' '}
         </div>
     );
 }
