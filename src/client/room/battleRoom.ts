@@ -70,8 +70,6 @@ export class BattleRoom extends Room {
                 );
                 return true;
             }
-        } else {
-            console.debug('Ignoring line', line);
         }
         return false;
     }
