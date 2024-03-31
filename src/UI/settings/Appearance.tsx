@@ -7,8 +7,7 @@ import { useClientStore } from '@/client/client';
 
 export default function AppearanceSettings(props: Readonly<HTMLAttributes<'div'>>) {
     const { client } = useClientContext();
-    const currentTheme = useClientStore(state => state.theme);
-    const [theme, setTheme] = useState<'light' | 'dark'>(currentTheme);
+    const { theme } = useClientStore(state => ({ theme: state.theme }));
     useEffect(() => {
         client.setTheme(theme);
     }, [theme]);
@@ -22,7 +21,7 @@ export default function AppearanceSettings(props: Readonly<HTMLAttributes<'div'>
                 <div className="ml-2 flex items-center" >
                     <span className='pr-4 flex items-center'>
                         <Switch checked={theme === 'dark'} onCheckedChange={() => {
-                            setTheme(theme === 'dark' ? 'light' : 'dark');
+                            client.setTheme(theme === 'dark' ? 'light' : 'dark');
                         }} />
                     </span>
                     <Label htmlFor="theme">Use dark theme</Label>

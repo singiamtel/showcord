@@ -6,6 +6,7 @@ import { faCog, faHome, faUser } from '@fortawesome/free-solid-svg-icons';
 import { notificationsEngine } from '../../client/notifications';
 import { AiOutlineClose } from 'react-icons/ai';
 import { GiBattleAxe } from 'react-icons/gi';
+import { useClientStore } from '@/client/client';
 
 const customIcons = {
     'home': <FontAwesomeIcon icon={faHome} height={16} width={16} />,
@@ -21,7 +22,8 @@ export function RoomListComponent(
         notifications: { unread: number; mentions: number };
     }>,
 ) {
-    const { setRoom, currentRoom: room } = useClientContext();
+    const { setRoom } = useClientContext();
+    const room = useClientStore(state => state.currentRoom);
     const customIcon = customIcons[ID as keyof typeof customIcons];
     const icon = customIcon ?? (type === 'battle' ?
         <GiBattleAxe height={16} width={16} /> :

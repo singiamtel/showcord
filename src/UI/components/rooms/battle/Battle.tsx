@@ -5,6 +5,7 @@ import { BattleRoom } from '@/client/room/battleRoom';
 import { Icons, Sprites } from '@pkmn/img';
 import type { Pokemon as PokemonType } from '@pkmn/client';
 import { Username } from '../../Username';
+import { useClientStore } from '@/client/client';
 
 
 function PokemonIcon({ pokemon }: Readonly<{
@@ -40,7 +41,7 @@ function PokemonSprite({ pokemon, side }: Readonly<{
 }
 
 export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
-    const { currentRoom: battle } = useClientContext() as {currentRoom: BattleRoom | undefined};
+    const battle = useClientStore(state => state.currentRoom) as BattleRoom;
     assert(battle?.type === 'battle', 'Trying to render BattleWindow in a room that is not a BattleRoom');
     return <div className={cn(props.className, 'h-full w-full bg-gray-125 grid grid-cols-12')}>
         <div className='col-span-2 flex flex-col items-center' id="side-1">

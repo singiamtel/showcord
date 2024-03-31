@@ -32,7 +32,7 @@ export class Settings {
     static readonly defaultNewsURL = 'https://pokemonshowdown.com/news.json';
 
     readonly version = 2; // used to invalidate settings when the format changes
-    private rooms: SerializedRoom[] = [];
+    rooms: SerializedRoom[] = [];
     /** Only serializable data should be here, as it saves directly to localStorage */
     private userDefinedSettings: UserDefinedSettings = {
         highlightWords: {},
@@ -51,7 +51,6 @@ export class Settings {
 
     set username(username: string) {
         this.name = username;
-        this.saveSettings();
     }
 
     get avatar() { return this.userDefinedSettings.avatar; }
@@ -67,7 +66,7 @@ export class Settings {
     get theme() { return this.__theme; }
     set theme(theme: 'light' | 'dark') {
         this.__theme = theme;
-        this.saveSettings();
+        localStorage.setItem('theme', theme);
     }
 
     private __status = '';
@@ -138,9 +137,7 @@ export class Settings {
             if (settings.version !== this.version) {
                 throw new Error('Settings version mismatch');
             }
-            settings.rooms.forEach((r) => {
-                this.rooms.push(r);
-            });
+            this.rooms = settings.rooms;
             this.name = settings.username;
             const userDefinedSettings = settings.userDefinedSettings;
             if (userDefinedSettings) {
@@ -175,6 +172,7 @@ export class Settings {
             userDefinedSettings: this.userDefinedSettings,
         };
         try {
+            console.log('Saving settings', this.rooms, new Error().stack);
             localStorage.setItem('settings', JSON.stringify(savedSettings));
         } catch (e) {
             console.error('Error saving settings', e, savedSettings);
@@ -185,8 +183,9 @@ export class Settings {
 
     addRoom(room: Room) {
         if (!this.rooms.find((r) => r.ID === room.ID)) {
-            this.rooms.push(room);
+            this.rooms = [...this.rooms, { ID: room.ID, lastReadTime: new Date(), open: true }];
         }
+        this.saveSettings();
     }
 
 
@@ -195,25 +194,14 @@ export class Settings {
         if (index !== -1) {
             this.rooms[index].open = false;
         }
+        this.saveSettings();
     }
 
     changeRooms(rooms: Map<string, Room>) {
     // Used to remember which rooms were open when the user logs out
-        this.rooms = Array.from(rooms).map((e) => e[1]).filter((e) =>
-            e.type === 'chat');
+        // this.rooms = Array.from(rooms).map((e) => e[1]).filter((e) =>
+        //     e.type === 'chat');
         this.saveSettings();
-    }
-
-    getSavedRooms() {
-        const settingsRaw = localStorage.getItem('settings');
-        if (!settingsRaw) {
-            return [];
-        }
-        const settings = JSON.parse(settingsRaw);
-        return settings.rooms as {
-            ID: string;
-            lastReadTime: Date;
-        }[] ?? [];
     }
 
     logout() {
@@ -226,7 +214,6 @@ export class Settings {
         if (this.userDefinedSettings.highlightWords[roomid] === undefined) {
             this.userDefinedSettings.highlightWords[roomid] = [];
         }
-        // this.userDefinedSettings.highlightWords[roomid]?.push(word);
         this.setHighlightWords(roomid, [...this.userDefinedSettings.highlightWords[roomid], word]);
         this.saveSettings();
     }

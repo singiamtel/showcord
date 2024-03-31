@@ -13,6 +13,7 @@ import MiniSearch, { SearchResult } from 'minisearch';
 import TextareaAutosize from 'react-textarea-autosize';
 import { cn } from '@/lib/utils';
 import { useClientContext } from './ClientContext';
+import { useClientStore } from '@/client/client';
 
 type SearchBoxOffset = {
     width: number;
@@ -35,7 +36,8 @@ export default function ChatBox(props: Readonly<HTMLAttributes<HTMLDivElement>>)
         width: 0,
         marginBottom: 0,
     });
-    const { client, currentRoom: room, setRoom } = useClientContext();
+    const room = useClientStore(state => state.currentRoom);
+    const { client, setRoom } = useClientContext();
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
     const formRef = createRef<HTMLFormElement>();
 

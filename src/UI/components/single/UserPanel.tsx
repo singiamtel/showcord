@@ -2,10 +2,10 @@ import { notificationsEngine } from '../../../client/notifications';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
 import { UserDetails } from '../UserDetails';
-import { useClientContext } from './ClientContext';
+import { client, useClientStore } from '@/client/client';
 
 export default function UserPanel() {
-    const { client, user, avatar } = useClientContext();
+    const { user, avatar } = useClientStore(state => ({ user: state.user, avatar: state.avatar }));
 
     return (
         <div className="h-26 p-3 flex items-center bg-gray-251 dark:bg-gray-600">
@@ -24,17 +24,15 @@ export default function UserPanel() {
                             />
                         ) :
                         (
-                            <>
-                                <button
-                                    onClick={() => {
-                                        client.login();
-                                        notificationsEngine.askPermission();
-                                    }}
-                                    className="font-bold rounded px-2 py-1 w-full"
-                                >
+                            <button
+                                onClick={() => {
+                                    client.login();
+                                    notificationsEngine.askPermission();
+                                }}
+                                className="font-bold rounded px-2 py-1 w-full"
+                            >
                                     Login
-                                </button>
-                            </>
+                            </button>
                         )
                     }
                     <div className="flex flex-row justify-center items-center cursor-pointer hover-color" onClick={() => client.openSettings()}>

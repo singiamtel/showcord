@@ -17,13 +17,51 @@ type ClientConstructor = {
     autoLogin?: boolean;
 };
 
+interface UseClientStoreType {
+    rooms: Map<Room['ID'], Room>;
+    currentRoom: Room | undefined;
+    setCurrentRoom: (roomID: Room) => void;
+    // messages: Message[]; // only messages from the current room
+    messages: Record<Room['ID'], Message[]>; // messages from all rooms
+    // setMessages: (messages: Record<Room['ID'], Message[]>, room: Room['ID']) => void;
+    notifications: RoomNotification[];
+    // setNotifications: (notifications: RoomNotification[]) => void;
+    avatar: string;
+    theme: 'light' | 'dark';
+    user: string | undefined
+}
+
+export const useClientStore = create<UseClientStoreType>((set) => ({
+    rooms: new Map(),
+    currentRoom: undefined,
+    setCurrentRoom: (room: Room) => {
+        set((state) => ({
+            currentRoom: room,
+        }));
+    },
+    messages: {},
+    notifications: [],
+    avatar: 'lucas',
+    theme: localStorage.getItem('theme') as 'light' | 'dark' ?? 'dark',
+    user: undefined,
+}));
+
+
 export class Client {
     readonly settings: Settings = new Settings();
+    static readonly permanentRooms = [{
+        ID: 'home',
+        name: 'Home',
+        defaultOpen: true,
+    }, {
+        ID: 'settings',
+        name: 'Settings',
+        defaultOpen: false,
+    }] as const; // Client-side only rooms, joined automatically
     private socket: WebSocket | undefined;
 
     private rooms: Map<string, Room> = new Map();
     events: EventTarget = new EventTarget();
-    private autoSelectRoom: string = '';
     private loggedIn: boolean = false;
     private shouldAutoLogin: boolean = true;
     private onOpen: (() => void)[] = []; // Append callbacks here to run when the socket opens
@@ -33,21 +71,16 @@ export class Client {
     }
 
     private joinAfterLogin: string[] = [];
-    challstr: string = '';
+    private challstr: string = '';
     private client_id = import.meta.env.VITE_OAUTH_CLIENTID;
-    private selectedRoom: string = ''; // Used for notifications
+    // private selectedRoom: string = ''; // Used for notifications
+    private __selectedRoom = '';
+    get selectedRoom() {
+        return this.__selectedRoom;
+    }
     // Callbacks given to query commands, it's called after the server responds back with the info
     private userListener: ((json: any) => any) | undefined;
     private roomListener: ((json: any) => any) | undefined;
-    permanentRooms = [{
-        ID: 'home',
-        name: 'Home',
-        defaultOpen: true,
-    }, {
-        ID: 'settings',
-        name: 'Settings',
-        defaultOpen: false,
-    }] as const; // Client-side only rooms, joined automatically
     private roomsJSON: any = undefined; // Server response to /cmd rooms
     private news: any = undefined; // Cached news
     private lastQueriedUser: { user: string; json: any } | undefined; // Cached user query
@@ -142,10 +175,7 @@ export class Client {
 
     createPM(user: string) {
         this.__createPM(user);
-        this.autoSelectRoom = '';
-        this.events.dispatchEvent(
-            new CustomEvent('selectroom', { detail: 'pm-' + toID(user) }),
-        );
+        this.selectRoom('pm-' + toID(user));
     }
 
     private __createPM(user: string) {
@@ -164,13 +194,12 @@ export class Client {
         this._addRoom(newRoom);
     }
 
-    // Used to remove highlights and mentions
     selectRoom(roomid: string) {
-        this.selectedRoom = roomid;
+        this.__selectedRoom = roomid;
         this.room(roomid)?.select();
         this.settings.changeRooms(this.rooms);
+        useClientStore.setState({ currentRoom: this.room(roomid) });
     }
-
 
     async queryUser(user: string, callback: (json: any) => void) {
         if (!this.socket) {
@@ -189,9 +218,7 @@ export class Client {
     private async queryUserInternal(user: string) {
         this.queryUser(user, (_json) => {
             // This is risky as we could be logged in but not get a queryResponse for some reason
-            this.events.dispatchEvent(
-                new CustomEvent('login', { detail: this.settings.username }),
-            );
+            useClientStore.setState({ user: this.settings.username, avatar: this.settings.avatar });
         });
     }
 
@@ -225,7 +252,6 @@ export class Client {
             throw new Error('Joining room(s) before socket initialization ' + room);
         }
         this.__send(`/join ${room}`, false);
-        this.autoSelectRoom = room;
     }
 
     leaveRoom(roomID: string) {
@@ -244,7 +270,7 @@ export class Client {
         }
         if (room.connected) {
             this.__send(`/leave ${roomID}`, false);
-        } else if (this.permanentRooms.map((e) => e.ID).includes(roomID as any)) {
+        } else if (Client.permanentRooms.map((e) => e.ID).includes(roomID as any)) {
             this._closeRoom(roomID);
         } else { this._removeRoom(roomID); }
     }
@@ -256,7 +282,10 @@ export class Client {
             return;
         }
         room.open = false;
-        this.events.dispatchEvent(new CustomEvent('leaveroom', { detail: roomID }));
+        useClientStore.setState({ rooms: new Map(this.rooms) });
+        if (roomID === this.selectedRoom) {
+            this.selectRoom('home');
+        }
     }
 
     async autojoin(rooms: string[], useDefaultRooms = false) {
@@ -264,8 +293,8 @@ export class Client {
             throw new Error('Auto-joining rooms before socket initialization ');
         }
         const filteredRooms = rooms.filter((room) =>
-            !this.permanentRooms.map((e) => e.ID).includes(
-                room as typeof this.permanentRooms[number]['ID'],
+            !Client.permanentRooms.map((e) => e.ID).includes(
+                room as typeof Client.permanentRooms[number]['ID'],
             ) && !room.startsWith('pm-'));
         if (useDefaultRooms && (!filteredRooms || filteredRooms.length === 0)) {
             for (const room of Settings.defaultRooms) {
@@ -301,9 +330,7 @@ export class Client {
 
     openSettings() {
         this._openRoom('settings');
-        this.events.dispatchEvent(
-            new CustomEvent('selectroom', { detail: 'settings' }),
-        );
+        this.selectRoom('settings');
     }
 
 
@@ -467,9 +494,11 @@ export class Client {
     // --- Room management ---
     private _addRoom(room: Room) {
         this.rooms.set(room.ID, room);
-        this.events.dispatchEvent(new CustomEvent('room', { detail: room.ID }));
-        this.events.dispatchEvent(new CustomEvent('message', { detail: room.ID })); // Just in case. Fixes pagehtml
-        this.settings.addRoom(room);
+        useClientStore.setState({ rooms: new Map(this.rooms) });
+        this.selectRoom(room.ID);
+        if (room.type !== 'permanent' && !this.settings.rooms.find((r) => r.ID === room.ID)) {
+            this.settings.addRoom(room);
+        }
     }
 
     private _openRoom(roomID: string) {
@@ -479,8 +508,8 @@ export class Client {
             // move room to bottom
             this.rooms.delete(roomID);
             this.rooms.set(roomID, room);
-            this.events.dispatchEvent(new CustomEvent('room', { detail: room }));
             this.settings.changeRooms(this.rooms);
+            useClientStore.setState({ rooms: new Map(this.rooms) });
             return;
         }
         console.warn('openRoom: room (' + roomID + ') is unknown');
@@ -489,8 +518,10 @@ export class Client {
 
     private _removeRoom(roomID: string) {
         this.rooms.delete(roomID);
-        const eventio = new CustomEvent('leaveroom', { detail: roomID });
-        this.events.dispatchEvent(eventio);
+        if (roomID === this.selectedRoom) {
+            this.selectRoom('home');
+        }
+        useClientStore.setState({ rooms: new Map(this.rooms) });
         this.settings.removeRoom(roomID);
     }
 
@@ -650,7 +681,7 @@ export class Client {
                 const room = this.requiresRoom('title', roomID);
                 if (!room) return false;
                 room.rename(name);
-                this.events.dispatchEvent(new CustomEvent('room', { detail: room }));
+                useClientStore.setState({ rooms: new Map(this.rooms) });
                 break;
             }
             case 'users': {
@@ -1181,7 +1212,11 @@ export class Client {
             if (this.shouldAutoLogin) {
                 this.tryLogin();
             }
+            const savedRooms = client.settings.rooms;
+            console.log('Saved rooms', savedRooms);
+            this.autojoin(savedRooms.map((e) => e.ID), true);
         };
+
         this.socket.onmessage = (event) => {
             console.debug('[socket-output]\n' + event.data);
             this.parseSocketChunk(event.data);
@@ -1196,8 +1231,7 @@ export class Client {
     }
 
     private __createPermanentRooms() {
-        this.permanentRooms.forEach((room) => {
-            // if (!room.defaultOpen) return;
+        Client.permanentRooms.forEach((room) => {
             this._addRoom(
                 new Room({
                     ID: room.ID,
@@ -1208,6 +1242,7 @@ export class Client {
                 }),
             );
         });
+        useClientStore.setState({ rooms: new Map(this.rooms) });
     }
 
     /**
@@ -1316,7 +1351,6 @@ export class Client {
                     if (args.length === 0) {
                         return false;
                     }
-                    this.autoSelectRoom = toID(args.join(''));
                 }
                 return false;
             // case 'status':
@@ -1331,31 +1365,3 @@ export class Client {
 
 export const client = new Client();
 window.client = client; // Only for debugging
-
-interface UseClientStoreType {
-    rooms: Room[];
-    setRooms: (rooms: Room[]) => void;
-    selectedRoom: Room | undefined;
-    setSelectedRoom: (room: Room) => void;
-    // messages: Message[]; // only messages from the current room
-    messages: Record<Room['ID'], Message[]>; // messages from all rooms
-    // setMessages: (messages: Record<Room['ID'], Message[]>, room: Room['ID']) => void;
-    notifications: RoomNotification[];
-    // setNotifications: (notifications: RoomNotification[]) => void;
-    avatar: string;
-    theme: 'light' | 'dark';
-    user: string | undefined
-}
-
-export const useClientStore = create<UseClientStoreType>((set) => ({
-    rooms: [],
-    setRooms: (rooms) => set({ rooms }),
-    selectedRoom: client.room('home'),
-    setSelectedRoom: (room) => set({ selectedRoom: room }),
-    messages: {},
-    notifications: [],
-    avatar: 'lucas',
-    theme: client.settings.theme,
-    user: undefined,
-}));
-

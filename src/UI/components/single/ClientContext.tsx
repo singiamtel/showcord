@@ -1,5 +1,5 @@
 import { assertNever } from '@/lib/utils';
-import { Client, client } from '../../../client/client';
+import { Client, client, useClientStore } from '../../../client/client';
 import { Message } from '../../../client/message';
 import { notificationsEngine, RoomNotification } from '../../../client/notifications';
 import { Room } from '../../../client/room/room';
@@ -11,46 +11,41 @@ import { toast } from 'react-toastify';
 interface ClientContextType {
     client: Client;
     rooms: Room[];
-    currentRoom: Room | undefined;
     setRoom:(room: string | 1 | -1 | Room) => void;
     messages: Message[];
-    user?: string; // Will be an object with user info
     setRooms: (rooms: Room[]) => void;
     notifications: RoomNotification[];
-    avatar?: string;
 }
 
 const ClientContext = createContext<ClientContextType | undefined>(undefined);
 
 export default function ClientContextProvider(props: Readonly<React.PropsWithChildren>) {
-    const [user, setUser] = useState<string | undefined>();
-    const [selectedRoom, setSelectedRoom] = useState<Room | undefined>(client.room('home'));
     const [rooms, setRooms] = useState<Room[]>(client.getRooms());
     const [notifications, setNotifications] = useState<RoomNotification[]>([]);
     const [update, setUpdate] = useState<number>(0); // Used to force update on rooms change
     const [previousRooms, setPreviousRooms] = useState<string[]>(['home']);
     const [messages, setMessages] = useState<Message[]>([]);
     const [updateMsgs, setUpdateMsgs] = useState<number>(0); // Used to force update on rooms change
-    const [avatar, setAvatar] = useState<string | undefined>(undefined);
+    const { currentRoom, setCurrentRoom } = useClientStore((state) => ({ currentRoom: state.currentRoom, setCurrentRoom: state.setCurrentRoom }));
 
     /* --- Room handling --- */
 
     const setRoom = useCallback((newRoom: string | 1 | -1 | Room) => {
         if (newRoom instanceof Room) {
-            setSelectedRoom(newRoom);
+            setCurrentRoom(newRoom);
             return;
         }
         if (typeof newRoom === 'number') {
             if (rooms) {
-                if (!selectedRoom) return;
-                const index = rooms.indexOf(selectedRoom);
+                if (!currentRoom) return;
+                const index = rooms.indexOf(currentRoom);
                 const newIndex = index + newRoom;
                 if (newIndex >= rooms.length) {
-                    setSelectedRoom(rooms[0]);
+                    setCurrentRoom(rooms[0]);
                 } else if (newIndex < 0) {
-                    setSelectedRoom(rooms[rooms.length - 1]);
+                    setCurrentRoom(rooms[rooms.length - 1]);
                 } else {
-                    setSelectedRoom(rooms[newIndex]);
+                    setCurrentRoom(rooms[newIndex]);
                 }
                 return;
             } else { return; }
@@ -65,12 +60,12 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
             tmpPR.push(newRoom);
             if (tmpPR.length > 5) tmpPR.shift();
             setPreviousRooms(tmpPR);
-            setSelectedRoom(roomObj);
+            setCurrentRoom(roomObj);
             client.selectRoom(newRoom);
         } else {
             console.warn('Trying to set room that does not exist (' + newRoom + ')');
         }
-    }, [client, rooms, selectedRoom, previousRooms]);
+    }, [client, rooms, previousRooms]);
 
     const globalErrorListener = (e: Event) => {
         const error = (e as CustomEvent).detail;
@@ -100,7 +95,7 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
                 return indexA - indexB;
             });
             setRooms(newRoomsOrdered);
-            if ((e.type === 'leaveroom' && selectedRoom?.ID === (e as CustomEvent).detail.ID) || !selectedRoom) {
+            if ((e.type === 'leaveroom' && currentRoom?.ID === (e as CustomEvent).detail.ID) || !currentRoom) {
                 setRoom('home');
             }
         };
@@ -122,32 +117,27 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
         };
     }, [
         setRooms,
-        selectedRoom,
         setRoom,
         update,
         setUpdate,
     ]);
 
-    useEffect(() => {
-        client.autojoin(client.settings.getSavedRooms().map((e) => e.ID), true);
-    }, []);
-
     /* --- End room handling --- */
 
     /* --- Message handling --- */
     const handleMsgEvent = useCallback(async (setMessages: any) => {
-        if (!selectedRoom) {
+        if (!currentRoom) {
             return;
         }
-        const msgs = selectedRoom.messages ?? [];
+        const msgs = currentRoom.messages ?? [];
         setNotifications(client.getNotifications());
         setMessages([...msgs]);
-    }, [client, selectedRoom]);
+    }, [client]);
 
     useEffect(() => {
-        if (!selectedRoom) return;
+        if (!currentRoom) return;
 
-        setMessages([...selectedRoom.messages ?? []]);
+        setMessages([...currentRoom.messages ?? []]);
 
         const eventListener = () => {
             setUpdateMsgs(updateMsgs + 1);
@@ -170,7 +160,6 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
         };
     }, [
         client,
-        selectedRoom,
         setMessages,
         handleMsgEvent,
         updateMsgs,
@@ -186,10 +175,6 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
     // TODO: Unclear if this should be here
         const init = async () => {
             await loadCustomColors();
-            client.events.addEventListener('login', (username) => {
-                setUser((username as CustomEvent).detail);
-                setAvatar(client.settings.avatar);
-            });
         };
         init();
     }, []);
@@ -198,15 +183,13 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
 
     const ProviderValue = useMemo(() => ({
         client,
-        currentRoom: selectedRoom,
+        currentRoom,
         setRoom,
-        user,
         messages,
         rooms,
         setRooms,
         notifications,
-        avatar,
-    }), [selectedRoom, user, messages, rooms, notifications, avatar]);
+    }), [messages, rooms, notifications]);
 
     return (
         <ClientContext.Provider

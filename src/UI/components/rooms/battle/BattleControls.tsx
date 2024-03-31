@@ -1,15 +1,16 @@
 import { assert, assertNever } from '@/lib/utils';
 import { HTMLAttributes, useEffect, useState } from 'react';
 import { useClientContext } from '../../single/ClientContext';
-import { BattleRoom } from '@/client/room/battleRoom';
 import { MoveRequest } from './requests/MoveRequest';
 import { WaitRequest } from './requests/WaitRequest';
 import { TeamRequest } from './requests/TeamRequest';
 import { SwitchRequest } from './requests/SwitchRequest';
-import { Client } from '@/client/client';
+import { useClientStore } from '@/client/client';
+import { BattleRoom } from '@/client/room/battleRoom';
 
 export default function BattleControls(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
-    const { client, currentRoom: battle } = useClientContext() as {client: Client, currentRoom: BattleRoom | undefined};
+    const { client } = useClientContext();
+    const battle = useClientStore(state => state.currentRoom) as BattleRoom;
     assert(battle?.type === 'battle', 'Trying to render BattleWindow in a room that is not a BattleRoom');
     const [req, setReq] = useState(battle.battle.request);
     useEffect(() => {

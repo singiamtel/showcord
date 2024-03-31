@@ -22,10 +22,11 @@ import {
 } from '@dnd-kit/sortable';
 import SortableItem from '../../../utils/Sortable';
 import { cn } from '@/lib/utils';
-import { useClientContext } from './ClientContext';
+import { useClientStore } from '@/client/client';
 
 export default function Sidebar(props: Readonly<HTMLAttributes<'div'>>) {
-    const { rooms, setRooms } = useClientContext();
+    const rooms = useClientStore((state) => state.rooms);
+    const roomsArray = Array.from(rooms.values());
 
     const mouseSensor = useSensor(MouseSensor, {
     // Require the mouse to move by 10 pixels before activating
@@ -46,10 +47,10 @@ export default function Sidebar(props: Readonly<HTMLAttributes<'div'>>) {
         const { active, over } = event;
         if (over) {
             if (active.id !== over.id) {
-                const oldIndex = rooms.findIndex((item) => item.ID === active.id);
-                const newIndex = rooms.findIndex((item) => item.ID === over.id);
-                const tmp = arrayMove(rooms, oldIndex, newIndex);
-                setRooms(tmp);
+                const oldIndex = roomsArray.findIndex((item) => item.ID === active.id);
+                const newIndex = roomsArray.findIndex((item) => item.ID === over.id);
+                const tmp = arrayMove(roomsArray, oldIndex, newIndex);
+                useClientStore.setState({ rooms: new Map(tmp.map((_, idx) => [tmp[idx].ID, tmp[idx]])) });
             }
         }
     };
@@ -74,10 +75,10 @@ export default function Sidebar(props: Readonly<HTMLAttributes<'div'>>) {
                 <div className="flex flex-grow overflow-y-auto">
                     <div className="w-full">
                         <SortableContext
-                            items={rooms.map((e) => e.ID)}
+                            items={roomsArray.map((e) => e.ID)}
                             strategy={verticalListSortingStrategy}
                         >
-                            {rooms.map((room, idx) => (
+                            {roomsArray.map((room, idx) => (
                                 <SortableItem id={room.ID} key={idx}>
                                     <RoomListComponent
                                         name={room.name}
