@@ -57,7 +57,7 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
             )}
             ref={ref}
         >
-            {messages[currentRoom.ID].map((message, index, arr) => (
+            {messages[currentRoom.ID] ? messages[currentRoom.ID].map((message, index, arr) => (
                 <ErrorBoundary
                     key={index}
                     fallbackRender={({ error: e }) => {
@@ -75,7 +75,7 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
                         prev={arr[index - 1]}
                     />
                 </ErrorBoundary>
-            ))}
+            )) : null}
             <div className="relative h-0 w-0">
                 {/* invisible div to scroll to */}
                 <div

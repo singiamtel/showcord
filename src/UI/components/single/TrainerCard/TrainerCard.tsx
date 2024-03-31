@@ -111,6 +111,7 @@ export default function TrainerCard(
                                 src={user.avatar ?
                                     Sprites.getAvatar(user.avatar) :
                                     Sprites.getAvatar(167)}
+                                alt="avatar"
                                 className="w-20 h-20"
                             />
                         ) :
@@ -146,13 +147,13 @@ function UserCardButton({
     icon,
     onClick,
     disabled = false,
-}: {
+}: Readonly<{
     name: string;
     alt: string;
     icon: ReactNode;
     onClick: MouseEventHandler<HTMLButtonElement>;
     disabled?: boolean;
-}) {
+}>) {
     return (
         <button
             className={'text-sm rounded-lg px-4 py-2 flex-grow-0 border border-gray-700 flex flex-col justify-center items-center ' +
