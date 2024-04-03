@@ -5,7 +5,7 @@ import { Room } from './room/room';
 import { User } from './user';
 import { clientNotification, RoomNotification } from './notifications';
 import { Protocol } from '@pkmn/protocol';
-import { assertNever, assert } from '@/lib/utils';
+import { assert, assertNever } from '@/lib/utils';
 import { BattleRoom } from './room/battleRoom';
 import formatParser, { Formats } from './formatParser';
 
@@ -35,7 +35,7 @@ export const useClientStore = create<UseClientStoreType>((set) => ({
     rooms: new Map(),
     currentRoom: undefined,
     setCurrentRoom: (room: Room) => {
-        set((state) => ({
+        set(() => ({
             currentRoom: room,
         }));
     },
@@ -540,17 +540,8 @@ export class Client {
     private addMessageToRoom(
         roomID: string,
         message: Message,
-        retry = true,
     ) {
         const room = this.room(roomID);
-        // if (
-        //     toID(message.user) !== toID(this.settings.username) &&
-        //     this.highlightMsg(roomID, message)
-        // ) {
-        //     this.events.dispatchEvent(
-        //         new CustomEvent('message', { detail: message }),
-        //     );
-        // }
         if (!room) {
             console.warn('addMessageToRoom: room (' + roomID + ') is unknown. Message:', message);
             return;
@@ -565,9 +556,6 @@ export class Client {
         } else {
             shouldNotify = room.addMessage(message, settings);
         }
-        // this.events.dispatchEvent(
-        //     new CustomEvent('message', { detail: message }),
-        // );
         useClientStore.getState().newMessage(room, message);
         if (shouldNotify) {
             this.events.dispatchEvent(
@@ -581,8 +569,6 @@ export class Client {
                 }),
             );
         }
-
-        return;
     }
 
     private addUsers(roomID: string, users: User[] /*  */) {
@@ -1025,6 +1011,9 @@ export class Client {
                 break;
             case 'customgroups':
             case 'tournament':
+            case 'notify':
+            case 'popup':
+            case 'nametaken':
             case 'updatesearch':
                 break;
             // battles
@@ -1095,10 +1084,77 @@ export class Client {
             case 'gen':
             case 'tier':
             case 'sentchoice':
+            case 'rated':
+            case 'seed':
+            case 'clearpoke':
+            case 'poke':
+            case 'usercount':
+            case 'message' :
+            case 'replace' :
+            case 'teampreview' :
+            case 'updatepoke' :
+            case 'inactive' :
+            case 'inactiveoff' :
+            case 'tie' :
+            case 'drag' :
+            case 'detailschange' :
+            case 'swap' :
+            case '-block' :
+            case '-notarget' :
+            case '-sethp' :
+            case '-curestatus':
+            case '-cureteam':
+            case '-setboost':
+            case '-swapboost':
+            case '-invertboost':
+            case '-clearboost':
+            case '-clearallboost':
+            case '-clearpositiveboost':
+            case '-swapsideconditions':
+            case '-endability':
+            case '-transform':
+            case '-mega':
+            case '-primal':
+            case '-burst':
+            case '-zpower':
+            case '-zbroken':
+            case '-activate':
+            case '-fieldactivate':
+            case '-hint':
+            case '-center':
+            case '-combine':
+            case '-copyboost':
+            case '-weather':
+            case '-fieldstart':
+            case '-fieldend':
+            case 'askreg':
+            case '-waiting':
+            case '-prepare':
+            case '-mustrecharge':
+            case '-hitcount':
+            case '-singlemove':
+            case '-anim':
+            case '-ohko':
+            case '-candynamax':
+            case '-terastallize':
+            case 'updatechallenges':
+            case 'debug':
+            case 'unlink':
+            case 'warning':
+            case 'bigerror':
+            case 'chatmsg':
+            case 'chatmsg-raw':
+            case 'controlshtml':
+            case 'fieldhtml':
+            case 'selectorhtml':
+            case 'refresh':
+            case 'tempnotify':
+            case 'tempnotifyoff':
+            case 'hidelines' :
                 break;
             default:
             {
-                // assertNever(args[0]);
+                assertNever(args[0]);
                 console.error('Unknown cmd', args[0], args);
                 return false;
             }
