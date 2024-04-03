@@ -37,7 +37,7 @@ export function RoomListComponent(
             className="relative flex w-full cursor-pointer"
         >
             <div
-                className={' flex flex-row hover-color w-full ' + (
+                className={'flex flex-row hover-color w-full overflow-clip ' + (
                     ID === room?.ID ?
                         ' bg-gray-451 dark:bg-gray-450 dark:hover:bg-gray-450 ' :
                         mentions > 0 || unread > 0 ?
@@ -51,9 +51,8 @@ export function RoomListComponent(
                         <span className="rounded-full bg-white text-white text-xs p-1 h-1 w-1  absolute top-1/2  transform -translate-x-1/2 -translate-y-1/2" />
                     ) :
                     null}
-                {/** Room name */}
                 <button
-                    className={'rounded p-1 flex flex-row basis-full items-center  h-auto mr-2 ml-2 '}
+                    className={'rounded p-1 flex flex-row basis-full items-center truncate h-auto mr-2 ml-2 '}
                     onClick={() => {
                         notificationsEngine.askPermission();
                         setRoom(ID);
@@ -75,8 +74,8 @@ export function RoomListComponent(
                 </button>
                 {
                     /* Should display closing button?*/
-                    (room?.ID === ID && room?.ID !== 'home') ?
-                        <ClosingButton room={room.ID} /> :
+                    (ID !== 'home') ?
+                        <ClosingButton room={ID} current={ID === room?.ID} /> :
                         ''
                 }
             </div>
@@ -84,11 +83,11 @@ export function RoomListComponent(
     );
 }
 
-function ClosingButton({ room }: Readonly<{ room: string }>) {
+function ClosingButton({ room, current }: Readonly<{ room: string, current: boolean }>) {
     const { client } = useClientContext();
     return (
         <button className="p-1" onClick={() => client.leaveRoom(room)}>
-            <AiOutlineClose className='hover:text-red-600' opacity={0.4} />
+            <AiOutlineClose className='hover:text-red-600 hover:opacity-100' opacity={current ? 0.8 : 0.2} />
         </button>
     );
 }
