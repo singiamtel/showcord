@@ -872,6 +872,7 @@ export class Client {
                         this.events.dispatchEvent(
                             new CustomEvent('error', { detail: args[2] }),
                         );
+                        this._removeRoom(roomID);
                         break;
                     default:
                         // assertNever(reason);
@@ -1280,7 +1281,7 @@ export class Client {
                 this.tryLogin();
             }
             const savedRooms = client.settings.rooms;
-            this.autojoin(savedRooms.map((e) => e.ID), true);
+            this.autojoin(savedRooms.filter((e) => e.open).map((e) => e.ID), true);
         };
 
         this.socket.onmessage = (event) => {
