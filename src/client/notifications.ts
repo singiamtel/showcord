@@ -1,4 +1,4 @@
-import { toast } from 'react-toastify';
+import { toast } from '@/components/ui/use-toast';
 
 export type RoomNotification = {
     room: string;
@@ -38,10 +38,14 @@ class NotificationsEngine {
             notification.user = notification.user.trim();
             if (selectedRoom !== notification.room) {
                 // Toasts don't have a title so we merge everything into the message
-                const message = notification.roomType === 'pm' ?
-                    `PM from ${notification.user}: ${notification.message}` :
-                    `${notification.room} - ${notification.user}: ${notification.message}`;
-                toast(limitString(message, 150)); //TODO: Move to UI
+                // const message = notification.roomType === 'pm' ?
+                //     `PM from ${notification.user}: ${notification.message}` :
+                //     `${notification.room} - ${notification.user}: ${notification.message}`;
+                // toast(limitString(message, 150)); //TODO: Move to UI
+                toast({
+                    title: 'PM from ' + notification.user,
+                    description: limitString(notification.message, 150),
+                });
             }
         } else {
             if (this.permission !== 'granted') return;

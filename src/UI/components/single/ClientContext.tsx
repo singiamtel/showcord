@@ -5,8 +5,7 @@ import { notificationsEngine, RoomNotification } from '../../../client/notificat
 import { Room } from '../../../client/room/room';
 import { loadCustomColors } from '../../../utils/namecolour';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
-
-import { toast } from 'react-toastify';
+import { toast } from '@/components/ui/use-toast';
 
 interface ClientContextType {
     client: Client;
@@ -71,7 +70,11 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
         const error = (e as CustomEvent).detail;
         console.warn('Received error from socket', error);
         if (error) {
-            toast.error(error);
+            toast({
+                variant: 'destructive',
+                title: 'Error',
+                description: error,
+            });
         }
     };
 

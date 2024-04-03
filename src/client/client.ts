@@ -108,6 +108,7 @@ export class Client {
     constructor(options?: ClientConstructor) {
         // if running test suite, don't do anything
         if (import.meta.env.VITEST) {
+            console.log('Running tests, skipping client initialization');
             return;
         }
         try {
@@ -115,6 +116,7 @@ export class Client {
             this.__createPermanentRooms();
             this.socket = new WebSocket(this.settings.serverURL);
             this.__setupSocketListeners();
+            useClientStore.setState({ currentRoom: this.room('home') });
         } catch (e) {
             if (e instanceof DOMException) {
                 console.warn('DOMException: ', e);
@@ -1289,7 +1291,7 @@ export class Client {
             console.error(event);
         };
         this.socket.onclose = (_) => {
-            console.error('Socket closed');
+            console.error('Socket closed, dispatching disconnect');
             this.events.dispatchEvent(new CustomEvent('disconnect'));
         };
     }

@@ -4,7 +4,6 @@ import { StrictMode } from 'react';
 
 import '@fontsource/roboto-mono';
 import './UI/globals.css';
-import 'react-toastify/dist/ReactToastify.css';
 import ClientContextProvider from './UI/components/single/ClientContext';
 import { Analytics } from '@vercel/analytics/react';
 

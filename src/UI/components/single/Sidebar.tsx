@@ -26,7 +26,7 @@ import { useClientStore } from '@/client/client';
 
 export default function Sidebar(props: Readonly<HTMLAttributes<'div'>>) {
     const rooms = useClientStore((state) => state.rooms);
-    const roomsArray = Array.from(rooms.values());
+    const roomsArray = Array.from(rooms.values()).filter(room => room.open);
 
     const mouseSensor = useSensor(MouseSensor, {
     // Require the mouse to move by 10 pixels before activating
