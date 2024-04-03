@@ -53,7 +53,7 @@ export default function TrainerCard(
     return (
         <div
             ref={forwardRef}
-            className="fixed bg-gray-601 dark:bg-gray-600 rounded-lg p-5 w-[400px] min-h-[150px] shadow-sm shadow-black z-10"
+            className="fixed bg-gray-601 dark:bg-gray-600 rounded-lg p-5 w-[400px] min-h-[150px] shadow-sm shadow-black z-20"
             style={{
                 left: clamp(position.x, margin, window.innerWidth - 500 - margin),
                 top: clamp(position.y, margin, window.innerHeight - 300 - margin),
