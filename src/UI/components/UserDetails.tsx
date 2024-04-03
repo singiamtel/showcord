@@ -18,6 +18,7 @@ export function UserDetails(props: Readonly<HTMLAttributes<HTMLDivElement> & Use
                         Sprites.getAvatar(props.avatar) :
                         Sprites.getAvatar(167)}
                     className="w-10 h-10 m-auto scale-[1.2]"
+                    alt={`${props.user}'s avatar (${props.avatar})`}
                 />
             </div>
             <div className="flex flex-row justify-center items-center">

@@ -55,7 +55,7 @@ function RenderUserContent() {
 }
 
 export default function UserPanel() {
-    const { user, avatar } = useClientStore(state => ({ user: state.user, avatar: state.avatar }));
+    const { user } = useClientStore(state => ({ user: state.user }));
     return (
         <div className="h-26 p-3 flex items-center bg-gray-251 dark:bg-gray-600">
             <span
