@@ -15,14 +15,17 @@ const customIcons = {
 
 
 export function RoomListComponent(
-    { name, ID, notifications: { unread, mentions }, type }: Readonly<{
+    { name, ID, type }: Readonly<{
         name: string;
         ID: string;
         type: string;
-        notifications: { unread: number; mentions: number };
     }>,
 ) {
     const { setRoom } = useClientContext();
+    const notifications = useClientStore(state => state.notifications);
+    const currentNotifications = notifications[ID];
+    const unread = currentNotifications?.unread ?? 0;
+    const mentions = currentNotifications?.mentions ?? 0;
     const room = useClientStore(state => state.currentRoom);
     const customIcon = customIcons[ID as keyof typeof customIcons];
     const icon = customIcon ?? (type === 'battle' ?
@@ -48,7 +51,7 @@ export function RoomListComponent(
                 {/** Notification circle if it applies */}
                 {(unread > 0) ?
                     (
-                        <span className="rounded-full bg-white text-white text-xs p-1 h-1 w-1  absolute top-1/2  transform -translate-x-1/2 -translate-y-1/2" />
+                        <span className="rounded-full bg-gray-600 dark:bg-gray-600 text-xs p-1 h-1 w-1  absolute top-1/2  transform -translate-x-1/2 -translate-y-1/2" />
                     ) :
                     null}
                 <button

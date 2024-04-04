@@ -187,8 +187,8 @@ export function MessageComponent(
     }
     return (
         <div
-            className={'pt-0.5 ' +
-        (hld ? 'bg-yellow-hl-body-light dark:bg-yellow-hl-body' : '')}
+            className={cn('px-1',
+                (hld ? 'bg-yellow-hl-body-light dark:bg-yellow-hl-body' : ''))}
         >
             <span className="text-gray-125 text-xs">
                 {time ? HHMMSS(time) : ''}

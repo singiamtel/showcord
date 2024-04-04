@@ -33,7 +33,6 @@ function RenderUserContent() {
 
     useEffect(() => {
         const onDisconnect = () => {
-            console.log('disconnected');
             setConnected(false);
         };
         client.events.addEventListener('disconnect', onDisconnect);
@@ -42,9 +41,6 @@ function RenderUserContent() {
         };
     }, []);
 
-    useEffect(() => {
-        console.log('connected', connected);
-    }, [connected]);
     if (!connected) {
         return <Disconnected />;
     } else if (user) {

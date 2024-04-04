@@ -63,7 +63,6 @@ export class BattleRoom extends Room {
                         type: 'rawHTML',
                         name: '',
                         content: html,
-                        notify: false,
                         hld: false,
                     }),
                     { selected: true, selfSent: false },

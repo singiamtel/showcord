@@ -71,8 +71,7 @@ export class Room {
     addMessage(
         message: Message,
         { selected, selfSent }: { selected: boolean; selfSent: boolean },
-    ): boolean {
-        let shouldNotify = false;
+    ): void {
         if (this.messages.length > this.messageLimit) {
             this.messages.shift();
         }
@@ -81,26 +80,15 @@ export class Room {
             this.lastReadTime = date;
         }
         if (
-            ['chat', 'pm'].includes(message.type) && !selfSent && !selected &&
-      message.timestamp &&
-      message.timestamp >
-        new Date(this.lastReadTime.getTime() - this.lastReadTimeMargin)
+            ['chat', 'pm'].includes(message.type) &&
+            !selfSent &&
+            !selected &&
+            message.timestamp &&
+            message.timestamp > new Date(this.lastReadTime.getTime() - this.lastReadTimeMargin)
         ) {
             this.unread++;
-            if (message.hld || this.type === 'pm') {
-                this.mentions++;
-                if (!selected || !document.hasFocus()) {
-                    shouldNotify = true;
-                    // message.hld = false;
-                    // new Notification(`Private message from ${message.user}`, {
-                    //     body: message.content,
-                    //     icon: '/static/favicon.png',
-                    // });
-                }
-            }
         }
         this.messages.push(message);
-        return shouldNotify;
     }
 
     send(message: string) {
@@ -184,7 +172,7 @@ export class Room {
         user.name = name;
         user.ID = toID(name);
         user.status = status;
-        this.users = this.users.sort(this.rankSorter);
+        this.users.sort(this.rankSorter);
     }
 
     runHighlight(callback: (roomID: string, content: Message) => boolean): void {
@@ -193,5 +181,14 @@ export class Room {
                 callback(this.ID, message);
             }
         }
+    }
+
+    clearNotifications() {
+        this.unread = 0;
+        this.mentions = 0;
+    }
+
+    checkMessageStaleness(message: Message): boolean {
+        return message.timestamp ? message.timestamp < new Date(this.lastReadTime.getTime() - this.lastReadTimeMargin) : true;
     }
 }

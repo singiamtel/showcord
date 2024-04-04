@@ -1,7 +1,6 @@
 import { toast } from '@/components/ui/use-toast';
 
 export type RoomNotification = {
-    room: string;
     mentions: number;
     unread: number;
 };
@@ -26,7 +25,6 @@ class NotificationsEngine {
             Notification.requestPermission().then((permission) => {
                 this.permission = permission;
             });
-            return;
         }
     }
 
@@ -37,13 +35,11 @@ class NotificationsEngine {
         if (document.hasFocus()) {
             notification.user = notification.user.trim();
             if (selectedRoom !== notification.room) {
-                // Toasts don't have a title so we merge everything into the message
-                // const message = notification.roomType === 'pm' ?
-                //     `PM from ${notification.user}: ${notification.message}` :
-                //     `${notification.room} - ${notification.user}: ${notification.message}`;
-                // toast(limitString(message, 150)); //TODO: Move to UI
+                const title = notification.roomType === 'pm' ?
+                    `PM from ${notification.user}` :
+                    `${notification.room} - ${notification.user}`;
                 toast({
-                    title: 'PM from ' + notification.user,
+                    title,
                     description: limitString(notification.message, 150),
                 });
             }

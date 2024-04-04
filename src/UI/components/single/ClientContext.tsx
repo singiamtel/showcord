@@ -1,7 +1,6 @@
 import { assertNever } from '@/lib/utils';
 import { Client, client, useClientStore } from '../../../client/client';
 import { Message } from '../../../client/message';
-import { notificationsEngine, RoomNotification } from '../../../client/notifications';
 import { Room } from '../../../client/room/room';
 import { loadCustomColors } from '../../../utils/namecolour';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
@@ -13,14 +12,12 @@ interface ClientContextType {
     setRoom:(room: string | 1 | -1 | Room) => void;
     messages: Message[];
     setRooms: (rooms: Room[]) => void;
-    notifications: RoomNotification[];
 }
 
 const ClientContext = createContext<ClientContextType | undefined>(undefined);
 
 export default function ClientContextProvider(props: Readonly<React.PropsWithChildren>) {
     const [rooms, setRooms] = useState<Room[]>(client.getRooms());
-    const [notifications, setNotifications] = useState<RoomNotification[]>([]);
     const [update, setUpdate] = useState<number>(0); // Used to force update on rooms change
     const [previousRooms, setPreviousRooms] = useState<string[]>(['home']);
     const [messages, setMessages] = useState<Message[]>([]);
@@ -133,7 +130,6 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
             return;
         }
         const msgs = currentRoom.messages ?? [];
-        setNotifications(client.getNotifications());
         setMessages([...msgs]);
     }, [client]);
 
@@ -146,20 +142,11 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
             setUpdateMsgs(updateMsgs + 1);
         };
 
-        const notificationsEventListener: EventListener = (event) => {
-            notificationsEngine.sendNotification((event as CustomEvent).detail);
-        };
-
         client.events.addEventListener('message', eventListener);
-        client.events.addEventListener('notification', notificationsEventListener);
 
         return () => {
             // Clean up the event listener when the component unmounts
             client.events.removeEventListener('message', eventListener);
-            client.events.removeEventListener(
-                'notification',
-                notificationsEventListener,
-            );
         };
     }, [
         client,
@@ -191,8 +178,7 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
         messages,
         rooms,
         setRooms,
-        notifications,
-    }), [messages, rooms, notifications]);
+    }), [messages, rooms, setRooms]);
 
     return (
         <ClientContext.Provider

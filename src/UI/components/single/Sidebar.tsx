@@ -25,7 +25,7 @@ import { cn } from '@/lib/utils';
 import { useClientStore } from '@/client/client';
 
 export default function Sidebar(props: Readonly<HTMLAttributes<'div'>>) {
-    const rooms = useClientStore((state) => state.rooms);
+    const { rooms } = useClientStore((state) => ({ rooms: state.rooms }));
     const roomsArray = Array.from(rooms.values()).filter(room => room.open);
 
     const mouseSensor = useSensor(MouseSensor, {
@@ -84,10 +84,6 @@ export default function Sidebar(props: Readonly<HTMLAttributes<'div'>>) {
                                         name={room.name}
                                         type={room.type}
                                         ID={room.ID}
-                                        notifications={{
-                                            unread: room.unread,
-                                            mentions: room.mentions,
-                                        }}
                                     />
                                 </SortableItem>
                             ))}

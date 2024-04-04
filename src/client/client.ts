@@ -3,7 +3,7 @@ import { toID } from '../utils/generic';
 import newMessage, { Message } from './message';
 import { Room } from './room/room';
 import { User } from './user';
-import { clientNotification, RoomNotification } from './notifications';
+import { clientNotification, notificationsEngine, RoomNotification as RoomNotifications } from './notifications';
 import { Protocol } from '@pkmn/protocol';
 import { assert, assertNever } from '@/lib/utils';
 import { BattleRoom } from './room/battleRoom';
@@ -24,8 +24,10 @@ interface UseClientStoreType {
     // messages: Message[]; // only messages from the current room
     messages: Record<Room['ID'], Message[]>; // messages from all rooms
     newMessage: (room: Room, message: Message) => void;
-    notifications: RoomNotification[];
-    // setNotifications: (notifications: RoomNotification[]) => void;
+    notifications: Record<Room['ID'], RoomNotifications>;
+    clearNotifications: (roomID: Room['ID']) => void;
+    addUnread: (room: Room) => void;
+    addMention: (room: Room) => void;
     avatar: string;
     theme: 'light' | 'dark';
     user: string | undefined
@@ -42,6 +44,10 @@ export const useClientStore = create<UseClientStoreType>((set) => ({
     messages: {},
     newMessage: (room: Room, message: Message) => {
         set((state) => {
+            if (room !== state.currentRoom) {
+                state.addUnread(room);
+            }
+
             if (!state.messages[room.ID]) {
                 return {
                     messages: { ...state.messages, [room.ID]: [message] },
@@ -52,10 +58,48 @@ export const useClientStore = create<UseClientStoreType>((set) => ({
             };
         });
     },
-    notifications: [],
+    notifications: {},
+    addUnread: (room: Room) => {
+        set((state) => {
+            if (!state.notifications[room.ID]) {
+                return {
+                    notifications: { ...state.notifications, [room.ID]: { unread: 1, mentions: 0 } },
+                };
+            }
+            return {
+                notifications: { ...state.notifications, [room.ID]: { unread: state.notifications[room.ID].unread + 1, mentions: state.notifications[room.ID].mentions } },
+            };
+        });
+    },
+    addMention: (room: Room) => {
+        set((state) => {
+            if (!state.notifications[room.ID]) {
+                return {
+                    notifications: { ...state.notifications, [room.ID]: { unread: 0, mentions: 1 } },
+                };
+            }
+            return {
+                notifications: { ...state.notifications, [room.ID]: { unread: state.notifications[room.ID].unread, mentions: state.notifications[room.ID].mentions + 1 } },
+            };
+        });
+    },
+    clearNotifications: (roomID: string) => {
+        set((state) => {
+            if (!state.notifications[roomID]) {
+                return {
+                    notifications: { ...state.notifications, [roomID]: { unread: 0, mentions: 0 } },
+                };
+            }
+            return {
+                notifications: { ...state.notifications, [roomID]: { unread: 0, mentions: 0 } },
+            };
+        });
+    },
+
     avatar: 'lucas',
     theme: localStorage.getItem('theme') as 'light' | 'dark' ?? 'dark',
     user: undefined,
+
 }));
 
 
@@ -108,7 +152,7 @@ export class Client {
     constructor(options?: ClientConstructor) {
         // if running test suite, don't do anything
         if (import.meta.env.VITEST) {
-            console.log('Running tests, skipping client initialization');
+            console.debug('Running tests, skipping client initialization');
             return;
         }
         try {
@@ -211,8 +255,9 @@ export class Client {
     selectRoom(roomid: string) {
         this.__selectedRoom = roomid;
         this.room(roomid)?.select();
-        this.settings.changeRooms(this.rooms);
+        // this.settings.changeRooms(this.rooms);
         useClientStore.setState({ currentRoom: this.room(roomid) });
+        useClientStore.getState().clearNotifications(roomid);
     }
 
     async queryUser(user: string, callback: (json: any) => void) {
@@ -330,16 +375,29 @@ export class Client {
         return highlight;
     }
 
+    private shouldNotify(room: Room, message: Message) {
+        if (this.selectedRoom == room.ID && document.hasFocus()) return false;
+        if (room.checkMessageStaleness(message)) return false;
+        if (message.hld || room.type === 'pm') return true;
+        return false;
+    }
+
     private forceHighlightMsg(roomid: string, message: Message) {
         return this.highlightMsg(roomid, message, true);
     }
 
-    getNotifications(): RoomNotification[] {
-        return Array.from(this.rooms).map(([_, room]) => ({
-            room: room.ID,
-            mentions: room.mentions,
-            unread: room.unread,
-        }));
+    getNotifications(): Map<string, RoomNotifications> {
+        return new Map(
+            [...this.rooms].map(([roomID, room]) => [roomID, { unread: room.unread, mentions: room.mentions }]),
+        );
+    }
+
+    clearNotifications(roomID: string) {
+        const room = this.room(roomID);
+        if (room) {
+            room.clearNotifications();
+            useClientStore.getState().clearNotifications(roomID);
+        }
     }
 
     openSettings() {
@@ -509,7 +567,9 @@ export class Client {
     private _addRoom(room: Room) {
         this.rooms.set(room.ID, room);
         useClientStore.setState({ rooms: new Map(this.rooms) });
-        this.selectRoom(room.ID);
+        if (!this.settings.rooms.find((r) => r.ID === room.ID)?.open) {
+            this.selectRoom(room.ID);
+        }
         if (room.type !== 'permanent' && !this.settings.rooms.find((r) => r.ID === room.ID)) {
             this.settings.addRoom(room);
         }
@@ -544,6 +604,7 @@ export class Client {
         message: Message,
     ) {
         const room = this.room(roomID);
+        this.highlightMsg(roomID, message);
         if (!room) {
             console.warn('addMessageToRoom: room (' + roomID + ') is unknown. Message:', message);
             return;
@@ -552,24 +613,21 @@ export class Client {
             selected: this.selectedRoom === roomID,
             selfSent: toID(this.settings.username) === toID(message.user),
         };
-        let shouldNotify = false;
         if (message.name) {
             room.addUHTML(message, settings);
         } else {
-            shouldNotify = room.addMessage(message, settings);
+            room.addMessage(message, settings);
         }
         useClientStore.getState().newMessage(room, message);
-        if (shouldNotify) {
-            this.events.dispatchEvent(
-                new CustomEvent('notification', {
-                    detail: {
-                        user: message.user,
-                        message: message.content,
-                        room: roomID,
-                        roomType: room.type,
-                    } as clientNotification,
-                }),
-            );
+
+        if (this.shouldNotify(room, message)) {
+            notificationsEngine.sendNotification({
+                user: message.user ?? '',
+                message: message.content,
+                room: roomID,
+                roomType: room.type,
+            });
+            useClientStore.getState().addMention(room);
         }
     }
 

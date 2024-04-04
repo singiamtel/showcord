@@ -198,8 +198,11 @@ export class Settings {
 
     changeRooms(rooms: Map<string, Room>) {
     // Used to remember which rooms were open when the user logs out
-        // this.rooms = Array.from(rooms).map((e) => e[1]).filter((e) =>
-        //     e.type === 'chat');
+        this.rooms = Array.from(rooms).filter((e) => e[1].type === 'chat').map((e) => ({
+            ID: e[1].ID,
+            lastReadTime: e[1].lastReadTime,
+            open: e[1].open,
+        }));
         this.saveSettings();
     }
 
