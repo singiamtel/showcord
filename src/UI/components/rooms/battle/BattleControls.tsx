@@ -29,7 +29,9 @@ export default function BattleControls(props: Readonly<HTMLAttributes<HTMLDivEle
         return <div>Loading...</div>;
     }
 
-    switch (req.requestType) {
+    const requestType = req.requestType;
+    if (!requestType) { return <WaitRequest req={req} battle={battle} />; }
+    switch (requestType) {
         case 'move':
             return <MoveRequest req={req} battle={battle} />;
         case 'switch':
@@ -39,7 +41,7 @@ export default function BattleControls(props: Readonly<HTMLAttributes<HTMLDivEle
         case 'wait':
             return <WaitRequest req={req} battle={battle} />;
         default:
-            assertNever(req);
+            assertNever(requestType, 'Unexpected request type: ' + requestType);
             return null;
     }
 }

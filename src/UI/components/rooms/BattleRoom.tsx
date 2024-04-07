@@ -10,6 +10,8 @@ import { cn } from '@/lib/utils';
 import BattleWindow from './battle/Battle';
 import BattleControls from './battle/BattleControls';
 import Calcs from './battle/Calcs';
+import { ErrorBoundary } from 'react-error-boundary';
+import { ErrorHandler } from '../ErrorHandler';
 
 export default function BattleRoom(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const [userListOpen, setUserListOpen] = useState(false);
@@ -23,9 +25,14 @@ export default function BattleRoom(props: Readonly<HTMLAttributes<HTMLDivElement
             )}
         >
             <div className="flex flex-col w-3/4 justify-center items-center gap-8 p-8">
-                <BattleWindow/>
+                <ErrorBoundary FallbackComponent={ErrorHandler}>
+                    <BattleWindow/>
+                </ErrorBoundary>
                 <div className="flex flex-col w-full h-full justify-center items-center bg-gray-125">
-                    <BattleControls/>
+
+                    <ErrorBoundary FallbackComponent={ErrorHandler}>
+                        <BattleControls/>
+                    </ErrorBoundary>
                 </div>
                 <Calcs/>
             </div>

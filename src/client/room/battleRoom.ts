@@ -28,7 +28,9 @@ export class BattleRoom extends Room {
     }
 
     setFormatter(perspective: SideID) {
-        assert(!this.formatter, 'Trying to create formatter twice');
+        if (this.formatter) {
+            return;
+        }
         this.perspective = perspective;
         this.formatter = new LogFormatter(perspective, this.battle);
     }
