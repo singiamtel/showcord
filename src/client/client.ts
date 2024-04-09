@@ -3,7 +3,7 @@ import { toID } from '../utils/generic';
 import newMessage, { Message } from './message';
 import { Room } from './room/room';
 import { User } from './user';
-import { clientNotification, notificationsEngine, RoomNotification as RoomNotifications } from './notifications';
+import { notificationsEngine, RoomNotification as RoomNotifications } from './notifications';
 import { Protocol } from '@pkmn/protocol';
 import { assert, assertNever } from '@/lib/utils';
 import { BattleRoom } from './room/battleRoom';
@@ -84,6 +84,7 @@ export const useClientStore = create<UseClientStoreType>((set) => ({
         });
     },
     clearNotifications: (roomID: string) => {
+        if (!roomID) return;
         set((state) => {
             if (!state.notifications[roomID]) {
                 return {
@@ -160,7 +161,8 @@ export class Client {
             this.__createPermanentRooms();
             this.socket = new WebSocket(this.settings.serverURL);
             this.__setupSocketListeners();
-            useClientStore.setState({ currentRoom: this.room('home') });
+            this.selectRoom('home');
+            window.addEventListener('focus', this.notificationsListener.bind(this));
         } catch (e) {
             if (e instanceof DOMException) {
                 console.warn('DOMException: ', e);
@@ -171,6 +173,11 @@ export class Client {
             console.error(e);
         }
     }
+
+    notificationsListener(e: FocusEvent) {
+        useClientStore.getState().clearNotifications(this.selectedRoom);
+    }
+
 
     async send(message: string, room: string | false) {
         if (room) {
@@ -370,6 +377,10 @@ export class Client {
 
     private highlightMsg(roomid: string, message: Message, force = false) {
         if (message.hld !== null && !force) return message.hld;
+        if (toID(message.user) === (this.settings.username)) {
+            message.hld = false;
+            return false;
+        }
         const highlight = this.settings.highlightMsg(roomid, message.content);
         message.hld = highlight;
         return highlight;
@@ -378,7 +389,7 @@ export class Client {
     private shouldNotify(room: Room, message: Message) {
         if (this.selectedRoom == room.ID && document.hasFocus()) return false;
         if (room.checkMessageStaleness(message)) return false;
-        if (message.hld || room.type === 'pm') return true;
+        if (message.hld || (room.type === 'pm' && toID(message.user) !== toID(this.settings.username))) return true;
         return false;
     }
 
@@ -619,6 +630,7 @@ export class Client {
             room.addMessage(message, settings);
         }
         useClientStore.getState().newMessage(room, message);
+        console.debug('message', message);
 
         if (this.shouldNotify(room, message)) {
             notificationsEngine.sendNotification({
