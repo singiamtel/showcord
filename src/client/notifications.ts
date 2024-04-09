@@ -1,4 +1,7 @@
+import { ToastAction } from '@/components/ui/toast';
 import { toast } from '@/components/ui/use-toast';
+import { createElement } from 'react';
+import { client } from './client';
 
 export type RoomNotification = {
     mentions: number;
@@ -41,6 +44,10 @@ class NotificationsEngine {
                 toast({
                     title,
                     description: limitString(notification.message, 150),
+                    // action: <ToastAction altText="Try again">Try again</ToastAction>,
+                    action: createElement(ToastAction, { altText: 'View', onClick: () => {
+                        client.selectRoom(notification.room);
+                    } }, 'View') as any,
                 });
             }
         } else {
