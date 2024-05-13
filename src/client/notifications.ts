@@ -53,7 +53,7 @@ class NotificationsEngine {
         } else {
             if (this.permission !== 'granted') return;
             const title = notification.roomType === 'pm' ?
-                `PM from ${notification.user}` :
+                `PM from ${notification.user.trim()}` :
                 `${notification.room} - ${notification.user}`;
             const body = notification.message;
             const icon = '';
