@@ -42,7 +42,7 @@ export default function UserList(props: Readonly<HTMLAttributes<HTMLDivElement> 
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
             />}
-            {staff.length > 0 && <h2 className="text-sm font-bold text-gray-500 dark:text-gray-175 mb-2">Staff</h2>}
+            {staff.length > 0 && <h2 className="text-sm font-bold text-gray-500 dark:text-gray-175">Staff</h2>}
             {staff.map((user, index) => (
                 <div key={index}>
                     <Username
@@ -56,7 +56,7 @@ export default function UserList(props: Readonly<HTMLAttributes<HTMLDivElement> 
             {
                 staff.length > 0 && regular.length > 0 && <hr className="my-2" />
             }
-            {regular.length > 0 && <h2 className="text-sm font-bold text-gray-500 dark:text-gray-175 mb-2">Users</h2>}
+            {regular.length > 0 && <h2 className="text-sm font-bold text-gray-500 dark:text-gray-175">Users</h2>}
             {regular.map((user, index) => (
                 <div key={index}>
                     <Username
