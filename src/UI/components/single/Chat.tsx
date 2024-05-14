@@ -198,7 +198,7 @@ export function MessageComponent(
                 {type === 'roleplay' ?
                     (
                         <>
-                            <span style={{ backgroundColor: userColor(user), width:".35em", height:".35em", verticalAlign:"middle" }} className='mr-1 align-center inline-block rounded-full m-auto'>
+                            <span style={{ backgroundColor: userColor(user), width: '.35em', height: '.35em', verticalAlign: 'middle' }} className='mr-1 align-center inline-block rounded-full m-auto'>
                             </span>
                             <Username
                                 user={user}
