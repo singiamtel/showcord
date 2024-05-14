@@ -52,7 +52,7 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     return (
         <div
             className={cn(
-                'p-5 flex flex-col overflow-auto overflow-x-hidden break-words overflow-y-scroll h-full relative',
+                'p-8 flex flex-col overflow-auto overflow-x-hidden break-words overflow-y-scroll h-full relative',
                 props.className,
             )}
             ref={ref}
@@ -198,9 +198,8 @@ export function MessageComponent(
                 {type === 'roleplay' ?
                     (
                         <>
-                            <strong style={{ color: userColor(user) }}>
-                ●
-                            </strong>{' '}
+                            <span style={{ backgroundColor: userColor(user), width:".35em", height:".35em", verticalAlign:"middle" }} className='mr-1 align-center inline-block rounded-full m-auto'>
+                            </span>
                             <Username
                                 user={user}
                                 colorless
