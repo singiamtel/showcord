@@ -1224,6 +1224,7 @@ export class Client {
             case 'tempnotify':
             case 'tempnotifyoff':
             case 'hidelines' :
+            case 'custom' :
                 break;
             default:
             {
