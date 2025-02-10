@@ -58,14 +58,15 @@ export class Room {
     }
 
     endChallenge() {
-        const challengeMessage = this.messages.find((m) => m.type === 'challenge');
+        const challengeMessage = this.messages.find((m) => m.type === 'challenge' && !m.cancelled);
         if (!challengeMessage) {
             console.error(
                 `endChallenge(): Tried to end non-existent challenge message for room ${this.name}`,
             );
             return;
         }
-        this.messages.splice(this.messages.indexOf(challengeMessage), 1);
+        // this.messages.splice(this.messages.indexOf(challengeMessage), 1);
+        challengeMessage.cancelled = true;
     }
 
     addMessage(

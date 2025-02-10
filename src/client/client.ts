@@ -24,6 +24,7 @@ interface UseClientStoreType {
     // messages: Message[]; // only messages from the current room
     messages: Record<Room['ID'], Message[]>; // messages from all rooms
     newMessage: (room: Room, message: Message) => void;
+    updateMessages: (room: Room) => void;
     notifications: Record<Room['ID'], RoomNotifications>;
     clearNotifications: (roomID: Room['ID']) => void;
     addUnread: (room: Room) => void;
@@ -57,6 +58,12 @@ export const useClientStore = create<UseClientStoreType>((set) => ({
                 messages: { ...state.messages, [room.ID]: [...state.messages[room.ID], message] },
             };
         });
+    },
+    updateMessages: (room: Room) => {
+        // copy all messages from changed room
+        set((state) => ({
+            messages: { ...state.messages, [room.ID]: [...room.messages] },
+        }));
     },
     notifications: {},
     addUnread: (room: Room) => {
@@ -839,9 +846,7 @@ export class Client {
                             const room = this.requiresRoom('pm', inferredRoomid);
                             if (!room) return false;
                             room.endChallenge();
-                            this.events.dispatchEvent(
-                                new CustomEvent('message', { detail: { room: inferredRoomid, end: true } }),
-                            );
+                            useClientStore.getState().updateMessages(room);
                         } else {
                             // start challenge
                             this.addMessageToRoom(
@@ -1330,6 +1335,10 @@ export class Client {
             case '/challenge':
                 type = 'challenge';
                 content = content.slice(11);
+                break;
+            case '/nonotify':
+                type = 'log';
+                content = content.slice(9);
                 break;
             default:
                 break;

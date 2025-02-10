@@ -73,6 +73,7 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
                         type={message.type}
                         hld={message.hld}
                         prev={arr[index - 1]}
+                        cancelled={message.cancelled}
                     />
                 </ErrorBoundary>
             )) : null}
@@ -100,44 +101,80 @@ const options = {
 } as const;
 
 export function ChallengeMessage(
-    { message, user }: Readonly<{
+    { message, user, cancelled }: Readonly<{
         message: string;
         user: string;
+        cancelled?: boolean;
     }>,
 ) {
     const { client } = useClientContext();
     const currentRoom = useClientStore(state => state.currentRoom);
+
 
     function acceptChallenge() {
         assert(currentRoom, 'currentRoom');
         client.send('/accept', currentRoom.ID);
     }
 
+    function cancelChallenge() {
+        assert(currentRoom, 'currentRoom');
+        client.send('/reject', currentRoom.ID);
+    }
+
     const formatID = message.split('|')[0];
     const format = client.formatName(formatID) || { gen: 9, name: `Unknown(${formatID})` };
+    if (cancelled) {
+        return (
+            <div className="p-2 bg-gray-100 rounded-md flex flex-col justify-center items-center">
+                Challenge from <Username user={user} bold /> was cancelled
+            </div>
+        );
+    }
     return (
         <div className="p-2 bg-blue-pastel rounded-md flex flex-col justify-center items-center">
-                You received a challenge from <Username user={user} bold />
-            <strong>
-                <span className='text-sm text-gray-125'>[Gen {format.gen}]</span> {format.name}
-            </strong>
-            <Button
-                onClick={() => {
-                    acceptChallenge();
-                }}
-            >Accept</Button>
+            { user === client.username ? (
+                <>
+                    <div>Waiting for opponent to accept challenge</div>
+                    <strong>
+                        <span className='text-sm text-gray-125'>[Gen {format.gen}]</span> {format.name}
+                    </strong>
+                </>
+            ) :
+                <>
+                    <div>You received a challenge from <Username user={user} bold /></div>
+                    <strong>
+                        <span className='text-sm text-gray-125'>[Gen {format.gen}]</span> {format.name}
+                    </strong>
+                    <div className="flex justify-center items-center gap-4">
+                        <Button
+                            variant="secondary"
+                            onClick={() => {
+                                acceptChallenge();
+                            }}
+                        >Accept</Button>
+
+                        <Button
+                            variant="secondary"
+                            onClick={() => {
+                                cancelChallenge();
+                            }}
+                        >Decline</Button>
+                    </div>
+                </>
+            }
         </div>
     );
 }
 
 export function MessageComponent(
-    { message, user, type, time, hld, prev }: Readonly<{
+    { message, user, type, time, hld, prev, cancelled }: Readonly<{
         message: string;
         user: string;
         type: MessageType;
         time?: Date;
         hld?: boolean | null;
         prev?: Message;
+        cancelled?: boolean;
     }>,
 ) {
     if (type === 'boxedHTML') {
@@ -171,7 +208,7 @@ export function MessageComponent(
         );
     }
     if (type === 'challenge') {
-        return <ChallengeMessage message={message} user={user} />;
+        return <ChallengeMessage message={message} user={user} cancelled={cancelled} />;
     }
     if (type === 'log') {
         return (

@@ -20,6 +20,7 @@ export type Message = {
     /** true if message is highlighted, false if not, null if not parsed yet */
     hld: boolean | null
     name?: string; // only defined for uhtml messages
+    cancelled?: boolean; // only defined for challenge messages
 };
 
 export default function ({
