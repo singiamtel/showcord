@@ -67,7 +67,7 @@ function News({ className }: Readonly<{ className?: string }>) {
             )}
         >
             <h2 className="font-bold text-xl text-center mt-2">
-        Latest News
+        Latest news
             </h2>
             {news?.slice(0, -1).map((n, idx) => (
                 <NewsCard key={idx} news={n} last={idx === news.length - 2} />
