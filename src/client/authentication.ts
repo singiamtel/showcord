@@ -14,6 +14,7 @@ export class AuthenticationManager {
     private client_id = import.meta.env.VITE_OAUTH_CLIENTID;
     private shouldAutoLogin: boolean = true;
     private loggedIn: boolean = false;
+    private hasManuallyLoggedOut: boolean = false;
 
     constructor(
         private settings: Settings,
@@ -33,6 +34,9 @@ export class AuthenticationManager {
     }
 
     async login(): Promise<void> {
+        // Reset manual logout flag when user explicitly logs in
+        this.hasManuallyLoggedOut = false;
+
         // Wait for challstr
         while (!this.challstr) {
             await new Promise((resolve) => setTimeout(resolve, 100));
@@ -75,6 +79,11 @@ export class AuthenticationManager {
     }
 
     async tryLogin(): Promise<void> {
+        // Don't auto-login if user has manually logged out
+        if (this.hasManuallyLoggedOut) {
+            return;
+        }
+
         while (!this.challstr) {
             await new Promise((resolve) => setTimeout(resolve, 500));
         }
@@ -122,6 +131,8 @@ export class AuthenticationManager {
         try {
             this.callbacks.sendMessage(message);
             this.loggedIn = true;
+            // Reset manual logout flag on successful login
+            this.hasManuallyLoggedOut = false;
             this.callbacks.setUsername(finalUsername);
             this.callbacks.onLoginSuccess?.();
         } catch (error) {
@@ -190,6 +201,7 @@ export class AuthenticationManager {
 
     logout(): void {
         this.loggedIn = false;
+        this.hasManuallyLoggedOut = true;
         this.settings.logout();
         localStorage.removeItem('ps-token');
     }
