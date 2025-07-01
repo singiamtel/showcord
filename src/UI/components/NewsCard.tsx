@@ -18,7 +18,7 @@ export default function NewsCard(
                 {news.title}
             </h2>
             <span className="ml-2 mb-2 block">
-                <span className="text-gray-125">
+                <span className="text-gray-125 mb-4">
                     {/* The date comes in as a unix timestamp, so we need to convert it to a date */}
                     {/* FIXME: This gives different dates than the official client. (can't tell if it's us doing it wrong) */}
                     {news.author} on {new Date(news.date * 1000).toLocaleDateString('en-US', {
