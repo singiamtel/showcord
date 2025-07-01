@@ -8,6 +8,7 @@ import { Protocol } from '@pkmn/protocol';
 import { assert, assertNever } from '@/lib/utils';
 import { BattleRoom } from './room/battleRoom';
 import formatParser, { Formats } from './formatParser';
+import { AuthenticationManager } from './authentication';
 
 import { create } from 'zustand';
 
@@ -113,6 +114,7 @@ export const useClientStore = create<UseClientStoreType>((set) => ({
 
 export class Client {
     readonly settings: Settings = new Settings();
+    private authManager: AuthenticationManager;
     static readonly permanentRooms = [{
         ID: 'home',
         name: 'Home',
@@ -127,7 +129,6 @@ export class Client {
     private rooms: Map<string, Room> = new Map();
     events: EventTarget = new EventTarget();
     private loggedIn: boolean = false;
-    private shouldAutoLogin: boolean = true;
     private onOpen: (() => void)[] = []; // Append callbacks here to run when the socket opens
 
     get username() {
@@ -136,7 +137,6 @@ export class Client {
 
     private joinAfterLogin: string[] = [];
     private challstr: string = '';
-    private client_id = import.meta.env.VITE_OAUTH_CLIENTID;
     // private selectedRoom: string = ''; // Used for notifications
     private __selectedRoom = '';
     get selectedRoom() {
@@ -158,13 +158,19 @@ export class Client {
     }
 
     constructor(options?: ClientConstructor) {
+        // Initialize authentication manager
+        this.authManager = new AuthenticationManager(this.settings);
+        this.authManager.setSendAssertionCallback(this.send_assertion.bind(this));
+
         // if running test suite, don't do anything
         if (import.meta.env.VITEST) {
             console.debug('Running tests, skipping client initialization');
             return;
         }
         try {
-            if (options?.autoLogin) this.shouldAutoLogin = options.autoLogin;
+            if (options?.autoLogin !== undefined) {
+                this.authManager.setShouldAutoLogin(options.autoLogin);
+            }
             this.__createPermanentRooms();
             this.socket = new WebSocket(this.settings.serverURL);
             this.__setupSocketListeners();
@@ -427,95 +433,15 @@ export class Client {
     // --- Login ---
 
     logout() {
-        this.settings.logout();
+        this.authManager.logout();
     }
 
     async login() {
-        // Order of login methods:
-        // 1. Assertion in URL (from oauth login)
-        // - This happens right after oauth login
-        // - We also need to store the token in localstorage
-        //
-        // 2. Assertion from token
-        // - This happens when we have a token stored in localstorage
-        // - We try to get an assertion from the token, and send it to the server
-        // - If it fails we drop the token and go to #3
-        //
-        // 3. Normal login
-        // Redirect to oauth login page
-        while (!this.challstr) {
-            await new Promise((resolve) => setTimeout(resolve, 100));
-        }
-        // Oauth login method
-        const url =
-            `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${this.client_id}&challenge=${this.challstr}`;
-        const nWindow = (window as any).n = open(
-            url,
-            undefined,
-            'popup=1,width=700,height=700',
-        );
-        const checkIfUpdated = async () => {
-            try {
-                if (nWindow?.location.host === location.host) {
-                    const url = new URL(nWindow.location.href);
-                    const assertion = url.searchParams.get('assertion');
-                    if (assertion) {
-                        this.send_assertion(assertion);
-                    }
-                    const token = url.searchParams.get('token');
-                    if (token) {
-                        localStorage.setItem(
-                            'ps-token',
-                            url.searchParams.get('token') ?? 'notoken',
-                        );
-                    }
-                    nWindow.close();
-                } else {
-                    setTimeout(checkIfUpdated, 500);
-                }
-            } catch (e) {
-                // DomException means that the window wasn't redirected yet
-                // so we just wait a bit more
-                if (e instanceof DOMException) {
-                    setTimeout(checkIfUpdated, 500);
-                    return;
-                }
-                throw e;
-            }
-        };
-        setTimeout(checkIfUpdated, 1000);
+        return this.authManager.login();
     }
 
     private async tryLogin() {
-        while (!this.challstr) {
-            await new Promise((resolve) => setTimeout(resolve, 500));
-        }
-        const urlParams = new URLSearchParams(window.location.search);
-        let assertion = urlParams.get('assertion');
-        if (assertion && assertion !== 'undefined') {
-            await this.send_assertion(assertion);
-            const token = urlParams.get('token');
-            if (token) {
-                localStorage.setItem('ps-token', token);
-            }
-        } else if (
-            (assertion = await this.assertionFromToken(this.challstr) || null)
-        ) {
-            await this.send_assertion(assertion);
-            return;
-        } else {
-            const token = localStorage.getItem('ps-token');
-            if (token && token !== 'undefined') {
-                if (!await this.refreshToken()) {
-                    console.error('Couldn\'t refresh token');
-                    return;
-                }
-                const assertion = await this.assertionFromToken(this.challstr);
-                if (assertion) {
-                    await this.send_assertion(assertion);
-                }
-            }
-        }
+        return this.authManager.tryLogin();
     }
 
     private async send_assertion(assertion: string) {
@@ -529,57 +455,7 @@ export class Client {
         );
     }
 
-    private async parseLoginserverResponse(
-        response: Response,
-    ): Promise<string | false> {
-        // Loginserver responses are just weird
-        const response_test = await response.text();
-        if (response_test.startsWith(';')) {
-            console.error('AssertionError: Received ; from loginserver');
-            return false;
-        }
-        try {
-            const response_json = JSON.parse(response_test.slice(1));
-            if (response_json.success === false) {
-                console.error(`Couldn't login`, response_json);
-                return false;
-            } else if (response_json.success) {
-                return response_json.success;
-            }
-        } catch (e) {
-            // pass
-        }
-        return response_test;
-    }
 
-    private async assertionFromToken(challstr: string): Promise<string | false> {
-        const token = localStorage.getItem('ps-token');
-        if (!token || token === 'undefined') {
-            return false;
-        }
-        const response = await fetch(
-            `${this.settings.loginServerURL}oauth/api/getassertion?challenge=${challstr}&token=${token}&client_id=${this.client_id}`,
-        );
-        return await this.parseLoginserverResponse(response);
-    }
-
-    private async refreshToken() {
-        const token = localStorage.getItem('ps-token');
-        if (!token || token === 'undefined') {
-            return false;
-        }
-        try {
-            const response = await fetch(
-                `${this.settings.loginServerURL}oauth/api/refreshtoken?token=${token}&client_id=${this.client_id}`,
-            );
-            const result = await this.parseLoginserverResponse(response);
-            if (result) localStorage.setItem('ps-token', result);
-            return result;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
-    }
 
     // --- Room management ---
     private _addRoom(room: Room) {
@@ -727,6 +603,7 @@ export class Client {
         switch (args[0]) {
         case 'challstr': {
             this.challstr = args[1];
+            this.authManager.setChallstr(args[1]);
             break;
         }
         case 'init': {
@@ -1357,9 +1234,7 @@ export class Client {
             for (const cb of this.onOpen) {
                 cb();
             }
-            if (this.shouldAutoLogin) {
-                this.tryLogin();
-            }
+            this.tryLogin();
             const savedRooms = client.settings.rooms;
             this.autojoin(savedRooms.filter((e) => e.open).map((e) => e.ID), true);
         };
