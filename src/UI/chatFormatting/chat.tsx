@@ -1,9 +1,8 @@
 import Linkify from 'linkify-react';
-import { Fragment, HTMLAttributes, useState } from 'react';
+import { HTMLAttributes, useState } from 'react';
 import manageURL from '../../utils/manageURL';
 import innerText from 'react-innertext';
 import { twMerge } from 'tailwind-merge';
-import { assertNever } from '@/lib/utils';
 
 // ``code here`` marks inline code
 // ||text|| are spoilers

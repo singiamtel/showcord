@@ -8,7 +8,7 @@ import { SwitchRequest } from './requests/SwitchRequest';
 import { useClientStore } from '@/client/client';
 import { BattleRoom } from '@/client/room/battleRoom';
 
-export default function BattleControls(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
+export default function BattleControls(_props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const { client } = useClientContext();
     const battle = useClientStore(state => state.currentRoom) as BattleRoom;
     assert(battle?.type === 'battle', 'Trying to render BattleWindow in a room that is not a BattleRoom');
@@ -32,17 +32,17 @@ export default function BattleControls(props: Readonly<HTMLAttributes<HTMLDivEle
     const requestType = req.requestType;
     if (!requestType) { return <WaitRequest req={req} battle={battle} />; }
     switch (requestType) {
-        case 'move':
-            return <MoveRequest req={req} battle={battle} />;
-        case 'switch':
-            return <SwitchRequest req={req} battle={battle} />;
-        case 'team':
-            return <TeamRequest req={req} battle={battle} />;
-        case 'wait':
-            return <WaitRequest req={req} battle={battle} />;
-        default:
-            assertNever(requestType, 'Unexpected request type: ' + requestType);
-            return null;
+    case 'move':
+        return <MoveRequest req={req} battle={battle} />;
+    case 'switch':
+        return <SwitchRequest req={req} battle={battle} />;
+    case 'team':
+        return <TeamRequest req={req} battle={battle} />;
+    case 'wait':
+        return <WaitRequest req={req} battle={battle} />;
+    default:
+        assertNever(requestType, 'Unexpected request type: ' + requestType);
+        return null;
     }
 }
 

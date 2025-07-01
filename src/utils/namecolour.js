@@ -256,41 +256,41 @@ function __userColorHash(name) {
 
         var R1, G1, B1;
         switch (Math.floor(H / 60)) {
-            case 1:
-                R1 = X;
-                G1 = C;
-                B1 = 0;
-                break;
-            case 2:
-                R1 = 0;
-                G1 = C;
-                B1 = X;
-                break;
-            case 3:
-                R1 = 0;
-                G1 = X;
-                B1 = C;
-                break;
-            case 4:
-                R1 = X;
-                G1 = 0;
-                B1 = C;
-                break;
-            case 5:
-                R1 = C;
-                G1 = 0;
-                B1 = X;
-                break;
-            case 0:
-                R1 = C;
-                G1 = X;
-                B1 = 0;
-                break;
-            default:
-                R1 = C;
-                G1 = X;
-                B1 = 0;
-                break;
+        case 1:
+            R1 = X;
+            G1 = C;
+            B1 = 0;
+            break;
+        case 2:
+            R1 = 0;
+            G1 = C;
+            B1 = X;
+            break;
+        case 3:
+            R1 = 0;
+            G1 = X;
+            B1 = C;
+            break;
+        case 4:
+            R1 = X;
+            G1 = 0;
+            B1 = C;
+            break;
+        case 5:
+            R1 = C;
+            G1 = 0;
+            B1 = X;
+            break;
+        case 0:
+            R1 = C;
+            G1 = X;
+            B1 = 0;
+            break;
+        default:
+            R1 = C;
+            G1 = X;
+            B1 = 0;
+            break;
         }
         var R = R1 + m,
             G = G1 + m,
@@ -330,7 +330,7 @@ function __userColorHash(name) {
 export let loadedCustomColors = false;
 // From https://play.pokemonshowdown.com/config/config.js
 // It's supposed to not change often, so we can just hardcode it here
-export let customColors = { 
+export let customColors = {
     'theimmortal': 'taco',
     'bmelts': 'testmelts',
     'jumpluff': 'zacchaeus',

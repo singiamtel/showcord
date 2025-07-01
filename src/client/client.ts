@@ -170,14 +170,14 @@ export class Client {
             this.__setupSocketListeners();
             this.selectRoom('home');
             window.addEventListener('focus', this.notificationsListener.bind(this));
-        } catch (e) {
-            if (e instanceof DOMException) {
-                console.warn('DOMException: ', e);
+        } catch (error) {
+            if (error instanceof DOMException) {
+                console.warn('DOMException: ', error);
                 this.settings.serverURL = Settings.defaultServerURL;
                 this.settings.loginServerURL = Settings.defaultLoginServerURL;
                 window.location.reload();
             }
-            console.error(e);
+            console.error(error);
         }
     }
 
@@ -725,518 +725,518 @@ export class Client {
         roomID: string
     ): boolean {
         switch (args[0]) {
-            case 'challstr': {
-                this.challstr = args[1];
-                break;
-            }
-            case 'init': {
-                const type = args[1];
-                const shouldConnect = type === 'chat' || type === 'battle';
-                const isBattle = type === 'battle';
-                const newRoom = isBattle ? new BattleRoom(
-                    {
-                        ID: roomID,
-                        name: roomID,
-                        type: type,
-                        connected: true,
-                        open: true,
-                    }
-                ) : new Room({
+        case 'challstr': {
+            this.challstr = args[1];
+            break;
+        }
+        case 'init': {
+            const type = args[1];
+            const shouldConnect = type === 'chat' || type === 'battle';
+            const isBattle = type === 'battle';
+            const newRoom = isBattle ? new BattleRoom(
+                {
                     ID: roomID,
                     name: roomID,
                     type: type,
-                    connected: shouldConnect,
+                    connected: true,
                     open: true,
-                });
-                this._addRoom(newRoom);
-                break;
-            }
-            case 'title': {
-                const name = args[1];
-                const room = this.requiresRoom('title', roomID);
-                if (!room) return false;
-                room.rename(name);
-                useClientStore.setState({ rooms: new Map(this.rooms) });
-                break;
-            }
-            case 'users': {
-                const room = this.requiresRoom('userlist', roomID);
-                if (!room) return false;
-                const parsedUsers = args[1].split(',');
-                const users = parsedUsers.map((tmpuser) => {
-                    const [user, status] = tmpuser.slice(1).split('@');
-                    const name = tmpuser.slice(0, 1) + user;
-                    return new User({ name, ID: toID(name), status });
-                });
-                users.shift();
-                room.addUsers(users);
-                break;
-            }
-            case '': {
-                const messageContent = args[1];
-                const room = this.requiresRoom('chat', roomID);
-                if (!room) return false;
-                const chatMessage = newMessage({
-                    user: '',
-                    content: messageContent,
-                    type: 'log',
-                });
-                if (!chatMessage) {
-                    this.events.dispatchEvent(
-                        new CustomEvent('message', { detail: chatMessage }),
-                    );
-                    return false;
                 }
-                this.addMessageToRoom(room.ID, chatMessage);
+            ) : new Room({
+                ID: roomID,
+                name: roomID,
+                type: type,
+                connected: shouldConnect,
+                open: true,
+            });
+            this._addRoom(newRoom);
+            break;
+        }
+        case 'title': {
+            const name = args[1];
+            const room = this.requiresRoom('title', roomID);
+            if (!room) return false;
+            room.rename(name);
+            useClientStore.setState({ rooms: new Map(this.rooms) });
+            break;
+        }
+        case 'users': {
+            const room = this.requiresRoom('userlist', roomID);
+            if (!room) return false;
+            const parsedUsers = args[1].split(',');
+            const users = parsedUsers.map((tmpuser) => {
+                const [user, status] = tmpuser.slice(1).split('@');
+                const name = tmpuser.slice(0, 1) + user;
+                return new User({ name, ID: toID(name), status });
+            });
+            users.shift();
+            room.addUsers(users);
+            break;
+        }
+        case '': {
+            const messageContent = args[1];
+            const room = this.requiresRoom('chat', roomID);
+            if (!room) return false;
+            const chatMessage = newMessage({
+                user: '',
+                content: messageContent,
+                type: 'log',
+            });
+            if (!chatMessage) {
+                this.events.dispatchEvent(
+                    new CustomEvent('message', { detail: chatMessage }),
+                );
+                return false;
+            }
+            this.addMessageToRoom(room.ID, chatMessage);
+            break;
+        }
+        case 'chat': {
+            const username = args[1];
+            const messageContent = args[2];
+            const room = this.requiresRoom('chat', roomID);
+            if (!room) return false;
+            const chatMessage = this.parseCMessage(messageContent, username, undefined, room);
+            if (!chatMessage) {
+                this.events.dispatchEvent(
+                    new CustomEvent('message', { detail: chatMessage }),
+                );
+                return false;
+            }
+            this.addMessageToRoom(room.ID, chatMessage);
+            break;
+        }
+        case 'c:': {
+            const timestamp = args[1];
+            const username = args[2];
+            const messageContent = args[3];
+            const room = this.requiresRoom('c:', roomID);
+            if (!room) return false;
+            const chatMessage = this.parseCMessage(messageContent, username, timestamp, room);
+            if (!chatMessage) {
+                this.events.dispatchEvent(
+                    new CustomEvent('message', { detail: chatMessage }),
+                );
                 break;
             }
-            case 'chat': {
-                const username = args[1];
-                const messageContent = args[2];
-                const room = this.requiresRoom('chat', roomID);
-                if (!room) return false;
-                const chatMessage = this.parseCMessage(messageContent, username, undefined, room);
-                if (!chatMessage) {
-                    this.events.dispatchEvent(
-                        new CustomEvent('message', { detail: chatMessage }),
-                    );
-                    return false;
+            this.addMessageToRoom(room.ID, chatMessage);
+            break;
+        }
+        case 'pm':
+            {
+                const sender = toID(args[1]);
+                const receiver = toID(args[2]);
+                let inferredRoomid = '';
+                if (sender === toID(this.settings.username)) {
+                    // sent message
+                    inferredRoomid = `pm-${receiver}`;
+                } else {
+                    // received message
+                    inferredRoomid = `pm-${sender}`;
                 }
-                this.addMessageToRoom(room.ID, chatMessage);
-                break;
-            }
-            case 'c:': {
-                const timestamp = args[1];
-                const username = args[2];
-                const messageContent = args[3];
-                const room = this.requiresRoom('c:', roomID);
-                if (!room) return false;
-                const chatMessage = this.parseCMessage(messageContent, username, timestamp, room);
-                if (!chatMessage) {
-                    this.events.dispatchEvent(
-                        new CustomEvent('message', { detail: chatMessage }),
-                    );
+                const { content, type } = this.parseCMessageContent(
+                    args.slice(3).join('|'),
+                );
+                this.__createPM(
+                    sender === toID(this.settings.username) ? args[2] : args[1],
+                );
+
+                if (type === 'challenge') {
+                    if (!content.trim()) {
+                        // end challenge
+                        const room = this.requiresRoom('pm', inferredRoomid);
+                        if (!room) return false;
+                        room.endChallenge();
+                        useClientStore.getState().updateMessages(room);
+                    } else {
+                        // start challenge
+                        this.addMessageToRoom(
+                            inferredRoomid,
+                            newMessage({
+                                user: args[1],
+                                content,
+                                timestamp: Math.floor(Date.now() / 1000).toString(),
+                                type,
+                            }),
+                        );
+                    }
                     break;
                 }
-                this.addMessageToRoom(room.ID, chatMessage);
-                break;
+                this.addMessageToRoom(
+                    inferredRoomid,
+                    newMessage({
+                        user: args[1],
+                        content,
+                        timestamp: Math.floor(Date.now() / 1000).toString(),
+                        type,
+                    }),
+                );
             }
-            case 'pm':
-                {
-                    const sender = toID(args[1]);
-                    const receiver = toID(args[2]);
-                    let inferredRoomid = '';
-                    if (sender === toID(this.settings.username)) {
-                        // sent message
-                        inferredRoomid = `pm-${receiver}`;
-                    } else {
-                        // received message
-                        inferredRoomid = `pm-${sender}`;
+            break;
+        case 'join': {
+            const room = this.requiresRoom('join', roomID);
+            if (!room) return false;
+            const username = args[1];
+            this.addUsers(room.ID, [new User({ name: username, ID: toID(username) })]);
+            break;
+        }
+        case 'leave': {
+            const room = this.requiresRoom('leave', roomID);
+            if (!room) return false;
+            this.removeUser(room.ID, args[1]);
+            break;
+        }
+        case 'name': {
+            const args1 = args[1];
+            const args2 = args[2];
+            this.updateUsername(roomID, args1, args2);
+            break;
+        }
+        case 'queryresponse': {
+            // 'userdetails' | 'roomlist' | 'rooms' | 'laddertop' | 'roominfo' | 'savereplay' | 'debug'
+            const queryType = args[1];
+            switch (queryType) {
+            case 'userdetails':
+                try {
+                    const tmpjson = JSON.parse(args[2]);
+                    if (tmpjson.userid === toID(this.settings.username)) {
+                        if (tmpjson.status) {
+                            this.settings.status = tmpjson.status;
+                        }
                     }
-                    const { content, type } = this.parseCMessageContent(
-                        args.slice(3).join('|'),
-                    );
-                    this.__createPM(
-                        sender === toID(this.settings.username) ? args[2] : args[1],
-                    );
 
-                    if (type === 'challenge') {
-                        if (!content.trim()) {
-                            // end challenge
-                            const room = this.requiresRoom('pm', inferredRoomid);
-                            if (!room) return false;
-                            room.endChallenge();
-                            useClientStore.getState().updateMessages(room);
-                        } else {
-                            // start challenge
-                            this.addMessageToRoom(
-                                inferredRoomid,
-                                newMessage({
-                                    user: args[1],
-                                    content,
-                                    timestamp: Math.floor(Date.now() / 1000).toString(),
-                                    type,
-                                }),
-                            );
-                        }
-                        break;
-                    }
-                    this.addMessageToRoom(
-                        inferredRoomid,
-                        newMessage({
-                            user: args[1],
-                            content,
-                            timestamp: Math.floor(Date.now() / 1000).toString(),
-                            type,
-                        }),
-                    );
-                }
-                break;
-            case 'join': {
-                const room = this.requiresRoom('join', roomID);
-                if (!room) return false;
-                const username = args[1];
-                this.addUsers(room.ID, [new User({ name: username, ID: toID(username) })]);
-                break;
-            }
-            case 'leave': {
-                const room = this.requiresRoom('leave', roomID);
-                if (!room) return false;
-                this.removeUser(room.ID, args[1]);
-                break;
-            }
-            case 'name': {
-                const args1 = args[1];
-                const args2 = args[2];
-                this.updateUsername(roomID, args1, args2);
-                break;
-            }
-            case 'queryresponse': {
-                // 'userdetails' | 'roomlist' | 'rooms' | 'laddertop' | 'roominfo' | 'savereplay' | 'debug'
-                const queryType = args[1];
-                switch (queryType) {
-                    case 'userdetails':
-                        try {
-                            const tmpjson = JSON.parse(args[2]);
-                            if (tmpjson.userid === toID(this.settings.username)) {
-                                if (tmpjson.status) {
-                                    this.settings.status = tmpjson.status;
-                                }
-                            }
-
-                            if (this.userListener) {
-                                this.userListener(tmpjson);
-                                this.userListener = undefined;
-                            } else if (this.loggedIn) {
-                                console.warn(
-                                    'received queryresponse|userdetails but nobody asked for it',
-                                    args,
-                                );
-                            }
-                        } catch (e) {
-                            console.error('Error parsing userdetails', args);
-                        }
-                        break;
-                    case 'rooms':
-                        try {
-                            const tmpjson = JSON.parse(args[2]);
-                            this.roomsJSON = tmpjson;
-                            if (this.roomListener) {
-                                this.roomListener(tmpjson);
-                                this.roomListener = undefined;
-                            }
-                        } catch (e) {
-                            console.error('Error parsing roomsdetails', args);
-                        }
-                        break;
-                    default:
-                        // assertNever(queryType);
-                        console.error('Unknown queryresponse', args);
-                        break;
-                }
-                break;
-            }
-            case 'noinit': {
-                const reason = args[1];
-                switch (reason) {
-                    case 'namerequired':
-                        this.joinAfterLogin.push(roomID);
-                        break;
-                    case 'nonexistent':
-                    case 'joinfailed':
-                        this.events.dispatchEvent(
-                            new CustomEvent('error', { detail: args[2] }),
+                    if (this.userListener) {
+                        this.userListener(tmpjson);
+                        this.userListener = undefined;
+                    } else if (this.loggedIn) {
+                        console.warn(
+                            'received queryresponse|userdetails but nobody asked for it',
+                            args,
                         );
-                        this._removeRoom(roomID);
-                        break;
-                    default:
-                        // assertNever(reason);
-                        console.error('Unknown noinit', args);
+                    }
+                } catch (e) {
+                    console.error('Error parsing userdetails', args);
                 }
+                break;
+            case 'rooms':
+                try {
+                    const tmpjson = JSON.parse(args[2]);
+                    this.roomsJSON = tmpjson;
+                    if (this.roomListener) {
+                        this.roomListener(tmpjson);
+                        this.roomListener = undefined;
+                    }
+                } catch (e) {
+                    console.error('Error parsing roomsdetails', args);
+                }
+                break;
+            default:
+                // assertNever(queryType);
+                console.error('Unknown queryresponse', args);
                 break;
             }
-            case 'updateuser':
-                {
-                    const username = args[1];
-                    const named = args[2];
-                    const avatar = args[3];
-                    if (!username.trim().toLowerCase().startsWith('guest')) {
-                        this.autojoin(this.joinAfterLogin);
-                        this.loggedIn = true;
-                        assert(named === '1', 'Couldn\'t guard against guest');
-                        this.settings.updateUser(username, avatar);
-                        this.setUsername(username);
-                        this.queryUserInternal(username);
-                    }
-                }
+            break;
+        }
+        case 'noinit': {
+            const reason = args[1];
+            switch (reason) {
+            case 'namerequired':
+                this.joinAfterLogin.push(roomID);
                 break;
-            case 'deinit':
+            case 'nonexistent':
+            case 'joinfailed':
+                this.events.dispatchEvent(
+                    new CustomEvent('error', { detail: args[2] }),
+                );
                 this._removeRoom(roomID);
                 break;
-            case 'pagehtml': {
-                const content = args[1];
-                const room = this.room(roomID);
-                if (!room) {
-                    console.error('Received |pagehtml| from untracked room', roomID);
-                    return false;
-                }
-                room.addUHTML(
-                    newMessage({
-                        name: 'pagehtml',
-                        user: '',
-                        type: 'rawHTML',
-                        content,
-                    }),
-                    {
-                        selected: this.selectedRoom === roomID,
-                        selfSent: false,
-                    },
-                );
-                this.events.dispatchEvent(
-                    new CustomEvent('message', { detail: 'pagehtml' }),
-                );
-                break;
+            default:
+                // assertNever(reason);
+                console.error('Unknown noinit', args);
             }
-            case 'uhtmlchange':{
+            break;
+        }
+        case 'updateuser':
+            {
+                const username = args[1];
+                const named = args[2];
+                const avatar = args[3];
+                if (!username.trim().toLowerCase().startsWith('guest')) {
+                    this.autojoin(this.joinAfterLogin);
+                    this.loggedIn = true;
+                    assert(named === '1', 'Couldn\'t guard against guest');
+                    this.settings.updateUser(username, avatar);
+                    this.setUsername(username);
+                    this.queryUserInternal(username);
+                }
+            }
+            break;
+        case 'deinit':
+            this._removeRoom(roomID);
+            break;
+        case 'pagehtml': {
+            const content = args[1];
+            const room = this.room(roomID);
+            if (!room) {
+                console.error('Received |pagehtml| from untracked room', roomID);
+                return false;
+            }
+            room.addUHTML(
+                newMessage({
+                    name: 'pagehtml',
+                    user: '',
+                    type: 'rawHTML',
+                    content,
+                }),
+                {
+                    selected: this.selectedRoom === roomID,
+                    selfSent: false,
+                },
+            );
+            this.events.dispatchEvent(
+                new CustomEvent('message', { detail: 'pagehtml' }),
+            );
+            break;
+        }
+        case 'uhtmlchange':{
+            const name = args[1];
+            const uhtml = args[2];
+            const room = this.requiresRoom('uhtmlchange', roomID);
+            if (!room) return false;
+            room.changeUHTML(
+                newMessage({
+                    name,
+                    user: '',
+                    type: 'boxedHTML',
+                    content: uhtml,
+                }),
+            );
+            this.events.dispatchEvent(
+                new CustomEvent('message', { detail: name }),
+            );
+            break;
+        }
+        case 'uhtml':
+            {
                 const name = args[1];
                 const uhtml = args[2];
-                const room = this.requiresRoom('uhtmlchange', roomID);
+                const room = this.requiresRoom('uhtml', roomID);
                 if (!room) return false;
-                room.changeUHTML(
+                room.addUHTML(
                     newMessage({
                         name,
                         user: '',
                         type: 'boxedHTML',
                         content: uhtml,
                     }),
+                    {
+                        selected: this.selectedRoom === room.ID,
+                        selfSent: false,
+                    },
                 );
                 this.events.dispatchEvent(
                     new CustomEvent('message', { detail: name }),
                 );
-                break;
             }
-            case 'uhtml':
-                {
-                    const name = args[1];
-                    const uhtml = args[2];
-                    const room = this.requiresRoom('uhtml', roomID);
-                    if (!room) return false;
-                    room.addUHTML(
-                        newMessage({
-                            name,
-                            user: '',
-                            type: 'boxedHTML',
-                            content: uhtml,
-                        }),
-                        {
-                            selected: this.selectedRoom === room.ID,
-                            selfSent: false,
-                        },
-                    );
-                    this.events.dispatchEvent(
-                        new CustomEvent('message', { detail: name }),
-                    );
-                }
-                break;
-            case 'html':
-                {
-                    const uhtml = args[1];
-                    const room = this.requiresRoom('html', roomID);
-                    if (!room) return false;
-                    room.addUHTML(
-                        newMessage({
-                            name: '',
-                            user: '',
-                            type: 'boxedHTML',
-                            content: uhtml,
-                        }),
-                        {
-                            selected: this.selectedRoom === room.ID,
-                            selfSent: false,
-                        },
-                    );
-                    this.events.dispatchEvent(
-                        new CustomEvent('message', { detail: 'html' }),
-                    );
-                }
-                break;
-            case 'raw': {
-                this.addMessageToRoom(
-                    roomID,
-                    newMessage({
-                        user: '',
-                        type: 'rawHTML',
-                        content: args[1],
-                    }),
-                );
-                break;
-            }
-            case 'error':
-                this.addMessageToRoom(
-                    roomID,
-                    newMessage({
-                        user: '',
-                        type: 'error',
-                        content: args[1],
-                    }),
-                );
-                break;
-            case 'formats': {
-                const formats = args.slice(1);
-                // formats
-                this.formats = formatParser(formats);
-            }
-                break;
-            case 'customgroups':
-            case 'tournament':
-            case 'notify':
-            case 'popup':
-            case 'nametaken':
-            case 'updatesearch':
-                break;
-            // battles
-            case 'player':
-                {
-                    const room = this.requiresRoom('player', roomID);
-                    if (!(room instanceof BattleRoom)) {
-                        console.error('Received |player| from non-battle room', roomID);
-                        return false;
-                    }
-                    const perspective = args[1];
-                    const playerName = args[2];
-                    if (toID(playerName) === this.settings.userID) {
-                        room.setFormatter(perspective);
-                    }
-                }
-                break;
-            case 'request':{
-                const room = this.requiresRoom('request', roomID);
+            break;
+        case 'html':
+            {
+                const uhtml = args[1];
+                const room = this.requiresRoom('html', roomID);
                 if (!room) return false;
+                room.addUHTML(
+                    newMessage({
+                        name: '',
+                        user: '',
+                        type: 'boxedHTML',
+                        content: uhtml,
+                    }),
+                    {
+                        selected: this.selectedRoom === room.ID,
+                        selfSent: false,
+                    },
+                );
+                this.events.dispatchEvent(
+                    new CustomEvent('message', { detail: 'html' }),
+                );
+            }
+            break;
+        case 'raw': {
+            this.addMessageToRoom(
+                roomID,
+                newMessage({
+                    user: '',
+                    type: 'rawHTML',
+                    content: args[1],
+                }),
+            );
+            break;
+        }
+        case 'error':
+            this.addMessageToRoom(
+                roomID,
+                newMessage({
+                    user: '',
+                    type: 'error',
+                    content: args[1],
+                }),
+            );
+            break;
+        case 'formats': {
+            const formats = args.slice(1);
+            // formats
+            this.formats = formatParser(formats);
+        }
+            break;
+        case 'customgroups':
+        case 'tournament':
+        case 'notify':
+        case 'popup':
+        case 'nametaken':
+        case 'updatesearch':
+            break;
+            // battles
+        case 'player':
+            {
+                const room = this.requiresRoom('player', roomID);
                 if (!(room instanceof BattleRoom)) {
-                    console.error('Received |request| from non-battle room', roomID);
+                    console.error('Received |player| from non-battle room', roomID);
                     return false;
                 }
-                this.events.dispatchEvent(
-                    new CustomEvent('request', { detail: room.battle.request }),
-                );
-                break;
+                const perspective = args[1];
+                const playerName = args[2];
+                if (toID(playerName) === this.settings.userID) {
+                    room.setFormatter(perspective);
+                }
             }
-            case 'move':
-            case '-fail':
-            case '-status':
-            case 'cant':
-            case '-item':
-            case '-enditem':
-            case '-unboost':
-            case '-formechange':
-            case '-clearnegativeboost':
-            case '-supereffective':
-            case '-end':
-            case '-singleturn':
-            case '-miss':
-            case '-crit':
-            case '-immune':
-            case '-sidestart':
-            case '-sideend':
-            case '-start':
-            case '-resisted':
-            case '-damage':
-            case 'done':
-            case 'faint':
-            case '-heal':
-            case '-ability':
-            case '-message':
-            case 'win':
-            case '-boost':
-            case 'upkeep':
-            case 'expire':
-            case 'turn':
-            case ':':
-            case 't:':
-            case 'teamsize':
-            case 'rule':
-            case 'start':
-            case 'switch':
-            case 'battle':
-            case 'gametype':
-            case 'gen':
-            case 'tier':
-            case 'sentchoice':
-            case 'rated':
-            case 'seed':
-            case 'clearpoke':
-            case 'poke':
-            case 'usercount':
-            case 'message' :
-            case 'replace' :
-            case 'teampreview' :
-            case 'updatepoke' :
-            case 'inactive' :
-            case 'inactiveoff' :
-            case 'tie' :
-            case 'drag' :
-            case 'detailschange' :
-            case 'swap' :
-            case '-block' :
-            case '-notarget' :
-            case '-sethp' :
-            case '-curestatus':
-            case '-cureteam':
-            case '-setboost':
-            case '-swapboost':
-            case '-invertboost':
-            case '-clearboost':
-            case '-clearallboost':
-            case '-clearpositiveboost':
-            case '-swapsideconditions':
-            case '-endability':
-            case '-transform':
-            case '-mega':
-            case '-primal':
-            case '-burst':
-            case '-zpower':
-            case '-zbroken':
-            case '-activate':
-            case '-fieldactivate':
-            case '-hint':
-            case '-center':
-            case '-combine':
-            case '-copyboost':
-            case '-weather':
-            case '-fieldstart':
-            case '-fieldend':
-            case 'askreg':
-            case '-waiting':
-            case '-prepare':
-            case '-mustrecharge':
-            case '-hitcount':
-            case '-singlemove':
-            case '-anim':
-            case '-ohko':
-            case '-candynamax':
-            case '-terastallize':
-            case 'updatechallenges':
-            case 'debug':
-            case 'unlink':
-            case 'warning':
-            case 'bigerror':
-            case 'chatmsg':
-            case 'chatmsg-raw':
-            case 'controlshtml':
-            case 'fieldhtml':
-            case 'selectorhtml':
-            case 'refresh':
-            case 'tempnotify':
-            case 'tempnotifyoff':
-            case 'hidelines' :
-            case 'custom' :
-                break;
-            default:
-            {
-                assertNever(args[0]);
-                console.error('Unknown cmd', args[0], args);
+            break;
+        case 'request':{
+            const room = this.requiresRoom('request', roomID);
+            if (!room) return false;
+            if (!(room instanceof BattleRoom)) {
+                console.error('Received |request| from non-battle room', roomID);
                 return false;
             }
+            this.events.dispatchEvent(
+                new CustomEvent('request', { detail: room.battle.request }),
+            );
+            break;
+        }
+        case 'move':
+        case '-fail':
+        case '-status':
+        case 'cant':
+        case '-item':
+        case '-enditem':
+        case '-unboost':
+        case '-formechange':
+        case '-clearnegativeboost':
+        case '-supereffective':
+        case '-end':
+        case '-singleturn':
+        case '-miss':
+        case '-crit':
+        case '-immune':
+        case '-sidestart':
+        case '-sideend':
+        case '-start':
+        case '-resisted':
+        case '-damage':
+        case 'done':
+        case 'faint':
+        case '-heal':
+        case '-ability':
+        case '-message':
+        case 'win':
+        case '-boost':
+        case 'upkeep':
+        case 'expire':
+        case 'turn':
+        case ':':
+        case 't:':
+        case 'teamsize':
+        case 'rule':
+        case 'start':
+        case 'switch':
+        case 'battle':
+        case 'gametype':
+        case 'gen':
+        case 'tier':
+        case 'sentchoice':
+        case 'rated':
+        case 'seed':
+        case 'clearpoke':
+        case 'poke':
+        case 'usercount':
+        case 'message' :
+        case 'replace' :
+        case 'teampreview' :
+        case 'updatepoke' :
+        case 'inactive' :
+        case 'inactiveoff' :
+        case 'tie' :
+        case 'drag' :
+        case 'detailschange' :
+        case 'swap' :
+        case '-block' :
+        case '-notarget' :
+        case '-sethp' :
+        case '-curestatus':
+        case '-cureteam':
+        case '-setboost':
+        case '-swapboost':
+        case '-invertboost':
+        case '-clearboost':
+        case '-clearallboost':
+        case '-clearpositiveboost':
+        case '-swapsideconditions':
+        case '-endability':
+        case '-transform':
+        case '-mega':
+        case '-primal':
+        case '-burst':
+        case '-zpower':
+        case '-zbroken':
+        case '-activate':
+        case '-fieldactivate':
+        case '-hint':
+        case '-center':
+        case '-combine':
+        case '-copyboost':
+        case '-weather':
+        case '-fieldstart':
+        case '-fieldend':
+        case 'askreg':
+        case '-waiting':
+        case '-prepare':
+        case '-mustrecharge':
+        case '-hitcount':
+        case '-singlemove':
+        case '-anim':
+        case '-ohko':
+        case '-candynamax':
+        case '-terastallize':
+        case 'updatechallenges':
+        case 'debug':
+        case 'unlink':
+        case 'warning':
+        case 'bigerror':
+        case 'chatmsg':
+        case 'chatmsg-raw':
+        case 'controlshtml':
+        case 'fieldhtml':
+        case 'selectorhtml':
+        case 'refresh':
+        case 'tempnotify':
+        case 'tempnotifyoff':
+        case 'hidelines' :
+        case 'custom' :
+            break;
+        default:
+        {
+            assertNever(args[0]);
+            console.error('Unknown cmd', args[0], args);
+            return false;
+        }
         }
         return true;
     }
@@ -1294,54 +1294,54 @@ export class Client {
         let UHTMLName = undefined;
         const cmd = content.split(' ')[0];
         switch (cmd) {
-            case '/raw':
-                type = 'rawHTML';
-                content = content.slice(5);
-                break;
-            case '/uhtmlchange': {
-                const [name, ...html] = content.split(',');
-                UHTMLName = name.split(' ')[1];
-                type = 'uhtmlchange';
-                content = html.join(',');
-                break;
-            }
-            case '/uhtml': {
-                const [name, ...html] = content.split(',');
-                UHTMLName = name.split(' ')[1];
-                type = 'boxedHTML';
-                content = html.join(',');
-                break;
-            }
-            case '/error':
-                type = 'error';
-                content = content.slice(6);
-                break;
-            case '/text':
-                type = 'log';
-                content = content.slice(5);
-                break;
-            case '/announce':
-                type = 'announce';
-                content = content.slice(9);
-                break;
-            case '/log':
-                type = 'log';
-                content = content.slice(4);
-                break;
-            case '/me':
-                type = 'roleplay';
-                content = content.slice(3);
-                break;
-            case '/challenge':
-                type = 'challenge';
-                content = content.slice(11);
-                break;
-            case '/nonotify':
-                type = 'log';
-                content = content.slice(9);
-                break;
-            default:
-                break;
+        case '/raw':
+            type = 'rawHTML';
+            content = content.slice(5);
+            break;
+        case '/uhtmlchange': {
+            const [name, ...html] = content.split(',');
+            UHTMLName = name.split(' ')[1];
+            type = 'uhtmlchange';
+            content = html.join(',');
+            break;
+        }
+        case '/uhtml': {
+            const [name, ...html] = content.split(',');
+            UHTMLName = name.split(' ')[1];
+            type = 'boxedHTML';
+            content = html.join(',');
+            break;
+        }
+        case '/error':
+            type = 'error';
+            content = content.slice(6);
+            break;
+        case '/text':
+            type = 'log';
+            content = content.slice(5);
+            break;
+        case '/announce':
+            type = 'announce';
+            content = content.slice(9);
+            break;
+        case '/log':
+            type = 'log';
+            content = content.slice(4);
+            break;
+        case '/me':
+            type = 'roleplay';
+            content = content.slice(3);
+            break;
+        case '/challenge':
+            type = 'challenge';
+            content = content.slice(11);
+            break;
+        case '/nonotify':
+            type = 'log';
+            content = content.slice(9);
+            break;
+        default:
+            break;
         }
         if (UHTMLName) {
             return { type, content, UHTMLName };
@@ -1409,102 +1409,102 @@ export class Client {
         const splitted_message = message.split(' ');
         const cmd = splitted_message[0].slice(1);
         switch (cmd) {
-            case 'highlight':
-            case 'hl': {
-                const [subcmd, ...args] = splitted_message.slice(1);
-                switch (subcmd) {
-                    case 'add':
-                    case 'roomadd':
-                        for (const word of args) {
-                            this.settings.addHighlightWord(
-                                subcmd === 'add' ? 'global' : this.selectedRoom,
-                                word,
-                            );
-                        }
-                        this.addMessageToRoom(
-                            this.selectedRoom,
-                            newMessage({
-                                user: '',
-                                name: '',
-                                type: 'log',
-                                content: `Added "${args.join(' ')}" to ${subcmd === 'add' ? 'global' : 'room'} highlight list`,
-                            }),
-                        );
-                        // TODO: display help
-                        return true;
-                    case 'delete':
-                    case 'roomdelete':
-                        for (const word of args) {
-                            this.settings.removeHighlightWord(
-                                subcmd === 'delete' ? 'global' : this.selectedRoom,
-                                word,
-                            );
-                        }
-                        this.addMessageToRoom(
-                            this.selectedRoom,
-                            newMessage({
-                                user: '',
-                                name: '',
-                                type: 'log',
-                                content: `Deleted "${args.join(' ')}" from highlight list`,
-                            }),
-                        );
-                        return true;
-                    case 'list':
-                    case 'roomlist':
-                        {
-                            const words = this.settings.getHighlightWords(subcmd === 'list' ? 'global' : this.selectedRoom);
+        case 'highlight':
+        case 'hl': {
+            const [subcmd, ...args] = splitted_message.slice(1);
+            switch (subcmd) {
+            case 'add':
+            case 'roomadd':
+                for (const word of args) {
+                    this.settings.addHighlightWord(
+                        subcmd === 'add' ? 'global' : this.selectedRoom,
+                        word,
+                    );
+                }
+                this.addMessageToRoom(
+                    this.selectedRoom,
+                    newMessage({
+                        user: '',
+                        name: '',
+                        type: 'log',
+                        content: `Added "${args.join(' ')}" to ${subcmd === 'add' ? 'global' : 'room'} highlight list`,
+                    }),
+                );
+                // TODO: display help
+                return true;
+            case 'delete':
+            case 'roomdelete':
+                for (const word of args) {
+                    this.settings.removeHighlightWord(
+                        subcmd === 'delete' ? 'global' : this.selectedRoom,
+                        word,
+                    );
+                }
+                this.addMessageToRoom(
+                    this.selectedRoom,
+                    newMessage({
+                        user: '',
+                        name: '',
+                        type: 'log',
+                        content: `Deleted "${args.join(' ')}" from highlight list`,
+                    }),
+                );
+                return true;
+            case 'list':
+            case 'roomlist':
+                {
+                    const words = this.settings.getHighlightWords(subcmd === 'list' ? 'global' : this.selectedRoom);
 
-                            this.addMessageToRoom(
-                                this.selectedRoom,
-                                newMessage({
-                                    user: '',
-                                    name: '',
-                                    type: 'log',
-                                    content: words && words.length ?
-                                        `Current highlight list: ${words.join(', ')}` :
-                                        'Your highlight list is empty',
-                                }),
-                            );
-                        }
-                        return true;
-                    case 'clear':
-                    case 'roomclear':
-                        this.settings.clearHighlightWords(
-                            subcmd === 'clear' ? 'global' : this.selectedRoom,
-                        );
-                        this.addMessageToRoom(
-                            this.selectedRoom,
-                            newMessage({
-                                user: '',
-                                name: '',
-                                type: 'log',
-                                content: `Cleared highlight list`,
-                            }),
-                        );
-                        return true;
+                    this.addMessageToRoom(
+                        this.selectedRoom,
+                        newMessage({
+                            user: '',
+                            name: '',
+                            type: 'log',
+                            content: words && words.length ?
+                                `Current highlight list: ${words.join(', ')}` :
+                                'Your highlight list is empty',
+                        }),
+                    );
+                }
+                return true;
+            case 'clear':
+            case 'roomclear':
+                this.settings.clearHighlightWords(
+                    subcmd === 'clear' ? 'global' : this.selectedRoom,
+                );
+                this.addMessageToRoom(
+                    this.selectedRoom,
+                    newMessage({
+                        user: '',
+                        name: '',
+                        type: 'log',
+                        content: `Cleared highlight list`,
+                    }),
+                );
+                return true;
 
-                    default:
-                        // Display help
-                        console.warn('Unknown subcommand for /highlight: ', subcmd);
-                        return true; // Don't send to server
+            default:
+                // Display help
+                console.warn('Unknown subcommand for /highlight: ', subcmd);
+                return true; // Don't send to server
+            }
+        }
+        case 'j':
+        case 'join':
+            if (!raw) {
+                // Set as autoselect room
+                const args = splitted_message.slice(1);
+                if (args.length === 0) {
+                    return false;
                 }
             }
-            case 'j':
-            case 'join':
-                if (!raw) {
-                    // Set as autoselect room
-                    const args = splitted_message.slice(1);
-                    if (args.length === 0) {
-                        return false;
-                    }
-                }
-                return false;
+            return false;
             // case 'status':
             // this.settings.setStatus(splitted_message.slice(1).join(' '));
             // return false;
-            default:
-                return false;
+        default:
+            return false;
         }
     }
 }
