@@ -40,31 +40,31 @@ const elements: {
 
 const cleanTag = (input: string, tag: keyof typeof elements) => {
     switch (tag) {
-        case 'code':
-            return input.replace(elements.code.pattern, '$1');
-        case 'spoiler':
-            return input.replace(elements.spoiler.pattern, '$1');
-        case 'bold':
-            return input.replace(elements.bold.pattern, '$1');
-        case 'italic':
-            return input.replace(elements.italic.pattern, '$1');
-        case 'strikethrough':
-            return input.replace(elements.strikethrough.pattern, '$1');
-        case 'superscript':
-            return input.replace(elements.superscript.pattern, '$1');
-        case 'subscript':
-            return input.replace(elements.subscript.pattern, '$1');
-        case 'link':
-            return input.replace(elements.link.pattern, '$1');
-        case 'greentext':
-        case 'fakeCommand': // e.g. //help should display as /help
-            return input?.slice(1);
-        case 'roomlink':
-            return input.replace(elements.roomlink.pattern, '$1');
-        default:
-            assertNever(tag);
-            console.error('cleanTag: unknown tag', tag);
-            return '';
+    case 'code':
+        return input.replace(elements.code.pattern, '$1');
+    case 'spoiler':
+        return input.replace(elements.spoiler.pattern, '$1');
+    case 'bold':
+        return input.replace(elements.bold.pattern, '$1');
+    case 'italic':
+        return input.replace(elements.italic.pattern, '$1');
+    case 'strikethrough':
+        return input.replace(elements.strikethrough.pattern, '$1');
+    case 'superscript':
+        return input.replace(elements.superscript.pattern, '$1');
+    case 'subscript':
+        return input.replace(elements.subscript.pattern, '$1');
+    case 'link':
+        return input.replace(elements.link.pattern, '$1');
+    case 'greentext':
+    case 'fakeCommand': // e.g. //help should display as /help
+        return input?.slice(1);
+    case 'roomlink':
+        return input.replace(elements.roomlink.pattern, '$1');
+    default:
+        assertNever(tag);
+        console.error('cleanTag: unknown tag', tag);
+        return '';
     }
 };
 let deepKey = 0;
