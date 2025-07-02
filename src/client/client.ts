@@ -8,6 +8,7 @@ import { Protocol } from '@pkmn/protocol';
 import { assert, assertNever } from '@/lib/utils';
 import { BattleRoom } from './room/battleRoom';
 import formatParser, { Formats } from './formatParser';
+import { AuthenticationManager, AuthenticationCallbacks } from './authentication';
 
 import { create } from 'zustand';
 
@@ -126,17 +127,17 @@ export class Client {
 
     private rooms: Map<string, Room> = new Map();
     events: EventTarget = new EventTarget();
-    private loggedIn: boolean = false;
-    private shouldAutoLogin: boolean = true;
     private onOpen: (() => void)[] = []; // Append callbacks here to run when the socket opens
+    private authManager: AuthenticationManager;
+    private pendingRoomJoins: string[] = []; // Rooms to join after login
 
     get username() {
         return this.settings.username;
     }
 
-    private joinAfterLogin: string[] = [];
-    private challstr: string = '';
-    private client_id = import.meta.env.VITE_OAUTH_CLIENTID;
+    get isLoggedIn() {
+        return this.authManager.isLoggedIn;
+    }
     // private selectedRoom: string = ''; // Used for notifications
     private __selectedRoom = '';
     get selectedRoom() {
@@ -161,10 +162,37 @@ export class Client {
         // if running test suite, don't do anything
         if (import.meta.env.VITEST) {
             console.debug('Running tests, skipping client initialization');
+            // Initialize authManager even in test mode to avoid undefined errors
+            this.authManager = new AuthenticationManager(this.settings, {
+                sendMessage: () => {},
+                setUsername: () => {},
+            });
             return;
         }
+
+        // Initialize authentication manager with callbacks
+        const authCallbacks: AuthenticationCallbacks = {
+            sendMessage: (message: string) => this.__send(message, false),
+            setUsername: (username: string) => this.setUsername(username),
+            onLoginSuccess: () => {
+                // Auto-join pending rooms and saved rooms after successful login
+                if (this.pendingRoomJoins.length > 0) {
+                    this.autojoin(this.pendingRoomJoins);
+                    this.pendingRoomJoins = [];
+                }
+                const savedRooms = this.settings.rooms;
+                this.autojoin(savedRooms.filter((e) => e.open).map((e) => e.ID), true);
+            },
+            onLoginFailure: (error: string) => {
+                console.error('Login failed:', error);
+            },
+        };
+        this.authManager = new AuthenticationManager(this.settings, authCallbacks);
+
         try {
-            if (options?.autoLogin) this.shouldAutoLogin = options.autoLogin;
+            if (options?.autoLogin !== undefined) {
+                this.authManager.setShouldAutoLogin(options.autoLogin);
+            }
             this.__createPermanentRooms();
             this.socket = new WebSocket(this.settings.serverURL);
             this.__setupSocketListeners();
@@ -427,159 +455,13 @@ export class Client {
     // --- Login ---
 
     logout() {
-        this.settings.logout();
+        this.authManager.logout();
     }
 
     async login() {
-        // Order of login methods:
-        // 1. Assertion in URL (from oauth login)
-        // - This happens right after oauth login
-        // - We also need to store the token in localstorage
-        //
-        // 2. Assertion from token
-        // - This happens when we have a token stored in localstorage
-        // - We try to get an assertion from the token, and send it to the server
-        // - If it fails we drop the token and go to #3
-        //
-        // 3. Normal login
-        // Redirect to oauth login page
-        while (!this.challstr) {
-            await new Promise((resolve) => setTimeout(resolve, 100));
-        }
-        // Oauth login method
-        const url =
-            `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${this.client_id}&challenge=${this.challstr}`;
-        const nWindow = (window as any).n = open(
-            url,
-            undefined,
-            'popup=1,width=700,height=700',
-        );
-        const checkIfUpdated = async () => {
-            try {
-                if (nWindow?.location.host === location.host) {
-                    const url = new URL(nWindow.location.href);
-                    const assertion = url.searchParams.get('assertion');
-                    if (assertion) {
-                        this.send_assertion(assertion);
-                    }
-                    const token = url.searchParams.get('token');
-                    if (token) {
-                        localStorage.setItem(
-                            'ps-token',
-                            url.searchParams.get('token') ?? 'notoken',
-                        );
-                    }
-                    nWindow.close();
-                } else {
-                    setTimeout(checkIfUpdated, 500);
-                }
-            } catch (e) {
-                // DomException means that the window wasn't redirected yet
-                // so we just wait a bit more
-                if (e instanceof DOMException) {
-                    setTimeout(checkIfUpdated, 500);
-                    return;
-                }
-                throw e;
-            }
-        };
-        setTimeout(checkIfUpdated, 1000);
+        await this.authManager.login();
     }
 
-    private async tryLogin() {
-        while (!this.challstr) {
-            await new Promise((resolve) => setTimeout(resolve, 500));
-        }
-        const urlParams = new URLSearchParams(window.location.search);
-        let assertion = urlParams.get('assertion');
-        if (assertion && assertion !== 'undefined') {
-            await this.send_assertion(assertion);
-            const token = urlParams.get('token');
-            if (token) {
-                localStorage.setItem('ps-token', token);
-            }
-        } else if (
-            (assertion = await this.assertionFromToken(this.challstr) || null)
-        ) {
-            await this.send_assertion(assertion);
-            return;
-        } else {
-            const token = localStorage.getItem('ps-token');
-            if (token && token !== 'undefined') {
-                if (!await this.refreshToken()) {
-                    console.error('Couldn\'t refresh token');
-                    return;
-                }
-                const assertion = await this.assertionFromToken(this.challstr);
-                if (assertion) {
-                    await this.send_assertion(assertion);
-                }
-            }
-        }
-    }
-
-    private async send_assertion(assertion: string) {
-        const username = assertion.split(',')[1];
-
-        const storedName = this.settings.username;
-        this.__send(
-            `/trn ${toID(storedName) === toID(username) ? storedName : username
-            },0,${assertion}`,
-            false,
-        );
-    }
-
-    private async parseLoginserverResponse(
-        response: Response,
-    ): Promise<string | false> {
-        // Loginserver responses are just weird
-        const response_test = await response.text();
-        if (response_test.startsWith(';')) {
-            console.error('AssertionError: Received ; from loginserver');
-            return false;
-        }
-        try {
-            const response_json = JSON.parse(response_test.slice(1));
-            if (response_json.success === false) {
-                console.error(`Couldn't login`, response_json);
-                return false;
-            } else if (response_json.success) {
-                return response_json.success;
-            }
-        } catch (e) {
-            // pass
-        }
-        return response_test;
-    }
-
-    private async assertionFromToken(challstr: string): Promise<string | false> {
-        const token = localStorage.getItem('ps-token');
-        if (!token || token === 'undefined') {
-            return false;
-        }
-        const response = await fetch(
-            `${this.settings.loginServerURL}oauth/api/getassertion?challenge=${challstr}&token=${token}&client_id=${this.client_id}`,
-        );
-        return await this.parseLoginserverResponse(response);
-    }
-
-    private async refreshToken() {
-        const token = localStorage.getItem('ps-token');
-        if (!token || token === 'undefined') {
-            return false;
-        }
-        try {
-            const response = await fetch(
-                `${this.settings.loginServerURL}oauth/api/refreshtoken?token=${token}&client_id=${this.client_id}`,
-            );
-            const result = await this.parseLoginserverResponse(response);
-            if (result) localStorage.setItem('ps-token', result);
-            return result;
-        } catch (e) {
-            console.error(e);
-            return false;
-        }
-    }
 
     // --- Room management ---
     private _addRoom(room: Room) {
@@ -726,7 +608,7 @@ export class Client {
     ): boolean {
         switch (args[0]) {
         case 'challstr': {
-            this.challstr = args[1];
+            this.authManager.setChallstr(args[1]);
             break;
         }
         case 'init': {
@@ -907,7 +789,7 @@ export class Client {
                     if (this.userListener) {
                         this.userListener(tmpjson);
                         this.userListener = undefined;
-                    } else if (this.loggedIn) {
+                    } else if (this.isLoggedIn) {
                         console.warn(
                             'received queryresponse|userdetails but nobody asked for it',
                             args,
@@ -940,7 +822,7 @@ export class Client {
             const reason = args[1];
             switch (reason) {
             case 'namerequired':
-                this.joinAfterLogin.push(roomID);
+                this.pendingRoomJoins.push(roomID);
                 break;
             case 'nonexistent':
             case 'joinfailed':
@@ -961,8 +843,6 @@ export class Client {
                 const named = args[2];
                 const avatar = args[3];
                 if (!username.trim().toLowerCase().startsWith('guest')) {
-                    this.autojoin(this.joinAfterLogin);
-                    this.loggedIn = true;
                     assert(named === '1', 'Couldn\'t guard against guest');
                     this.settings.updateUser(username, avatar);
                     this.setUsername(username);
@@ -1357,11 +1237,8 @@ export class Client {
             for (const cb of this.onOpen) {
                 cb();
             }
-            if (this.shouldAutoLogin) {
-                this.tryLogin();
-            }
-            const savedRooms = client.settings.rooms;
-            this.autojoin(savedRooms.filter((e) => e.open).map((e) => e.ID), true);
+            // Auto-login is now handled by the authentication manager
+            this.authManager.tryLogin();
         };
 
         this.socket.onmessage = (event) => {

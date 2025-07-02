@@ -1,12 +1,25 @@
 import { Settings } from './settings';
 import { logger } from '../utils/logger';
+import { toID } from '../utils/generic';
+
+export interface AuthenticationCallbacks {
+    sendMessage: (message: string) => void;
+    setUsername: (username: string) => void;
+    onLoginSuccess?: () => void;
+    onLoginFailure?: (error: string) => void;
+}
 
 export class AuthenticationManager {
     private challstr: string = '';
     private client_id = import.meta.env.VITE_OAUTH_CLIENTID;
-    private shouldAutoLogin: boolean = true;
+    private shouldAutoLogin: boolean = true; // Currently unused - kept for future auto-login features
+    private loggedIn: boolean = false;
+    private hasManuallyLoggedOut: boolean = false;
 
-    constructor(private settings: Settings) {}
+    constructor(
+        private settings: Settings,
+        private callbacks: AuthenticationCallbacks
+    ) {}
 
     setChallstr(challstr: string): void {
         this.challstr = challstr;
@@ -16,8 +29,15 @@ export class AuthenticationManager {
         this.shouldAutoLogin = shouldAutoLogin;
     }
 
+    get isLoggedIn(): boolean {
+        return this.loggedIn;
+    }
+
     async login(): Promise<void> {
-    // Wait for challstr
+        // Reset manual logout flag when user explicitly logs in
+        this.hasManuallyLoggedOut = false;
+
+        // Wait for challstr
         while (!this.challstr) {
             await new Promise((resolve) => setTimeout(resolve, 100));
         }
@@ -59,6 +79,11 @@ export class AuthenticationManager {
     }
 
     async tryLogin(): Promise<void> {
+        // Don't auto-login if user has manually logged out
+        if (this.hasManuallyLoggedOut) {
+            return;
+        }
+
         while (!this.challstr) {
             await new Promise((resolve) => setTimeout(resolve, 500));
         }
@@ -79,7 +104,7 @@ export class AuthenticationManager {
 
         // Try token login
         const token = localStorage.getItem('ps-token');
-        if (token) {
+        if (token && token !== 'undefined') {
             const tokenAssertion = await this.assertionFromToken(this.challstr);
             if (tokenAssertion) {
                 await this.sendAssertion(tokenAssertion);
@@ -89,39 +114,62 @@ export class AuthenticationManager {
             localStorage.removeItem('ps-token');
         }
 
-        if (this.shouldAutoLogin) {
-            await this.login();
-        }
+        // Don't automatically open login popup - let user initiate login manually
+        // This prevents jarring popups on app startup
     }
 
     private async sendAssertion(assertion: string): Promise<void> {
-    // This would need to be implemented by calling back to the client
-    // For now, just log it
-        logger.debug('Sending assertion', { assertion });
+        const username = assertion.split(',')[1];
+        const storedName = this.settings.username;
+
+        // Use the stored name if it matches the assertion username, otherwise use assertion username
+        const finalUsername = toID(storedName) === toID(username) ? storedName : username;
+
+        const message = `/trn ${finalUsername},0,${assertion}`;
+
+        try {
+            this.callbacks.sendMessage(message);
+            this.loggedIn = true;
+            // Reset manual logout flag on successful login
+            this.hasManuallyLoggedOut = false;
+            this.callbacks.setUsername(finalUsername);
+            this.callbacks.onLoginSuccess?.();
+        } catch (error) {
+            logger.error('Failed to send assertion', error);
+            this.callbacks.onLoginFailure?.('Failed to send assertion');
+        }
     }
 
     private async parseLoginserverResponse(response: Response): Promise<string | false> {
+        // Loginserver responses are just weird
         const response_text = await response.text();
-        const response_json = JSON.parse(response_text.substr(1));
-        if (response_json.actionsuccess) {
-            return response_json.assertion;
-        }
-        if (response_json.assertion && response_json.assertion.substr(0, 2) === ';;') {
+        if (response_text.startsWith(';')) {
             logger.error('AssertionError: Received ; from loginserver');
             return false;
         }
-
-        logger.error('Couldn\'t login', response_json);
-        return false;
+        try {
+            const response_json = JSON.parse(response_text.slice(1));
+            if (response_json.success === false) {
+                logger.error('Couldn\'t login', response_json);
+                return false;
+            } else if (response_json.success) {
+                return response_json.success;
+            }
+        } catch (e) {
+            // pass
+        }
+        return response_text;
     }
 
     private async assertionFromToken(challstr: string): Promise<string | false> {
+        const token = localStorage.getItem('ps-token');
+        if (!token || token === 'undefined') {
+            return false;
+        }
         try {
-            const response = await fetch(this.settings.loginServerURL, {
-                method: 'POST',
-                body: `act=getassertion&userid=${this.settings.username}&challstr=${challstr}&token=${localStorage.getItem('ps-token')}`,
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            });
+            const response = await fetch(
+                `${this.settings.loginServerURL}oauth/api/getassertion?challenge=${challstr}&token=${token}&client_id=${this.client_id}`,
+            );
             return await this.parseLoginserverResponse(response);
         } catch (error) {
             logger.error('Error getting assertion from token', error);
@@ -129,24 +177,31 @@ export class AuthenticationManager {
         }
     }
 
-    private async refreshToken(): Promise<void> {
+    private async refreshToken(): Promise<boolean> {
+        const token = localStorage.getItem('ps-token');
+        if (!token || token === 'undefined') {
+            return false;
+        }
         try {
-            const response = await fetch(this.settings.loginServerURL, {
-                method: 'POST',
-                body: `act=upkeep&challstr=${this.challstr}&token=${localStorage.getItem('ps-token')}`,
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            });
-            const data = await response.text();
-            const json = JSON.parse(data.substr(1));
-            if (json.actionsuccess && json.token) {
-                localStorage.setItem('ps-token', json.token);
+            const response = await fetch(
+                `${this.settings.loginServerURL}oauth/api/refreshtoken?token=${token}&client_id=${this.client_id}`,
+            );
+            const result = await this.parseLoginserverResponse(response);
+            if (result) {
+                localStorage.setItem('ps-token', result);
+                return true;
             }
+            return false;
         } catch (error) {
             logger.error('Couldn\'t refresh token', error);
+            return false;
         }
     }
 
     logout(): void {
+        this.loggedIn = false;
+        this.hasManuallyLoggedOut = true;
         this.settings.logout();
+        localStorage.removeItem('ps-token');
     }
 }
