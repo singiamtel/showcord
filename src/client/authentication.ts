@@ -12,7 +12,7 @@ export interface AuthenticationCallbacks {
 export class AuthenticationManager {
     private challstr: string = '';
     private client_id = import.meta.env.VITE_OAUTH_CLIENTID;
-    private shouldAutoLogin: boolean = true;
+    private shouldAutoLogin: boolean = true; // Currently unused - kept for future auto-login features
     private loggedIn: boolean = false;
     private hasManuallyLoggedOut: boolean = false;
 
@@ -114,9 +114,8 @@ export class AuthenticationManager {
             localStorage.removeItem('ps-token');
         }
 
-        if (this.shouldAutoLogin) {
-            await this.login();
-        }
+        // Don't automatically open login popup - let user initiate login manually
+        // This prevents jarring popups on app startup
     }
 
     private async sendAssertion(assertion: string): Promise<void> {
