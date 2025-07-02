@@ -185,7 +185,7 @@ export class Client {
             },
             onLoginFailure: (error: string) => {
                 console.error('Login failed:', error);
-            }
+            },
         };
         this.authManager = new AuthenticationManager(this.settings, authCallbacks);
 
@@ -461,7 +461,6 @@ export class Client {
     async login() {
         await this.authManager.login();
     }
-
 
 
     // --- Room management ---

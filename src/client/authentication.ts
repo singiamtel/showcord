@@ -121,12 +121,12 @@ export class AuthenticationManager {
     private async sendAssertion(assertion: string): Promise<void> {
         const username = assertion.split(',')[1];
         const storedName = this.settings.username;
-        
+
         // Use the stored name if it matches the assertion username, otherwise use assertion username
         const finalUsername = toID(storedName) === toID(username) ? storedName : username;
-        
+
         const message = `/trn ${finalUsername},0,${assertion}`;
-        
+
         try {
             this.callbacks.sendMessage(message);
             this.loggedIn = true;
