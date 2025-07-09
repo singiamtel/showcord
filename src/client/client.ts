@@ -581,7 +581,11 @@ export class Client {
             const { args, kwArgs } = Protocol.parseBattleLine(line);
             const room = this.room(roomID);
             if (room instanceof BattleRoom) {
-                room.feedBattle(line) && this.events.dispatchEvent(new CustomEvent('message', { detail: line }));
+                // If there was a change, re-render
+                // FIXME: this is not how react handles reactivity
+                if (room.feedBattle(line)) {
+                    this.events.dispatchEvent(new CustomEvent('message', { detail: line }));
+                }
             }
 
             const success = this.parseSocketLine(args, kwArgs, roomID);
