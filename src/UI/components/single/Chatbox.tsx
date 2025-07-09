@@ -1,6 +1,5 @@
 import {
     ChangeEventHandler,
-    createRef,
     FormEvent,
     HTMLAttributes,
     KeyboardEvent,
@@ -39,7 +38,7 @@ export default function ChatBox(props: Readonly<HTMLAttributes<HTMLDivElement>>)
     const room = useClientStore(state => state.currentRoom);
     const { client, setRoom } = useClientContext();
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
-    const formRef = createRef<HTMLFormElement>();
+    const formRef = useRef<HTMLFormElement>(null);
 
     const submit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();

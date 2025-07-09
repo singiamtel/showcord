@@ -1,10 +1,8 @@
 import {
-    createRef,
     HTMLAttributes,
     useCallback,
     useLayoutEffect,
     useRef,
-    useState,
 } from 'react';
 import { useClientContext } from './ClientContext';
 import useOnScreen from '../../hooks/useOnScreen';
@@ -28,7 +26,7 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const currentRoom = useClientStore(state => state.currentRoom);
     const messages = useClientStore(state => state.messages);
     assert(currentRoom, 'Opening chat without a selected room');
-    const messagesEndRef = createRef<HTMLDivElement>();
+    const messagesEndRef = useRef<HTMLDivElement>(null);
     const isIntersecting = useOnScreen(messagesEndRef);
     const ref = useRef<HTMLDivElement>(null);
 

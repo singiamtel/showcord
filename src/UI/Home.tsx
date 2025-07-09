@@ -1,5 +1,4 @@
 import {
-    createRef,
     FormEvent,
     HTMLAttributes,
     KeyboardEventHandler,
@@ -85,7 +84,7 @@ function RoomList({ className }: Readonly<{ className?: string }>) {
     );
     const { setRoom } = useClientContext();
 
-    const formRef = createRef<HTMLFormElement>();
+    const formRef = useRef<HTMLFormElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
 
     useEffect(() => {
