@@ -26,7 +26,7 @@ export function assertNever(x: never, message?: string): asserts x is never {
 }
 
 export function assert(condition: any, message?: string): asserts condition {
-    if (!Boolean(condition)) {
+    if (!condition) {
         throw new AssertionError({ message: message ?? 'Assert failed', expected: 'true', actual: condition });
     }
 }

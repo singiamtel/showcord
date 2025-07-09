@@ -8,7 +8,7 @@
     "build": "tsc && vite build && cp sitemap.txt dist/ && cp robots.txt dist/",
     "serve": "vite preview",
     "lint": "eslint",
-    "lint:fix": "eslint src/",
+    "lint:fix": "eslint --fix",
     "test": "vitest"
   },
   "dependencies": {
@@ -71,6 +71,7 @@
     "zustand": "^4.5.7"
   },
   "devDependencies": {
+    "@eslint-react/eslint-plugin": "^1.52.2",
     "@svgr/webpack": "^8.1.0",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^14.3.1",
@@ -85,7 +86,8 @@
     "jsdom": "^24.1.3",
     "postcss": "^8.5.4",
     "tailwindcss": "^3.4.17",
-    "typescript": "^5.8.3"
+    "typescript": "^5.8.3",
+    "typescript-eslint": "^8.36.0"
   },
   "browserslist": {
     "production": [

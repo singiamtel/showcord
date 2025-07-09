@@ -1,37 +1,53 @@
-import typescriptEslint from '@typescript-eslint/eslint-plugin';
-import typescriptParser from '@typescript-eslint/parser';
+// @ts-check
+import eslintJs from "@eslint/js";
+import eslintReact from "@eslint-react/eslint-plugin";
+import tseslint from "typescript-eslint";
 import reactRefresh from 'eslint-plugin-react-refresh';
 
-export default [
-    {
-        files: ['**/*.{js,jsx,ts,tsx}'],
-        ignores: ['node_modules/**', 'dist/**', 'coverage/**', 'src/utils/namecolour.js', '.next/**'],
-        languageOptions: {
-            parser: typescriptParser,
-            parserOptions: {
-                ecmaVersion: 'latest',
-                sourceType: 'module',
-                ecmaFeatures: {
-                    jsx: true,
-                },
+export default tseslint.config({
+    files: ["**/*.{js,jsx,ts,tsx}"],
+    ignores: ['node_modules/**', 'dist/**', 'coverage/**', 'src/utils/namecolour.js', '.next/**', 'eslint.config.js', 'test/**', 'e2e/**', 'vite.config.ts', 'tailwind.config.js'],
+
+    // Extend recommended rule sets from:
+    // 1. ESLint JS's recommended rules
+    // 2. TypeScript ESLint recommended rules
+    // 3. ESLint React's recommended-typescript rules
+    extends: [
+        eslintJs.configs.recommended,
+        tseslint.configs.recommended,
+        eslintReact.configs["recommended-typescript"],
+    ],
+
+    // Configure language/parsing options
+    languageOptions: {
+        // Use TypeScript ESLint parser for TypeScript files
+        parser: tseslint.parser,
+        parserOptions: {
+            // Enable project service for better TypeScript integration
+            projectService: {
+                allowDefaultProject: ["*.js", "*.mjs", "*.cjs"]
             },
-            globals: {
-                window: 'readonly',
-                document: 'readonly',
-                console: 'readonly',
-                process: 'readonly',
-                Buffer: 'readonly',
-                localStorage: 'readonly',
-                sessionStorage: 'readonly',
-                fetch: 'readonly',
-                location: 'readonly',
-                open: 'readonly',
-            },
+            tsconfigRootDir: import.meta.dirname,
         },
-        plugins: {
-            '@typescript-eslint': typescriptEslint,
-            'react-refresh': reactRefresh,
+        globals: {
+            window: 'readonly',
+            document: 'readonly',
+            console: 'readonly',
+            process: 'readonly',
+            Buffer: 'readonly',
+            localStorage: 'readonly',
+            sessionStorage: 'readonly',
+            fetch: 'readonly',
+            location: 'readonly',
+            open: 'readonly',
         },
+    },
+
+    plugins: {
+        'react-refresh': reactRefresh,
+    },
+
+    // Custom rule overrides (modify rule levels or disable rules)
         rules: {
             // TypeScript rules
             'quotes': [
@@ -117,5 +133,4 @@ export default [
 
             // General JavaScript
         },
-    },
-];
+});

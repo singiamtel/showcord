@@ -89,7 +89,7 @@ export class AuthenticationManager {
         }
 
         const urlParams = new URLSearchParams(window.location.search);
-        let assertion = urlParams.get('assertion');
+        const assertion = urlParams.get('assertion');
 
         if (assertion && assertion !== 'undefined') {
             await this.sendAssertion(assertion);
