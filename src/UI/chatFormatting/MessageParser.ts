@@ -1,6 +1,5 @@
 import Linkify from 'linkify-react';
 import { Fragment, createElement } from 'react';
-import { assertNever } from '@/lib/utils';
 import { bold, fakeCommand, greentext, inlineCode, italic, link, spoiler, strikethrough, subscript, superscript, options } from './chat';
 import { RoomLink } from './RoomLink';
 
@@ -62,8 +61,8 @@ const cleanTag = (input: string, tag: keyof typeof elements) => {
     case 'roomlink':
         return input.replace(elements.roomlink.pattern, '$1');
     default:
-        assertNever(tag);
-        console.error('cleanTag: unknown tag', tag);
+        tag satisfies never;
+        console.error('Bug in chatFormatting/MessageParser, cleanTag: unknown tag', tag);
         return '';
     }
 };

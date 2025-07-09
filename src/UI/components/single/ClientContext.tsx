@@ -1,4 +1,3 @@
-import { assertNever } from '@/lib/utils';
 import { Client, client, useClientStore } from '../../../client/client';
 import { Message } from '../../../client/message';
 import { Room } from '../../../client/room/room';

@@ -5,7 +5,7 @@ import { Room } from './room/room';
 import { User } from './user';
 import { notificationsEngine, RoomNotification as RoomNotifications } from './notifications';
 import { Protocol } from '@pkmn/protocol';
-import { assert, assertNever } from '@/lib/utils';
+import { assert } from '@/lib/utils';
 import { BattleRoom } from './room/battleRoom';
 import formatParser, { Formats } from './formatParser';
 import { AuthenticationManager, AuthenticationCallbacks } from './authentication';
@@ -808,11 +808,17 @@ export class Client {
                         this.roomListener = undefined;
                     }
                 } catch (e) {
-                    console.error('Error parsing roomsdetails', args);
+                    console.error('Error parsing roomsdetails', args, e);
                 }
                 break;
+            case 'roomlist':
+            case 'laddertop':
+            case 'roominfo':
+            case 'savereplay':
+            case 'debug':
+                break;
             default:
-                // assertNever(queryType);
+                queryType satisfies never;
                 console.error('Unknown queryresponse', args);
                 break;
             }
@@ -831,9 +837,12 @@ export class Client {
                 );
                 this._removeRoom(roomID);
                 break;
+            case 'rename':
+                console.warn('Currently unhandled noinit', args);
+                break;
             default:
-                // assertNever(reason);
-                console.error('Unknown noinit', args);
+                reason satisfies never;
+                console.error('Bug in pkmn/protocol, noinit', args);
             }
             break;
         }
@@ -968,11 +977,11 @@ export class Client {
         }
             break;
         case 'customgroups':
-        case 'tournament':
         case 'notify':
         case 'popup':
         case 'nametaken':
         case 'updatesearch':
+            console.error('Currently unhandled cmd', args);
             break;
             // battles
         case 'player':
@@ -1017,6 +1026,7 @@ export class Client {
         case '-crit':
         case '-immune':
         case '-sidestart':
+        case 'tournament':
         case '-sideend':
         case '-start':
         case '-resisted':
@@ -1113,8 +1123,8 @@ export class Client {
             break;
         default:
         {
-            assertNever(args[0]);
-            console.error('Unknown cmd', args[0], args);
+            console.error('Bug in pkmn/protocol, unknown cmd', args[0], args);
+            args[0] satisfies never;
             return false;
         }
         }

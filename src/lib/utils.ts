@@ -21,10 +21,6 @@ export function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
 }
 
-export function assertNever(x: never, message?: string): asserts x is never {
-    throw new AssertionError({ message: message ?? 'Unexpected object: ' + x, expected: 'never' });
-}
-
 export function assert(condition: any, message?: string): asserts condition {
     if (!condition) {
         throw new AssertionError({ message: message ?? 'Assert failed', expected: 'true', actual: condition });

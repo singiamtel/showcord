@@ -1,4 +1,4 @@
-import { assert, assertNever } from '@/lib/utils';
+import { assert } from '@/lib/utils';
 import { HTMLAttributes, useEffect, useState } from 'react';
 import { useClientContext } from '../../single/ClientContext';
 import { MoveRequest } from './requests/MoveRequest';
@@ -41,7 +41,8 @@ export default function BattleControls(_props: Readonly<HTMLAttributes<HTMLDivEl
     case 'wait':
         return <WaitRequest req={req} battle={battle} />;
     default:
-        assertNever(requestType, 'Unexpected request type: ' + requestType);
+        requestType satisfies never;
+        console.error('Bug in BattleControls, unexpected request type', requestType);
         return null;
     }
 }

@@ -36,9 +36,9 @@ export function inlineCode(
     delete props.key;
     return (
         <code
+            key={key}
             className={'font-mono bg-gray-601 dark:bg-gray-600 rounded p-1 '}
             {...props}
-            key={key}
         />
     );
 }
@@ -51,13 +51,13 @@ export function spoiler(
     delete props.key;
     return (
         <Linkify
+            key={key}
             as="span"
             className={twMerge(
                 'dark:bg-gray-700 dark:text-gray-700 p-0.5 rounded bg-gray-spoiler-light text-gray-spoiler-light ',
                 visible ? 'text-black dark:text-white' : 'hover:cursor-pointer',
             )}
             {...props}
-            key={key}
             options={options}
             onClick={() => {
                 //set spoiler to visible
@@ -72,7 +72,7 @@ export function bold(
 ): React.ReactElement {
     const key = props.key;
     delete props.key;
-    return <Linkify as="strong" {...props} key={key} options={options} />;
+    return <Linkify key={key} as="strong" {...props} options={options} />;
 }
 
 export function italic(
@@ -80,7 +80,7 @@ export function italic(
 ) {
     const key = props.key;
     delete props.key;
-    return <Linkify as="em" {...props} key={key} options={options} />;
+    return <Linkify key={key} as="em" {...props} options={options} />;
 }
 
 export function strikethrough(
@@ -88,7 +88,7 @@ export function strikethrough(
 ) {
     const key = props.key;
     delete props.key;
-    return <Linkify as="s" {...props} key={key} options={options} />;
+    return <Linkify key={key} as="s" {...props} options={options} />;
 }
 
 export function superscript(
@@ -96,7 +96,7 @@ export function superscript(
 ) {
     const key = props.key;
     delete props.key;
-    return <Linkify as="sup" {...props} key={key} options={options} />;
+    return <Linkify key={key} as="sup" {...props} options={options} />;
 }
 
 export function subscript(
@@ -104,7 +104,7 @@ export function subscript(
 ) {
     const key = props.key;
     delete props.key;
-    return <Linkify as="sub" {...props} key={key} options={options} />;
+    return <Linkify key={key} as="sub" {...props} options={options} />;
 }
 
 export function link(
@@ -114,12 +114,12 @@ export function link(
     delete props.key;
     return (
         <a
+            key={key}
             href={`//www.google.com/search?ie=UTF-8&btnI&q=${
                 innerText(props.children)
             }`}
             className="text-blue-500 underline"
             {...props}
-            key={key}
             target="_blank"
         />
     );
@@ -136,10 +136,10 @@ export function greentext(
     delete props.children;
     return (
         <Linkify
+            key={key}
             as="span"
             className="text-green-400-light dark:text-green-400"
             {...props}
-            key={key}
             options={options}
         >
       &gt;{children}
@@ -155,7 +155,7 @@ export function fakeCommand(
     delete props.key;
     delete props.children;
     return (
-        <Linkify as="span" {...props} key={key} options={options}>
+        <Linkify key={key} as="span" {...props} options={options}>
             {children}
         </Linkify>
     );
