@@ -8,7 +8,7 @@ import { useClientContext } from '../components/single/ClientContext';
 import { Settings } from '@/client/settings';
 
 export default function DeveloperSettings(props: Readonly<HTMLAttributes<'div'>>) {
-    const description = 'These settings are for advanced users only. Change them at your own risk.';
+    const description = 'These settings are for advanced users only. Mess with them at your own risk.';
     const { client } = useClientContext();
     const [serverURL, setServerURL] = useState(client.settings.serverURL);
     const [loginserverURL, setLoginserverURL] = useState(client.settings.loginServerURL);
