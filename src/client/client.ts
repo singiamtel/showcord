@@ -31,7 +31,7 @@ interface UseClientStoreType {
     addUnread: (room: Room) => void;
     addMention: (room: Room) => void;
     avatar: string;
-    theme: 'light' | 'dark';
+    theme: 'light' | 'dark' | 'system';
     user: string | undefined
 }
 
@@ -106,7 +106,7 @@ export const useClientStore = create<UseClientStoreType>((set) => ({
     },
 
     avatar: 'lucas',
-    theme: localStorage.getItem('theme') as 'light' | 'dark' ?? 'dark',
+    theme: localStorage.getItem('theme') as 'light' | 'dark' | 'system' ?? 'system',
     user: undefined,
 
 }));
@@ -260,7 +260,7 @@ export class Client {
         return this.rooms.get(roomID);
     }
 
-    setTheme(theme: 'light' | 'dark') {
+    setTheme(theme: 'light' | 'dark' | 'system') {
         this.settings.theme = theme;
         useClientStore.setState({ theme });
     }

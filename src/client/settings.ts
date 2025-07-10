@@ -62,9 +62,9 @@ export class Settings {
 
     get userID() { return toID(this.name); }
 
-    private __theme: 'dark' | 'light' = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    private __theme: 'light' | 'dark' | 'system' = 'system';
     get theme() { return this.__theme; }
-    set theme(theme: 'light' | 'dark') {
+    set theme(theme: 'light' | 'dark' | 'system') {
         this.__theme = theme;
         localStorage.setItem('theme', theme);
     }
@@ -125,8 +125,8 @@ export class Settings {
         }
         const theme = localStorage.getItem('theme');
         if (theme) {
-            console.assert(theme === 'dark' || theme === 'light', 'Invalid theme', theme);
-            this.theme = theme as 'dark' | 'light';
+            console.assert(theme === 'dark' || theme === 'light' || theme === 'system', 'Invalid theme', theme);
+            this.theme = theme as 'light' | 'dark' | 'system';
         }
         const settingsRaw = localStorage.getItem('settings');
         if (!settingsRaw) {
