@@ -1,4 +1,4 @@
-import { HTMLAttributes, useEffect, useState } from 'react';
+import { HTMLAttributes, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { useClientContext } from '../components/single/ClientContext';
 import { cn } from '@/lib/utils';
@@ -17,6 +17,7 @@ function ThemePillSelector({ value, onChange }: { value: ThemeOption; onChange: 
         <div className="inline-flex rounded-md border border-gray-200 dark:border-gray-700 p-1 bg-gray-50 dark:bg-gray-800">
             {options.map((option) => (
                 <button
+                    type="button"
                     key={option.value}
                     onClick={() => onChange(option.value)}
                     className={cn(

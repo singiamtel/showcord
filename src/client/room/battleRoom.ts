@@ -6,7 +6,6 @@ import { Protocol } from '@pkmn/protocol';
 
 import { Room, RoomType } from './room';
 import newMessage from '../message';
-import { assert } from '@/lib/utils';
 
 
 export class BattleRoom extends Room {
