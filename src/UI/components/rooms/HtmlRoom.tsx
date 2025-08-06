@@ -1,5 +1,5 @@
 
-import { HTMLAttributes } from 'react';
+import type { HTMLAttributes } from 'react';
 import Chat from '../single/Chat';
 import { cn } from '@/lib/utils';
 

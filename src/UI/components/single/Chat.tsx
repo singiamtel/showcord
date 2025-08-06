@@ -1,5 +1,5 @@
 import {
-    HTMLAttributes,
+    type HTMLAttributes,
     useCallback,
     useLayoutEffect,
     useRef,
@@ -11,7 +11,7 @@ import { HHMMSS } from '../../../utils/date';
 import { ErrorBoundary } from 'react-error-boundary';
 
 import Linkify from 'linkify-react';
-import { Message, MessageType } from '../../../client/message';
+import type { Message, MessageType } from '../../../client/message';
 import Code from '../../chatFormatting/code';
 import { Username } from '../Username';
 

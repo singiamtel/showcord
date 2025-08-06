@@ -1,6 +1,6 @@
 import { Sprites } from '@pkmn/img';
 import { Username } from './Username';
-import { HTMLAttributes } from 'react';
+import type { HTMLAttributes } from 'react';
 import { cn } from '@/lib/utils';
 
 interface UserDetailsProps {

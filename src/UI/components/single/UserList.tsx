@@ -1,7 +1,7 @@
 import { useClientContext } from './ClientContext';
-import { HTMLAttributes, useLayoutEffect, useState } from 'react';
+import { type HTMLAttributes, useLayoutEffect, useState } from 'react';
 import { Username } from '../Username';
-import { isStaff, User } from '../../../client/user';
+import { isStaff, type User } from '../../../client/user';
 import { toID } from '@/utils/generic';
 import { cn } from '@/lib/utils';
 import { useClientStore } from '@/client/client';

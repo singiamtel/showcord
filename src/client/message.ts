@@ -1,4 +1,4 @@
-import { Optional } from '../utils/generic';
+import type { Optional } from '../utils/generic';
 
 export type MessageType =
   | 'chat'

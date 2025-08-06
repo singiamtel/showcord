@@ -1,14 +1,14 @@
 import { Settings } from './settings';
 import { toID } from '../utils/generic';
-import newMessage, { Message } from './message';
+import newMessage, { type Message } from './message';
 import { Room } from './room/room';
 import { User } from './user';
-import { notificationsEngine, RoomNotification as RoomNotifications } from './notifications';
+import { notificationsEngine, type RoomNotification as RoomNotifications } from './notifications';
 import { Protocol } from '@pkmn/protocol';
 import { assert } from '@/lib/utils';
 import { BattleRoom } from './room/battleRoom';
-import formatParser, { Formats } from './formatParser';
-import { AuthenticationManager, AuthenticationCallbacks } from './authentication';
+import formatParser, { type Formats } from './formatParser';
+import { AuthenticationManager, type AuthenticationCallbacks } from './authentication';
 
 import { create } from 'zustand';
 

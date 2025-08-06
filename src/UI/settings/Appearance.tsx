@@ -1,4 +1,4 @@
-import { HTMLAttributes, useEffect } from 'react';
+import { type HTMLAttributes, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { useClientContext } from '../components/single/ClientContext';
 import { cn } from '@/lib/utils';

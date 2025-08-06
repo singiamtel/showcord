@@ -1,7 +1,7 @@
 import ChatBox from '../single/Chatbox';
 import Chat from '../single/Chat';
 import { cn } from '@/lib/utils';
-import { HTMLAttributes } from 'react';
+import type { HTMLAttributes } from 'react';
 
 export default function PmRoom(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     return (

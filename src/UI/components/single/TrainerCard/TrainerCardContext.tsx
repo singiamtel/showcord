@@ -1,4 +1,4 @@
-import { MouseEventHandler, createContext, useContext, useEffect, useRef, useState } from 'react';
+import { type MouseEventHandler, createContext, useContext, useEffect, useRef, useState } from 'react';
 import TrainerCard from './TrainerCard';
 import useClickOutside from '@/UI/hooks/useClickOutside';
 import { useClientContext } from '../ClientContext';

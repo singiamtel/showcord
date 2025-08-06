@@ -1,4 +1,4 @@
-import { HTMLAttributes } from 'react';
+import type { HTMLAttributes } from 'react';
 import { RoomListComponent } from '../RoomListComponent';
 import {
     restrictToParentElement,
@@ -9,7 +9,7 @@ import 'allotment/dist/style.css';
 import {
     closestCenter,
     DndContext,
-    DragOverEvent,
+    type DragOverEvent,
     MouseSensor,
     TouchSensor,
     useSensor,

@@ -1,10 +1,10 @@
 import { Battle } from '@pkmn/client';
 import { LogFormatter } from '@pkmn/view';
 import { Generations } from '@pkmn/data';
-import { Dex, SideID } from '@pkmn/dex';
+import { Dex, type SideID } from '@pkmn/dex';
 import { Protocol } from '@pkmn/protocol';
 
-import { Room, RoomType } from './room';
+import { Room, type RoomType } from './room';
 import newMessage from '../message';
 
 

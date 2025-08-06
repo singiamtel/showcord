@@ -1,5 +1,5 @@
-import { Client, client, useClientStore } from '../../../client/client';
-import { Message } from '../../../client/message';
+import { type Client, client, useClientStore } from '../../../client/client';
+import type { Message } from '../../../client/message';
 import { Room } from '../../../client/room/room';
 import { loadCustomColors } from '../../../utils/namecolour';
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';

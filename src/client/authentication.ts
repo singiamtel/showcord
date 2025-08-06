@@ -1,4 +1,4 @@
-import { Settings } from './settings';
+import type { Settings } from './settings';
 import { logger } from '../utils/logger';
 import { toID } from '../utils/generic';
 

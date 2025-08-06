@@ -1,4 +1,4 @@
-import { HTMLAttributes, useState } from 'react';
+import { type HTMLAttributes, useState } from 'react';
 import AppearanceSettings from './settings/Appearance';
 import DeveloperSettings from './settings/Developer';
 import HighlightingSettings from './settings/Highlighting';

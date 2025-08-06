@@ -2,7 +2,7 @@ import ChatBox from '../single/Chatbox';
 import UserList from '../single/UserList';
 import Chat from '../single/Chat';
 import { cn } from '@/lib/utils';
-import { HTMLAttributes } from 'react';
+import type { HTMLAttributes } from 'react';
 
 export default function ChatRoom(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     return (

@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useState } from 'react';
+import { type RefObject, useEffect, useState } from 'react';
 
 export default function useClickOutside(ref: RefObject<HTMLElement>) {
     const [isOutside, setIsOutside] = useState<boolean | null>(false);

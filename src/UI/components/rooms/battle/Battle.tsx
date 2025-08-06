@@ -1,6 +1,6 @@
 import { assert, cn } from '@/lib/utils';
-import { HTMLAttributes } from 'react';
-import { BattleRoom } from '@/client/room/battleRoom';
+import type { HTMLAttributes } from 'react';
+import type { BattleRoom } from '@/client/room/battleRoom';
 import { Icons, Sprites } from '@pkmn/img';
 import type { Pokemon as PokemonType, Side } from '@pkmn/client';
 import { Username } from '../../Username';

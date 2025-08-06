@@ -1,6 +1,6 @@
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { ReactNode } from 'react';
+import type { ReactNode } from 'react';
 
 interface SortableItemProps {
     id: string;

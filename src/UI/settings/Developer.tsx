@@ -1,4 +1,4 @@
-import { HTMLAttributes, useState } from 'react';
+import { type HTMLAttributes, useState } from 'react';
 import { twMerge } from 'tailwind-merge';
 import { AlertDestructive } from '@/utils/AlertDestructive';
 import { Input } from '@/components/ui/input';

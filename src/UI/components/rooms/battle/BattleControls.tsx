@@ -1,12 +1,12 @@
 import { assert } from '@/lib/utils';
-import { HTMLAttributes, useEffect, useState } from 'react';
+import { type HTMLAttributes, useEffect, useState } from 'react';
 import { useClientContext } from '../../single/ClientContext';
 import { MoveRequest } from './requests/MoveRequest';
 import { WaitRequest } from './requests/WaitRequest';
 import { TeamRequest } from './requests/TeamRequest';
 import { SwitchRequest } from './requests/SwitchRequest';
 import { useClientStore } from '@/client/client';
-import { BattleRoom } from '@/client/room/battleRoom';
+import type { BattleRoom } from '@/client/room/battleRoom';
 
 export default function BattleControls(_props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const { client } = useClientContext();

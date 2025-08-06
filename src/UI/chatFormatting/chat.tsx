@@ -1,5 +1,5 @@
 import Linkify from 'linkify-react';
-import { HTMLAttributes, useState } from 'react';
+import { type HTMLAttributes, useState } from 'react';
 import manageURL from '../../utils/manageURL';
 import innerText from 'react-innertext';
 import { twMerge } from 'tailwind-merge';

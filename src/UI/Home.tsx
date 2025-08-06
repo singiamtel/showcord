@@ -1,14 +1,14 @@
 import {
-    FormEvent,
-    HTMLAttributes,
-    KeyboardEventHandler,
+    type FormEvent,
+    type HTMLAttributes,
+    type KeyboardEventHandler,
     useEffect,
     useRef,
     useState,
 } from 'react';
 import RoomCard from './components/RoomCard';
 import { InfinitySpin } from 'react-loader-spinner';
-import MiniSearch, { SearchResult } from 'minisearch';
+import MiniSearch, { type SearchResult } from 'minisearch';
 import NewsCard from './components/NewsCard';
 
 import targetFaceCluster from './assets/cluster_target_face_nobg.webp';

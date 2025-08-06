@@ -1,7 +1,7 @@
 import manageURL from '../../utils/manageURL';
 import innerText from 'react-innertext';
 import { useClientContext } from '../components/single/ClientContext';
-import { ExtendedProps } from './chat';
+import type { ExtendedProps } from './chat';
 
 
 export function RoomLink(

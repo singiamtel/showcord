@@ -1,14 +1,14 @@
 import {
-    ChangeEventHandler,
-    FormEvent,
-    HTMLAttributes,
-    KeyboardEvent,
+    type ChangeEventHandler,
+    type FormEvent,
+    type HTMLAttributes,
+    type KeyboardEvent,
     useEffect,
     useLayoutEffect,
     useRef,
     useState,
 } from 'react';
-import MiniSearch, { SearchResult } from 'minisearch';
+import MiniSearch, { type SearchResult } from 'minisearch';
 import TextareaAutosize from 'react-textarea-autosize';
 import { cn } from '@/lib/utils';
 import { useClientContext } from './ClientContext';

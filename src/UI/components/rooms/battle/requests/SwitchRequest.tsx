@@ -1,9 +1,9 @@
 import { useClientContext } from '@/UI/components/single/ClientContext';
-import { BattleRoom } from '@/client/room/battleRoom';
+import type { BattleRoom } from '@/client/room/battleRoom';
 import { cn } from '@/lib/utils';
-import { Protocol } from '@pkmn/protocol';
+import type { Protocol } from '@pkmn/protocol';
 import { ChoiceBuilder } from '@pkmn/view';
-import { HTMLAttributes, useEffect, useState } from 'react';
+import { type HTMLAttributes, useEffect, useState } from 'react';
 
 function SwitchButton(props: Readonly<HTMLAttributes<HTMLButtonElement> & { pokemon: Protocol.Request.Pokemon; }>) {
     return <button

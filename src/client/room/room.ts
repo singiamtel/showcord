@@ -1,6 +1,6 @@
 import { toID } from '@/utils/generic';
-import { Message } from '../message';
-import { rankOrder, RankSymbol, User } from '../user';
+import type { Message } from '../message';
+import { rankOrder, type RankSymbol, type User } from '../user';
 
 export const roomTypes = ['chat', 'battle', 'pm', 'permanent', 'html'] as const;
 export type RoomType = typeof roomTypes[number];

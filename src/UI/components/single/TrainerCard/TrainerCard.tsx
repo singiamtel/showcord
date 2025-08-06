@@ -1,9 +1,9 @@
 import { Sprites } from '@pkmn/img';
 import {
     Fragment,
-    MouseEventHandler,
-    MutableRefObject,
-    ReactNode,
+    type MouseEventHandler,
+    type MutableRefObject,
+    type ReactNode,
     useEffect,
 } from 'react';
 import {

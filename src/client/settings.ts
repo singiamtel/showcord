@@ -1,6 +1,6 @@
 import { toID } from '@/utils/generic';
 import { highlightMsg, stringsToRegex } from '../utils/highlightMsg';
-import { Room } from './room/room';
+import type { Room } from './room/room';
 
 export interface UserDefinedSettings {
     highlightWords: { [key: string]: string[] };
