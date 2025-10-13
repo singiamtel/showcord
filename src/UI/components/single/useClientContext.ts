@@ -1,8 +1,8 @@
-import { useContext } from 'react';
+import { use } from 'react';
 import { ClientContext } from './ClientContext.types';
 
 export function useClientContext() {
-    const context = useContext(ClientContext);
+    const context = use(ClientContext);
     if (!context) {
         throw new Error('useClientContext must be used within a ClientContextProvider');
     }

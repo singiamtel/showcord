@@ -3,7 +3,7 @@ import type { BattleRoom } from '@/client/room/battleRoom';
 import { cn } from '@/lib/utils';
 import type { Protocol } from '@pkmn/protocol';
 import { ChoiceBuilder } from '@pkmn/view';
-import { type HTMLAttributes, useEffect, useState } from 'react';
+import { type HTMLAttributes, useEffect, useMemo, useState } from 'react';
 
 function SwitchButton(props: Readonly<HTMLAttributes<HTMLButtonElement> & { pokemon: Protocol.Request.Pokemon; }>) {
     return <button
@@ -17,7 +17,7 @@ export function SwitchRequest({ req, battle }: Readonly<{ req: Protocol.SwitchRe
     const side = req.side;
 
     const { client } = useClientContext();
-    const [builder] = useState(() => new ChoiceBuilder(req));
+    const builder = useMemo(() => new ChoiceBuilder(req), [req]);
     const [selected, setSelected] = useState<string | null>(null);
 
     useEffect(() => {

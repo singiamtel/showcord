@@ -17,6 +17,5 @@ export default defineConfig(({ command }) => ({
         globals: true,
         environment: 'happy-dom',
         setupFiles: ['./test/setupTests.js'],
-        reporters: 'basic',
     },
 }));

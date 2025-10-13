@@ -1,5 +1,5 @@
 
-import { type HTMLAttributes, useState } from 'react';
+import { type HTMLAttributes } from 'react';
 import { useClientContext } from '../components/single/useClientContext';
 import { cn } from '@/lib/utils';
 import { Username } from '../components/Username';
@@ -7,7 +7,7 @@ import { Button } from '@/components/ui/button';
 
 export default function AccountSettings(props: Readonly<HTMLAttributes<'div'>>) {
     const { client } = useClientContext();
-    const [username] = useState(client.username);
+    const username = client.username;
     return (
         <div className={cn('p-8', props.className)}>
             <h2 className="text-xl">

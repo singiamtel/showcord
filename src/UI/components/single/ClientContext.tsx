@@ -7,14 +7,10 @@ import { ClientContext } from './ClientContext.types';
 
 export default function ClientContextProvider(props: Readonly<React.PropsWithChildren>) {
     const [previousRooms, setPreviousRooms] = useState<string[]>(['home']);
-    const { rooms: roomsMap, currentRoom, setCurrentRoom } = useRoomStore((state) => ({
-        rooms: state.rooms,
-        currentRoom: state.currentRoom,
-        setCurrentRoom: state.setCurrentRoom,
-    }));
-    const { messages: messagesMap } = useMessageStore((state) => ({
-        messages: state.messages,
-    }));
+    const roomsMap = useRoomStore((state) => state.rooms);
+    const currentRoom = useRoomStore((state) => state.currentRoom);
+    const setCurrentRoom = useRoomStore((state) => state.setCurrentRoom);
+    const messagesMap = useMessageStore((state) => state.messages);
 
     const rooms = Array.from(roomsMap.values()).filter((r) => r.open);
     const messages = currentRoom ? messagesMap[currentRoom.ID] || [] : [];
@@ -94,11 +90,11 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
     }), [setRoom, messages, rooms]);
 
     return (
-        <ClientContext.Provider
+        <ClientContext
             value={ProviderValue}
         >
             {props.children}
-        </ClientContext.Provider>
+        </ClientContext>
     );
 }
 

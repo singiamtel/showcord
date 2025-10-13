@@ -20,8 +20,6 @@ export class QueryHandlers {
     async queryUser(user: string, callback: (json: any) => void) {
         if (this.lastQueriedUser && this.lastQueriedUser.user === user) {
             callback(this.lastQueriedUser.json);
-            this.callbacks.send(`/cmd userdetails ${user}`, false);
-            this.userListener = callback;
         }
         this.callbacks.send(`/cmd userdetails ${user}`, false);
         this.userListener = callback;

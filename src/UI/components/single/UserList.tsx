@@ -1,4 +1,4 @@
-import { type HTMLAttributes, useLayoutEffect, useState } from 'react';
+import { type HTMLAttributes, useLayoutEffect, useRef, useState } from 'react';
 import { Username } from '../Username';
 import { isStaff, type User } from '../../../client/user';
 import { toID } from '@/utils/generic';
@@ -12,12 +12,18 @@ export default function UserList(props: Readonly<HTMLAttributes<HTMLDivElement> 
     const usersUpdateCounter = useRoomStore(state => state.usersUpdateCounter);
     const [users, setUsers] = useState<User[]>([]);
     const [search, setSearch] = useState<string>('');
+    const prevUsersRef = useRef<User[]>([]);
 
     const filteredUsers = users.filter((user) => toID(user.name).includes(toID(search)));
 
     useLayoutEffect(() => {
         if (!room) return;
-        setUsers([...room.users]);
+        const newUsers = [...room.users];
+        const usersChanged = prevUsersRef.current.length !== newUsers.length || !prevUsersRef.current.every((u, i) => u === newUsers[i]);
+        if (usersChanged) {
+            prevUsersRef.current = newUsers;
+            setUsers(newUsers);
+        }
     }, [room, usersUpdateCounter]);
 
     // separate users into staff and regular users

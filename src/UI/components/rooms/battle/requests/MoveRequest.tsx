@@ -2,7 +2,7 @@ import { useClientContext } from '@/UI/components/single/useClientContext';
 import type { BattleRoom } from '@/client/room/battleRoom';
 import type { Protocol } from '@pkmn/protocol';
 import { ChoiceBuilder } from '@pkmn/view';
-import { type HTMLAttributes, useEffect, useState } from 'react';
+import { type HTMLAttributes, useEffect, useMemo, useState } from 'react';
 
 function MoveButton(props: Readonly<HTMLAttributes<HTMLButtonElement> & { move: Protocol.Request.ActivePokemon['moves'][number]; }>) {
     return <button
@@ -15,7 +15,7 @@ function MoveButton(props: Readonly<HTMLAttributes<HTMLButtonElement> & { move: 
 export function MoveRequest({ req, battle }: Readonly<{ req: Protocol.MoveRequest; battle: BattleRoom }>) {
     const active = req.active;
     const { client } = useClientContext();
-    const [builder, _setBuilder] = useState(() => new ChoiceBuilder(req));
+    const builder = useMemo(() => new ChoiceBuilder(req), [req]);
     const [selected, setSelected] = useState<string | null>(null);
 
     useEffect(() => {

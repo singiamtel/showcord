@@ -28,7 +28,8 @@ function Disconnected() {
 }
 function RenderUserContent() {
     const isConnected = useAppStore(state => state.isConnected);
-    const { user, avatar } = useUserStore(state => ({ user: state.user, avatar: state.avatar }));
+    const user = useUserStore(state => state.user);
+    const avatar = useUserStore(state => state.avatar);
 
     if (!isConnected) {
         return <Disconnected />;
@@ -40,7 +41,7 @@ function RenderUserContent() {
 }
 
 export default function UserPanel() {
-    const { user } = useUserStore(state => ({ user: state.user }));
+    const user = useUserStore(state => state.user);
     return (
         <div className="h-26 p-3 flex items-center bg-gray-251 dark:bg-gray-600">
             <span

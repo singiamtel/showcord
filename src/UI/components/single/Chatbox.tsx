@@ -39,6 +39,7 @@ export default function ChatBox(props: Readonly<HTMLAttributes<HTMLDivElement>>)
     const { client, setRoom } = useClientContext();
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
     const formRef = useRef<HTMLFormElement>(null);
+    const prevOffsetRef = useRef<SearchBoxOffset>({ width: 0, marginBottom: 0 });
 
     const submit = (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
@@ -132,16 +133,14 @@ export default function ChatBox(props: Readonly<HTMLAttributes<HTMLDivElement>>)
 
     useLayoutEffect(() => {
         const size = formRef.current?.getBoundingClientRect();
-        setSearchBoxOffset(prev => {
-            if (
-                prev.width === size?.width &&
-                prev.marginBottom === size?.height
-            ) return prev;
-            return {
-                width: size?.width ?? 0,
-                marginBottom: size?.height ?? 0,
-            };
-        });
+        const newOffset = {
+            width: size?.width ?? 0,
+            marginBottom: size?.height ?? 0,
+        };
+        if (prevOffsetRef.current.width !== newOffset.width || prevOffsetRef.current.marginBottom !== newOffset.marginBottom) {
+            prevOffsetRef.current = newOffset;
+            setSearchBoxOffset(newOffset);
+        }
     }, [displaySearchbox]);
 
     useEffect(() => {

@@ -25,7 +25,7 @@ import { cn } from '@/lib/utils';
 import { useRoomStore } from '@/client/client';
 
 export default function Sidebar(props: Readonly<HTMLAttributes<'div'>>) {
-    const { rooms } = useRoomStore((state) => ({ rooms: state.rooms }));
+    const rooms = useRoomStore((state) => state.rooms);
     const roomsArray = Array.from(rooms.values()).filter(room => room.open);
 
     const mouseSensor = useSensor(MouseSensor, {

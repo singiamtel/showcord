@@ -1,8 +1,8 @@
-import { useContext } from 'react';
+import { use } from 'react';
 import { TrainerCardContext } from './TrainerCardContext.types';
 
 export const useTrainerCard = () => {
-    const context = useContext(TrainerCardContext);
+    const context = use(TrainerCardContext);
     if (context === undefined) {
         throw new Error('useTrainerCard must be used within a TrainerCardProvider');
     }

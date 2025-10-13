@@ -16,11 +16,10 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
     const wrapperRef = useRef<any>(null);
 
     const closeWindow = useCallback(() => {
-        // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
         setUser(null);
-        // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+
         setUsername(null);
-        // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
+
         setPosition({ x: 0, y: 0 });
     }, []);
 
@@ -53,7 +52,7 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
     const contextValue = useMemo(() => ({ isOpen, openCard, closeCard, clickUsername }), [isOpen, clickUsername]);
 
     return (
-        <TrainerCardContext.Provider value={contextValue}>
+        <TrainerCardContext value={contextValue}>
             <TrainerCard
                 user={user}
                 name={username}
@@ -62,7 +61,7 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
                 close={closeWindow}
             />
             {children}
-        </TrainerCardContext.Provider>
+        </TrainerCardContext>
     );
 }
 

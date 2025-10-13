@@ -131,6 +131,9 @@ export default tseslint.config({
             // React Refresh
             'react-refresh/only-export-components': 'warn',
 
+            // React hooks
+            '@eslint-react/hooks-extra/no-direct-set-state-in-use-effect': 'off',
+
             // General JavaScript
         },
 });
