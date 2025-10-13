@@ -53,6 +53,7 @@ export default function HighlightingSettings(props: Readonly<HTMLAttributes<'div
                                 {words.map((word) => (
                                     <li key={word} className="flex items-center font-mono">
                                         <button
+                                            type="button"
                                             className="bg-red-pastel hover:bg-red-600 text-black dark:text-white rounded px-2 py-1 mr-2"
                                             onClick={() => {
                                                 client.settings.removeHighlightWord(room, word);

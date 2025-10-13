@@ -15,21 +15,16 @@ export default function App() {
     const [isDark, setIsDark] = useState(false);
 
     useEffect(() => {
-        const updateTheme = () => {
-            if (theme === 'system') {
-                setIsDark(window.matchMedia('(prefers-color-scheme: dark)').matches);
-            } else {
-                setIsDark(theme === 'dark');
-            }
-        };
-
-        updateTheme();
-
         if (theme === 'system') {
             const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-            const handleChange = () => updateTheme();
+            const handleChange = (e: MediaQueryListEvent) => {
+                setIsDark(e.matches);
+            };
+            setIsDark(mediaQuery.matches);
             mediaQuery.addEventListener('change', handleChange);
             return () => mediaQuery.removeEventListener('change', handleChange);
+        } else {
+            setIsDark(theme === 'dark');
         }
     }, [theme]);
 

@@ -156,6 +156,7 @@ function UserCardButton({
 }>) {
     return (
         <button
+            type="button"
             className={'text-sm rounded-lg px-4 py-2 flex-grow-0 border border-gray-700 flex flex-col justify-center items-center ' +
         (disabled ? 'opacity-50' : 'hover:bg-gray-351 hover:dark:bg-gray-700 hover:underline ')}
             onClick={onClick}

@@ -57,14 +57,13 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
         >
             {messages[currentRoom.ID] ? messages[currentRoom.ID].map((message, index, arr) => (
                 <ErrorBoundary
-                    key={index}
+                    key={`msg-${currentRoom.ID}-${message.timestamp?.getTime() || 0}-${index}`}
                     fallbackRender={({ error: e }) => {
                         console.error(e.name, message.content, e);
                         return <div className="text-red-400">Error displaying message</div>;
                     }}
                 >
                     <MessageComponent
-                        key={index}
                         time={message.timestamp}
                         user={message.user || ''}
                         message={message.content}

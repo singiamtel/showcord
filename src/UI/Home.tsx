@@ -68,8 +68,8 @@ function News({ className }: Readonly<{ className?: string }>) {
             <h2 className="font-bold text-xl text-center mt-2">
         Latest news
             </h2>
-            {news?.slice(0, -1).map((n, idx) => (
-                <NewsCard key={idx} news={n} last={idx === news.length - 2} />
+            {news?.slice(0, -1).map((n) => (
+                <NewsCard key={n.id || n.title} news={n} last={n === news[news.length - 2]} />
             ))}
         </div>
     );
@@ -99,12 +99,16 @@ function RoomList({ className }: Readonly<{ className?: string }>) {
     }, [roomsJSON]);
 
     useEffect(() => {
+        if (!input) {
+            setMiniSearchResults([]);
+            return;
+        }
         const search = minisearch.search(input, {
             fuzzy: 0.2,
             prefix: true,
         });
         setMiniSearchResults(search);
-    }, [input, setMiniSearchResults]);
+    }, [input]);
 
     useEffect(() => {
         const focus = () => {
@@ -177,13 +181,13 @@ function RoomList({ className }: Readonly<{ className?: string }>) {
 
             {miniSearchResults.length > 0 ?
                 miniSearchResults?.sort((a: any, b: any) => b.userCount - a.userCount)
-                    .map((room: any, idx: number) => (
-                        <RoomCard onClick={manageRoomCardClick} key={idx} room={room} />
+                    .map((room: any) => (
+                        <RoomCard onClick={manageRoomCardClick} key={room.title} room={room} />
                     )) :
                 roomsJSON ?
                     roomsJSON.chat?.sort((a: any, b: any) => b.userCount - a.userCount)
-                        .map((room: any, idx: number) => (
-                            <RoomCard onClick={manageRoomCardClick} key={idx} room={room} />
+                        .map((room: any) => (
+                            <RoomCard onClick={manageRoomCardClick} key={room.title} room={room} />
                         )) :
                     (
                         <div className="h-full flex items-center justify-center !bg-white">
@@ -202,9 +206,12 @@ function SocialLink({ id, href, children }: Readonly<{ id: string, href?: string
         window.matchMedia('(min-width: 1500px)').matches
     );
     useEffect(() => {
-        window
-            .matchMedia('(min-width: 1500px)')
-            .addEventListener('change', e => setMatches(e.matches));
+        const mediaQuery = window.matchMedia('(min-width: 1500px)');
+        const handleChange = (e: MediaQueryListEvent) => setMatches(e.matches);
+        mediaQuery.addEventListener('change', handleChange);
+        return () => {
+            mediaQuery.removeEventListener('change', handleChange);
+        };
     }, []);
     return (
         <a

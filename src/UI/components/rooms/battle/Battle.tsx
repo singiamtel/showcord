@@ -61,8 +61,8 @@ function PokemonSprite({ pokemon, side }: Readonly<{
 function RenderTeam({ player }: Readonly<{ player: Side }>) {
     console.log(player);
     return <div className='w-[120px] grid grid-cols-2 md:grid-cols-3 p-2'>
-        {player.team.map((pokemon, idx) => pokemon && <PokemonIcon key={idx} pokemon={pokemon} />)}
-        {player.team.length < player.totalPokemon && [...Array(player.totalPokemon - player.team.length)].map((_, idx) => <PokeballIcon key={idx} />)}
+        {player.team.map((pokemon) => pokemon && <PokemonIcon key={pokemon.name} pokemon={pokemon} />)}
+        {player.team.length < player.totalPokemon && [...Array(player.totalPokemon - player.team.length)].map((_, idx) => <PokeballIcon key={`pokeball-${idx}`} />)}
         {/* {player.active.map((pokemon, idx) => pokemon && <PokemonSprite key={idx} pokemon={pokemon} />)} */}
     </div>;
 }
@@ -81,8 +81,8 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
             </div>
         </div>
         <div className='h-full w-full bg-gray-100 flex justify-around items-center' id="battle">
-            {battle.battle.p1.active.map((pokemon, idx) => pokemon && <PokemonSprite key={idx} pokemon={pokemon} side='p1'/>)}
-            {battle.battle.p2.active.map((pokemon, idx) => pokemon && <PokemonSprite key={idx} pokemon={pokemon} side='p2'/>)}
+            {battle.battle.p1.active.map((pokemon) => pokemon && <PokemonSprite key={`p1-${pokemon.name}`} pokemon={pokemon} side='p1'/>)}
+            {battle.battle.p2.active.map((pokemon) => pokemon && <PokemonSprite key={`p2-${pokemon.name}`} pokemon={pokemon} side='p2'/>)}
         </div>
         <div className='flex flex-col items-center' id="side-2">
             <div className='text-center w-full'>

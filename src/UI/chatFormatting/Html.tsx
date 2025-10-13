@@ -38,6 +38,7 @@ export default function HTML(
             if (domNode.name === 'button' && attribs.value) {
                 return (
                     <button
+                        type="button"
                         onClick={() => {
                             client.send(attribs.value, currentRoom?.ID || '');
                         }}

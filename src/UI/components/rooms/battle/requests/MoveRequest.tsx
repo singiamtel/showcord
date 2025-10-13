@@ -6,6 +6,7 @@ import { type HTMLAttributes, useEffect, useState } from 'react';
 
 function MoveButton(props: Readonly<HTMLAttributes<HTMLButtonElement> & { move: Protocol.Request.ActivePokemon['moves'][number]; }>) {
     return <button
+        type="button"
         className='bg-blue-pastel hover:bg-blue-100 dark:bg-blue-dark hover:dark:bg-blue-darkest p-4 rounded-md'
         {...props}
     >{props.move.name}</button>;
@@ -14,26 +15,24 @@ function MoveButton(props: Readonly<HTMLAttributes<HTMLButtonElement> & { move: 
 export function MoveRequest({ req, battle }: Readonly<{ req: Protocol.MoveRequest; battle: BattleRoom }>) {
     const active = req.active;
     const { client } = useClientContext();
-    const [builder, setBuilder] = useState(new ChoiceBuilder(req));
+    const [builder, _setBuilder] = useState(() => new ChoiceBuilder(req));
     const [selected, setSelected] = useState<string | null>(null);
-    const [undo, setUndo] = useState(false);
 
     useEffect(() => {
         if (selected) {
             client.send(`/${builder.toString()}|${req.rqid}`, battle.ID);
-            setUndo(true);
-        } else if (undo) {
-            client.send(`/undo`, battle.ID);
-            builder.choices.length = 0;
-            setUndo(false);
         }
-    }, [selected]);
+    }, [selected, builder, battle.ID, client, req.rqid]);
+
+    const handleUndo = () => {
+        client.send(`/undo`, battle.ID);
+        builder.choices.length = 0;
+        setSelected(null);
+    };
 
     useEffect(() => {
-        setSelected(null);
         builder.choices.length = 0;
-        setUndo(false);
-    }, [active]);
+    }, [active, builder]);
 
     if (!active[0]) {
         return null;
@@ -42,12 +41,13 @@ export function MoveRequest({ req, battle }: Readonly<{ req: Protocol.MoveReques
     return selected ? <div className='flex flex-col gap-4'>
         {battle.battle?.sides[0]?.active[0]?.name} will use {selected}
         <button
+            type="button"
             className='bg-red-pastel hover:bg-red-100 dark:bg-red-dark hover:dark:bg-red-darkest p-4 rounded-md'
-            onClick={() => setSelected(null)}>
+            onClick={handleUndo}>
             Cancel</button>
     </div> : <div
         className='grid grid-cols-2 grid-rows-2 w-full h-full place-items-center'
-    >{active[0].moves.map((move, idx: number) => <MoveButton key={idx} move={move}
+    >{active[0].moves.map((move, idx: number) => <MoveButton key={move.id || `move-${idx}`} move={move}
             onClick={() => {
                 builder.addChoice(`move ${idx + 1}`);
                 setSelected(move.name);

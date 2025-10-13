@@ -55,6 +55,7 @@ export function RoomListComponent(
                     ) :
                     null}
                 <button
+                    type="button"
                     className={'rounded p-1 flex flex-row basis-full items-center truncate h-auto mr-2 ml-2 '}
                     onClick={() => {
                         notificationsEngine.askPermission();
@@ -89,7 +90,7 @@ export function RoomListComponent(
 function ClosingButton({ room, current }: Readonly<{ room: string, current: boolean }>) {
     const { client } = useClientContext();
     return (
-        <button className="p-1" onClick={() => client.leaveRoom(room)}>
+        <button type="button" className="p-1" onClick={() => client.leaveRoom(room)}>
             <AiOutlineClose className='hover:text-red-600 hover:opacity-100' opacity={current ? 0.8 : 0.2} />
         </button>
     );

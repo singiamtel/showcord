@@ -7,6 +7,7 @@ import { type HTMLAttributes, useEffect, useState } from 'react';
 
 function SwitchButton(props: Readonly<HTMLAttributes<HTMLButtonElement> & { pokemon: Protocol.Request.Pokemon; }>) {
     return <button
+        type="button"
         className={cn(` p-4 rounded-md`,
             props.pokemon.fainted ? 'opacity-50 bg-gray-100 dark:bg-gray-dark' : 'bg-blue-pastel hover:bg-blue-100 dark:bg-blue-dark hover:dark:bg-blue-darkest')}
         {...props}
@@ -16,7 +17,7 @@ export function SwitchRequest({ req, battle }: Readonly<{ req: Protocol.SwitchRe
     const side = req.side;
 
     const { client } = useClientContext();
-    const [builder] = useState(new ChoiceBuilder(req));
+    const [builder] = useState(() => new ChoiceBuilder(req));
     const [selected, setSelected] = useState<string | null>(null);
 
     useEffect(() => {

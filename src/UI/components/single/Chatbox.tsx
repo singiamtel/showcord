@@ -130,17 +130,19 @@ export default function ChatBox(props: Readonly<HTMLAttributes<HTMLDivElement>>)
         setInput(e.target.value);
     };
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         const size = formRef.current?.getBoundingClientRect();
-        if (
-            searchBoxOffset.width === size?.width &&
-      searchBoxOffset.marginBottom === size?.height
-        ) return;
-        setSearchBoxOffset({
-            width: size?.width ?? 0,
-            marginBottom: size?.height ?? 0,
+        setSearchBoxOffset(prev => {
+            if (
+                prev.width === size?.width &&
+                prev.marginBottom === size?.height
+            ) return prev;
+            return {
+                width: size?.width ?? 0,
+                marginBottom: size?.height ?? 0,
+            };
         });
-    }, [formRef, searchBoxOffset.width, searchBoxOffset.marginBottom]);
+    }, [displaySearchbox]);
 
     useEffect(() => {
         textAreaRef.current?.focus();
@@ -192,6 +194,10 @@ const SearchBox = (
 ) => {
     const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
     useEffect(() => {
+        if (!text) {
+            setSuggestions([]);
+            return;
+        }
         const search = minisearch.search(text.slice(1), {
             boost: { name: 4 },
             fuzzy: 0.6,
@@ -209,8 +215,8 @@ const SearchBox = (
         (display ? `` : 'hidden')}
         >
             <div>
-                {suggestions.map((suggestion, idx) => (
-                    <Suggestion key={idx} suggestion={suggestion} />
+                {suggestions.map((suggestion) => (
+                    <Suggestion key={suggestion.id} suggestion={suggestion} />
                 ))}
             </div>
         </div>

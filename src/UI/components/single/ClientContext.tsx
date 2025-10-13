@@ -135,21 +135,25 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
     useEffect(() => {
         if (!currentRoom) return;
 
-        setMessages([...currentRoom.messages ?? []]);
+        const refreshMessages = () => {
+            const newMsgs = currentRoom.messages ?? [];
+            setMessages([...newMsgs]);
+        };
+
+        refreshMessages();
 
         const eventListener = () => {
-            setUpdateMsgs(updateMsgs + 1);
+            setUpdateMsgs(prev => prev + 1);
         };
 
         client.events.addEventListener('message', eventListener);
 
         return () => {
-            // Clean up the event listener when the component unmounts
             client.events.removeEventListener('message', eventListener);
         };
     }, [
         client,
-        setMessages,
+        currentRoom,
         handleMsgEvent,
         updateMsgs,
     ]);
@@ -195,3 +199,5 @@ export function useClientContext() {
     }
     return context;
 }
+
+useClientContext.displayName = 'useClientContext';

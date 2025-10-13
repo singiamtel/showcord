@@ -155,7 +155,7 @@ export class AuthenticationManager {
             } else if (response_json.success) {
                 return response_json.success;
             }
-        } catch (e) {
+        } catch {
             // pass
         }
         return response_text;

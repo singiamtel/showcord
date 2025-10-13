@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 function LoginButton() {
     return (
         <button
+            type="button"
             onClick={() => {
                 client.login();
                 notificationsEngine.askPermission();
@@ -60,7 +61,7 @@ export default function UserPanel() {
             >
                 <div className="flex flex-row justify-between items-center w-full">
                     <RenderUserContent/>
-                    <button className="flex flex-row justify-center items-center cursor-pointer hover-color" onClick={() => client.openSettings()}>
+                    <button type="button" className="flex flex-row justify-center items-center cursor-pointer hover-color" onClick={() => client.openSettings()}>
                         <FontAwesomeIcon icon={faCog} />
                     </button>
                 </div>

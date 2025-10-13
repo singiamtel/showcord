@@ -210,7 +210,7 @@ export class Client {
         }
     }
 
-    notificationsListener(e: FocusEvent) {
+    notificationsListener(_e: FocusEvent) {
         useClientStore.getState().clearNotifications(this.selectedRoom);
     }
 
@@ -801,7 +801,7 @@ export class Client {
                             args,
                         );
                     }
-                } catch (e) {
+                } catch (_e) {
                     console.error('Error parsing userdetails', args);
                 }
                 break;

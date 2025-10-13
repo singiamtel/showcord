@@ -7,7 +7,7 @@ import AccountSettings from './settings/Account';
 
 function SettingsButton(props: Readonly<HTMLAttributes<'button'> & { onClick: () => void, active?: boolean }>) {
     return (
-        <button className={cn('text-gray-250 p-1.5 rounded text-left hover-color dark:text-gray-351 ', props.className, props.active ? 'bg-gray-451 dark:bg-gray-450 dark:hover:bg-gray-450' : '')} onClick={props.onClick}>
+        <button type="button" className={cn('text-gray-250 p-1.5 rounded text-left hover-color dark:text-gray-351 ', props.className, props.active ? 'bg-gray-451 dark:bg-gray-450 dark:hover:bg-gray-450' : '')} onClick={props.onClick}>
             {props.children}
         </button>
     );

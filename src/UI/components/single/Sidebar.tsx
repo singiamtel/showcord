@@ -78,8 +78,8 @@ export default function Sidebar(props: Readonly<HTMLAttributes<'div'>>) {
                             items={roomsArray.map((e) => e.ID)}
                             strategy={verticalListSortingStrategy}
                         >
-                            {roomsArray.map((room, idx) => (
-                                <SortableItem id={room.ID} key={idx}>
+                            {roomsArray.map((room) => (
+                                <SortableItem id={room.ID} key={room.ID}>
                                     <RoomListComponent
                                         name={room.name}
                                         type={room.type}
