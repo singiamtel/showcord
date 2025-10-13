@@ -1,6 +1,7 @@
 import Linkify from 'linkify-react';
-import { Fragment, createElement } from 'react';
-import { bold, fakeCommand, greentext, inlineCode, italic, link, spoiler, strikethrough, subscript, superscript, options } from './chat';
+import { Fragment, createElement, type ReactElement } from 'react';
+import { Bold, FakeCommand, Greentext, InlineCode, Italic, Link, Spoiler, Strikethrough, Subscript, Superscript } from './chat';
+import { options } from './constants';
 import { RoomLink } from './RoomLink';
 
 const tokens = {
@@ -21,19 +22,19 @@ type Token = typeof tokens[keyof typeof tokens];
 const elements: {
     [key in Token]: {
         pattern: RegExp;
-        element: (props: any) => JSX.Element;
+        element: (props: any) => ReactElement;
     };
 } = {
-    code: { pattern: /`+(.+?)`+/g, element: inlineCode },
-    spoiler: { pattern: /\|\|(.+?)\|\|/g, element: spoiler },
-    bold: { pattern: /\*\*(.+?)\*\*/g, element: bold },
-    italic: { pattern: /__(.+?)__/g, element: italic },
-    strikethrough: { pattern: /~~(.+?)~~/g, element: strikethrough },
-    superscript: { pattern: /\^\^(.+?)\^\^/g, element: superscript },
-    subscript: { pattern: /\\\\(.+?)\\\\/g, element: subscript },
-    link: { pattern: /\[\[(.+?)?\]\]/g, element: link },
-    greentext: { pattern: /^>.*/g, element: greentext },
-    fakeCommand: { pattern: /^\/\/.*/g, element: fakeCommand },
+    code: { pattern: /`+(.+?)`+/g, element: InlineCode },
+    spoiler: { pattern: /\|\|(.+?)\|\|/g, element: Spoiler },
+    bold: { pattern: /\*\*(.+?)\*\*/g, element: Bold },
+    italic: { pattern: /__(.+?)__/g, element: Italic },
+    strikethrough: { pattern: /~~(.+?)~~/g, element: Strikethrough },
+    superscript: { pattern: /\^\^(.+?)\^\^/g, element: Superscript },
+    subscript: { pattern: /\\\\(.+?)\\\\/g, element: Subscript },
+    link: { pattern: /\[\[(.+?)?\]\]/g, element: Link },
+    greentext: { pattern: /^>.*/g, element: Greentext },
+    fakeCommand: { pattern: /^\/\/.*/g, element: FakeCommand },
     roomlink: { pattern: /<<(.+?)?>>/g, element: RoomLink },
 } as const;
 
@@ -73,7 +74,7 @@ export const encloseInTag = (
         input: string,
         tag: keyof typeof elements,
     }
-): null | { length: number; element: JSX.Element } => {
+): null | { length: number; element: ReactElement } => {
     // Find the closing tag if it exists
     elements[tag].pattern.lastIndex = 0;
     const matches = elements[tag].pattern.exec(input);

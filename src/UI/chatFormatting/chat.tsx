@@ -1,35 +1,15 @@
 import Linkify from 'linkify-react';
-import { type HTMLAttributes, useState } from 'react';
-import manageURL from '../../utils/manageURL';
+import { type HTMLAttributes, type ReactElement, useState } from 'react';
 import innerText from 'react-innertext';
 import { twMerge } from 'tailwind-merge';
-
-// ``code here`` marks inline code
-// ||text|| are spoilers
-// **text** is bold
-// __text__ is italic
-// ~~text~~ is strikethrough
-// ^^text^^ is superscript
-// \\text\\ is subscript
-// [[text]] is a link
-// >text is greentext
-// /me is an emote
+import { options } from './constants';
 
 export interface ExtendedProps extends HTMLAttributes<HTMLSpanElement> {
-    children: string | JSX.Element;
+    children: string | ReactElement;
     key?: number;
 }
 
-export const options = {
-    defaultProtocol: 'https',
-    target: '_blank',
-    attributes: {
-        onClick: manageURL,
-        className: 'text-blue-500 underline cursor-pointer',
-    },
-};
-
-export function inlineCode(
+export function InlineCode(
     props: ExtendedProps,
 ) {
     const key = props.key;
@@ -43,7 +23,7 @@ export function inlineCode(
     );
 }
 
-export function spoiler(
+export function Spoiler(
     props: ExtendedProps,
 ) {
     const key = props.key;
@@ -67,7 +47,7 @@ export function spoiler(
     );
 }
 
-export function bold(
+export function Bold(
     props: ExtendedProps,
 ): React.ReactElement {
     const key = props.key;
@@ -75,7 +55,7 @@ export function bold(
     return <Linkify key={key} as="strong" {...props} options={options} />;
 }
 
-export function italic(
+export function Italic(
     props: ExtendedProps,
 ) {
     const key = props.key;
@@ -83,7 +63,7 @@ export function italic(
     return <Linkify key={key} as="em" {...props} options={options} />;
 }
 
-export function strikethrough(
+export function Strikethrough(
     props: ExtendedProps,
 ) {
     const key = props.key;
@@ -91,7 +71,7 @@ export function strikethrough(
     return <Linkify key={key} as="s" {...props} options={options} />;
 }
 
-export function superscript(
+export function Superscript(
     props: ExtendedProps,
 ) {
     const key = props.key;
@@ -99,7 +79,7 @@ export function superscript(
     return <Linkify key={key} as="sup" {...props} options={options} />;
 }
 
-export function subscript(
+export function Subscript(
     props: ExtendedProps,
 ) {
     const key = props.key;
@@ -107,7 +87,7 @@ export function subscript(
     return <Linkify key={key} as="sub" {...props} options={options} />;
 }
 
-export function link(
+export function Link(
     props: ExtendedProps,
 ) {
     const key = props.key;
@@ -127,7 +107,7 @@ export function link(
 
 type Optional<T, K extends keyof T> = Pick<Partial<T>, K> & Omit<T, K>;
 
-export function greentext(
+export function Greentext(
     props: Optional<ExtendedProps, 'children'>,
 ) {
     const key = props.key;
@@ -147,7 +127,7 @@ export function greentext(
     );
 }
 
-export function fakeCommand(
+export function FakeCommand(
     props: Optional<ExtendedProps, 'children'>,
 ) {
     const key = props.key;

@@ -3,6 +3,7 @@ import eslintJs from "@eslint/js";
 import eslintReact from "@eslint-react/eslint-plugin";
 import tseslint from "typescript-eslint";
 import reactRefresh from 'eslint-plugin-react-refresh';
+import reactHooks from 'eslint-plugin-react-hooks';
 
 export default tseslint.config({
     files: ["**/*.{js,jsx,ts,tsx}"],
@@ -45,6 +46,7 @@ export default tseslint.config({
 
     plugins: {
         'react-refresh': reactRefresh,
+        'react-hooks': reactHooks,
     },
 
     // Custom rule overrides (modify rule levels or disable rules)
@@ -133,6 +135,7 @@ export default tseslint.config({
 
             // React hooks
             '@eslint-react/hooks-extra/no-direct-set-state-in-use-effect': 'off',
+            'react-hooks/rules-of-hooks': 'error',
 
             // General JavaScript
         },
