@@ -23,8 +23,10 @@ interface UseClientStoreType {
     rooms: Map<Room['ID'], Room>;
     currentRoom: Room | undefined;
     setCurrentRoom: (roomID: Room) => void;
-    // messages: Message[]; // only messages from the current room
-    messages: Record<Room['ID'], Message[]>; // messages from all rooms
+    setRooms: (rooms: Map<Room['ID'], Room>) => void;
+    addRoom: (room: Room) => void;
+    removeRoom: (roomID: Room['ID']) => void;
+    messages: Record<Room['ID'], Message[]>;
     newMessage: (room: Room, message: Message) => void;
     updateMessages: (room: Room) => void;
     notifications: Record<Room['ID'], RoomNotifications>;
@@ -43,6 +45,25 @@ export const useClientStore = create<UseClientStoreType>((set) => ({
         set(() => ({
             currentRoom: room,
         }));
+    },
+    setRooms: (rooms: Map<Room['ID'], Room>) => {
+        set(() => ({
+            rooms: new Map(rooms),
+        }));
+    },
+    addRoom: (room: Room) => {
+        set((state) => {
+            const newRooms = new Map(state.rooms);
+            newRooms.set(room.ID, room);
+            return { rooms: newRooms };
+        });
+    },
+    removeRoom: (roomID: Room['ID']) => {
+        set((state) => {
+            const newRooms = new Map(state.rooms);
+            newRooms.delete(roomID);
+            return { rooms: newRooms };
+        });
     },
     messages: {},
     newMessage: (room: Room, message: Message) => {
@@ -384,7 +405,7 @@ export class Client {
             return;
         }
         room.open = false;
-        useClientStore.setState({ rooms: new Map(this.rooms) });
+        useClientStore.getState().setRooms(this.rooms);
         if (roomID === this.selectedRoom) {
             this.selectRoom('home');
         }
@@ -467,7 +488,7 @@ export class Client {
     // --- Room management ---
     private _addRoom(room: Room) {
         this.rooms.set(room.ID, room);
-        useClientStore.setState({ rooms: new Map(this.rooms) });
+        useClientStore.getState().addRoom(room);
         if (!this.settings.rooms.find((r) => r.ID === room.ID)?.open) {
             this.selectRoom(room.ID);
         }
@@ -480,11 +501,10 @@ export class Client {
         const room = this.room(roomID);
         if (room) {
             room.open = true;
-            // move room to bottom
             this.rooms.delete(roomID);
             this.rooms.set(roomID, room);
             this.settings.changeRooms(this.rooms);
-            useClientStore.setState({ rooms: new Map(this.rooms) });
+            useClientStore.getState().setRooms(this.rooms);
             return;
         }
         console.warn('openRoom: room (' + roomID + ') is unknown');
@@ -496,7 +516,7 @@ export class Client {
         if (roomID === this.selectedRoom) {
             this.selectRoom('home');
         }
-        useClientStore.setState({ rooms: new Map(this.rooms) });
+        useClientStore.getState().removeRoom(roomID);
         this.settings.removeRoom(roomID);
     }
 
@@ -644,7 +664,7 @@ export class Client {
             const room = this.requiresRoom('title', roomID);
             if (!room) return false;
             room.rename(name);
-            useClientStore.setState({ rooms: new Map(this.rooms) });
+            useClientStore.getState().setRooms(this.rooms);
             break;
         }
         case 'users': {
@@ -1282,7 +1302,6 @@ export class Client {
                 }),
             );
         });
-        useClientStore.setState({ rooms: new Map(this.rooms) });
     }
 
     /**
