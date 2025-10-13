@@ -9,7 +9,8 @@
     "serve": "vite preview",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "test": "vitest --run"
+    "test": "vitest --run",
+    "pre-commit": "npm run lint:fix && npm run test"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

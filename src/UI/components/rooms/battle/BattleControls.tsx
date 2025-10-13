@@ -30,7 +30,7 @@ export default function BattleControls(_props: Readonly<HTMLAttributes<HTMLDivEl
     }
 
     const requestType = req.requestType;
-    if (!requestType) { return <WaitRequest req={req} battle={battle} />; }
+    if (!requestType) { return <div>Loading...</div>; }
     switch (requestType) {
     case 'move':
         return <MoveRequest req={req} battle={battle} />;
