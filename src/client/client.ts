@@ -22,6 +22,7 @@ type ClientConstructor = {
 interface UseClientStoreType {
     rooms: Map<Room['ID'], Room>;
     currentRoom: Room | undefined;
+    selectedRoomID: string;
     setCurrentRoom: (roomID: Room) => void;
     setRooms: (rooms: Map<Room['ID'], Room>) => void;
     addRoom: (room: Room) => void;
@@ -35,15 +36,19 @@ interface UseClientStoreType {
     addMention: (room: Room) => void;
     avatar: string;
     theme: 'light' | 'dark' | 'system';
-    user: string | undefined
+    user: string | undefined;
+    error: string | undefined;
+    setError: (error: string | undefined) => void;
 }
 
 export const useClientStore = create<UseClientStoreType>((set) => ({
     rooms: new Map(),
     currentRoom: undefined,
+    selectedRoomID: 'home',
     setCurrentRoom: (room: Room) => {
         set(() => ({
             currentRoom: room,
+            selectedRoomID: room.ID,
         }));
     },
     setRooms: (rooms: Map<Room['ID'], Room>) => {
@@ -68,7 +73,7 @@ export const useClientStore = create<UseClientStoreType>((set) => ({
     messages: {},
     newMessage: (room: Room, message: Message) => {
         set((state) => {
-            if (room !== state.currentRoom) {
+            if (room.ID !== state.selectedRoomID) {
                 state.addUnread(room);
             }
 
@@ -130,6 +135,10 @@ export const useClientStore = create<UseClientStoreType>((set) => ({
     avatar: 'lucas',
     theme: localStorage.getItem('theme') as 'light' | 'dark' | 'system' ?? 'system',
     user: undefined,
+    error: undefined,
+    setError: (error: string | undefined) => {
+        set(() => ({ error }));
+    },
 
 }));
 
@@ -147,11 +156,10 @@ export class Client {
     }] as const; // Client-side only rooms, joined automatically
     private socket: WebSocket | undefined;
 
-    private rooms: Map<string, Room> = new Map();
     events: EventTarget = new EventTarget();
-    private onOpen: (() => void)[] = []; // Append callbacks here to run when the socket opens
+    private onOpen: (() => void)[] = [];
     private authManager: AuthenticationManager;
-    private pendingRoomJoins: string[] = []; // Rooms to join after login
+    private pendingRoomJoins: string[] = [];
 
     get username() {
         return this.settings.username;
@@ -160,10 +168,13 @@ export class Client {
     get isLoggedIn() {
         return this.authManager.isLoggedIn;
     }
-    // private selectedRoom: string = ''; // Used for notifications
-    private __selectedRoom = '';
+
+    get rooms() {
+        return useClientStore.getState().rooms;
+    }
+
     get selectedRoom() {
-        return this.__selectedRoom;
+        return useClientStore.getState().selectedRoomID;
     }
     // Callbacks given to query commands, it's called after the server responds back with the info
     private userListener: ((json: any) => any) | undefined;
@@ -317,10 +328,8 @@ export class Client {
     }
 
     selectRoom(roomid: string) {
-        this.__selectedRoom = roomid;
         this.room(roomid)?.select();
-        // this.settings.changeRooms(this.rooms);
-        useClientStore.setState({ currentRoom: this.room(roomid) });
+        useClientStore.setState({ currentRoom: this.room(roomid), selectedRoomID: roomid });
         useClientStore.getState().clearNotifications(roomid);
     }
 
@@ -384,9 +393,11 @@ export class Client {
         const room = this.room(roomID);
         if (!room) {
             console.warn('Trying to leave non-existent room', roomID);
+            const error = `Trying to leave non-existent room ${roomID}`;
+            useClientStore.getState().setError(error);
             this.events.dispatchEvent(
                 new CustomEvent('error', {
-                    detail: `Trying to leave non-existent room ${roomID}`,
+                    detail: error,
                 }),
             );
             return;
@@ -405,7 +416,9 @@ export class Client {
             return;
         }
         room.open = false;
-        useClientStore.getState().setRooms(this.rooms);
+        const rooms = this.rooms;
+        rooms.set(roomID, room);
+        useClientStore.getState().setRooms(rooms);
         if (roomID === this.selectedRoom) {
             this.selectRoom('home');
         }
@@ -487,7 +500,6 @@ export class Client {
 
     // --- Room management ---
     private _addRoom(room: Room) {
-        this.rooms.set(room.ID, room);
         useClientStore.getState().addRoom(room);
         if (!this.settings.rooms.find((r) => r.ID === room.ID)?.open) {
             this.selectRoom(room.ID);
@@ -501,10 +513,10 @@ export class Client {
         const room = this.room(roomID);
         if (room) {
             room.open = true;
-            this.rooms.delete(roomID);
-            this.rooms.set(roomID, room);
-            this.settings.changeRooms(this.rooms);
-            useClientStore.getState().setRooms(this.rooms);
+            const rooms = this.rooms;
+            rooms.set(roomID, room);
+            this.settings.changeRooms(rooms);
+            useClientStore.getState().setRooms(rooms);
             return;
         }
         console.warn('openRoom: room (' + roomID + ') is unknown');
@@ -512,7 +524,6 @@ export class Client {
 
 
     private _removeRoom(roomID: string) {
-        this.rooms.delete(roomID);
         if (roomID === this.selectedRoom) {
             this.selectRoom('home');
         }
@@ -540,7 +551,6 @@ export class Client {
             room.addMessage(message, settings);
         }
         useClientStore.getState().newMessage(room, message);
-        this.events.dispatchEvent(new CustomEvent('message', { detail: message }));
         console.debug('message', message);
 
         if (this.shouldNotify(room, message)) {
@@ -558,7 +568,7 @@ export class Client {
         const room = this.room(roomID);
         if (room) {
             room.addUsers(users);
-            this.events.dispatchEvent(new CustomEvent('users', { detail: users }));
+            this.events.dispatchEvent(new CustomEvent('users'));
             return;
         }
         console.warn('addUsers: room (' + roomID + ') is unknown. Users:', users);
@@ -568,7 +578,7 @@ export class Client {
         const room = this.room(roomID);
         if (room) {
             room.removeUser(user);
-            this.events.dispatchEvent(new CustomEvent('users', { detail: user }));
+            this.events.dispatchEvent(new CustomEvent('users'));
             return;
         }
         console.warn('removeUsers: room (' + roomID + ') is unknown');
@@ -578,7 +588,7 @@ export class Client {
         const room = this.room(roomID);
         if (room) {
             room.updateUsername(newName, userID);
-            this.events.dispatchEvent(new CustomEvent('users', { detail: newName }));
+            this.events.dispatchEvent(new CustomEvent('users'));
             return;
         }
         console.warn('updateUsername: room (' + roomID + ') is unknown');
@@ -603,11 +613,7 @@ export class Client {
             const { args, kwArgs } = Protocol.parseBattleLine(line);
             const room = this.room(roomID);
             if (room instanceof BattleRoom) {
-                // If there was a change, re-render
-                // FIXME: this is not how react handles reactivity
-                if (room.feedBattle(line)) {
-                    this.events.dispatchEvent(new CustomEvent('message', { detail: line }));
-                }
+                room.feedBattle(line);
             }
 
             const success = this.parseSocketLine(args, kwArgs, roomID);
@@ -664,7 +670,9 @@ export class Client {
             const room = this.requiresRoom('title', roomID);
             if (!room) return false;
             room.rename(name);
-            useClientStore.getState().setRooms(this.rooms);
+            const rooms = this.rooms;
+            rooms.set(roomID, room);
+            useClientStore.getState().setRooms(rooms);
             break;
         }
         case 'users': {
@@ -690,9 +698,6 @@ export class Client {
                 type: 'log',
             });
             if (!chatMessage) {
-                this.events.dispatchEvent(
-                    new CustomEvent('message', { detail: chatMessage }),
-                );
                 return false;
             }
             this.addMessageToRoom(room.ID, chatMessage);
@@ -705,9 +710,6 @@ export class Client {
             if (!room) return false;
             const chatMessage = this.parseCMessage(messageContent, username, undefined, room);
             if (!chatMessage) {
-                this.events.dispatchEvent(
-                    new CustomEvent('message', { detail: chatMessage }),
-                );
                 return false;
             }
             this.addMessageToRoom(room.ID, chatMessage);
@@ -721,9 +723,6 @@ export class Client {
             if (!room) return false;
             const chatMessage = this.parseCMessage(messageContent, username, timestamp, room);
             if (!chatMessage) {
-                this.events.dispatchEvent(
-                    new CustomEvent('message', { detail: chatMessage }),
-                );
                 break;
             }
             this.addMessageToRoom(room.ID, chatMessage);
@@ -858,11 +857,15 @@ export class Client {
                 break;
             case 'nonexistent':
             case 'joinfailed':
+            {
+                const error = args[2];
+                useClientStore.getState().setError(error);
                 this.events.dispatchEvent(
-                    new CustomEvent('error', { detail: args[2] }),
+                    new CustomEvent('error', { detail: error }),
                 );
                 this._removeRoom(roomID);
                 break;
+            }
             case 'rename':
                 console.warn('Currently unhandled noinit', args);
                 break;
@@ -907,9 +910,6 @@ export class Client {
                     selfSent: false,
                 },
             );
-            this.events.dispatchEvent(
-                new CustomEvent('message', { detail: 'pagehtml' }),
-            );
             break;
         }
         case 'uhtmlchange':{
@@ -924,9 +924,6 @@ export class Client {
                     type: 'boxedHTML',
                     content: uhtml,
                 }),
-            );
-            this.events.dispatchEvent(
-                new CustomEvent('message', { detail: name }),
             );
             break;
         }
@@ -948,9 +945,6 @@ export class Client {
                         selfSent: false,
                     },
                 );
-                this.events.dispatchEvent(
-                    new CustomEvent('message', { detail: name }),
-                );
             }
             break;
         case 'html':
@@ -969,9 +963,6 @@ export class Client {
                         selected: this.selectedRoom === room.ID,
                         selfSent: false,
                     },
-                );
-                this.events.dispatchEvent(
-                    new CustomEvent('message', { detail: 'html' }),
                 );
             }
             break;
@@ -1182,9 +1173,6 @@ export class Client {
                     type: 'boxedHTML',
                     content,
                 }),
-            );
-            this.events.dispatchEvent(
-                new CustomEvent('message', { detail: message }),
             );
 
             return;

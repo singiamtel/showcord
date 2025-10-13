@@ -183,22 +183,29 @@ describe('Message Handling Integration Tests', () => {
     });
 
     describe('Message Events', () => {
-        it('should dispatch message event on new message', () => {
-            const messageSpy = vi.fn();
-            client.events.addEventListener('message', messageSpy);
+        it('should add message to zustand store on new message', async () => {
+            const { useClientStore } = await import('../../src/client/client');
+            const initialMessages = useClientStore.getState().messages['testroom'] || [];
+            const initialCount = initialMessages.length;
             
             mockServer.sendChat('testroom', 'testuser', 'Test message', '1234567890');
             
-            expect(messageSpy).toHaveBeenCalled();
+            const messages = useClientStore.getState().messages['testroom'];
+            expect(messages).toBeDefined();
+            expect(messages.length).toBeGreaterThan(initialCount);
         });
 
-        it('should dispatch message event on uhtml', () => {
-            const messageSpy = vi.fn();
-            client.events.addEventListener('message', messageSpy);
+        it('should add uhtml message to room messages', () => {
+            const room = client.room('testroom');
+            expect(room).toBeDefined();
+            const initialCount = room?.messages.length || 0;
             
             mockServer.sendUHTML('testroom', 'testbox', '<div>Content</div>');
             
-            expect(messageSpy).toHaveBeenCalled();
+            expect(room?.messages.length).toBeGreaterThan(initialCount);
+            const lastMessage = room?.messages[room.messages.length - 1];
+            expect(lastMessage?.type).toBe('boxedHTML');
+            expect(lastMessage?.content).toContain('Content');
         });
     });
 
