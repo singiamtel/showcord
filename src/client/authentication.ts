@@ -1,6 +1,7 @@
 import type { Settings } from './settings';
 import { logger } from '../utils/logger';
 import { toID } from '../utils/generic';
+import { useClientStore } from './clientStore';
 
 export interface AuthenticationCallbacks {
     sendMessage: (message: string) => void;
@@ -10,9 +11,8 @@ export interface AuthenticationCallbacks {
 }
 
 export class AuthenticationManager {
-    private challstr: string = '';
     private client_id = import.meta.env.VITE_OAUTH_CLIENTID;
-    private shouldAutoLogin: boolean = true; // Currently unused - kept for future auto-login features
+    private shouldAutoLogin: boolean = true;
     private loggedIn: boolean = false;
     private hasManuallyLoggedOut: boolean = false;
 
@@ -22,7 +22,7 @@ export class AuthenticationManager {
     ) {}
 
     setChallstr(challstr: string): void {
-        this.challstr = challstr;
+        useClientStore.getState().setChallstr(challstr);
     }
 
     setShouldAutoLogin(shouldAutoLogin: boolean): void {
@@ -38,12 +38,14 @@ export class AuthenticationManager {
         this.hasManuallyLoggedOut = false;
 
         // Wait for challstr
-        while (!this.challstr) {
+        while (!useClientStore.getState().challstr) {
+            console.log('Waiting for challstr...');
             await new Promise((resolve) => setTimeout(resolve, 100));
         }
 
         // OAuth login method
-        const url = `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${this.client_id}&challenge=${this.challstr}`;
+        const challstr = useClientStore.getState().challstr;
+        const url = `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${this.client_id}&challenge=${challstr}`;
         const nWindow = (window as any).n = open(
             url,
             undefined,
@@ -52,6 +54,7 @@ export class AuthenticationManager {
 
         const checkIfUpdated = async (): Promise<void> => {
             try {
+                console.log(nWindow?.location.href);
                 if (nWindow?.location.host === location.host) {
                     const url = new URL(nWindow.location.href);
                     const assertion = url.searchParams.get('assertion');
@@ -84,7 +87,7 @@ export class AuthenticationManager {
             return;
         }
 
-        while (!this.challstr) {
+        while (!useClientStore.getState().challstr) {
             await new Promise((resolve) => setTimeout(resolve, 500));
         }
 
@@ -105,7 +108,8 @@ export class AuthenticationManager {
         // Try token login
         const token = localStorage.getItem('ps-token');
         if (token && token !== 'undefined') {
-            const tokenAssertion = await this.assertionFromToken(this.challstr);
+            const challstr = useClientStore.getState().challstr;
+            const tokenAssertion = await this.assertionFromToken(challstr);
             if (tokenAssertion) {
                 await this.sendAssertion(tokenAssertion);
                 return;
