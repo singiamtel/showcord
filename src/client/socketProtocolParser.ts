@@ -22,7 +22,6 @@ export interface ProtocolParserCallbacks {
     removeRoom: (roomID: string) => void;
     setUsername: (username: string) => void;
     forceHighlightMsg: (roomid: string, message: any) => boolean;
-    dispatchEvent: (event: Event) => void;
 }
 
 export class SocketProtocolParser {
@@ -440,9 +439,7 @@ export class SocketProtocolParser {
                 console.error('Received |request| from non-battle room', roomID);
                 return false;
             }
-            this.callbacks.dispatchEvent(
-                new CustomEvent('request', { detail: room.battle.request }),
-            );
+            useRoomStore.getState().setBattleRequest(roomID, room.battle.request);
             break;
         }
         case 'move':

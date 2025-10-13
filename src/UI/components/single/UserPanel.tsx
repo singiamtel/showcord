@@ -2,8 +2,7 @@ import { notificationsEngine } from '../../../client/notifications';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
 import { UserDetails } from '../UserDetails';
-import { client, useUserStore } from '@/client/client';
-import { useEffect, useState } from 'react';
+import { client, useUserStore, useAppStore } from '@/client/client';
 
 function LoginButton() {
     return (
@@ -28,21 +27,10 @@ function Disconnected() {
     );
 }
 function RenderUserContent() {
-    const [connected, setConnected] = useState(true);
-
+    const isConnected = useAppStore(state => state.isConnected);
     const { user, avatar } = useUserStore(state => ({ user: state.user, avatar: state.avatar }));
 
-    useEffect(() => {
-        const onDisconnect = () => {
-            setConnected(false);
-        };
-        client.events.addEventListener('disconnect', onDisconnect);
-        return () => {
-            client.events.removeEventListener('disconnect', onDisconnect);
-        };
-    }, []);
-
-    if (!connected) {
+    if (!isConnected) {
         return <Disconnected />;
     } else if (user) {
         return <UserDetails border user={user} avatar={avatar} />;

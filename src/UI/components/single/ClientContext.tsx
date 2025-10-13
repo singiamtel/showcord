@@ -1,4 +1,4 @@
-import { type Client, client, useRoomStore, useMessageStore } from '../../../client/client';
+import { type Client, client, useRoomStore, useMessageStore, useAppStore } from '../../../client/client';
 import type { Message } from '../../../client/message';
 import { Room } from '../../../client/room/room';
 import { loadCustomColors } from '../../../utils/namecolour';
@@ -68,23 +68,21 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
     }, [setCurrentRoom, rooms, previousRooms, currentRoom]);
 
     useEffect(() => {
-        const globalErrorListener = (e: Event) => {
-            const error = (e as CustomEvent).detail;
-            console.warn('Received error from socket', error);
-            if (error) {
+        let previousError: string | undefined = undefined;
+        const unsubscribe = useAppStore.subscribe((state) => {
+            const error = state.error;
+            if (error && error !== previousError) {
+                console.warn('Received error from socket', error);
                 toast({
                     variant: 'destructive',
                     title: 'Error',
                     description: error,
                 });
+                previousError = error;
             }
-        };
+        });
 
-        client.events.addEventListener('error', globalErrorListener);
-
-        return () => {
-            client.events.removeEventListener('error', globalErrorListener);
-        };
+        return unsubscribe;
     }, []);
 
     useEffect(() => {

@@ -1,6 +1,7 @@
 import { toID } from '@/utils/generic';
 import type { Message } from '../message';
 import { rankOrder, type RankSymbol, type User } from '../user';
+import { useRoomStore } from '../stores/roomStore';
 
 export const roomTypes = ['chat', 'battle', 'pm', 'permanent', 'html'] as const;
 export type RoomType = typeof roomTypes[number];
@@ -102,6 +103,7 @@ export class Room {
 
     removeUser(username: string) {
         this.users = this.users.filter((u) => u.name !== username);
+        useRoomStore.getState().notifyUsersUpdate();
     }
 
     rename(name: string) {
@@ -159,6 +161,7 @@ export class Room {
     addUsers(users: User[]) {
         this.users = this.users.concat(users).filter((user, index, self) =>
             self.findIndex((u) => u.ID === user.ID) === index).sort(this.rankSorter);
+        useRoomStore.getState().notifyUsersUpdate();
     }
 
     updateUsername(newName: string, userID: string) {
@@ -174,6 +177,7 @@ export class Room {
         user.ID = toID(name);
         user.status = status;
         this.users.sort(this.rankSorter);
+        useRoomStore.getState().notifyUsersUpdate();
     }
 
     runHighlight(callback: (roomID: string, content: Message) => boolean): void {

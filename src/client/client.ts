@@ -42,7 +42,6 @@ export class Client {
     }] as const;
     private socket: WebSocket | undefined;
 
-    events: EventTarget = new EventTarget();
     private onOpen: (() => void)[] = [];
     private authManager: AuthenticationManager;
     private pendingRoomJoins: string[] = [];
@@ -90,7 +89,6 @@ export class Client {
                     removeRoom: this._removeRoom.bind(this),
                     setUsername: this.setUsername.bind(this),
                     forceHighlightMsg: this.forceHighlightMsg.bind(this),
-                    dispatchEvent: (event: Event) => this.events.dispatchEvent(event),
                 },
                 this.queryHandlers
             );
@@ -127,7 +125,6 @@ export class Client {
                 removeRoom: this._removeRoom.bind(this),
                 setUsername: this.setUsername.bind(this),
                 forceHighlightMsg: this.forceHighlightMsg.bind(this),
-                dispatchEvent: (event: Event) => this.events.dispatchEvent(event),
             },
             this.queryHandlers
         );
@@ -260,11 +257,6 @@ export class Client {
             console.warn('Trying to leave non-existent room', roomID);
             const error = `Trying to leave non-existent room ${roomID}`;
             useAppStore.getState().setError(error);
-            this.events.dispatchEvent(
-                new CustomEvent('error', {
-                    detail: error,
-                }),
-            );
             return;
         }
         if (room.connected) {
@@ -363,6 +355,7 @@ export class Client {
             for (const cb of this.onOpen) {
                 cb();
             }
+            useAppStore.getState().setConnected(true);
             this.authManager.tryLogin();
         };
 
@@ -375,7 +368,7 @@ export class Client {
         };
         this.socket.onclose = (_) => {
             console.error('Socket closed, dispatching disconnect');
-            this.events.dispatchEvent(new CustomEvent('disconnect'));
+            useAppStore.getState().setConnected(false);
         };
     }
 

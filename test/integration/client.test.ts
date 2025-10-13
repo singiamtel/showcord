@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { Client } from '@/client/client';
+import { Client, useAppStore } from '@/client/client';
 import { createMockWebSocket, MockServer } from '../helpers/mockServer';
 
 describe('Client Integration Tests', () => {
@@ -43,12 +43,9 @@ describe('Client Integration Tests', () => {
         });
 
         it('should handle socket close event', () => {
-            const disconnectSpy = vi.fn();
-            client.events.addEventListener('disconnect', disconnectSpy);
-            
             mockWebSocket.triggerClose();
             
-            expect(disconnectSpy).toHaveBeenCalled();
+            expect(useAppStore.getState().isConnected).toBe(false);
         });
     });
 

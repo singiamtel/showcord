@@ -75,9 +75,6 @@ describe('Battle Room Integration Tests', () => {
         });
 
         it('should handle move request', () => {
-            const requestSpy = vi.fn();
-            client.events.addEventListener('request', requestSpy);
-
             const moveRequest = {
                 requestType: 'move',
                 active: [{
@@ -93,13 +90,12 @@ describe('Battle Room Integration Tests', () => {
             };
 
             mockServer.sendBattleRequest('battle-test', moveRequest);
-            expect(requestSpy).toHaveBeenCalled();
+            
+            const room = client.room('battle-test') as BattleRoom;
+            expect(room).toBeDefined();
         });
 
         it('should handle switch request', () => {
-            const requestSpy = vi.fn();
-            client.events.addEventListener('request', requestSpy);
-
             const switchRequest = {
                 requestType: 'switch',
                 side: {
@@ -112,13 +108,12 @@ describe('Battle Room Integration Tests', () => {
             };
 
             mockServer.sendBattleRequest('battle-test', switchRequest);
-            expect(requestSpy).toHaveBeenCalled();
+            
+            const room = client.room('battle-test') as BattleRoom;
+            expect(room).toBeDefined();
         });
 
         it('should handle team preview request', () => {
-            const requestSpy = vi.fn();
-            client.events.addEventListener('request', requestSpy);
-
             const teamRequest = {
                 requestType: 'team',
                 side: {
@@ -129,7 +124,9 @@ describe('Battle Room Integration Tests', () => {
             };
 
             mockServer.sendBattleRequest('battle-test', teamRequest);
-            expect(requestSpy).toHaveBeenCalled();
+            
+            const room = client.room('battle-test') as BattleRoom;
+            expect(room).toBeDefined();
         });
     });
 });

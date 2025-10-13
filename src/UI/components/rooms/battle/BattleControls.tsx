@@ -1,6 +1,5 @@
 import { assert } from '@/lib/utils';
 import { type HTMLAttributes, useEffect, useState } from 'react';
-import { useClientContext } from '../../single/ClientContext';
 import { MoveRequest } from './requests/MoveRequest';
 import { WaitRequest } from './requests/WaitRequest';
 import { TeamRequest } from './requests/TeamRequest';
@@ -9,21 +8,16 @@ import { useRoomStore } from '@/client/client';
 import type { BattleRoom } from '@/client/room/battleRoom';
 
 export default function BattleControls(_props: Readonly<HTMLAttributes<HTMLDivElement>>) {
-    const { client } = useClientContext();
     const battle = useRoomStore(state => state.currentRoom) as BattleRoom;
+    const battleRequest = useRoomStore(state => state.battleRequest);
     assert(battle?.type === 'battle', 'Trying to render BattleWindow in a room that is not a BattleRoom');
     const [req, setReq] = useState(battle.battle.request);
-    useEffect(() => {
-        const listener = (e: Event) => {
-            const detail = (e as CustomEvent).detail;
-            setReq({ ...detail });
-        };
 
-        client.events.addEventListener('request', listener);
-        return () => {
-            client.events.removeEventListener('request', listener);
-        };
-    }, [battle]);
+    useEffect(() => {
+        if (battleRequest && battleRequest.roomID === battle.ID) {
+            setReq({ ...battleRequest.request });
+        }
+    }, [battleRequest, battle.ID]);
 
     if (!req) {
         return <div>Loading...</div>;

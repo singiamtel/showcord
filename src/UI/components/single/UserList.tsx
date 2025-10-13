@@ -1,4 +1,3 @@
-import { useClientContext } from './ClientContext';
 import { type HTMLAttributes, useLayoutEffect, useState } from 'react';
 import { Username } from '../Username';
 import { isStaff, type User } from '../../../client/user';
@@ -10,24 +9,16 @@ export default function UserList(props: Readonly<HTMLAttributes<HTMLDivElement> 
     searchable?: boolean
 }>) {
     const room = useRoomStore(state => state.currentRoom);
-    const { client } = useClientContext();
+    const usersUpdateCounter = useRoomStore(state => state.usersUpdateCounter);
     const [users, setUsers] = useState<User[]>([]);
     const [search, setSearch] = useState<string>('');
 
     const filteredUsers = users.filter((user) => toID(user.name).includes(toID(search)));
 
     useLayoutEffect(() => {
-        const refreshUsers = () => {
-            if (!room) return;
-            setUsers([...room.users]);
-        };
-
-        refreshUsers();
-        client.events.addEventListener('users', refreshUsers);
-        return () => {
-            client.events.removeEventListener('users', refreshUsers);
-        };
-    }, [client, room]);
+        if (!room) return;
+        setUsers([...room.users]);
+    }, [room, usersUpdateCounter]);
 
     // separate users into staff and regular users
     const staff = filteredUsers.filter((user) => isStaff(user.name));

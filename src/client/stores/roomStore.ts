@@ -5,6 +5,8 @@ interface RoomStoreState {
     rooms: Map<Room['ID'], Room>;
     selectedRoomID: string;
     currentRoom: Room | undefined;
+    battleRequest: { roomID: string; request: any } | undefined;
+    usersUpdateCounter: number;
 }
 
 interface RoomStoreActions {
@@ -13,6 +15,8 @@ interface RoomStoreActions {
     removeRoom: (roomID: Room['ID']) => void;
     setCurrentRoom: (room: Room) => void;
     selectRoom: (roomID: string, room: Room | undefined) => void;
+    setBattleRequest: (roomID: string, request: any) => void;
+    notifyUsersUpdate: () => void;
 }
 
 export type RoomStore = RoomStoreState & RoomStoreActions;
@@ -21,6 +25,8 @@ export const useRoomStore = create<RoomStore>((set) => ({
     rooms: new Map(),
     selectedRoomID: 'home',
     currentRoom: undefined,
+    battleRequest: undefined,
+    usersUpdateCounter: 0,
 
     setRooms: (rooms: Map<Room['ID'], Room>) => {
         set(() => ({
@@ -55,6 +61,18 @@ export const useRoomStore = create<RoomStore>((set) => ({
         set(() => ({
             currentRoom: room,
             selectedRoomID: roomID,
+        }));
+    },
+
+    setBattleRequest: (roomID: string, request: any) => {
+        set(() => ({
+            battleRequest: { roomID, request },
+        }));
+    },
+
+    notifyUsersUpdate: () => {
+        set((state) => ({
+            usersUpdateCounter: state.usersUpdateCounter + 1,
         }));
     },
 }));
