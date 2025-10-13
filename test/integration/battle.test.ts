@@ -39,6 +39,8 @@ describe('Battle Room Integration Tests', () => {
 
         it('should set room title for battle', () => {
             mockServer.joinRoom('battle-gen9ou-12345', 'battle');
+            mockServer.sendBattleTeamSize('battle-gen9ou-12345', 'p1', 6);
+            mockServer.sendBattleTeamSize('battle-gen9ou-12345', 'p2', 6);
             mockServer.setRoomTitle('battle-gen9ou-12345', 'Player1 vs Player2');
             
             const room = client.room('battle-gen9ou-12345');
@@ -49,6 +51,8 @@ describe('Battle Room Integration Tests', () => {
     describe('Player Setup', () => {
         beforeEach(() => {
             mockServer.joinRoom('battle-test', 'battle');
+            mockServer.sendBattleTeamSize('battle-test', 'p1', 6);
+            mockServer.sendBattleTeamSize('battle-test', 'p2', 6);
             mockServer.updateUser('testuser', '1', 'lucas');
         });
 
@@ -70,6 +74,8 @@ describe('Battle Room Integration Tests', () => {
     describe('Battle Requests', () => {
         beforeEach(() => {
             mockServer.joinRoom('battle-test', 'battle');
+            mockServer.sendBattleTeamSize('battle-test', 'p1', 6);
+            mockServer.sendBattleTeamSize('battle-test', 'p2', 6);
             mockServer.updateUser('testuser', '1', 'lucas');
             mockServer.sendBattlePlayer('battle-test', 'p1', 'testuser');
         });

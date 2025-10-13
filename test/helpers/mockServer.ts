@@ -104,6 +104,10 @@ export class MockServer {
         }
     }
 
+    sendBattleTeamSize(roomId: string, perspective: 'p1' | 'p2' | 'p3' | 'p4', size: number) {
+        this.send(`>${roomId}\n|teamsize|${perspective}|${size}`);
+    }
+
     sendBattleRequest(roomId: string, requestJson: any) {
         this.send(`>${roomId}\n|request|${JSON.stringify(requestJson)}`);
     }
