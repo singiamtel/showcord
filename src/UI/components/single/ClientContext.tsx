@@ -1,4 +1,4 @@
-import { type Client, client, useClientStore } from '../../../client/client';
+import { type Client, client, useRoomStore, useMessageStore } from '../../../client/client';
 import type { Message } from '../../../client/message';
 import { Room } from '../../../client/room/room';
 import { loadCustomColors } from '../../../utils/namecolour';
@@ -16,10 +16,12 @@ const ClientContext = createContext<ClientContextType | undefined>(undefined);
 
 export default function ClientContextProvider(props: Readonly<React.PropsWithChildren>) {
     const [previousRooms, setPreviousRooms] = useState<string[]>(['home']);
-    const { rooms: roomsMap, currentRoom, setCurrentRoom, messages: messagesMap } = useClientStore((state) => ({
+    const { rooms: roomsMap, currentRoom, setCurrentRoom } = useRoomStore((state) => ({
         rooms: state.rooms,
         currentRoom: state.currentRoom,
         setCurrentRoom: state.setCurrentRoom,
+    }));
+    const { messages: messagesMap } = useMessageStore((state) => ({
         messages: state.messages,
     }));
 

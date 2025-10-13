@@ -10,13 +10,13 @@ import { Username } from '../components/Username';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { twMerge } from 'tailwind-merge';
 import { useClientContext } from '../components/single/ClientContext';
-import { useClientStore } from '@/client/client';
+import { useRoomStore } from '@/client/client';
 
 export default function HTML(
     { message, raw }: Readonly<{ message: string; raw?: boolean }>,
 ) {
     const { client } = useClientContext();
-    const currentRoom = useClientStore(state => state.currentRoom);
+    const currentRoom = useRoomStore(state => state.currentRoom);
     const parserOptions = {
         replace: (domNode: any) => {
             const { attribs, children } = domNode;

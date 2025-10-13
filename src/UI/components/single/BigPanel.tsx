@@ -9,10 +9,10 @@ import ChatRoom from '../rooms/ChatRoom';
 import BattleRoom from '../rooms/BattleRoom';
 import PmRoom from '../rooms/PmRoom';
 import HtmlRoom from '../rooms/HtmlRoom';
-import { useClientStore } from '@/client/client';
+import { useRoomStore } from '@/client/client';
 
 export default function BigPanel(props: Readonly<HTMLAttributes<'div'>>) {
-    const room = useClientStore(state => state.currentRoom);
+    const room = useRoomStore(state => state.currentRoom);
     const roomType = room?.type;
 
     if (!room) return null;

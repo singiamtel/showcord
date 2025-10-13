@@ -5,13 +5,13 @@ import { useEffect, useState } from 'react';
 import Sidebar from './components/single/Sidebar';
 import BigPanel from './components/single/BigPanel';
 import { TrainerCardProvider } from './components/single/TrainerCard/TrainerCardContext';
-import { useClientStore } from '@/client/client';
+import { useAppStore } from '@/client/client';
 import { Toaster } from '@/components/ui/toaster';
 
 library.add(faBarChart, faPieChart);
 
 export default function App() {
-    const theme = useClientStore(state => state.theme);
+    const theme = useAppStore(state => state.theme);
     const [isDark, setIsDark] = useState(false);
 
     useEffect(() => {

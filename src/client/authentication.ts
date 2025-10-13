@@ -1,7 +1,7 @@
 import type { Settings } from './settings';
 import { logger } from '../utils/logger';
 import { toID } from '../utils/generic';
-import { useClientStore } from './clientStore';
+import { useUserStore } from './stores/userStore';
 
 export interface AuthenticationCallbacks {
     sendMessage: (message: string) => void;
@@ -22,7 +22,7 @@ export class AuthenticationManager {
     ) {}
 
     setChallstr(challstr: string): void {
-        useClientStore.getState().setChallstr(challstr);
+        useUserStore.getState().setChallstr(challstr);
     }
 
     setShouldAutoLogin(shouldAutoLogin: boolean): void {
@@ -38,13 +38,13 @@ export class AuthenticationManager {
         this.hasManuallyLoggedOut = false;
 
         // Wait for challstr
-        while (!useClientStore.getState().challstr) {
+        while (!useUserStore.getState().challstr) {
             console.log('Waiting for challstr...');
             await new Promise((resolve) => setTimeout(resolve, 100));
         }
 
         // OAuth login method
-        const challstr = useClientStore.getState().challstr;
+        const challstr = useUserStore.getState().challstr;
         const url = `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${this.client_id}&challenge=${challstr}`;
         const nWindow = (window as any).n = open(
             url,
@@ -87,7 +87,7 @@ export class AuthenticationManager {
             return;
         }
 
-        while (!useClientStore.getState().challstr) {
+        while (!useUserStore.getState().challstr) {
             await new Promise((resolve) => setTimeout(resolve, 500));
         }
 
@@ -108,7 +108,7 @@ export class AuthenticationManager {
         // Try token login
         const token = localStorage.getItem('ps-token');
         if (token && token !== 'undefined') {
-            const challstr = useClientStore.getState().challstr;
+            const challstr = useUserStore.getState().challstr;
             const tokenAssertion = await this.assertionFromToken(challstr);
             if (tokenAssertion) {
                 await this.sendAssertion(tokenAssertion);

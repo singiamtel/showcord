@@ -4,7 +4,10 @@ import newMessage from './message';
 import { Room } from './room/room';
 import { User } from './user';
 import { BattleRoom } from './room/battleRoom';
-import { useClientStore } from './clientStore';
+import { useRoomStore } from './stores/roomStore';
+import { useUserStore } from './stores/userStore';
+import { useMessageStore } from './stores/messageStore';
+import { useAppStore } from './stores/appStore';
 import { assert } from '@/lib/utils';
 import type { Settings } from './settings';
 import { parseCMessage, parseCMessageContent, addMessageToRoom, highlightMsg } from './messageHandling';
@@ -70,7 +73,7 @@ export class SocketProtocolParser {
         switch (args[0]) {
         case 'challstr': {
             const challstr = args.slice(1).join('|');
-            useClientStore.getState().setChallstr(challstr);
+            useUserStore.getState().setChallstr(challstr);
             return true;
         }
         case 'init': {
@@ -102,7 +105,7 @@ export class SocketProtocolParser {
             room.rename(name);
             const rooms = this.callbacks.getRooms();
             rooms.set(roomID, room);
-            useClientStore.getState().setRooms(rooms);
+            useRoomStore.getState().setRooms(rooms);
             break;
         }
         case 'users': {
@@ -181,7 +184,7 @@ export class SocketProtocolParser {
                         const room = this.requiresRoom('pm', inferredRoomid);
                         if (!room) return false;
                         room.endChallenge();
-                        useClientStore.getState().updateMessages(room);
+                        useMessageStore.getState().updateMessages(room.ID, room.messages);
                     } else {
                         this.addMessageToRoom(
                             inferredRoomid,
@@ -279,7 +282,7 @@ export class SocketProtocolParser {
             case 'joinfailed':
             {
                 const error = args[2];
-                useClientStore.getState().setError(error);
+                useAppStore.getState().setError(error);
                 this.callbacks.removeRoom(roomID);
                 break;
             }

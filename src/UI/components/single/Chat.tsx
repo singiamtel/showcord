@@ -19,12 +19,12 @@ import { userColor } from '../../../utils/namecolour';
 import manageURL from '../../../utils/manageURL';
 import { assert, cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
-import { useClientStore } from '@/client/client';
+import { useRoomStore, useMessageStore } from '@/client/client';
 import { FormatMsgDisplay } from '@/UI/chatFormatting/MessageParser';
 
 export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
-    const currentRoom = useClientStore(state => state.currentRoom);
-    const messages = useClientStore(state => state.messages);
+    const currentRoom = useRoomStore(state => state.currentRoom);
+    const messages = useMessageStore(state => state.messages);
     assert(currentRoom, 'Opening chat without a selected room');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const isIntersecting = useOnScreen(messagesEndRef);
@@ -105,7 +105,7 @@ export function ChallengeMessage(
     }>,
 ) {
     const { client } = useClientContext();
-    const currentRoom = useClientStore(state => state.currentRoom);
+    const currentRoom = useRoomStore(state => state.currentRoom);
 
 
     function acceptChallenge() {

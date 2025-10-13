@@ -184,15 +184,15 @@ describe('Message Handling Integration Tests', () => {
 
     describe('Message Events', () => {
         it('should add message to zustand store on new message', async () => {
-            const { useClientStore } = await import('../../src/client/client');
-            const initialMessages = useClientStore.getState().messages['testroom'] || [];
+            const { useMessageStore } = await import('../../src/client/client');
+            const initialMessages = useMessageStore.getState().messages['testroom'] || [];
             const initialCount = initialMessages.length;
-            
-            mockServer.sendChat('testroom', 'testuser', 'Test message', '1234567890');
-            
-            const messages = useClientStore.getState().messages['testroom'];
-            expect(messages).toBeDefined();
-            expect(messages.length).toBeGreaterThan(initialCount);
+
+            mockServer.send('>testroom\n|c:|1234567890|TestUser|Test message');
+            await new Promise(resolve => setTimeout(resolve, 50));
+
+            const messages = useMessageStore.getState().messages['testroom'];
+            expect(messages.length).toBe(initialCount + 1);
         });
 
         it('should add uhtml message to room messages', () => {

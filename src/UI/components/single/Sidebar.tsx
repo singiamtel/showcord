@@ -22,10 +22,10 @@ import {
 } from '@dnd-kit/sortable';
 import SortableItem from '../../../utils/Sortable';
 import { cn } from '@/lib/utils';
-import { useClientStore } from '@/client/client';
+import { useRoomStore } from '@/client/client';
 
 export default function Sidebar(props: Readonly<HTMLAttributes<'div'>>) {
-    const { rooms } = useClientStore((state) => ({ rooms: state.rooms }));
+    const { rooms } = useRoomStore((state) => ({ rooms: state.rooms }));
     const roomsArray = Array.from(rooms.values()).filter(room => room.open);
 
     const mouseSensor = useSensor(MouseSensor, {
@@ -50,7 +50,7 @@ export default function Sidebar(props: Readonly<HTMLAttributes<'div'>>) {
                 const oldIndex = roomsArray.findIndex((item) => item.ID === active.id);
                 const newIndex = roomsArray.findIndex((item) => item.ID === over.id);
                 const tmp = arrayMove(roomsArray, oldIndex, newIndex);
-                useClientStore.setState({ rooms: new Map(tmp.map((_, idx) => [tmp[idx].ID, tmp[idx]])) });
+                useRoomStore.setState({ rooms: new Map(tmp.map((_, idx) => [tmp[idx].ID, tmp[idx]])) });
             }
         }
     };

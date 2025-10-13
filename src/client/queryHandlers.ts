@@ -1,5 +1,5 @@
 import { Settings } from './settings';
-import { useClientStore } from './clientStore';
+import { useUserStore } from './stores/userStore';
 
 export interface QueryCallbacks {
     send: (message: string, room: string | false) => void;
@@ -29,7 +29,7 @@ export class QueryHandlers {
 
     queryUserInternal(user: string) {
         this.queryUser(user, (_json) => {
-            useClientStore.setState({ user: this.settings.username, avatar: this.settings.avatar });
+            useUserStore.setState({ user: this.settings.username, avatar: this.settings.avatar });
         });
     }
 

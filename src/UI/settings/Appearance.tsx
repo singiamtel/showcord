@@ -2,7 +2,7 @@ import { type HTMLAttributes, useEffect } from 'react';
 import { Label } from '@/components/ui/label';
 import { useClientContext } from '../components/single/ClientContext';
 import { cn } from '@/lib/utils';
-import { useClientStore } from '@/client/client';
+import { useAppStore } from '@/client/client';
 
 type ThemeOption = 'light' | 'dark' | 'system';
 
@@ -36,7 +36,7 @@ function ThemePillSelector({ value, onChange }: { value: ThemeOption; onChange: 
 
 export default function AppearanceSettings(props: Readonly<HTMLAttributes<'div'>>) {
     const { client } = useClientContext();
-    const { theme } = useClientStore(state => ({ theme: state.theme }));
+    const { theme } = useAppStore(state => ({ theme: state.theme }));
 
     useEffect(() => {
         client.setTheme(theme);

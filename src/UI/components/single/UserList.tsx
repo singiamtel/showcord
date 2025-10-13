@@ -4,12 +4,12 @@ import { Username } from '../Username';
 import { isStaff, type User } from '../../../client/user';
 import { toID } from '@/utils/generic';
 import { cn } from '@/lib/utils';
-import { useClientStore } from '@/client/client';
+import { useRoomStore } from '@/client/client';
 
 export default function UserList(props: Readonly<HTMLAttributes<HTMLDivElement> & {
     searchable?: boolean
 }>) {
-    const room = useClientStore(state => state.currentRoom);
+    const room = useRoomStore(state => state.currentRoom);
     const { client } = useClientContext();
     const [users, setUsers] = useState<User[]>([]);
     const [search, setSearch] = useState<string>('');

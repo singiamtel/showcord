@@ -2,7 +2,8 @@ import { toID } from '../utils/generic';
 import newMessage, { type Message } from './message';
 import { type Room } from './room/room';
 import { notificationsEngine } from './notifications';
-import { useClientStore } from './clientStore';
+import { useMessageStore } from './stores/messageStore';
+import { useNotificationStore } from './stores/notificationStore';
 import type { Settings } from './settings';
 
 export interface MessageHandlerCallbacks {
@@ -59,7 +60,7 @@ export function addMessageToRoom(
     } else {
         room.addMessage(message, settings);
     }
-    useClientStore.getState().newMessage(room, message);
+    useMessageStore.getState().newMessage(roomID, message);
     console.debug('message', message);
 
     if (shouldNotify(room, message, selectedRoom, username)) {
@@ -69,7 +70,7 @@ export function addMessageToRoom(
             room: roomID,
             roomType: room.type,
         });
-        useClientStore.getState().addMention(room);
+        useNotificationStore.getState().addMention(roomID);
     }
 }
 

@@ -1,8 +1,8 @@
 import { toID } from '../utils/generic';
 import { Room } from './room/room';
-import { useClientStore } from './clientStore';
+import { useRoomStore } from './stores/roomStore';
+import { useNotificationStore, type RoomNotification as RoomNotifications } from './stores/notificationStore';
 import type { Settings } from './settings';
-import type { RoomNotification as RoomNotifications } from './notifications';
 
 export interface RoomManagementCallbacks {
     getRoom: (roomID: string) => Room | undefined;
@@ -15,7 +15,7 @@ export function addRoom(
     settings: Settings,
     callbacks: { getRoom: (roomID: string) => Room | undefined }
 ) {
-    useClientStore.getState().addRoom(room);
+    useRoomStore.getState().addRoom(room);
     if (!settings.rooms.find((r) => r.ID === room.ID)?.open) {
         selectRoom(room.ID, callbacks.getRoom);
     }
@@ -36,7 +36,7 @@ export function openRoom(
         const rooms = getRooms();
         rooms.set(roomID, room);
         settings.changeRooms(rooms);
-        useClientStore.getState().setRooms(rooms);
+        useRoomStore.getState().setRooms(rooms);
         return;
     }
     console.warn('openRoom: room (' + roomID + ') is unknown');
@@ -51,7 +51,7 @@ export function removeRoom(
     if (roomID === selectedRoom) {
         selectRoom('home', getRoom);
     }
-    useClientStore.getState().removeRoom(roomID);
+    useRoomStore.getState().removeRoom(roomID);
     settings.removeRoom(roomID);
 }
 
@@ -69,7 +69,7 @@ export function closeRoom(
     room.open = false;
     const rooms = getRooms();
     rooms.set(roomID, room);
-    useClientStore.getState().setRooms(rooms);
+    useRoomStore.getState().setRooms(rooms);
     if (roomID === selectedRoom) {
         selectRoom('home', getRoom);
     }
@@ -93,13 +93,13 @@ export function __createPM(user: string, getRoom: (roomID: string) => Room | und
         connected: false,
         open: true,
     });
-    useClientStore.getState().addRoom(newRoom);
+    useRoomStore.getState().addRoom(newRoom);
 }
 
 export function selectRoom(roomid: string, getRoom: (roomID: string) => Room | undefined) {
     getRoom(roomid)?.select();
-    useClientStore.setState({ currentRoom: getRoom(roomid), selectedRoomID: roomid });
-    useClientStore.getState().clearNotifications(roomid);
+    useRoomStore.getState().selectRoom(roomid, getRoom(roomid));
+    useNotificationStore.getState().clearNotifications(roomid);
 }
 
 export function getRoomsArray(getRooms: () => Map<Room['ID'], Room>): Room[] {
@@ -109,7 +109,7 @@ export function getRoomsArray(getRooms: () => Map<Room['ID'], Room>): Room[] {
 
 export function createPermanentRooms(permanentRooms: readonly { ID: string; name: string; defaultOpen: boolean }[]) {
     permanentRooms.forEach((room) => {
-        useClientStore.getState().addRoom(
+        useRoomStore.getState().addRoom(
             new Room({
                 ID: room.ID,
                 name: room.name,
@@ -131,6 +131,6 @@ export function clearNotifications(roomID: string, getRoom: (roomID: string) => 
     const room = getRoom(roomID);
     if (room) {
         room.clearNotifications();
-        useClientStore.getState().clearNotifications(roomID);
+        useNotificationStore.getState().clearNotifications(roomID);
     }
 }

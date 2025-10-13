@@ -1,8 +1,9 @@
 import { Settings } from './settings';
 import { type Message } from './message';
-import { type RoomNotification as RoomNotifications } from './notifications';
 import { AuthenticationManager, type AuthenticationCallbacks } from './authentication';
-import { useClientStore } from './clientStore';
+import { useRoomStore } from './stores/roomStore';
+import { useAppStore } from './stores/appStore';
+import { useNotificationStore, type RoomNotification as RoomNotifications } from './stores/notificationStore';
 import { highlightMsg, addMessageToRoom as addMsgToRoom } from './messageHandling';
 import {
     openRoom as openRoomInternal,
@@ -26,7 +27,7 @@ type ClientConstructor = {
     skipVitestCheck?: boolean;
 };
 
-export { useClientStore };
+export { useRoomStore, useMessageStore, useNotificationStore, useUserStore, useAppStore } from './stores';
 
 export class Client {
     readonly settings: Settings = new Settings();
@@ -57,11 +58,11 @@ export class Client {
     }
 
     get rooms() {
-        return useClientStore.getState().rooms;
+        return useRoomStore.getState().rooms;
     }
 
     get selectedRoom() {
-        return useClientStore.getState().selectedRoomID;
+        return useRoomStore.getState().selectedRoomID;
     }
 
     formatName(formatID: string) {
@@ -152,7 +153,7 @@ export class Client {
     }
 
     notificationsListener(_e: FocusEvent) {
-        useClientStore.getState().clearNotifications(this.selectedRoom);
+        useNotificationStore.getState().clearNotifications(this.selectedRoom);
     }
 
     async send(message: string, room: string | false) {
@@ -203,7 +204,7 @@ export class Client {
 
     setTheme(theme: 'light' | 'dark' | 'system') {
         this.settings.theme = theme;
-        useClientStore.setState({ theme });
+        useAppStore.setState({ theme });
     }
 
     getRooms() {
@@ -258,7 +259,7 @@ export class Client {
         if (!room) {
             console.warn('Trying to leave non-existent room', roomID);
             const error = `Trying to leave non-existent room ${roomID}`;
-            useClientStore.getState().setError(error);
+            useAppStore.getState().setError(error);
             this.events.dispatchEvent(
                 new CustomEvent('error', {
                     detail: error,

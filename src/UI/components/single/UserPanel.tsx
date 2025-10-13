@@ -2,7 +2,7 @@ import { notificationsEngine } from '../../../client/notifications';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
 import { UserDetails } from '../UserDetails';
-import { client, useClientStore } from '@/client/client';
+import { client, useUserStore } from '@/client/client';
 import { useEffect, useState } from 'react';
 
 function LoginButton() {
@@ -30,7 +30,7 @@ function Disconnected() {
 function RenderUserContent() {
     const [connected, setConnected] = useState(true);
 
-    const { user, avatar } = useClientStore(state => ({ user: state.user, avatar: state.avatar }));
+    const { user, avatar } = useUserStore(state => ({ user: state.user, avatar: state.avatar }));
 
     useEffect(() => {
         const onDisconnect = () => {
@@ -52,7 +52,7 @@ function RenderUserContent() {
 }
 
 export default function UserPanel() {
-    const { user } = useClientStore(state => ({ user: state.user }));
+    const { user } = useUserStore(state => ({ user: state.user }));
     return (
         <div className="h-26 p-3 flex items-center bg-gray-251 dark:bg-gray-600">
             <span
