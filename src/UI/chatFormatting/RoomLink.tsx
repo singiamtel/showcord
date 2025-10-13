@@ -1,6 +1,6 @@
 import manageURL from '../../utils/manageURL';
 import innerText from 'react-innertext';
-import { useClientContext } from '../components/single/ClientContext';
+import { useClientContext } from '../components/single/useClientContext';
 import type { ExtendedProps } from './chat';
 
 

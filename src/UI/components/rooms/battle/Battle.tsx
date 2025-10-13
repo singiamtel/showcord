@@ -62,7 +62,8 @@ function RenderTeam({ player }: Readonly<{ player: Side }>) {
     console.log(player);
     return <div className='w-[120px] grid grid-cols-2 md:grid-cols-3 p-2'>
         {player.team.map((pokemon) => pokemon && <PokemonIcon key={pokemon.name} pokemon={pokemon} />)}
-        {player.team.length < player.totalPokemon && [...Array(player.totalPokemon - player.team.length)].map((_, idx) => <PokeballIcon key={`pokeball-${idx}`} />)}
+        {/* eslint-disable-next-line @eslint-react/no-array-index-key */}
+        {player.team.length < player.totalPokemon && [...Array(player.totalPokemon - player.team.length)].map((_, idx) => <PokeballIcon key={`pokeball-${player.name}-${idx}`} />)}
         {/* {player.active.map((pokemon, idx) => pokemon && <PokemonSprite key={idx} pokemon={pokemon} />)} */}
     </div>;
 }

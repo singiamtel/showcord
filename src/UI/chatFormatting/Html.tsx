@@ -9,7 +9,7 @@ import { Icons } from '@pkmn/img';
 import { Username } from '../components/Username';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { twMerge } from 'tailwind-merge';
-import { useClientContext } from '../components/single/ClientContext';
+import { useClientContext } from '../components/single/useClientContext';
 import { useRoomStore } from '@/client/client';
 
 export default function HTML(

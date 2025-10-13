@@ -4,7 +4,7 @@ import { AlertDestructive } from '@/utils/AlertDestructive';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { useClientContext } from '../components/single/ClientContext';
+import { useClientContext } from '../components/single/useClientContext';
 import { Settings } from '@/client/settings';
 
 export default function DeveloperSettings(props: Readonly<HTMLAttributes<'div'>>) {

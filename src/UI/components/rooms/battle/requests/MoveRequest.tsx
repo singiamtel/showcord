@@ -1,4 +1,4 @@
-import { useClientContext } from '@/UI/components/single/ClientContext';
+import { useClientContext } from '@/UI/components/single/useClientContext';
 import type { BattleRoom } from '@/client/room/battleRoom';
 import type { Protocol } from '@pkmn/protocol';
 import { ChoiceBuilder } from '@pkmn/view';

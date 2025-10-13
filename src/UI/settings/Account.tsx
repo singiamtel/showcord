@@ -1,6 +1,6 @@
 
 import { type HTMLAttributes, useState } from 'react';
-import { useClientContext } from '../components/single/ClientContext';
+import { useClientContext } from '../components/single/useClientContext';
 import { cn } from '@/lib/utils';
 import { Username } from '../components/Username';
 import { Button } from '@/components/ui/button';

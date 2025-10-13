@@ -4,7 +4,7 @@ import {
     useLayoutEffect,
     useRef,
 } from 'react';
-import { useClientContext } from './ClientContext';
+import { useClientContext } from './useClientContext';
 import useOnScreen from '../../hooks/useOnScreen';
 import Html from '../../chatFormatting/Html';
 import { HHMMSS } from '../../../utils/date';
@@ -55,25 +55,28 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
             )}
             ref={ref}
         >
-            {messages[currentRoom.ID] ? messages[currentRoom.ID].map((message, index, arr) => (
-                <ErrorBoundary
-                    key={`msg-${currentRoom.ID}-${message.timestamp?.getTime() || 0}-${index}`}
-                    fallbackRender={({ error: e }) => {
-                        console.error(e.name, message.content, e);
-                        return <div className="text-red-400">Error displaying message</div>;
-                    }}
-                >
-                    <MessageComponent
-                        time={message.timestamp}
-                        user={message.user || ''}
-                        message={message.content}
-                        type={message.type}
-                        hld={message.hld}
-                        prev={arr[index - 1]}
-                        cancelled={message.cancelled}
-                    />
-                </ErrorBoundary>
-            )) : null}
+            {messages[currentRoom.ID] ? (
+                messages[currentRoom.ID].map((message, _index, arr) => (
+                    <ErrorBoundary
+                        // eslint-disable-next-line @eslint-react/no-array-index-key
+                        key={`msg-${currentRoom.ID}-${message.timestamp?.getTime() || 0}-${_index}`}
+                        fallbackRender={({ error: e }) => {
+                            console.error(e.name, message.content, e);
+                            return <div className="text-red-400">Error displaying message</div>;
+                        }}
+                    >
+                        <MessageComponent
+                            time={message.timestamp}
+                            user={message.user || ''}
+                            message={message.content}
+                            type={message.type}
+                            hld={message.hld}
+                            prev={arr[_index - 1]}
+                            cancelled={message.cancelled}
+                        />
+                    </ErrorBoundary>
+                ))
+            ) : null}
             <div className="relative h-0 w-0">
                 {/* invisible div to scroll to */}
                 <div

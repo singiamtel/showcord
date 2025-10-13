@@ -12,21 +12,20 @@ library.add(faBarChart, faPieChart);
 
 export default function App() {
     const theme = useAppStore(state => state.theme);
-    const [isDark, setIsDark] = useState(false);
+    const [systemPrefersDark, setSystemPrefersDark] = useState(() =>
+        window.matchMedia('(prefers-color-scheme: dark)').matches);
 
     useEffect(() => {
-        if (theme === 'system') {
-            const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-            const handleChange = (e: MediaQueryListEvent) => {
-                setIsDark(e.matches);
-            };
-            setIsDark(mediaQuery.matches);
-            mediaQuery.addEventListener('change', handleChange);
-            return () => mediaQuery.removeEventListener('change', handleChange);
-        } else {
-            setIsDark(theme === 'dark');
-        }
+        if (theme !== 'system') return;
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+        const handleChange = (e: MediaQueryListEvent) => {
+            setSystemPrefersDark(e.matches);
+        };
+        mediaQuery.addEventListener('change', handleChange);
+        return () => mediaQuery.removeEventListener('change', handleChange);
     }, [theme]);
+
+    const isDark = theme === 'system' ? systemPrefersDark : theme === 'dark';
 
     return (
         <div className={`${isDark ? 'dark' : ''}`}>

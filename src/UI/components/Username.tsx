@@ -1,6 +1,6 @@
 import { cn } from '@/lib/utils';
 import { userColor } from '../../utils/namecolour';
-import { useTrainerCard } from './single/TrainerCard/TrainerCardContext';
+import { useTrainerCard } from './single/TrainerCard/useTrainerCard';
 
 export function Username(
     { user, alignRight, colon, idle, bold, colorless = false, className, onClick }: Readonly<{

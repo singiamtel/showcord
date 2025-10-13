@@ -8,7 +8,7 @@ import {
 } from 'react';
 import RoomCard from './components/RoomCard';
 import { InfinitySpin } from 'react-loader-spinner';
-import MiniSearch, { type SearchResult } from 'minisearch';
+import MiniSearch from 'minisearch';
 import NewsCard from './components/NewsCard';
 
 import targetFaceCluster from './assets/cluster_target_face_nobg.webp';
@@ -18,7 +18,7 @@ import discord from './assets/discord.png';
 import FAQ from './assets/FAQ.png';
 
 import { twMerge } from 'tailwind-merge';
-import { useClientContext } from './components/single/ClientContext';
+import { useClientContext } from './components/single/useClientContext';
 
 const minisearch = new MiniSearch({
     fields: ['title', 'desc'],
@@ -79,9 +79,6 @@ function RoomList({ className }: Readonly<{ className?: string }>) {
     const { client } = useClientContext();
     const [roomsJSON, setRoomsJSON] = useState<any>({});
     const [input, setInput] = useState<string>('');
-    const [miniSearchResults, setMiniSearchResults] = useState<SearchResult[]>(
-        [],
-    );
     const { setRoom } = useClientContext();
 
     const formRef = useRef<HTMLFormElement>(null);
@@ -98,17 +95,12 @@ function RoomList({ className }: Readonly<{ className?: string }>) {
         minisearch.addAll(roomsJSON.chat);
     }, [roomsJSON]);
 
-    useEffect(() => {
-        if (!input) {
-            setMiniSearchResults([]);
-            return;
-        }
-        const search = minisearch.search(input, {
+    const miniSearchResults = input ?
+        minisearch.search(input, {
             fuzzy: 0.2,
             prefix: true,
-        });
-        setMiniSearchResults(search);
-    }, [input]);
+        }) :
+        [];
 
     useEffect(() => {
         const focus = () => {

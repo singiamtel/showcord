@@ -11,7 +11,7 @@ import {
 import MiniSearch, { type SearchResult } from 'minisearch';
 import TextareaAutosize from 'react-textarea-autosize';
 import { cn } from '@/lib/utils';
-import { useClientContext } from './ClientContext';
+import { useClientContext } from './useClientContext';
 import { useRoomStore } from '@/client/client';
 
 type SearchBoxOffset = {
@@ -192,18 +192,12 @@ const SearchBox = (
         text: string;
     }>,
 ) => {
-    const [suggestions, setSuggestions] = useState<SearchResult[]>([]);
-    useEffect(() => {
-        if (!text) {
-            setSuggestions([]);
-            return;
-        }
-        const search = minisearch.search(text.slice(1), {
+    const suggestions = text ?
+        minisearch.search(text.slice(1), {
             boost: { name: 4 },
             fuzzy: 0.6,
-        });
-        setSuggestions(search);
-    }, [text]);
+        }) :
+        [];
 
     return (
         <div

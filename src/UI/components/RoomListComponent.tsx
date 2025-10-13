@@ -1,4 +1,4 @@
-import { useClientContext } from './single/ClientContext';
+import { useClientContext } from './single/useClientContext';
 import HashtagIcon from '../assets/hashtag';
 import Circle from './Circle';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';

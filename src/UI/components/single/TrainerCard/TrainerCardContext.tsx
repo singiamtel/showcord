@@ -1,16 +1,8 @@
-import { type MouseEventHandler, createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { type MouseEventHandler, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TrainerCard from './TrainerCard';
 import useClickOutside from '@/UI/hooks/useClickOutside';
-import { useClientContext } from '../ClientContext';
-
-interface TrainerCardContextType {
-    isOpen: boolean;
-    openCard: () => void;
-    closeCard: () => void;
-    clickUsername: (e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void;
-}
-
-const TrainerCardContext = createContext<TrainerCardContextType | undefined>(undefined);
+import { useClientContext } from '../useClientContext';
+import { TrainerCardContext } from './TrainerCardContext.types';
 
 export function TrainerCardProvider({ children }: Readonly<{ children: React.ReactNode }>) {
     const { client } = useClientContext();
@@ -24,8 +16,11 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
     const wrapperRef = useRef<any>(null);
 
     const closeWindow = useCallback(() => {
+        // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
         setUser(null);
+        // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
         setUsername(null);
+        // eslint-disable-next-line @eslint-react/hooks-extra/no-direct-set-state-in-use-effect
         setPosition({ x: 0, y: 0 });
     }, []);
 
@@ -51,10 +46,8 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
 
     useEffect(() => {
         if (!clickedOutside) return;
-        setUser(null);
-        setUsername(null);
-        setPosition({ x: 0, y: 0 });
-    }, [clickedOutside]);
+        closeWindow();
+    }, [clickedOutside, closeWindow]);
 
 
     const contextValue = useMemo(() => ({ isOpen, openCard, closeCard, clickUsername }), [isOpen, clickUsername]);
@@ -72,12 +65,4 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
         </TrainerCardContext.Provider>
     );
 }
-
-export const useTrainerCard = () => {
-    const context = useContext(TrainerCardContext);
-    if (context === undefined) {
-        throw new Error('useTrainerCard must be used within a TrainerCardProvider');
-    }
-    return context;
-};
 

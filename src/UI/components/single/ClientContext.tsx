@@ -1,18 +1,9 @@
-import { type Client, client, useRoomStore, useMessageStore, useAppStore } from '../../../client/client';
-import type { Message } from '../../../client/message';
+import { client, useRoomStore, useMessageStore, useAppStore } from '../../../client/client';
 import { Room } from '../../../client/room/room';
 import { loadCustomColors } from '../../../utils/namecolour';
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
-
-interface ClientContextType {
-    client: Client;
-    rooms: Room[];
-    setRoom:(room: string | 1 | -1 | Room) => void;
-    messages: Message[];
-}
-
-const ClientContext = createContext<ClientContextType | undefined>(undefined);
+import { ClientContext } from './ClientContext.types';
 
 export default function ClientContextProvider(props: Readonly<React.PropsWithChildren>) {
     const [previousRooms, setPreviousRooms] = useState<string[]>(['home']);
@@ -111,12 +102,3 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
     );
 }
 
-export function useClientContext() {
-    const context = useContext(ClientContext);
-    if (!context) {
-        throw new Error('useClientContext must be used within a ClientContextProvider');
-    }
-    return context;
-}
-
-useClientContext.displayName = 'useClientContext';

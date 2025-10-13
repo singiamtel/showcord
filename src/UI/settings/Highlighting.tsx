@@ -1,7 +1,7 @@
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { type HTMLAttributes, useState } from 'react';
-import { useClientContext } from '../components/single/ClientContext';
+import { useClientContext } from '../components/single/useClientContext';
 import { cn } from '@/lib/utils';
 
 export default function HighlightingSettings(props: Readonly<HTMLAttributes<'div'>>) {
