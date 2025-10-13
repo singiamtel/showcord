@@ -16,6 +16,7 @@ type ClientConstructor = {
     server_url?: string;
     loginserver_url?: string;
     autoLogin?: boolean;
+    skipVitestCheck?: boolean;
 };
 
 interface UseClientStoreType {
@@ -160,7 +161,7 @@ export class Client {
 
     constructor(options?: ClientConstructor) {
         // if running test suite, don't do anything
-        if (import.meta.env.VITEST) {
+        if (import.meta.env.VITEST && !options?.skipVitestCheck) {
             console.debug('Running tests, skipping client initialization');
             // Initialize authManager even in test mode to avoid undefined errors
             this.authManager = new AuthenticationManager(this.settings, {
@@ -519,6 +520,7 @@ export class Client {
             room.addMessage(message, settings);
         }
         useClientStore.getState().newMessage(room, message);
+        this.events.dispatchEvent(new CustomEvent('message', { detail: message }));
         console.debug('message', message);
 
         if (this.shouldNotify(room, message)) {
@@ -855,10 +857,10 @@ export class Client {
                 const username = args[1];
                 const named = args[2];
                 const avatar = args[3];
+                this.setUsername(username);
                 if (!username.trim().toLowerCase().startsWith('guest')) {
                     assert(named === '1', 'Couldn\'t guard against guest');
                     this.settings.updateUser(username, avatar);
-                    this.setUsername(username);
                     this.queryUserInternal(username);
                 }
             }
@@ -1208,23 +1210,23 @@ export class Client {
         }
         case '/error':
             type = 'error';
-            content = content.slice(6);
+            content = content.slice(7);
             break;
         case '/text':
             type = 'log';
-            content = content.slice(5);
+            content = content.slice(6);
             break;
         case '/announce':
             type = 'announce';
-            content = content.slice(9);
+            content = content.slice(10);
             break;
         case '/log':
             type = 'log';
-            content = content.slice(4);
+            content = content.slice(5);
             break;
         case '/me':
             type = 'roleplay';
-            content = content.slice(3);
+            content = content.slice(4);
             break;
         case '/challenge':
             type = 'challenge';

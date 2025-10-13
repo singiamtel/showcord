@@ -9,7 +9,7 @@
     "serve": "vite preview",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "test": "vitest"
+    "test": "vitest --reporter=basic"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
