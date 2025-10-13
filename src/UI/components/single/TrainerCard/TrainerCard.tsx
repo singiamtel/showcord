@@ -122,7 +122,7 @@ export default function TrainerCard(
                 <div id="usercard-rooms" className="text-sm">
           Chatrooms: {user ?
                         publicRooms.map((e, idx) =>
-                            roomLink(e[0], idx === publicRooms.length - 1, close, idx)) :
+                            roomLink(e[0], idx === publicRooms.length - 1, close, client, idx)) :
                         ''}
                     <br />
                     {privateRooms.length > 0 ?
@@ -130,7 +130,7 @@ export default function TrainerCard(
                             <>
                 Private rooms: {user ?
                                     privateRooms.map((e, idx) =>
-                                        roomLink(e[0], idx === privateRooms.length - 1, close, idx)) :
+                                        roomLink(e[0], idx === privateRooms.length - 1, close, client, idx)) :
                                     ''}
                             </>
                         ) :
@@ -173,8 +173,7 @@ function UserCardButton({
     );
 }
 
-function roomLink(room: string, last: boolean, close: () => void, key: number) {
-    const { client } = useClientContext();
+function roomLink(room: string, last: boolean, close: () => void, client: any, key: number) {
     const hasRank = rankOrder[room.charAt(0) as keyof typeof rankOrder] !== undefined;
     return (
         <Fragment key={key}>

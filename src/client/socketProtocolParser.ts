@@ -237,8 +237,9 @@ export class SocketProtocolParser {
                         }
                     }
 
+                    const hadListener = this.queryHandlers.hasUserListener();
                     this.queryHandlers.handleUserDetailsResponse(tmpjson);
-                    if (!this.queryHandlers.hasUserListener() && this.settings.username) {
+                    if (!hadListener && this.settings.username) {
                         console.warn(
                             'received queryresponse|userdetails but nobody asked for it',
                             args,
