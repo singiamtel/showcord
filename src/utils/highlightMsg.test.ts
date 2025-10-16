@@ -1,8 +1,8 @@
-import { test, expect, suite } from 'vitest';
+import { test, expect, describe } from 'vitest';
 import { stringsToRegex, highlightMsg } from './highlightMsg';
 
 
-suite('highlightMsg', () => {
+describe('highlightMsg', () => {
     test('should highlight perfect matches', () => {
         const regex = stringsToRegex(['testuser']);
         const msg = 'testuser';

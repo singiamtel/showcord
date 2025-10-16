@@ -1,8 +1,8 @@
-import { test, expect, suite } from 'vitest';
+import { test, expect, describe } from 'vitest';
 import { render } from '@testing-library/react';
 import { FormatMsgDisplay } from '@/UI/chatFormatting/MessageParser';
 
-suite('inlineCode', () => {
+describe('inlineCode', () => {
     test('should render code', () => {
         const JSX = FormatMsgDisplay({ msg: '`test`' });
         const { container } = render(JSX);
