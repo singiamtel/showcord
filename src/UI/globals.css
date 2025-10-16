@@ -178,9 +178,7 @@ a:visited {
 
 table {
   border-collapse: collapse;
-  /* Allow table to be responsive */
-  width: 100%;
-  display: block;
+  /* display: block; */
   overflow-x: auto;
 }
 
