@@ -54,7 +54,9 @@ export class BattleRoom extends Room {
             console.error('this.battle.add error', line, e);
         }
 
-        this.battle.update();
+        if (this.battle.request) {
+            this.battle.update(this.battle.request);
+        }
 
         if (this.formatter) {
             const html = this.formatter.formatHTML(args, kwArgs);
