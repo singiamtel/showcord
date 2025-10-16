@@ -380,6 +380,13 @@ export class Client {
         message: string,
         _raw: boolean,
     ): boolean {
+        if (message.startsWith('/inject ')) {
+            const injectedData = message.slice(8);
+            console.debug('[inject] Injecting message:', injectedData);
+            this.protocolParser.parseSocketChunk(injectedData);
+            return true;
+        }
+
         const handled = parseHighlightCommand(
             message,
             this.settings,
