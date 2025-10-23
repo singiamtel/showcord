@@ -4,6 +4,7 @@ import eslintReact from "@eslint-react/eslint-plugin";
 import tseslint from "typescript-eslint";
 import reactRefresh from 'eslint-plugin-react-refresh';
 import reactHooks from 'eslint-plugin-react-hooks';
+import regexpPlugin from 'eslint-plugin-regexp';
 
 export default tseslint.config({
     files: ["**/*.{js,jsx,ts,tsx}"],
@@ -17,6 +18,7 @@ export default tseslint.config({
         eslintJs.configs.recommended,
         tseslint.configs.recommended,
         eslintReact.configs["recommended-typescript"],
+        regexpPlugin.configs["flat/recommended"],
     ],
 
     // Configure language/parsing options

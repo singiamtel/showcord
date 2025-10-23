@@ -7,9 +7,9 @@ export function HTMLtoPlain(html: string) {
     return tmp.innerText || '';
 }
 
-const brRegex = /<br\s*[/]?>/gi;
+const brRegex = /<br\s*\/?>/gi;
 const summaryOpenRegex = /<summary\s*>/gi;
-const summaryCloseRegex = /<[/]summary\s*>/gi;
+const summaryCloseRegex = /<\/summary\s*>/gi;
 
 export default function Code({ message }: any) {
     const codeRef = useRef<HTMLElement>(null);

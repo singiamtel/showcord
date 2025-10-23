@@ -14,7 +14,7 @@ export function regex2str(regex: RegExp) { // Convert regex to string
 }
 
 export function removeFirstCharacterIfNotLetter(str: string) {
-    if (str.length > 0 && !str.charAt(0).match(/[a-zA-Z]/)) {
+    if (str.length > 0 && !str.charAt(0).match(/[a-z]/i)) {
         return str.slice(1);
     }
     return str;

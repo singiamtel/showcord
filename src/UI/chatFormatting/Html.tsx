@@ -150,7 +150,7 @@ export default function HTML(
         },
         allowedStyles: {
             'p': {
-                'letter-spacing': [/^(\d+)(\w+)$/],
+                'letter-spacing': [/^(\d+)([a-z]+)$/i],
             },
             'span': {
                 'background': colorRegex,
