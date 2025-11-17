@@ -13,6 +13,7 @@ interface RoomStoreActions {
     setRooms: (rooms: Map<Room['ID'], Room>) => void;
     addRoom: (room: Room) => void;
     removeRoom: (roomID: Room['ID']) => void;
+    updateRoom: (roomID: Room['ID'], updates: Partial<Pick<Room, 'open' | 'connected'>>) => void;
     setCurrentRoom: (room: Room) => void;
     selectRoom: (roomID: string, room: Room | undefined) => void;
     setBattleRequest: (roomID: string, request: any) => void;
@@ -45,6 +46,24 @@ export const useRoomStore = create<RoomStore>()((set) => ({
             const newRooms = new Map(state.rooms);
             newRooms.delete(roomID);
             return { rooms: newRooms };
+        });
+    },
+
+    updateRoom: (roomID: Room['ID'], updates: Partial<Pick<Room, 'open' | 'connected'>>) => {
+        set((state) => {
+            const room = state.rooms.get(roomID);
+            if (!room) {
+                console.warn(`updateRoom: room ${roomID} not found`);
+                return state;
+            }
+
+            const hasChanges = Object.entries(updates).some(
+                ([key, value]) => room[key as keyof typeof updates] !== value
+            );
+            if (!hasChanges) return state;
+
+            Object.assign(room, updates);
+            return { rooms: new Map(state.rooms).set(roomID, room) };
         });
     },
 

@@ -32,11 +32,9 @@ export function openRoom(
 ) {
     const room = getRoom(roomID);
     if (room) {
-        room.open = true;
-        const rooms = new Map(getRooms());
-        rooms.set(roomID, room);
-        settings.changeRooms(rooms);
-        useRoomStore.getState().setRooms(rooms);
+        // Use updateRoom action which handles change detection internally
+        useRoomStore.getState().updateRoom(roomID, { open: true });
+        settings.changeRooms(getRooms());
         return;
     }
     console.warn('openRoom: room (' + roomID + ') is unknown');
@@ -66,10 +64,7 @@ export function closeRoom(
         console.warn('Trying to close non-existent room', roomID);
         return;
     }
-    room.open = false;
-    const rooms = new Map(getRooms());
-    rooms.set(roomID, room);
-    useRoomStore.getState().setRooms(rooms);
+    useRoomStore.getState().updateRoom(roomID, { open: false });
     if (roomID === selectedRoom) {
         selectRoom('home', getRoom);
     }

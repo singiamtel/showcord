@@ -1,4 +1,4 @@
-import { type HTMLAttributes, useEffect } from 'react';
+import { type HTMLAttributes } from 'react';
 import { Label } from '@/components/ui/label';
 import { useClientContext } from '../components/single/useClientContext';
 import { cn } from '@/lib/utils';
@@ -36,11 +36,7 @@ function ThemePillSelector({ value, onChange }: { value: ThemeOption; onChange: 
 
 export default function AppearanceSettings(props: Readonly<HTMLAttributes<'div'>>) {
     const { client } = useClientContext();
-    const { theme } = useAppStore(state => ({ theme: state.theme }));
-
-    useEffect(() => {
-        client.setTheme(theme);
-    }, [theme]);
+    const theme = useAppStore(state => state.theme);
 
     return (
         <div className={cn('p-8', props.className)}>

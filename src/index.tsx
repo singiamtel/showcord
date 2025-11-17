@@ -6,6 +6,7 @@ import '@fontsource/roboto-mono';
 import './UI/globals.css';
 import ClientContextProvider from './UI/components/single/ClientContext';
 import { Analytics } from '@vercel/analytics/react';
+import { ErrorBoundary } from './UI/components/ErrorBoundary';
 
 const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement,
@@ -13,9 +14,11 @@ const root = ReactDOM.createRoot(
 
 root.render(
     <StrictMode>
-        <Analytics/>
-        <ClientContextProvider>
-            <App />
-        </ClientContextProvider>
+        <ErrorBoundary>
+            <Analytics/>
+            <ClientContextProvider>
+                <App />
+            </ClientContextProvider>
+        </ErrorBoundary>
     </StrictMode>,
 );
