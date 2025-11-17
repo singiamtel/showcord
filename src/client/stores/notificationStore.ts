@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
 import type { Room } from '../room/room';
 
 export type RoomNotification = {
@@ -18,51 +19,33 @@ interface NotificationStoreActions {
 
 export type NotificationStore = NotificationStoreState & NotificationStoreActions;
 
-export const useNotificationStore = create<NotificationStore>((set) => ({
-    notifications: {},
+export const useNotificationStore = create<NotificationStore>()(
+    immer((set) => ({
+        notifications: {},
 
-    addUnread: (roomID: string) => {
-        set((state) => {
-            if (!state.notifications[roomID]) {
-                return {
-                    notifications: { ...state.notifications, [roomID]: { unread: 1, mentions: 0 } },
-                };
-            }
-            return {
-                notifications: {
-                    ...state.notifications,
-                    [roomID]: {
-                        unread: state.notifications[roomID].unread + 1,
-                        mentions: state.notifications[roomID].mentions,
-                    },
-                },
-            };
-        });
-    },
+        addUnread: (roomID: string) => {
+            set((state) => {
+                if (!state.notifications[roomID]) {
+                    state.notifications[roomID] = { unread: 1, mentions: 0 };
+                } else {
+                    state.notifications[roomID].unread += 1;
+                }
+            });
+        },
 
-    addMention: (roomID: string) => {
-        set((state) => {
-            if (!state.notifications[roomID]) {
-                return {
-                    notifications: { ...state.notifications, [roomID]: { unread: 0, mentions: 1 } },
-                };
-            }
-            return {
-                notifications: {
-                    ...state.notifications,
-                    [roomID]: {
-                        unread: state.notifications[roomID].unread,
-                        mentions: state.notifications[roomID].mentions + 1,
-                    },
-                },
-            };
-        });
-    },
+        addMention: (roomID: string) => {
+            set((state) => {
+                if (!state.notifications[roomID]) {
+                    state.notifications[roomID] = { unread: 0, mentions: 1 };
+                } else {
+                    state.notifications[roomID].mentions += 1;
+                }
+            });
+        },
 
-    clearNotifications: (roomID: string) => {
-        if (!roomID) return;
-        set((state) => ({
-            notifications: { ...state.notifications, [roomID]: { unread: 0, mentions: 0 } },
-        }));
-    },
-}));
+        clearNotifications: (roomID: string) => {
+            if (!roomID) return;
+            set((state) => ({ notifications: { ...state.notifications, [roomID]: { unread: 0, mentions: 0 } } }));
+        },
+    }))
+);

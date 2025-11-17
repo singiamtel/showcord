@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
 
 interface AppStoreState {
     theme: 'light' | 'dark' | 'system';
@@ -14,20 +15,22 @@ interface AppStoreActions {
 
 export type AppStore = AppStoreState & AppStoreActions;
 
-export const useAppStore = create<AppStore>((set) => ({
-    theme: localStorage.getItem('theme') as 'light' | 'dark' | 'system' ?? 'system',
-    error: undefined,
-    isConnected: false,
+export const useAppStore = create<AppStore>()(
+    immer((set) => ({
+        theme: (typeof localStorage !== 'undefined' ? localStorage.getItem('theme') as 'light' | 'dark' | 'system' : null) ?? 'system',
+        error: undefined,
+        isConnected: false,
 
-    setTheme: (theme: 'light' | 'dark' | 'system') => {
-        set(() => ({ theme }));
-    },
+        setTheme: (theme: 'light' | 'dark' | 'system') => {
+            set({ theme });
+        },
 
-    setError: (error: string | undefined) => {
-        set(() => ({ error }));
-    },
+        setError: (error: string | undefined) => {
+            set({ error });
+        },
 
-    setConnected: (isConnected: boolean) => {
-        set(() => ({ isConnected }));
-    },
-}));
+        setConnected: (isConnected: boolean) => {
+            set({ isConnected });
+        },
+    }))
+);

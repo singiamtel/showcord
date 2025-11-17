@@ -40,6 +40,7 @@
     "highlight.js": "^11.11.1",
     "html-escaper": "^3.0.3",
     "html-react-parser": "^5.2.6",
+    "immer": "^10.2.0",
     "linkify-react": "^4.3.2",
     "linkifyjs": "^4.3.2",
     "minisearch": "^7.2.0",

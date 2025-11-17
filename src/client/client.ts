@@ -27,6 +27,10 @@ type ClientConstructor = {
     skipVitestCheck?: boolean;
 };
 
+import { enableMapSet } from 'immer';
+
+enableMapSet();
+
 export { useRoomStore, useMessageStore, useNotificationStore, useUserStore, useAppStore } from './stores';
 
 export class Client {

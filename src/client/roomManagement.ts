@@ -33,7 +33,7 @@ export function openRoom(
     const room = getRoom(roomID);
     if (room) {
         room.open = true;
-        const rooms = getRooms();
+        const rooms = new Map(getRooms());
         rooms.set(roomID, room);
         settings.changeRooms(rooms);
         useRoomStore.getState().setRooms(rooms);
@@ -67,7 +67,7 @@ export function closeRoom(
         return;
     }
     room.open = false;
-    const rooms = getRooms();
+    const rooms = new Map(getRooms());
     rooms.set(roomID, room);
     useRoomStore.getState().setRooms(rooms);
     if (roomID === selectedRoom) {

@@ -21,7 +21,7 @@ interface RoomStoreActions {
 
 export type RoomStore = RoomStoreState & RoomStoreActions;
 
-export const useRoomStore = create<RoomStore>((set) => ({
+export const useRoomStore = create<RoomStore>()((set) => ({
     rooms: new Map(),
     selectedRoomID: 'home',
     currentRoom: undefined,
@@ -29,9 +29,7 @@ export const useRoomStore = create<RoomStore>((set) => ({
     usersUpdateCounter: 0,
 
     setRooms: (rooms: Map<Room['ID'], Room>) => {
-        set(() => ({
-            rooms: new Map(rooms),
-        }));
+        set({ rooms: new Map(rooms) });
     },
 
     addRoom: (room: Room) => {
@@ -51,23 +49,15 @@ export const useRoomStore = create<RoomStore>((set) => ({
     },
 
     setCurrentRoom: (room: Room) => {
-        set(() => ({
-            currentRoom: room,
-            selectedRoomID: room.ID,
-        }));
+        set({ currentRoom: room, selectedRoomID: room.ID });
     },
 
     selectRoom: (roomID: string, room: Room | undefined) => {
-        set(() => ({
-            currentRoom: room,
-            selectedRoomID: roomID,
-        }));
+        set({ currentRoom: room, selectedRoomID: roomID });
     },
 
     setBattleRequest: (roomID: string, request: any) => {
-        set(() => ({
-            battleRequest: { roomID, request },
-        }));
+        set({ battleRequest: { roomID, request } });
     },
 
     notifyUsersUpdate: () => {

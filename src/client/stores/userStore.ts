@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { immer } from 'zustand/middleware/immer';
 
 interface UserStoreState {
     user: string | undefined;
@@ -14,20 +15,22 @@ interface UserStoreActions {
 
 export type UserStore = UserStoreState & UserStoreActions;
 
-export const useUserStore = create<UserStore>((set) => ({
-    user: undefined,
-    avatar: 'lucas',
-    challstr: '',
+export const useUserStore = create<UserStore>()(
+    immer((set) => ({
+        user: undefined,
+        avatar: 'lucas',
+        challstr: '',
 
-    setUser: (user: string | undefined) => {
-        set(() => ({ user }));
-    },
+        setUser: (user: string | undefined) => {
+            set({ user });
+        },
 
-    setAvatar: (avatar: string) => {
-        set(() => ({ avatar }));
-    },
+        setAvatar: (avatar: string) => {
+            set({ avatar });
+        },
 
-    setChallstr: (challstr: string) => {
-        set(() => ({ challstr }));
-    },
-}));
+        setChallstr: (challstr: string) => {
+            set({ challstr });
+        },
+    }))
+);

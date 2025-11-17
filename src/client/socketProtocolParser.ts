@@ -102,7 +102,7 @@ export class SocketProtocolParser {
             const room = this.requiresRoom('title', roomID);
             if (!room) return false;
             room.rename(name);
-            const rooms = this.callbacks.getRooms();
+            const rooms = new Map(this.callbacks.getRooms());
             rooms.set(roomID, room);
             useRoomStore.getState().setRooms(rooms);
             break;
