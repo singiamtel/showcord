@@ -18,11 +18,11 @@ export function MoveRequest({ req, battle }: Readonly<{ req: Protocol.MoveReques
     const builder = useMemo(() => new ChoiceBuilder(req), [req]);
     const [selected, setSelected] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (selected) {
-            client.send(`/${builder.toString()}|${req.rqid}`, battle.ID);
-        }
-    }, [selected, builder, battle.ID, client, req.rqid]);
+    const handleMoveSelect = (move: Protocol.Request.ActivePokemon['moves'][number], idx: number) => {
+        builder.addChoice(`move ${idx + 1}`);
+        setSelected(move.name);
+        client.send(`/${builder.toString()}|${req.rqid}`, battle.ID);
+    };
 
     const handleUndo = () => {
         client.send(`/undo`, battle.ID);
@@ -32,6 +32,7 @@ export function MoveRequest({ req, battle }: Readonly<{ req: Protocol.MoveReques
 
     useEffect(() => {
         builder.choices.length = 0;
+        setSelected(null);
     }, [active, builder]);
 
     if (!active[0]) {
@@ -48,9 +49,6 @@ export function MoveRequest({ req, battle }: Readonly<{ req: Protocol.MoveReques
     </div> : <div
         className='grid grid-cols-2 grid-rows-2 w-full h-full place-items-center'
     >{active[0].moves.map((move, idx: number) => <MoveButton key={move.id || `move-${idx}`} move={move}
-            onClick={() => {
-                builder.addChoice(`move ${idx + 1}`);
-                setSelected(move.name);
-            }}
+            onClick={() => handleMoveSelect(move, idx)}
         />)}</div>;
 }

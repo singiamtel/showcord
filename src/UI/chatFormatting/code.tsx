@@ -1,4 +1,3 @@
-import { useEffect, useRef } from 'react';
 import hljs from 'highlight.js';
 
 export function HTMLtoPlain(html: string) {
@@ -12,19 +11,12 @@ const summaryOpenRegex = /<summary\s*>/gi;
 const summaryCloseRegex = /<\/summary\s*>/gi;
 
 export default function Code({ message }: any) {
-    const codeRef = useRef<HTMLElement>(null);
     const msg = message.replace(brRegex, '\n').replace(summaryCloseRegex, '\n')
         .replace(summaryOpenRegex, '');
     const str = HTMLtoPlain(msg);
     const result = hljs.highlightAuto(str);
     const threshold = 5;
     const shouldHighlight = result.relevance >= threshold;
-
-    useEffect(() => {
-        if (codeRef.current && result.value) {
-            codeRef.current.innerHTML = result.value;
-        }
-    }, [result.value]);
 
     return (
         <div
@@ -35,7 +27,10 @@ export default function Code({ message }: any) {
                     <pre
                         className={'whitespace-pre-wrap text-sm '}
                     >
-                        <code ref={codeRef} className="hljs" />
+                        <code
+                            className="hljs"
+                            dangerouslySetInnerHTML={{ __html: result.value }}
+                        />
                     </pre>
                 ) :
                 (

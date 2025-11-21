@@ -19,6 +19,7 @@ import FAQ from './assets/FAQ.png';
 
 import { twMerge } from 'tailwind-merge';
 import { useClientContext } from './components/single/useClientContext';
+import { useMediaQuery } from './hooks/useMediaQuery';
 
 const minisearch = new MiniSearch({
     fields: ['title', 'desc'],
@@ -56,8 +57,9 @@ function News({ className }: Readonly<{ className?: string }>) {
     const [news, setNews] = useState<any[]>([]);
     const { client } = useClientContext();
     useEffect(() => {
+        if (!client) return;
         client.queryNews(setNews);
-    }, []);
+    }, [client]);
     return (
         <div
             className={twMerge(
@@ -194,17 +196,7 @@ function RoomList({ className }: Readonly<{ className?: string }>) {
 }
 
 function SocialLink({ id, href, children }: Readonly<{ id: string, href?: string, children: any }>) {
-    const [matches, setMatches] = useState(
-        window.matchMedia('(min-width: 1500px)').matches
-    );
-    useEffect(() => {
-        const mediaQuery = window.matchMedia('(min-width: 1500px)');
-        const handleChange = (e: MediaQueryListEvent) => setMatches(e.matches);
-        mediaQuery.addEventListener('change', handleChange);
-        return () => {
-            mediaQuery.removeEventListener('change', handleChange);
-        };
-    }, []);
+    const matches = useMediaQuery('(min-width: 1500px)');
     return (
         <a
             id={id}

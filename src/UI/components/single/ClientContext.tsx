@@ -5,6 +5,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
 import { ClientContext } from './ClientContext.types';
 
+let didInitColors = false;
+
 export default function ClientContextProvider(props: Readonly<React.PropsWithChildren>) {
     const [previousRooms, setPreviousRooms] = useState<string[]>(['home']);
     const roomsMap = useRoomStore((state) => state.rooms);
@@ -73,11 +75,10 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
     }, []);
 
     useEffect(() => {
-    // TODO: Unclear if this should be here
-        const init = async () => {
-            await loadCustomColors();
-        };
-        init();
+        if (!didInitColors) {
+            didInitColors = true;
+            loadCustomColors();
+        }
     }, []);
 
     /* --- End user handling --- */

@@ -3,7 +3,7 @@ import type { BattleRoom } from '@/client/room/battleRoom';
 import { cn } from '@/lib/utils';
 import type { Protocol } from '@pkmn/protocol';
 import { ChoiceBuilder } from '@pkmn/view';
-import { type HTMLAttributes, useEffect, useMemo, useState } from 'react';
+import { type HTMLAttributes, useMemo } from 'react';
 
 function SwitchButton(props: Readonly<HTMLAttributes<HTMLButtonElement> & { pokemon: Protocol.Request.Pokemon; }>) {
     return <button
@@ -18,24 +18,18 @@ export function SwitchRequest({ req, battle }: Readonly<{ req: Protocol.SwitchRe
 
     const { client } = useClientContext();
     const builder = useMemo(() => new ChoiceBuilder(req), [req]);
-    const [selected, setSelected] = useState<string | null>(null);
 
-    useEffect(() => {
-        if (selected) {
-            // req.send();
-            client.send(`/${builder.toString()}|${req.rqid}`, battle.ID);
-        }
-    }, [selected]);
+    const handleSwitch = (mon: Protocol.Request.Pokemon, idx: number) => {
+        builder.addChoice(`switch ${idx + 1}`);
+        client.send(`/${builder.toString()}|${req.rqid}`, battle.ID);
+    };
 
     return <div
         className='grid grid-cols-3 grid-rows-2 w-full h-full place-items-center'
     >
         {side.pokemon.map((mon, idx) => <SwitchButton key={mon.name} pokemon={mon}
 
-            onClick={() => {
-                builder.addChoice(`switch ${idx + 1}`);
-                setSelected(mon.name);
-            }}
+            onClick={() => handleSwitch(mon, idx)}
         />)}
     </div>;
 }

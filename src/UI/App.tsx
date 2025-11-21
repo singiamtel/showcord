@@ -1,29 +1,18 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faBarChart, faPieChart } from '@fortawesome/free-solid-svg-icons';
-import { useEffect, useState } from 'react';
 
 import Sidebar from './components/single/Sidebar';
 import BigPanel from './components/single/BigPanel';
 import { TrainerCardProvider } from './components/single/TrainerCard/TrainerCardContext';
 import { useAppStore } from '@/client/client';
 import { Toaster } from '@/components/ui/toaster';
+import { useMediaQuery } from './hooks/useMediaQuery';
 
 library.add(faBarChart, faPieChart);
 
 export default function App() {
     const theme = useAppStore(state => state.theme);
-    const [systemPrefersDark, setSystemPrefersDark] = useState(() =>
-        window.matchMedia('(prefers-color-scheme: dark)').matches);
-
-    useEffect(() => {
-        if (theme !== 'system') return;
-        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-        const handleChange = (e: MediaQueryListEvent) => {
-            setSystemPrefersDark(e.matches);
-        };
-        mediaQuery.addEventListener('change', handleChange);
-        return () => mediaQuery.removeEventListener('change', handleChange);
-    }, [theme]);
+    const systemPrefersDark = useMediaQuery('(prefers-color-scheme: dark)');
 
     const isDark = theme === 'system' ? systemPrefersDark : theme === 'dark';
 
