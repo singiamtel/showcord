@@ -14,6 +14,7 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
     const [username, setUsername] = useState<string | null>(null);
     const [position, setPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
     const wrapperRef = useRef<any>(null);
+    const clickedElementRef = useRef<HTMLElement | null>(null);
 
     const closeWindow = useCallback(() => {
         setUser(null);
@@ -21,6 +22,7 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
         setUsername(null);
 
         setPosition({ x: 0, y: 0 });
+        clickedElementRef.current = null;
     }, []);
 
     const { isOutside: clickedOutside } = useClickOutside(wrapperRef);
@@ -28,13 +30,22 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
     const clickUsername: MouseEventHandler<HTMLAnchorElement> = (e) => {
         if (!e) return;
         if (!(e.target instanceof HTMLElement)) return;
-        const username = e.target.getAttribute(
+        const clickedElement = e.target;
+
+        // If clicking on the same element that opened the popup, close it
+        if (clickedElementRef.current === clickedElement) {
+            closeWindow();
+            return;
+        }
+
+        const username = clickedElement.getAttribute(
             'data-username',
         )?.trim();
         if (!username) {
             console.error('clickUsername: no username');
             return;
         }
+        clickedElementRef.current = clickedElement;
         setUsername(username);
         setPosition({ x: e.clientX, y: e.clientY });
         setUser(null);
