@@ -6,12 +6,17 @@ import { Protocol } from '@pkmn/protocol';
 
 import { Room, type RoomType } from './room';
 import newMessage from '../message';
+import { useMessageStore } from '../stores/messageStore';
 
 
 export class BattleRoom extends Room {
     battle: Battle;
+    log: string[] = [];
+    onLogUpdate: ((line: string) => void) | null = null;
     formatter: LogFormatter | null = null;
     perspective: SideID = 'p1';
+    isPlayer = false;
+    battleEnded = false;
     constructor(
         { ID, name, type, connected, open }: {
             ID: string;
@@ -24,10 +29,11 @@ export class BattleRoom extends Room {
         super({ ID, name, type, connected, open });
 
         this.battle = new Battle(new Generations(Dex));
+        this.formatter = new LogFormatter(this.perspective, this.battle);
     }
 
     setFormatter(perspective: SideID) {
-        if (this.formatter) {
+        if (this.perspective === perspective && this.formatter) {
             return;
         }
         this.perspective = perspective;
@@ -42,6 +48,9 @@ export class BattleRoom extends Room {
      * Returns whether a new message was added to the battle.
      */
     feedBattle(line: string): boolean {
+        this.log.push(line);
+        if (this.onLogUpdate) this.onLogUpdate(line);
+
         const { args, kwArgs } = Protocol.parseBattleLine(line);
 
         try {
@@ -61,15 +70,17 @@ export class BattleRoom extends Room {
         if (this.formatter) {
             const html = this.formatter.formatHTML(args, kwArgs);
             if (html) {
+                const message = newMessage({
+                    type: 'rawHTML',
+                    name: '',
+                    content: html,
+                    hld: false,
+                });
                 this.addMessage(
-                    newMessage({
-                        type: 'rawHTML',
-                        name: '',
-                        content: html,
-                        hld: false,
-                    }),
+                    message,
                     { selected: true, selfSent: false },
                 );
+                useMessageStore.getState().newMessage(this.ID, message);
                 return true;
             }
         }

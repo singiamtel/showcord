@@ -22,6 +22,12 @@
     "paths": {
       "@/*": [
         "./src/*"
+      ],
+      "@pkmn-client/*": [
+        "./pokemon-showdown-client/play.pokemonshowdown.com/src/*"
+      ],
+      "@pkmn-client-js/*": [
+        "./pokemon-showdown-client/play.pokemonshowdown.com/js/*"
       ]
     }
   },

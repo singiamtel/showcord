@@ -1,99 +1,125 @@
-import { assert, cn } from '@/lib/utils';
-import type { HTMLAttributes } from 'react';
-import type { BattleRoom } from '@/client/room/battleRoom';
-import { Icons, Sprites } from '@pkmn/img';
-import type { Pokemon as PokemonType, Side } from '@pkmn/client';
-import { Username } from '../../Username';
+import React, { useEffect, useRef, useState, type HTMLAttributes } from 'react';
+import { Battle as VisualBattle } from '@pkmn-client/battle';
+import $ from 'jquery';
+import '../../../../utils/showdown-globals';
 import { useRoomStore } from '@/client/client';
+import type { BattleRoom } from '@/client/room/battleRoom';
+import { cn } from '@/lib/utils';
 
-
-function PokeballIcon() {
-    const item = Icons.getPokeball('pokeball')!;
-    return (
-        <span
-            style={{
-                background:
-                  `transparent url("${item.url}") no-repeat scroll ${item.left}px ${item.top}px`,
-                width: '40px',
-                height: '30px',
-                border: 0,
-                display: 'inline-block',
-                imageRendering: 'pixelated',
-                verticalAlign: '-7px',
-            }}
-        >
-        </span>
-    );
-}
-
-function PokemonIcon({ pokemon }: Readonly<{
-    pokemon: PokemonType | null,
-}>) {
-    if (!pokemon) return null;
-    const data = Icons.getPokemon(pokemon.speciesForme, { protocol: 'https', domain: 'cdn.crob.at' });
-    return (
-        <span
-            title={pokemon.name}
-            style={{
-                background:
-                  `transparent url("${data.url}") no-repeat scroll ${data.left}px ${data.top}px`,
-                width: '40px',
-                height: '30px',
-                border: 0,
-                display: 'inline-block',
-                imageRendering: 'pixelated',
-                verticalAlign: '-7px',
-            }}
-        >
-        </span>
-    );
-}
-
-function PokemonSprite({ pokemon, side }: Readonly<{
-    pokemon: PokemonType | null,
-    side: 'p1' | 'p2'
-}>) {
-    if (!pokemon) return null;
-    const data = Sprites.getPokemon(pokemon.speciesForme, { side }); // TODO: Mirror sprites and use cdn.crob.at too
-    return <img src={data.url} width={data.w} height={data.h} data-name={pokemon.name} alt={`${pokemon.name} sprite`} title={pokemon.name} />;
-}
-
-function RenderTeam({ player }: Readonly<{ player: Side }>) {
-    console.log(player);
-    return <div className='w-[120px] grid grid-cols-2 md:grid-cols-3 p-2'>
-        {player.team.map((pokemon) => pokemon && <PokemonIcon key={pokemon.name} pokemon={pokemon} />)}
-        {/* eslint-disable-next-line @eslint-react/no-array-index-key */}
-        {player.team.length < player.totalPokemon && [...Array(player.totalPokemon - player.team.length)].map((_, idx) => <PokeballIcon key={`pokeball-${player.name}-${idx}`} />)}
-        {/* {player.active.map((pokemon, idx) => pokemon && <PokemonSprite key={idx} pokemon={pokemon} />)} */}
-    </div>;
-}
+// Helper to check if PS globals are loaded
+const checkGlobals = () => {
+    const ready = !!(window.BattlePokedex && window.BattleMovedex && window.BattleTeambuilderTable);
+    if (!ready) {
+        console.log('Waiting for globals...', {
+            BattlePokedex: !!window.BattlePokedex,
+            BattleMovedex: !!window.BattleMovedex,
+            BattleTeambuilderTable: !!window.BattleTeambuilderTable,
+        });
+    }
+    return ready;
+};
 
 export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
-    const battle = useRoomStore(state => state.currentRoom) as BattleRoom;
-    assert(battle?.type === 'battle', 'Trying to render BattleWindow in a room that is not a BattleRoom');
-    return <div className={cn(props.className, 'h-full w-full bg-gray-125 flex flex-row')}>
-        <div className=' flex flex-col items-center' id="side-1">
-            <div className='text-center w-full'>
-                <Username bold user={' ' + battle.battle.p1.name} />
-            </div>
-            <img src={Sprites.getAvatar(battle.battle.p1.avatar)} alt={`${battle.battle.p1.name}'s avatar`}/>
-            <div className='w-full'>
-                <RenderTeam player={battle.battle.p1} />
-            </div>
-        </div>
-        <div className='h-full w-full bg-gray-100 flex justify-around items-center' id="battle">
-            {battle.battle.p1.active.map((pokemon) => pokemon && <PokemonSprite key={`p1-${pokemon.name}`} pokemon={pokemon} side='p1'/>)}
-            {battle.battle.p2.active.map((pokemon) => pokemon && <PokemonSprite key={`p2-${pokemon.name}`} pokemon={pokemon} side='p2'/>)}
-        </div>
-        <div className='flex flex-col items-center' id="side-2">
-            <div className='text-center w-full'>
-                <Username bold user={' ' + battle.battle.p2.name} />
-            </div>
-            <img src={Sprites.getAvatar(battle.battle.p2.avatar)} />
-            <div className='w-full'>
-                <RenderTeam player={battle.battle.p2} />
-            </div>
-        </div>
-    </div>;
-}
+    const room = useRoomStore(state => state.currentRoom) as BattleRoom;
+    const battleRef = useRef<HTMLDivElement>(null);
+    const logRef = useRef<HTMLDivElement>(null);
+    const [battleInstance, setBattleInstance] = useState<VisualBattle | null>(null);
+    const logIndexRef = useRef(0);
+    const [isReady, setIsReady] = useState(() => checkGlobals());
 
+    // Poll for globals if not ready
+    useEffect(() => {
+        if (isReady) return;
+        const interval = setInterval(() => {
+            if (checkGlobals()) {
+                setIsReady(true);
+                clearInterval(interval);
+            }
+        }, 100);
+        return () => clearInterval(interval);
+    }, [isReady]);
+
+    // Initialize Battle
+    useEffect(() => {
+        if (!battleRef.current || !logRef.current || !isReady) return;
+
+        const $battle = $(battleRef.current);
+        const $log = $(logRef.current);
+        const battleId = (room.ID || 'battle-view') as any; // Cast to expected ID type
+
+        console.log('Initializing VisualBattle for room', battleId);
+
+        const battle = new VisualBattle({
+            id: battleId,
+            $frame: $battle,
+            $logFrame: $log,
+        });
+
+        setBattleInstance(battle);
+
+        // Set perspective if room has one
+        if (room.perspective) {
+            console.log('Setting viewpoint to', room.perspective);
+            battle.setViewpoint(room.perspective);
+        }
+
+        // Feed initial log
+        if (room.log && room.log.length > 0) {
+            console.log('Feeding initial log', room.log.length, 'lines');
+            room.log.forEach(line => battle.add(line));
+            battle.seekTurn(Infinity);
+            logIndexRef.current = room.log.length;
+        }
+        return () => {
+            console.log('Destroying VisualBattle');
+            // Clean up DOM if needed, though VisualBattle usually handles its own frame
+            $battle.empty();
+            // battle.destroy() if available
+        };
+    }, [isReady, room.ID]);
+
+    // Update perspective
+    useEffect(() => {
+        if (battleInstance && room.perspective) {
+            console.log('Updating viewpoint to', room.perspective);
+            battleInstance.setViewpoint(room.perspective);
+        }
+    }, [battleInstance, room.perspective]);
+
+    // Update log
+    useEffect(() => {
+        if (!battleInstance) return;
+
+        // Catch up on any missed lines (race condition handling)
+        if (room.log.length > logIndexRef.current) {
+            const newLines = room.log.slice(logIndexRef.current);
+            console.log('Catching up logs', newLines.length);
+            newLines.forEach(line => battleInstance.add(line));
+            battleInstance.seekTurn(Infinity);
+            logIndexRef.current = room.log.length;
+        }
+
+        // Subscribe to new lines
+        room.onLogUpdate = (line) => {
+            // console.log("Live log line:", line);
+            battleInstance.add(line);
+            // battleInstance.seekTurn(Infinity);
+            logIndexRef.current = room.log.length;
+        };
+
+        return () => {
+            room.onLogUpdate = null;
+        };
+    }, [battleInstance, room]);
+
+    if (!isReady) {
+        return <div className={cn(props.className, 'flex items-center justify-center')}>Loading Battle Engine...</div>;
+    }
+
+    return (
+        <div className={cn(props.className, 'w-full aspect-video bg-gray-125 relative')}>
+            <div className="battle" ref={battleRef} style={{ width: '100%', height: '100%' }}></div>
+            <div className="battle-log" ref={logRef} style={{ display: 'none' }}></div>
+        </div>
+    );
+}

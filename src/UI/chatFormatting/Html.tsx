@@ -140,13 +140,18 @@ export default function HTML(
             'details',
             'video',
             'marquee',
+            'h2',
+            'em',
+            'b',
+            'i',
+            'u',
         ],
         allowedAttributes: {
             'img': ['src', 'height', 'width'],
             'video': ['src', 'height', 'width', 'controls'],
             'button': ['value'],
             'a': ['href'],
-            '*': ['style'],
+            '*': ['style', 'class'],
         },
         allowedStyles: {
             'p': {

@@ -9,6 +9,8 @@ export default defineConfig(({ command }) => ({
     resolve: {
         alias: {
             '@': path.resolve(__dirname, './src'),
+            '@pkmn-client': path.resolve(__dirname, './pokemon-showdown-client/play.pokemonshowdown.com/src'),
+            '@pkmn-client-js': path.resolve(__dirname, './pokemon-showdown-client/play.pokemonshowdown.com/js'),
             events: 'rollup-plugin-node-polyfills/polyfills/events',
         },
     },

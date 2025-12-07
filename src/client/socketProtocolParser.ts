@@ -429,6 +429,7 @@ export class SocketProtocolParser {
                 const playerName = args[2];
                 if (toID(playerName) === this.settings.userID) {
                     room.setFormatter(perspective);
+                    room.isPlayer = true;
                 }
             }
             break;
@@ -442,6 +443,15 @@ export class SocketProtocolParser {
             useRoomStore.getState().setBattleRequest(roomID, room.battle.request);
             break;
         }
+        case 'win':
+        case 'tie':
+            {
+                const room = this.callbacks.getRoom(roomID);
+                if (room instanceof BattleRoom) {
+                    room.battleEnded = true;
+                }
+            }
+            break;
         case 'move':
         case '-fail':
         case '-status':
@@ -468,7 +478,6 @@ export class SocketProtocolParser {
         case '-heal':
         case '-ability':
         case '-message':
-        case 'win':
         case '-boost':
         case 'upkeep':
         case 'expire':
@@ -495,7 +504,6 @@ export class SocketProtocolParser {
         case 'updatepoke' :
         case 'inactive' :
         case 'inactiveoff' :
-        case 'tie' :
         case 'drag' :
         case 'detailschange' :
         case 'swap' :

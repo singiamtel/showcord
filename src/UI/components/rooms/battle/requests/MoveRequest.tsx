@@ -39,8 +39,11 @@ export function MoveRequest({ req, battle }: Readonly<{ req: Protocol.MoveReques
         return null;
     }
 
+    const sideIndex = battle.perspective === 'p1' ? 0 : 1;
+    const pokemonName = battle.battle?.sides[sideIndex]?.active[0]?.name;
+
     return selected ? <div className='flex flex-col gap-4'>
-        {battle.battle?.sides[0]?.active[0]?.name} will use {selected}
+        {pokemonName} will use {selected}
         <button
             type="button"
             className='bg-red-pastel hover:bg-red-100 dark:bg-red-dark hover:dark:bg-red-darkest p-4 rounded-md'

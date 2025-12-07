@@ -19,6 +19,7 @@ import {
 import { QueryHandlers } from './queryHandlers';
 import { SocketProtocolParser } from './socketProtocolParser';
 import { parseHighlightCommand } from './commands/highlightCommands';
+import { BattleRoom } from './room/battleRoom';
 
 type ClientConstructor = {
     server_url?: string;
@@ -142,6 +143,7 @@ export class Client {
             this.__setupSocketListeners();
             this.selectRoom('home');
             window.addEventListener('focus', this.notificationsListener.bind(this));
+            window.addEventListener('beforeunload', this.cleanupBeforeUnload.bind(this));
         } catch (error) {
             if (error instanceof DOMException) {
                 console.warn('DOMException: ', error);
@@ -155,6 +157,14 @@ export class Client {
 
     notificationsListener(_e: FocusEvent) {
         useNotificationStore.getState().clearNotifications(this.selectedRoom);
+    }
+
+    /**
+     * Cleanup handler called before the page unloads.
+     * Leaves all active battles to prevent the "5 games limit" issue.
+     */
+    cleanupBeforeUnload(_e: BeforeUnloadEvent) {
+        this.leaveAllActiveBattles();
     }
 
     async send(message: string, room: string | false) {
@@ -212,6 +222,38 @@ export class Client {
         return getRoomsArray(() => this.rooms);
     }
 
+    /**
+     * Returns all battle rooms where the user is an active player (not spectator, battle not ended).
+     */
+    getActiveBattleRooms(): BattleRoom[] {
+        const activeBattles: BattleRoom[] = [];
+        this.rooms.forEach((room) => {
+            if (room instanceof BattleRoom && room.isPlayer && !room.battleEnded) {
+                activeBattles.push(room);
+            }
+        });
+        return activeBattles;
+    }
+
+    /**
+     * Leaves all active battles where the user is a player.
+     * Used for cleanup when closing the page/tab.
+     */
+    leaveAllActiveBattles() {
+        const activeBattles = this.getActiveBattleRooms();
+        for (const battle of activeBattles) {
+            try {
+                // readyState 1 = OPEN
+                if (this.socket && this.socket.readyState === 1) {
+                    const message = `${battle.ID}|/leave`;
+                    this.socket.send(message);
+                }
+            } catch (e) {
+                console.error('Failed to leave battle on cleanup:', battle.ID, e);
+            }
+        }
+    }
+
     createPM(user: string) {
         createPMInternal(user, {
             getRoom: this.room.bind(this),
@@ -263,6 +305,15 @@ export class Client {
             useAppStore.getState().setError(error);
             return;
         }
+
+        if (room instanceof BattleRoom && room.isPlayer && !room.battleEnded) {
+            if (window.confirm('You are currently playing in this battle. Do you want to forfeit?')) {
+                this.__send('/forfeit', roomID);
+                this.__send(`/leave ${roomID}`, false);
+            }
+            return;
+        }
+
         if (room.connected) {
             this.__send(`/leave ${roomID}`, false);
         } else if (Client.permanentRooms.map((e) => e.ID).includes(roomID as any)) {

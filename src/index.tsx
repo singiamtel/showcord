@@ -1,3 +1,4 @@
+import './utils/showdown-globals';
 import ReactDOM from 'react-dom/client';
 import App from './UI/App';
 import { StrictMode } from 'react';

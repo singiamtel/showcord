@@ -12,6 +12,28 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Showcord</title>
+    
+    <!-- Polyfill for exports -->
+    <script>window.exports = window;</script>
+    
+    <!-- jQuery (required by Pokemon Showdown Client) -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+
+    <!-- Pokemon Showdown Styles -->
+    <link rel="stylesheet" href="//play.pokemonshowdown.com/style/battle.css" />
+    <link rel="stylesheet" href="//play.pokemonshowdown.com/style/sim-types.css" />
+    
+    <!-- Pokemon Showdown Data -->
+    <script src="//play.pokemonshowdown.com/data/pokedex-mini.js"></script>
+    <script src="//play.pokemonshowdown.com/data/pokedex.js"></script>
+    <script src="//play.pokemonshowdown.com/data/moves.js"></script>
+    <script src="//play.pokemonshowdown.com/data/items.js"></script>
+    <script src="//play.pokemonshowdown.com/data/abilities.js"></script>
+    <script src="//play.pokemonshowdown.com/data/typechart.js"></script>
+    <script src="//play.pokemonshowdown.com/data/graphics.js"></script>
+    <script src="//play.pokemonshowdown.com/data/teambuilder-tables.js"></script>
+    <script src="//play.pokemonshowdown.com/data/aliases.js"></script>
+    <script src="//play.pokemonshowdown.com/data/text.js"></script>
   </head>
   <body style="height: 100vh; width: 100vw">
     <div id="root" style="height: 100vh; width: 100vw"></div>
