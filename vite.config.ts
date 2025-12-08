@@ -1,20 +1,15 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
-import { NodeGlobalsPolyfillPlugin } from '@esbuild-plugins/node-globals-polyfill';
-import nodePolyfills from 'rollup-plugin-node-polyfills';
-import path from 'path';
+import tsconfigPaths from 'vite-tsconfig-paths';
 
-export default defineConfig(({ command }) => ({
+export default defineConfig(() => ({
     base: `${process.env.PUBLIC_URL ?? ''}/`,
     resolve: {
         alias: {
-            '@': path.resolve(__dirname, './src'),
-            '@pkmn-client': path.resolve(__dirname, './pokemon-showdown-client/play.pokemonshowdown.com/src'),
-            '@pkmn-client-js': path.resolve(__dirname, './pokemon-showdown-client/play.pokemonshowdown.com/js'),
             events: 'rollup-plugin-node-polyfills/polyfills/events',
         },
     },
-    plugins: [react()],
+    plugins: [react(), tsconfigPaths()],
     test: {
         globals: true,
         environment: 'happy-dom',

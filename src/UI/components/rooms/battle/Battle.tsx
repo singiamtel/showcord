@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState, type HTMLAttributes } from 'react';
-import { Battle as VisualBattle } from '@pkmn-client/battle';
+import { Battle as VisualBattle } from '@/vendor/pokemon-showdown/battle';
 import $ from 'jquery';
 import '../../../../utils/showdown-globals';
 import { useRoomStore } from '@/client/client';
