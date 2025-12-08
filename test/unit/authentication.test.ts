@@ -24,10 +24,10 @@ describe('Authentication Manager', () => {
         } as any;
 
         authManager = new AuthenticationManager(mockSettings, {
-            sendMessage: mockSendMessage,
-            setUsername: mockSetUsername,
-            onLoginSuccess: mockOnLoginSuccess,
-            onLoginFailure: mockOnLoginFailure,
+            sendMessage: mockSendMessage as (message: string) => void,
+            setUsername: mockSetUsername as (username: string) => void,
+            onLoginSuccess: mockOnLoginSuccess as () => void,
+            onLoginFailure: mockOnLoginFailure as (error: string) => void,
         });
     });
 

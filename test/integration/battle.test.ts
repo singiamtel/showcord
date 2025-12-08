@@ -13,7 +13,7 @@ describe.skip('Battle Room Integration Tests', () => {
         originalWebSocket = global.WebSocket;
         mockWebSocket = createMockWebSocket();
         
-        global.WebSocket = vi.fn(() => mockWebSocket) as any;
+        global.WebSocket = vi.fn(function() { return mockWebSocket; }) as any;
         
         mockServer = new MockServer((data) => {
             mockWebSocket.triggerMessage(data);
