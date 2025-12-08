@@ -1,10 +1,16 @@
 import React, { useEffect, useRef, useState, type HTMLAttributes } from 'react';
+// showdown-globals must be imported before vendor modules to set window.Config etc.
+import '../../../../utils/showdown-globals';
+import { Dex, toID } from '@/vendor/pokemon-showdown/battle-dex';
 import { Battle as VisualBattle } from '@/vendor/pokemon-showdown/battle';
 import $ from 'jquery';
-import '../../../../utils/showdown-globals';
 import { useRoomStore } from '@/client/client';
 import type { BattleRoom } from '@/client/room/battleRoom';
 import { cn } from '@/lib/utils';
+
+// Set window.Dex after vendor modules are loaded (for IIFEs that check it)
+window.Dex = Dex;
+window.toID = toID;
 
 // Helper to check if PS globals are loaded
 const checkGlobals = () => {
