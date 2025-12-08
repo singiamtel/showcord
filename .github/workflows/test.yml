@@ -13,8 +13,8 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
-    - uses: oven-sh/setup-bun@v2
-    - run: bun install --frozen-lockfile
-    - run: bun run lint
-    - run: bun run test
-    - run: bun run build
+    - uses: actions/setup-node@v6
+    - run: npm ci
+    - run: npm run lint
+    - run: npm run test
+    - run: npm run build
