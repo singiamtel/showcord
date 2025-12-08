@@ -24,11 +24,11 @@ export default function BattleRoom(props: Readonly<HTMLAttributes<HTMLDivElement
                 'flex break-normal h-screen overflow-x-hidden',
             )}
         >
-            <div className="flex flex-col w-3/4 justify-center items-center gap-8 p-8 overflow-y-auto">
+            <div className="flex flex-col w-3/4 justify-center items-center gap-2 p-4">
                 <ErrorBoundary FallbackComponent={ErrorHandler}>
                     <BattleWindow/>
                 </ErrorBoundary>
-                <div className="flex flex-col w-full h-40 justify-center items-center bg-gray-125">
+                <div className="flex flex-col w-full h-52 justify-center items-center bg-gray-125 dark:bg-gray-600 rounded">
                     <ErrorBoundary FallbackComponent={ErrorHandler}>
                         <BattleControls/>
                     </ErrorBoundary>

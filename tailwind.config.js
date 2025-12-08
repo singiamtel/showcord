@@ -31,6 +31,8 @@ export default {
                 300: '#05A8FC',
                 400: '#4752C4',
                 pastel: '#E1E8FF',
+                dark: '#3B4A6B',
+                darkest: '#2D3A54',
             },
             gray: {
                 75: '#1E1F22',
@@ -59,20 +61,37 @@ export default {
                 'border': '#1E1F22',
             },
             yellow: {
+                500: '#EAB308',
                 'hl-body': '#444039',
                 'hl-mark': '#EFB132',
                 'hl-body-light': '#FDF7EC',
             },
+            orange: {
+                500: '#F97316',
+            },
+            cyan: {
+                400: '#22D3EE',
+            },
+            purple: {
+                500: '#A855F7',
+                700: '#7C3AED',
+            },
             red: {
                 400: '#F54343',
+                500: '#EF4444',
                 600: 'red',
                 pastel: '#F8D7DA',
+                dark: '#6B3A3A',
+                darkest: '#542D2D',
             },
             green: {
                 pastel: '#D4EDDA',
                 400: '#96F04A',
                 '400-light': '#187902',
+                500: '#22C55E',
                 '600': '#35E717',
+                700: '#15803D',
+                800: '#166534',
             },
         },
         fontFamily: {
