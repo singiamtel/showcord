@@ -74,7 +74,6 @@ export default function Sidebar(props: Readonly<HTMLAttributes<'div'>>) {
                 </div>
                 <div className="flex flex-grow overflow-y-auto">
                     <div className="w-full">
-                        {/* @ts-ignore */}
                         <SortableContext
                             items={roomsArray.map((e) => e.ID)}
                             strategy={verticalListSortingStrategy}
