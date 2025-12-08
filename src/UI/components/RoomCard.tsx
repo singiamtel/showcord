@@ -1,3 +1,5 @@
+import { motion } from 'framer-motion';
+
 export type RoomQuery = {
     title: string;
     desc: string;
@@ -17,16 +19,26 @@ const emoji: { [key: string]: string } = {
 } as const;
 
 export default function RoomCard(
-    { room, onClick }: Readonly<{ room: RoomQuery; onClick: (str: string) => void }>,
+    { room, onClick, index = 0 }: Readonly<{ room: RoomQuery; onClick: (str: string) => void; index?: number }>,
 ) {
     return (
-        <button
+        <motion.button
             type="button"
             className={'rounded-lg mr-2 my-2 p-2 bg-gray-251 dark:bg-gray-300 hover:bg-gray-351 dark:hover:bg-gray-175 text-left w-full transition-colors'}
             onClick={(e) => {
                 e.preventDefault();
                 onClick(room.title);
             }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+                type: 'spring',
+                stiffness: 300,
+                damping: 25,
+                delay: index * 0.03,
+            }}
+            whileHover={{ scale: 1.02, x: 4 }}
+            whileTap={{ scale: 0.98 }}
         >
             <span className="text-gray-125">
                 <h3 className="font-bold text-blue-300">
@@ -37,6 +49,6 @@ export default function RoomCard(
             <div>
                 {room.desc}
             </div>
-        </button>
+        </motion.button>
     );
 }

@@ -175,13 +175,13 @@ function RoomList({ className }: Readonly<{ className?: string }>) {
 
             {miniSearchResults.length > 0 ?
                 miniSearchResults?.sort((a: any, b: any) => b.userCount - a.userCount)
-                    .map((room: any) => (
-                        <RoomCard onClick={manageRoomCardClick} key={room.title} room={room} />
+                    .map((room: any, idx: number) => (
+                        <RoomCard onClick={manageRoomCardClick} key={room.title} room={room} index={idx} />
                     )) :
                 roomsJSON ?
                     roomsJSON.chat?.sort((a: any, b: any) => b.userCount - a.userCount)
-                        .map((room: any) => (
-                            <RoomCard onClick={manageRoomCardClick} key={room.title} room={room} />
+                        .map((room: any, idx: number) => (
+                            <RoomCard onClick={manageRoomCardClick} key={room.title} room={room} index={idx} />
                         )) :
                     (
                         <div className="h-full flex items-center justify-center !bg-white">

@@ -28,8 +28,7 @@ export default function BattleRoom(props: Readonly<HTMLAttributes<HTMLDivElement
                 <ErrorBoundary FallbackComponent={ErrorHandler}>
                     <BattleWindow/>
                 </ErrorBoundary>
-                <div className="flex flex-col w-full justify-center items-center bg-gray-125">
-
+                <div className="flex flex-col w-full h-40 justify-center items-center bg-gray-125">
                     <ErrorBoundary FallbackComponent={ErrorHandler}>
                         <BattleControls/>
                     </ErrorBoundary>

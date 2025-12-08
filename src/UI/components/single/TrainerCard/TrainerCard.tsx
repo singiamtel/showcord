@@ -6,6 +6,7 @@ import {
     type ReactNode,
     useEffect,
 } from 'react';
+import { motion } from 'framer-motion';
 import {
     clamp,
     removeFirstCharacterIfNotLetter,
@@ -51,12 +52,20 @@ export default function TrainerCard(
     if (!name) return null;
 
     return (
-        <div
+        <motion.div
             ref={forwardRef}
             className="fixed bg-gray-601 dark:bg-gray-600 rounded-lg p-5 w-[400px] min-h-[150px] shadow-sm shadow-black z-20"
             style={{
                 left: clamp(position.x, margin, window.innerWidth - 500 - margin),
                 top: clamp(position.y, margin, window.innerHeight - 300 - margin),
+            }}
+            initial={{ opacity: 0, scale: 0.9, y: 10 }}
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={{ opacity: 0, scale: 0.95, y: 5 }}
+            transition={{
+                type: 'spring',
+                stiffness: 400,
+                damping: 25,
             }}
         >
             <div id="usercard-header" className="flex flex-row justify-between">
@@ -137,7 +146,7 @@ export default function TrainerCard(
                         ''}
                 </div>
             }
-        </div>
+        </motion.div>
     );
 }
 
@@ -155,21 +164,28 @@ function UserCardButton({
     disabled?: boolean;
 }>) {
     return (
-        <button
+        <motion.button
             type="button"
-            className={'text-sm rounded-lg px-4 py-2 flex-grow-0 border border-gray-700 flex flex-col justify-center items-center ' +
-        (disabled ? 'opacity-50' : 'hover:bg-gray-351 hover:dark:bg-gray-700 hover:underline ')}
+            className={'text-sm rounded-lg px-4 py-2 flex-grow-0 border border-gray-700 flex flex-col justify-center items-center transition-colors ' +
+        (disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-351 hover:dark:bg-gray-700 ')}
             onClick={onClick}
             title={alt}
             disabled={disabled}
+            whileHover={disabled ? undefined : { scale: 1.05 }}
+            whileTap={disabled ? undefined : { scale: 0.95 }}
+            transition={{ type: 'spring', stiffness: 400, damping: 17 }}
         >
-            <span className="flex items-center justify-center">
+            <motion.span
+                className="flex items-center justify-center"
+                whileHover={disabled ? undefined : { rotate: [0, -10, 10, 0] }}
+                transition={{ duration: 0.3 }}
+            >
                 {icon}
-            </span>
+            </motion.span>
             <div className="">
                 {name}
             </div>
-        </button>
+        </motion.button>
     );
 }
 

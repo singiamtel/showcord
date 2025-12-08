@@ -125,7 +125,7 @@ export function ChallengeMessage(
     const format = client.formatName(formatID) || { gen: 9, name: `Unknown(${formatID})` };
     if (cancelled) {
         return (
-            <div className="p-2 bg-gray-100 rounded-md flex flex-col justify-center items-center">
+            <div className="p-2 bg-gray-100 rounded-md flex flex-col justify-center items-center opacity-70">
                 Challenge from <Username user={user} bold /> was cancelled
             </div>
         );
