@@ -24,6 +24,8 @@ import SortableItem from '../../../utils/Sortable';
 import { cn } from '@/lib/utils';
 import { useRoomStore } from '@/client/client';
 
+import { BattleSearch } from '../BattleSearch';
+
 export default function Sidebar(props: Readonly<HTMLAttributes<'div'>>) {
     const rooms = useRoomStore((state) => state.rooms);
     const roomsArray = Array.from(rooms.values()).filter(room => room.open);
@@ -90,6 +92,7 @@ export default function Sidebar(props: Readonly<HTMLAttributes<'div'>>) {
                         </SortableContext>
                     </div>
                 </div>
+                <BattleSearch />
                 <UserPanel />
             </div>
         </DndContext>

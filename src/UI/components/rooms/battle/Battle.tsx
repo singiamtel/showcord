@@ -27,6 +27,7 @@ const checkGlobals = () => {
 
 export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const room = useRoomStore(state => state.currentRoom) as BattleRoom;
+    const perspective = useRoomStore(state => (state.currentRoom as BattleRoom)?.perspective);
     const battleRef = useRef<HTMLDivElement>(null);
     const logRef = useRef<HTMLDivElement>(null);
     const [battleInstance, setBattleInstance] = useState<VisualBattle | null>(null);
@@ -64,9 +65,9 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
         setBattleInstance(battle);
 
         // Set perspective if room has one
-        if (room.perspective) {
-            console.log('Setting viewpoint to', room.perspective);
-            battle.setViewpoint(room.perspective);
+        if (perspective) {
+            console.log('Setting viewpoint to', perspective);
+            battle.setViewpoint(perspective);
         }
 
         // Feed initial log
@@ -82,15 +83,15 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
             $battle.empty();
             // battle.destroy() if available
         };
-    }, [isReady, room.ID]);
+    }, [isReady, room.ID]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Update perspective
     useEffect(() => {
-        if (battleInstance && room.perspective) {
-            console.log('Updating viewpoint to', room.perspective);
-            battleInstance.setViewpoint(room.perspective);
+        if (battleInstance && perspective) {
+            console.log('Updating viewpoint to', perspective);
+            battleInstance.setViewpoint(perspective);
         }
-    }, [battleInstance, room.perspective]);
+    }, [battleInstance, perspective]);
 
     // Update log
     useEffect(() => {

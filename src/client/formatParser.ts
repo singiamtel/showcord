@@ -64,6 +64,11 @@ export default function formatParser(formats: string[]) {
     for (const format of formats) {
         if (nextIsCategory) {
             currentCategory.name = format;
+            result.categories.push({
+                name: currentCategory.name,
+                column: currentCategory.column,
+                formats: [],
+            });
             nextIsCategory = false;
         } else if (format.startsWith(',LL')) {
             // TODO: wtf is ,LL?
@@ -72,11 +77,6 @@ export default function formatParser(formats: string[]) {
             // new category
             nextIsCategory = true;
             currentCategory.column = Number(format.split(',')[1]);
-            result.categories.push({
-                name: currentCategory.name,
-                column: currentCategory.column,
-                formats: [],
-            });
             continue;
         } else if (format.startsWith('[')) {
             // new format

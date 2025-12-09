@@ -58,8 +58,8 @@ describe('Format Parser', () => {
             const result = formatParser(formats);
             
             expect(result.categories).toHaveLength(2);
-            expect(result.categories[0].name).toBe('');
-            expect(result.categories[1].name).toBe('S/V Singles');
+            expect(result.categories[0].name).toBe('S/V Singles');
+            expect(result.categories[1].name).toBe('Next Category');
             expect(result.categories[1].column).toBe(1);
             expect(result.categories[0].formats).toHaveLength(1);
             expect(result.categories[0].formats[0].name).toBe('Random Battle');
@@ -80,10 +80,11 @@ describe('Format Parser', () => {
             const result = formatParser(formats);
             
             expect(result.categories).toHaveLength(3);
-            expect(result.categories[1].name).toBe('Category 1');
+            expect(result.categories[0].name).toBe('Category 1');
             expect(result.categories[0].column).toBe(1);
-            expect(result.categories[2].name).toBe('Category 2');
+            expect(result.categories[1].name).toBe('Category 2');
             expect(result.categories[1].column).toBe(2);
+            expect(result.categories[2].name).toBe('End');
         });
 
         it('should parse multiple formats in one category', () => {
@@ -189,10 +190,10 @@ describe('Format Parser', () => {
             const result = formatParser(formats);
             
             expect(result.categories).toHaveLength(3);
-            expect(result.categories[1].name).toBe('S/V Singles');
+            expect(result.categories[0].name).toBe('S/V Singles');
             expect(result.categories[0].formats).toHaveLength(3);
-            expect(result.categories[2].name).toBe('S/V Doubles');
-            expect(result.categories[1].formats.length + result.categories[0].formats.length).toBeGreaterThanOrEqual(3);
+            expect(result.categories[1].name).toBe('S/V Doubles');
+            expect(result.categories[0].formats.length + result.categories[1].formats.length).toBeGreaterThanOrEqual(3);
         });
     });
 });

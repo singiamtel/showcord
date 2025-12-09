@@ -8,6 +8,7 @@ import { useRoomStore } from './stores/roomStore';
 import { useUserStore } from './stores/userStore';
 import { useMessageStore } from './stores/messageStore';
 import { useAppStore } from './stores/appStore';
+import { useBattleStore } from './stores/battleStore';
 import { assert } from '@/lib/utils';
 import type { Settings } from './settings';
 import { parseCMessage, parseCMessageContent, addMessageToRoom, highlightMsg } from './messageHandling';
@@ -407,15 +408,24 @@ export class SocketProtocolParser {
             );
             break;
         case 'formats': {
-            const formats = args.slice(1);
+            const formats = args[1].split('|');
             this.formats = formatParser(formats);
+            useBattleStore.getState().setFormats(this.formats);
+        }
+            break;
+        case 'updatesearch': {
+            try {
+                const json = JSON.parse(args[1]);
+                useBattleStore.getState().updateSearch(json);
+            } catch (e) {
+                console.error('Failed to parse updatesearch', e);
+            }
         }
             break;
         case 'customgroups':
         case 'notify':
         case 'popup':
         case 'nametaken':
-        case 'updatesearch':
             console.error('Currently unhandled cmd', args);
             break;
         case 'player':
@@ -430,6 +440,7 @@ export class SocketProtocolParser {
                 if (toID(playerName) === this.settings.userID) {
                     room.setFormatter(perspective);
                     room.isPlayer = true;
+                    useRoomStore.getState().updateRoom(roomID, { isPlayer: true, perspective: perspective } as any);
                 }
             }
             break;
