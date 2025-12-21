@@ -16,7 +16,7 @@ describe('inlineCode', () => {
         const { container } = render(JSX);
         const codeElements = container.querySelectorAll('code');
         expect(codeElements.length).toEqual(expected.length);
-        codeElements.forEach((el, i) => {
+        codeElements.forEach((el: Element, i: number) => {
             expect(el.textContent).toEqual(expected[i]);
         });
     });
@@ -28,7 +28,7 @@ describe('inlineCode', () => {
         const { container } = render(JSX);
         const codeElements = container.querySelectorAll('code');
         expect(codeElements.length).toEqual(expected.length);
-        codeElements.forEach((el, i) => {
+        codeElements.forEach((el: Element, i: number) => {
             expect(el.textContent).toEqual(expected[i]);
         });
     });

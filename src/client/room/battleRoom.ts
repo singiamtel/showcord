@@ -1,24 +1,21 @@
-import { Battle } from '@pkmn/client';
-import { LogFormatter } from '@pkmn/view';
-import { Generations } from '@pkmn/data';
-import { Dex, type SideID } from '@pkmn/dex';
-import { Protocol } from '@pkmn/protocol';
-
 import { Room, type RoomType } from './room';
-import newMessage from '../message';
-import { useMessageStore } from '../stores/messageStore';
 
-
+// Defines a proxy that loads the heavy BattleRoom implementation lazily.
 export class BattleRoom extends Room {
-    battle: Battle;
+    // Stub properties to match RealBattleRoom interface
+    battle: any; 
     log: string[] = [];
     onLogUpdate: ((line: string) => void) | null = null;
-    formatter: LogFormatter | null = null;
-    perspective: SideID = 'p1';
+    formatter: any = null;
+    perspective: any = 'p1';
     isPlayer = false;
     battleEnded = false;
+
+    private realRoom: any | null = null;
+    private queue: Array<() => void> = [];
+
     constructor(
-        { ID, name, type, connected, open }: {
+        args: {
             ID: string;
             name: string;
             type: RoomType;
@@ -26,22 +23,52 @@ export class BattleRoom extends Room {
             open: boolean;
         },
     ) {
-        super({ ID, name, type, connected, open });
+        super(args);
 
-        this.battle = new Battle(new Generations(Dex));
-        this.formatter = new LogFormatter(this.perspective, this.battle);
+        // Stub battle object to prevent crashes on 'battle.request' access before load
+        this.battle = {
+            request: null,
+            getPokemon: () => null,
+            add: () => {},
+            update: () => {},
+        };
+
+        // Load the real room dynamically
+        import('./RealBattleRoom').then(({ RealBattleRoom }) => {
+            // Create the heavy instance
+            this.realRoom = new RealBattleRoom(args);
+            
+            // Sync mutable properties that might have changed before load
+            this.realRoom.perspective = this.perspective;
+            this.realRoom.isPlayer = this.isPlayer;
+            this.realRoom.battleEnded = this.battleEnded;
+            
+            // Replace stubs with real objects
+            this.battle = this.realRoom.battle;
+            this.formatter = this.realRoom.formatter;
+
+            // Replay any queued actions
+            this.queue.forEach(fn => fn());
+            this.queue = [];
+        }).catch(err => {
+            console.error('Failed to load RealBattleRoom', err);
+        });
     }
 
-    setFormatter(perspective: SideID) {
-        if (this.perspective === perspective && this.formatter) {
-            return;
-        }
+    setFormatter(perspective: any) {
         this.perspective = perspective;
-        this.formatter = new LogFormatter(perspective, this.battle);
+        if (this.realRoom) {
+            this.realRoom.setFormatter(perspective);
+        } else {
+             this.queue.push(() => {
+                 if (this.realRoom) this.realRoom.setFormatter(perspective);
+             });
+        }
     }
 
     get currentPokemon() {
-        return this.battle.getPokemon(this.perspective);
+        if (this.realRoom) return this.realRoom.currentPokemon;
+        return null;
     }
 
     /**
@@ -51,39 +78,13 @@ export class BattleRoom extends Room {
         this.log.push(line);
         if (this.onLogUpdate) this.onLogUpdate(line);
 
-        const { args, kwArgs } = Protocol.parseBattleLine(line);
-
-        try {
-            // pre handler
-            //   add(pre, key, args, kwArgs);
-            this.battle.add(args, kwArgs);
-            // post handler
-            //   add(post, key, args, kwArgs);
-        } catch (e) {
-            console.error('this.battle.add error', line, e);
+        if (this.realRoom) {
+            return this.realRoom.feedBattle(line);
+        } else {
+            this.queue.push(() => {
+                 if (this.realRoom) this.realRoom.feedBattle(line);
+            });
+            return false;
         }
-
-        if (this.battle.request) {
-            this.battle.update(this.battle.request);
-        }
-
-        if (this.formatter) {
-            const html = this.formatter.formatHTML(args, kwArgs);
-            if (html) {
-                const message = newMessage({
-                    type: 'rawHTML',
-                    name: '',
-                    content: html,
-                    hld: false,
-                });
-                this.addMessage(
-                    message,
-                    { selected: true, selfSent: false },
-                );
-                useMessageStore.getState().newMessage(this.ID, message);
-                return true;
-            }
-        }
-        return false;
     }
 }

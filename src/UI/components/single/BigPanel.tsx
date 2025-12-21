@@ -1,16 +1,20 @@
-import type {
-    HTMLAttributes,
+import {
+    type HTMLAttributes,
+    lazy,
+    Suspense,
 } from 'react';
 
 import Home from '../../Home';
 import SettingsPage from '../../SettingsPage';
 import { cn } from '@/lib/utils';
-import ChatRoom from '../rooms/ChatRoom';
-import BattleRoom from '../rooms/BattleRoom';
-import PmRoom from '../rooms/PmRoom';
-import HtmlRoom from '../rooms/HtmlRoom';
 import { useRoomStore } from '@/client/client';
 import { ErrorBoundary } from '../ErrorBoundary';
+import { InfinitySpin } from 'react-loader-spinner';
+
+const ChatRoom = lazy(() => import('../rooms/ChatRoom'));
+const BattleRoom = lazy(() => import('../rooms/BattleRoom'));
+const PmRoom = lazy(() => import('../rooms/PmRoom'));
+const HtmlRoom = lazy(() => import('../rooms/HtmlRoom'));
 
 export default function BigPanel(props: Readonly<HTMLAttributes<'div'>>) {
     const room = useRoomStore(state => state.currentRoom);
@@ -61,7 +65,13 @@ export default function BigPanel(props: Readonly<HTMLAttributes<'div'>>) {
                 </div>
             )}
         >
-            {renderRoom()}
+            <Suspense fallback={
+                <div className={cn(props.className, 'flex flex-col justify-center items-center h-full')}>
+                    <InfinitySpin width="200" color="#4fa94d" />
+                </div>
+            }>
+                {renderRoom()}
+            </Suspense>
         </ErrorBoundary>
     );
 }

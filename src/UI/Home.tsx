@@ -37,7 +37,7 @@ function TargetFaceWelcome({ className }: Readonly<{ className?: string }>) {
         >
             <img
                 src={targetFaceCluster}
-                alt="targetFaceCluster"
+                alt="Showcord Mascot Cluster"
                 className="opacity-70 h-auto w-full"
             />
             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-black z-10 bg-gray-100 dark:bg-gray-600 opacity-10" />
@@ -223,7 +223,7 @@ function SocialLinks({ className }: Readonly<{ className?: string }>) {
             >
                 <img
                     src={discord}
-                    alt="discord"
+                    alt="Discord Logo"
                     height="50"
                     width="50"
                 />
@@ -238,7 +238,7 @@ function SocialLinks({ className }: Readonly<{ className?: string }>) {
             >
                 <img
                     src={github}
-                    alt="github"
+                    alt="GitHub Logo"
                     height="50"
                     width="50"
                 />
@@ -255,7 +255,7 @@ function SocialLinks({ className }: Readonly<{ className?: string }>) {
             >
                 <img
                     src={FAQ}
-                    alt="FAQ"
+                    alt="FAQ Icon"
                     height="50"
                     width="50"
                 />
