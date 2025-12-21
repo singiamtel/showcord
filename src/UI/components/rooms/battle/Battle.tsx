@@ -83,7 +83,7 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
             $battle.empty();
             // battle.destroy() if available
         };
-    }, [isReady, room.ID]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [isReady, room.ID]);
 
     // Update perspective
     useEffect(() => {
