@@ -50,6 +50,7 @@ export default defineConfig(() => ({
     resolve: {
         alias: {
             events: 'rollup-plugin-node-polyfills/polyfills/events',
+            buffer: 'buffer',
         },
     },
     plugins: [fixPsCircularDep(), react(), tsconfigPaths()],
