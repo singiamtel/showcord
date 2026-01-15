@@ -50,7 +50,7 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     return (
         <div
             className={cn(
-                'p-8 flex flex-col overflow-auto overflow-x-hidden break-words overflow-y-scroll h-full relative',
+                'p-8 flex flex-col overflow-auto overflow-x-hidden wrap-break-word overflow-y-scroll h-full relative',
                 props.className,
             )}
             ref={ref}
@@ -230,7 +230,7 @@ export function MessageComponent(
             <span className="text-gray-125 text-xs">
                 {time ? HHMMSS(time) : ''}
             </span>
-            <span className="break-words">
+            <span className="wrap-break-word">
         &nbsp;
                 {type === 'roleplay' ?
                     (

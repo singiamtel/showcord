@@ -166,7 +166,7 @@ function UserCardButton({
     return (
         <motion.button
             type="button"
-            className={'text-sm rounded-lg px-4 py-2 flex-grow-0 border border-gray-700 flex flex-col justify-center items-center transition-colors ' +
+            className={'text-sm rounded-lg px-4 py-2 grow-0 border border-gray-700 flex flex-col justify-center items-center transition-colors ' +
         (disabled ? 'opacity-50 cursor-not-allowed' : 'hover:bg-gray-351 hover:dark:bg-gray-700 ')}
             onClick={onClick}
             title={alt}

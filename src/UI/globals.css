@@ -1,6 +1,158 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@import "tw-animate-css";
+
+/* ============================================
+   THEME CONFIGURATION (replaces tailwind.config.js)
+   ============================================ */
+
+@theme {
+  /* Font families */
+  --font-sans: Inter, sans-serif;
+  --font-serif: Inter, sans-serif;
+  --font-mono: 'Roboto Mono', sans-serif;
+
+  /* Primary colors */
+  --color-primary: #0F4C81;
+  --color-secondary: #F2F2F2;
+  --color-white: #FFFFFF;
+  --color-black: #000000;
+
+  /* Text colors */
+  --color-text: #000000;
+  --color-text-dark: #FFFFFF;
+
+  /* Blue palette (Discord-like) */
+  --color-blue-100: #5865F2;
+  --color-blue-200: #404EED;
+  --color-blue-300: #05A8FC;
+  --color-blue-400: #4752C4;
+  --color-blue-pastel: #E1E8FF;
+  --color-blue-dark: #3B4A6B;
+  --color-blue-darkest: #2D3A54;
+
+  /* Gray palette (Discord-like, extensive) */
+  --color-gray-75: #1E1F22;
+  --color-gray-100: #F6F6F6;
+  --color-gray-125: #949BA4;
+  --color-gray-150: #B5B8BB;
+  --color-gray-151: #5C5E66;
+  --color-gray-175: #6D6F78;
+  --color-gray-200: #99AAB5;
+  --color-gray-250: #4E5058;
+  --color-gray-251: #EBEDEF;
+  --color-gray-300: #313338;
+  --color-gray-350: #36373D;
+  --color-gray-351: #E0E1E5;
+  --color-gray-375: #383A40;
+  --color-gray-376: #EBEDEF;
+  --color-gray-400: #23272A;
+  --color-gray-450: #404249;
+  --color-gray-451: #D7D9DC;
+  --color-gray-500: #BDBDBD;
+  --color-gray-600: #2B2D31;
+  --color-gray-601: #E3E5E8;
+  --color-gray-sidebar-light: #F2F3F5;
+  --color-gray-700: #1F2023;
+  --color-gray-spoiler-light: #C4C9CD;
+  --color-gray-border: #1E1F22;
+
+  /* Yellow palette */
+  --color-yellow-500: #EAB308;
+  --color-yellow-hl-body: #444039;
+  --color-yellow-hl-mark: #EFB132;
+  --color-yellow-hl-body-light: #FDF7EC;
+
+  /* Orange palette */
+  --color-orange-500: #F97316;
+
+  /* Cyan palette */
+  --color-cyan-400: #22D3EE;
+
+  /* Purple palette */
+  --color-purple-500: #A855F7;
+  --color-purple-700: #7C3AED;
+
+  /* Red palette */
+  --color-red-400: #F54343;
+  --color-red-500: #EF4444;
+  --color-red-600: red;
+  --color-red-pastel: #F8D7DA;
+  --color-red-dark: #6B3A3A;
+  --color-red-darkest: #542D2D;
+
+  /* Green palette */
+  --color-green-pastel: #D4EDDA;
+  --color-green-400: #96F04A;
+  --color-green-400-light: #187902;
+  --color-green-500: #22C55E;
+  --color-green-600: #35E717;
+  --color-green-700: #15803D;
+  --color-green-800: #166534;
+
+  /* Extended border radius (for shadcn/ui) */
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  /* Custom keyframes for accordion */
+  @keyframes accordion-down {
+    from { height: 0; }
+    to { height: var(--radix-accordion-content-height); }
+  }
+
+  @keyframes accordion-up {
+    from { height: var(--radix-accordion-content-height); }
+    to { height: 0; }
+  }
+
+  /* Custom animations */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+}
+
+/* ============================================
+   EXTENDED THEME COLORS FOR SHADCN/UI
+   (These use hsl() with CSS variables)
+   ============================================ */
+
+@theme inline {
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+}
+
+/* ============================================
+   SAFELIST (replaces tailwind.config.js safelist)
+   ============================================ */
+
+@source inline("border border-solid border-gray-border");
+@source inline("ml-14 mr-14 p-2 m-1 p-5.5 m-2");
+@source inline("w-[400px] h-[300px]");
+@source inline("text-sm text-white text-gray-700 text-green-400 text-red-600");
+@source inline("hover:text-white");
+@source inline("font-bold py-2 px-4 px-3 py-1 rounded whitespace-pre-wrap");
+@source inline("bg-blue-100 hover:bg-blue-400 bg-gray-700");
+
+/* ============================================
+   CSS VARIABLES FOR SHADCN/UI THEMING
+   ============================================ */
 
 @layer base {
   :root {
@@ -66,6 +218,10 @@
   }
 }
 
+/* ============================================
+   BASE STYLES
+   ============================================ */
+
 @layer base {
   * {
     @apply border-border;
@@ -76,21 +232,35 @@
   }
 }
 
-@layer utilities {
-  /* @responsive { */
-  /* hide scrollbar for chrome, safari and opera  */
-  .no-scrollbar::-webkit-scrollbar {
+/* ============================================
+   CUSTOM UTILITIES
+   ============================================ */
+
+@utility no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+
+  &::-webkit-scrollbar {
     display: none;
   }
-
-  /* hide scrollbar for ie, edge and firefox  */
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
-  }
-
-  /* } */
 }
+
+@utility hover-color {
+  &:hover {
+    background-color: var(--color-gray-351);
+  }
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 150ms;
+}
+
+.dark .hover-color:hover {
+  background-color: var(--color-gray-350);
+}
+
+/* ============================================
+   GLOBAL STYLES
+   ============================================ */
 
 html {
   font-size: 16px;
@@ -207,8 +377,4 @@ h2 {
   font-weight: bold;
   padding-top: 10px;
   padding-bottom: 10px;
-}
-
-.hover-color {
-  @apply hover:bg-gray-351 dark:hover:bg-gray-350 transition-colors;
 }

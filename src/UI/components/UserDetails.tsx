@@ -12,7 +12,7 @@ interface UserDetailsProps {
 export function UserDetails(props: Readonly<HTMLAttributes<HTMLDivElement> & UserDetailsProps>) {
     return (
         <div className="flex overflow-hidden">
-            <div className={cn('flex-shrink-0 w-12 h-12 rounded-full overflow-hidden mr-2 bg-gray-251 dark:bg-gray-250 border-gray-351 dark:border-gray-700', props.border && 'border-2', props.className)}>
+            <div className={cn('shrink-0 w-12 h-12 rounded-full overflow-hidden mr-2 bg-gray-251 dark:bg-gray-250 border-gray-351 dark:border-gray-700', props.border && 'border-2', props.className)}>
                 <img
                     src={props.avatar ?
                         Sprites.getAvatar(props.avatar) :

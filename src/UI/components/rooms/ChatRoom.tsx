@@ -14,7 +14,7 @@ export default function ChatRoom(props: Readonly<HTMLAttributes<HTMLDivElement>>
             )}
         >
             <div className="dark:bg-gray-300 flex flex-col max-h-full h-full w-full max-w-full">
-                <div className="flex-grow flex-shrink min-h-0">
+                <div className="grow shrink min-h-0">
                     <Chat
                     />
                 </div>

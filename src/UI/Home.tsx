@@ -40,7 +40,7 @@ function TargetFaceWelcome({ className }: Readonly<{ className?: string }>) {
                 alt="Showcord Mascot Cluster"
                 className="opacity-70 h-auto w-full"
             />
-            <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-transparent to-black z-10 bg-gray-100 dark:bg-gray-600 opacity-10" />
+            <div className="absolute top-0 left-0 w-full h-full bg-linear-to-b from-transparent to-black z-10 bg-gray-100 dark:bg-gray-600 opacity-10" />
             <div className="flex flex-col justify-between p-4 absolute">
                 <h1 className="font-bold text-4xl text-center z-10 text-transparent">
           Welcome to Showcord!
@@ -184,7 +184,7 @@ function RoomList({ className }: Readonly<{ className?: string }>) {
                             <RoomCard onClick={manageRoomCardClick} key={room.title} room={room} index={idx} />
                         )) :
                     (
-                        <div className="h-full flex items-center justify-center !bg-white">
+                        <div className="h-full flex items-center justify-center bg-white!">
                             <InfinitySpin
                                 width="200"
                                 color="#4fa94d"
@@ -200,7 +200,7 @@ function SocialLink({ id, href, children }: Readonly<{ id: string, href?: string
     return (
         <a
             id={id}
-            className="max-h-full min-h-0 flex items-center gap-2 w-full p-8 rounded-lg cursor-pointer text-black visited:text-black dark:text-white dark:hover:text-white dark:visited:text-white overflow-ellipsis hover-color bg-gray-251 dark:bg-gray-300 "
+            className="max-h-full min-h-0 flex items-center gap-2 w-full p-8 rounded-lg cursor-pointer text-black visited:text-black dark:text-white dark:hover:text-white dark:visited:text-white text-ellipsis hover-color bg-gray-251 dark:bg-gray-300 "
             target="_blank"
             href={href}
         >
@@ -275,14 +275,14 @@ export default function Home(props: Readonly<HTMLAttributes<'div'>>) {
     return (
         <div
             className={twMerge(
-                'flex flex-col flex-grow md:grid md:grid-cols-8 md:grid-rows-2 gap-6 p-4 [&>*]:bg-gray-100 dark:[&>*]:bg-gray-600 overflow-y-scroll h-full',
+                'flex flex-col grow md:grid md:grid-cols-8 md:grid-rows-2 gap-6 p-4 *:bg-gray-100 dark:*:bg-gray-600 overflow-y-scroll h-full',
                 props.className,
             )}
         >
-            <News className="md:col-span-5 row-span-1 col-span-8 order-3 md:order-none" />
-            <RoomList className="md:col-span-3 row-span-2 col-span-8 order-2 md:order-none" />
-            <TargetFaceWelcome className="md:col-span-3 row-span-1 col-span-8 order-1 md:order-none" />
-            <SocialLinks className="md:col-span-2 row-span-1 col-span-8 order-4 md:order-none" />
+            <News className="md:col-span-5 row-span-1 col-span-8 order-3 md:order-0" />
+            <RoomList className="md:col-span-3 row-span-2 col-span-8 order-2 md:order-0" />
+            <TargetFaceWelcome className="md:col-span-3 row-span-1 col-span-8 order-1 md:order-0" />
+            <SocialLinks className="md:col-span-2 row-span-1 col-span-8 order-4 md:order-0" />
         </div>
     );
 }

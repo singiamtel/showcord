@@ -44,10 +44,10 @@ export default function App() {
             <title>Showcord - Pokemon Showdown Client</title>
             <meta name="description" content="Showcord is a modern, feature-rich client for Pokemon Showdown. Battle, chat, and connect with the community in style." />
             <div
-                className={`grid grid-cols-7 grid-rows-1 md:h-screen text-text dark:text-text-dark dark:bg-gray-300 w-screen dark:[color-scheme:dark]`}
+                className={`grid grid-cols-7 grid-rows-1 md:h-screen text-text dark:text-text-dark dark:bg-gray-300 w-screen dark:scheme-dark`}
             >
                 <TrainerCardProvider>
-                    <Sidebar className="md:col-span-1 col-span-7 hidden md:flex" />
+                    <Sidebar className="md:col-span-1 col-span-7 flex max-md:hidden" />
                     <BigPanel className="md:col-span-6 col-span-7" />
                 </TrainerCardProvider>
             </div>
