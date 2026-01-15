@@ -168,7 +168,7 @@ export default function ChatBox(props: Readonly<HTMLAttributes<HTMLDivElement>>)
                 />
                 <div className="flex flex-row">
                     <TextareaAutosize
-                        className="mr-5 ml-5 p-2 rounded-lg flex-grow bg-gray-376 dark:bg-gray-375 resize-none placeholder-gray-175"
+                        className="mr-5 ml-5 p-2 rounded-lg grow bg-gray-376 dark:bg-gray-375 resize-none placeholder-gray-175"
                         value={input}
                         onChange={manageChanges}
                         onKeyDown={manageKeybinds}

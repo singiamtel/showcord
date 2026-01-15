@@ -90,7 +90,7 @@ export default function BattleRoom(props: Readonly<HTMLAttributes<HTMLDivElement
                         }
                     </AnimatePresence>
                     <Chat className='p-2 h-full'/>
-                    <ChatBox className='p-2 flex-grow-1'/>
+                    <ChatBox className='p-2 grow'/>
                 </div>
 
             </div>

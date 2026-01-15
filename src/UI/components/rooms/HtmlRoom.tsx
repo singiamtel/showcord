@@ -13,7 +13,7 @@ export default function HtmlRoom(props: Readonly<HTMLAttributes<HTMLDivElement>>
             )}
         >
             <div className={'dark:bg-gray-300 flex flex-col w-full max-w-full'}>
-                <div className="h-[90%] max-h-[90%] flex-grow flex-shrink min-h-0">
+                <div className="h-[90%] max-h-[90%] grow shrink min-h-0">
                     <Chat
                     />
                 </div>

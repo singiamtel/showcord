@@ -74,7 +74,7 @@ export default function Sidebar(props: Readonly<HTMLAttributes<'div'>>) {
                 <div className="text-center mr-2 ml-2 p-2 font-bold text-lg h-16 whitespace-nowrap">
           Showcord!
                 </div>
-                <div className="flex flex-grow overflow-y-auto">
+                <div className="flex grow overflow-y-auto">
                     <div className="w-full">
                         <SortableContext
                             items={roomsArray.map((e) => e.ID)}

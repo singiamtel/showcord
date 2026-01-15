@@ -1,6 +1,7 @@
 import { defineConfig, type Plugin } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 import tsconfigPaths from 'vite-tsconfig-paths';
+import tailwindcss from '@tailwindcss/vite';
 
 /**
  * Fix circular dependency in vendored Pokemon Showdown files.
@@ -47,13 +48,16 @@ function fixPsCircularDep(): Plugin {
 
 export default defineConfig(() => ({
     base: `${process.env.PUBLIC_URL ?? ''}/`,
+    server: {
+        allowedHosts: true,
+    },
     resolve: {
         alias: {
             events: 'rollup-plugin-node-polyfills/polyfills/events',
             buffer: 'buffer',
         },
     },
-    plugins: [fixPsCircularDep(), react(), tsconfigPaths()],
+    plugins: [fixPsCircularDep(), tailwindcss(), react(), tsconfigPaths()],
     test: {
         globals: true,
         environment: 'happy-dom',
