@@ -61,7 +61,8 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
                         // eslint-disable-next-line @eslint-react/no-array-index-key
                         key={`msg-${currentRoom.ID}-${message.timestamp?.getTime() || 0}-${_index}`}
                         fallbackRender={({ error: e }) => {
-                            console.error(e.name, message.content, e);
+                            const errorName = e instanceof Error ? e.name : 'UnknownError';
+                            console.error(errorName, message.content, e);
                             return <div className="text-red-400">Error displaying message</div>;
                         }}
                     >
