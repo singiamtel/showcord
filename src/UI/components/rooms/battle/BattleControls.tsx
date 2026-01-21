@@ -12,7 +12,7 @@ export default function BattleControls(_props: Readonly<HTMLAttributes<HTMLDivEl
     const battleRequest = useRoomStore(state => state.battleRequest);
     assert(battle?.type === 'battle', 'Trying to render BattleWindow in a room that is not a BattleRoom');
 
-    const req = (battleRequest && battleRequest.roomID === battle.ID) ?
+    const req = (battleRequest?.roomID === battle.ID && battleRequest.request) ?
         battleRequest.request :
         battle.battle.request;
 
