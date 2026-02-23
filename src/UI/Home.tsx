@@ -42,10 +42,10 @@ function TargetFaceWelcome({ className }: Readonly<{ className?: string }>) {
             />
             <div className="absolute top-0 left-0 w-full h-full bg-linear-to-b from-transparent to-black z-10 bg-gray-100 dark:bg-gray-600 opacity-10" />
             <div className="flex flex-col justify-between p-4 absolute">
-                <h1 className="font-bold text-4xl text-center z-10 text-transparent">
+                <h1 className="font-bold text-4xl text-center z-10 text-white">
           Welcome to Showcord!
                 </h1>
-                <h2 className="font-bold text-2xl text-center z-10 text-transparent">
+                <h2 className="font-bold text-2xl text-center z-10 text-white">
           Chat with your friends and meet new people
                 </h2>
             </div>
@@ -202,6 +202,7 @@ function SocialLink({ id, href, children }: Readonly<{ id: string, href?: string
             id={id}
             className="max-h-full min-h-0 flex items-center gap-2 w-full p-8 rounded-lg cursor-pointer text-black visited:text-black dark:text-white dark:hover:text-white dark:visited:text-white text-ellipsis hover-color bg-gray-251 dark:bg-gray-300 "
             target="_blank"
+            rel="noopener noreferrer"
             href={href}
         >
             {matches ? children : <div className="flex justify-center items-center w-full">{children[0]}</div>}
@@ -251,7 +252,7 @@ function SocialLinks({ className }: Readonly<{ className?: string }>) {
             </SocialLink>
             <SocialLink
                 id="FAQ"
-                // href="https://github.com/singiamtel/Showcord"
+                href="https://github.com/singiamtel/Showcord#readme"
             >
                 <img
                     src={FAQ}

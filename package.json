@@ -5,7 +5,7 @@
   "scripts": {
     "start": "vite",
     "dev": "vite",
-    "build": "tsc && vite build && cp sitemap.txt dist/ && cp robots.txt dist/",
+    "build": "tsc && vite build",
     "serve": "vite preview",
     "lint": "eslint",
     "lint:fix": "eslint --fix",

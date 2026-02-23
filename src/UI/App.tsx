@@ -8,6 +8,7 @@ import { TrainerCardProvider } from './components/single/TrainerCard/TrainerCard
 import { useAppStore } from '@/client/client';
 import { Toaster } from '@/components/ui/toaster';
 import { useMediaQuery } from './hooks/useMediaQuery';
+import { SeoMetadata } from './components/SeoMetadata';
 
 library.add(faBarChart, faPieChart);
 
@@ -41,8 +42,7 @@ export default function App() {
 
     return (
         <div className={`${isDark ? 'dark' : ''}`}>
-            <title>Showcord - Pokemon Showdown Client</title>
-            <meta name="description" content="Showcord is a modern, feature-rich client for Pokemon Showdown. Battle, chat, and connect with the community in style." />
+            <SeoMetadata />
             <div
                 className={`grid grid-cols-7 grid-rows-1 md:h-screen text-text dark:text-text-dark dark:bg-gray-300 w-screen dark:scheme-dark`}
             >
