@@ -1,44 +1,23 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Client } from '@/client/client';
-import { createMockWebSocket, MockServer } from '../helpers/mockServer';
 import { BattleRoom } from '@/client/room/battleRoom';
-import { useRoomStore } from '@/client/stores/roomStore';
+import { createClientHarness, type ClientHarness } from '../harness/clientHarness';
 
 describe('Battle Cleanup Integration Tests', () => {
-    let mockWebSocket: ReturnType<typeof createMockWebSocket>;
-    let mockServer: MockServer;
+    let harness: ClientHarness;
+    let mockWebSocket: ClientHarness['webSocket'];
+    let mockServer: ClientHarness['server'];
     let client: Client;
-    let originalWebSocket: any;
-    let originalConfirm: any;
 
     beforeEach(() => {
-        // Reset the room store between tests
-        useRoomStore.setState({
-            rooms: new Map(),
-            selectedRoomID: 'home',
-            currentRoom: undefined,
-            battleRequest: undefined,
-            usersUpdateCounter: 0,
-        });
-
-        originalWebSocket = global.WebSocket;
-        mockWebSocket = createMockWebSocket();
-        global.WebSocket = vi.fn(function() { return mockWebSocket; }) as any;
-        
-        mockServer = new MockServer((data) => {
-            mockWebSocket.triggerMessage(data);
-        });
-
-        client = new Client({ autoLogin: false, skipVitestCheck: true });
-        mockWebSocket.triggerOpen();
-        
-        originalConfirm = window.confirm;
-        window.confirm = vi.fn(() => true); // Default to yes
+        harness = createClientHarness({ confirmResult: true });
+        mockWebSocket = harness.webSocket;
+        mockServer = harness.server;
+        client = harness.client;
     });
 
     afterEach(() => {
-        global.WebSocket = originalWebSocket;
-        window.confirm = originalConfirm;
+        harness.cleanup();
     });
 
     it('should set isPlayer when user is a player', () => {

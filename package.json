@@ -9,7 +9,11 @@
     "serve": "vite preview",
     "lint": "eslint",
     "lint:fix": "eslint --fix",
-    "test": "vitest --run --coverage --silent passed-only",
+    "test": "npm run test:strict",
+    "test:strict": "vitest --run --coverage --silent passed-only",
+    "test:integration": "vitest --run test/integration --silent passed-only",
+    "test:unit": "vitest --run test/unit src/utils/highlightMsg.test.ts src/UI/components/single/chat.test.ts --silent passed-only",
+    "test:ui": "vitest --run test/ui-snapshot.test.tsx --silent passed-only",
     "pre-commit": "npm run lint:fix && npm run test && npm run build"
   },
   "dependencies": {

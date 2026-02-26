@@ -1,29 +1,22 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { Client } from '@/client/client';
-import { createMockWebSocket, MockServer } from '../helpers/mockServer';
+import { createClientHarness, type ClientHarness } from '../harness/clientHarness';
 
 describe('Protocol Edge Cases', () => {
-    let mockWebSocket: ReturnType<typeof createMockWebSocket>;
-    let mockServer: MockServer;
+    let harness: ClientHarness;
+    let mockWebSocket: ClientHarness['webSocket'];
+    let mockServer: ClientHarness['server'];
     let client: Client;
-    let originalWebSocket: any;
 
     beforeEach(() => {
-        originalWebSocket = global.WebSocket;
-        mockWebSocket = createMockWebSocket();
-        
-        global.WebSocket = vi.fn(function() { return mockWebSocket; }) as any;
-        
-        mockServer = new MockServer((data) => {
-            mockWebSocket.triggerMessage(data);
-        });
-
-        client = new Client({ autoLogin: false, skipVitestCheck: true });
-        mockWebSocket.triggerOpen();
+        harness = createClientHarness();
+        mockWebSocket = harness.webSocket;
+        mockServer = harness.server;
+        client = harness.client;
     });
 
     afterEach(() => {
-        global.WebSocket = originalWebSocket;
+        harness.cleanup();
     });
 
     describe('Room Edge Cases', () => {

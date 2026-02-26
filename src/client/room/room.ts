@@ -61,7 +61,7 @@ export class Room {
     endChallenge() {
         const challengeMessage = this.messages.find((m) => m.type === 'challenge' && !m.cancelled);
         if (!challengeMessage) {
-            console.error(
+            console.warn(
                 `endChallenge(): Tried to end non-existent challenge message for room ${this.name}`,
             );
             return;
@@ -125,14 +125,14 @@ export class Room {
         message: Message,
     ) {
         if (!message.name) {
-            console.error(
+            console.warn(
                 `changeUHTML(): Received unnamed UHTML for room ${this.name}`,
             );
             return false;
         }
         const prevMsg = this.messages.find((m) => m.name === message.name);
         if (!prevMsg) {
-            console.error(
+            console.warn(
                 `changeUHTML(): Tried to change non-existent uhtml message named ${message.name} for room ${this.name}`,
             );
             return false;

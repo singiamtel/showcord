@@ -62,5 +62,15 @@ export default defineConfig(() => ({
         globals: true,
         environment: 'happy-dom',
         setupFiles: ['./test/setupTests.js'],
+        coverage: {
+            provider: 'v8',
+            reporter: ['text', 'html', 'json-summary'],
+            thresholds: {
+                statements: 58,
+                branches: 50,
+                functions: 53,
+                lines: 59,
+            },
+        },
     },
 }));

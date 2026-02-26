@@ -52,6 +52,8 @@ export class Client {
     private pendingRoomJoins: string[] = [];
     private queryHandlers: QueryHandlers;
     private protocolParser: SocketProtocolParser;
+    private readonly boundNotificationsListener = this.notificationsListener.bind(this);
+    private readonly boundCleanupBeforeUnload = this.cleanupBeforeUnload.bind(this);
 
     get username() {
         return this.settings.username;
@@ -142,8 +144,8 @@ export class Client {
             this.socket = new WebSocket(this.settings.serverURL);
             this.__setupSocketListeners();
             this.selectRoom('home');
-            window.addEventListener('focus', this.notificationsListener.bind(this));
-            window.addEventListener('beforeunload', this.cleanupBeforeUnload.bind(this));
+            window.addEventListener('focus', this.boundNotificationsListener);
+            window.addEventListener('beforeunload', this.boundCleanupBeforeUnload);
         } catch (error) {
             if (error instanceof DOMException) {
                 console.warn('DOMException: ', error);
@@ -376,6 +378,18 @@ export class Client {
         await this.authManager.login();
     }
 
+    destroy() {
+        window.removeEventListener('focus', this.boundNotificationsListener);
+        window.removeEventListener('beforeunload', this.boundCleanupBeforeUnload);
+
+        if (this.socket && this.socket.readyState < 2) {
+            this.socket.close();
+        }
+
+        this.socket = undefined;
+        this.onOpen = [];
+    }
+
 
     private _openRoom(roomID: string) {
         openRoomInternal(
@@ -422,7 +436,7 @@ export class Client {
             console.error(event);
         };
         this.socket.onclose = (_) => {
-            console.error('Socket closed, dispatching disconnect');
+            console.warn('Socket closed, dispatching disconnect');
             useAppStore.getState().setConnected(false);
         };
     }
