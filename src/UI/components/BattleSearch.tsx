@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useBattleStore } from '@/client/stores/battleStore';
-import { client } from '@/client/client';
+import { client } from '@/client/singleton';
 import { Button } from '@/components/ui/button';
 
 export function BattleSearch() {

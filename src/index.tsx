@@ -2,7 +2,7 @@ import './utils/showdown-globals';
 import ReactDOM from 'react-dom/client';
 import App from './UI/App';
 import { StrictMode } from 'react';
-import { client } from './client/client';
+import { client } from './client/singleton';
 
 import '@fontsource/roboto-mono';
 import './UI/globals.css';

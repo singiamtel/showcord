@@ -2,7 +2,8 @@ import { notificationsEngine } from '../../../client/notifications';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog } from '@fortawesome/free-solid-svg-icons';
 import { UserDetails } from '../UserDetails';
-import { client, useUserStore, useAppStore } from '@/client/client';
+import { client } from '@/client/singleton';
+import { useUserStore, useAppStore } from '@/client/client';
 
 function LoginButton() {
     return (

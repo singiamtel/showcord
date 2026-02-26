@@ -1,4 +1,5 @@
-import { client, useRoomStore, useMessageStore, useAppStore } from '../../../client/client';
+import { useRoomStore, useMessageStore, useAppStore } from '../../../client/client';
+import { client } from '../../../client/singleton';
 import { Room } from '../../../client/room/room';
 import { loadCustomColors } from '../../../utils/namecolour';
 import { useCallback, useEffect, useMemo, useState } from 'react';
@@ -98,4 +99,3 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
         </ClientContext>
     );
 }
-

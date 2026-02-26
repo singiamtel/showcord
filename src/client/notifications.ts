@@ -1,7 +1,7 @@
 import { ToastAction } from '@/components/ui/toast';
 import { toast } from '@/components/ui/use-toast';
 import { createElement } from 'react';
-import { client } from './client';
+import { client } from '@/client/singleton';
 
 export type RoomNotification = {
     mentions: number;

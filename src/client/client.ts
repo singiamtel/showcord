@@ -512,6 +512,3 @@ export class Client {
         return handled;
     }
 }
-
-
-export const client = new Client();
