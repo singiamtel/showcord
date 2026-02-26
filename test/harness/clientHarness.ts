@@ -1,4 +1,4 @@
-import { Client } from '@/client/client';
+import { Client, type ClientRuntime } from '@/client/client';
 import { BattleRoom } from '@/client/room/battleRoom';
 import { vi } from 'vitest';
 import { createMockWebSocket, MockServer } from '../helpers/mockServer';
@@ -16,16 +16,18 @@ export type ClientHarness = ReturnType<typeof createClientHarness>;
 export function createClientHarness(options: ClientHarnessOptions = {}) {
     resetAllStores();
 
-    const originalWebSocket = globalThis.WebSocket;
-    const originalConfirm = window.confirm;
-
     const webSocket = createMockWebSocket();
-    globalThis.WebSocket = vi.fn(function() { return webSocket; }) as any;
-
-    if (options.confirmResult !== undefined) {
-        const confirmResult = options.confirmResult;
-        window.confirm = vi.fn(() => confirmResult);
-    }
+    const runtime = {
+        createWebSocket: vi.fn(() => webSocket as unknown as WebSocket),
+        addWindowEventListener: vi.fn((event, listener) => {
+            window.addEventListener(event, listener as EventListener);
+        }),
+        removeWindowEventListener: vi.fn((event, listener) => {
+            window.removeEventListener(event, listener as EventListener);
+        }),
+        confirm: vi.fn(() => options.confirmResult ?? true),
+        reloadWindow: vi.fn(),
+    } satisfies ClientRuntime;
 
     const server = new MockServer((data) => {
         webSocket.triggerMessage(data);
@@ -34,7 +36,9 @@ export function createClientHarness(options: ClientHarnessOptions = {}) {
     const client = new Client({
         autoLogin: options.autoLogin ?? false,
         skipVitestCheck: true,
+        runtime,
     });
+    client.start();
 
     if (options.autoOpen !== false) {
         webSocket.triggerOpen();
@@ -76,13 +80,12 @@ export function createClientHarness(options: ClientHarnessOptions = {}) {
 
     const cleanup = () => {
         client.destroy();
-        globalThis.WebSocket = originalWebSocket;
-        window.confirm = originalConfirm;
         resetAllStores();
     };
 
     return {
         client,
+        runtime,
         server,
         webSocket,
         room,

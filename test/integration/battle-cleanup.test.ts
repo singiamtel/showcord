@@ -69,7 +69,7 @@ describe('Battle Cleanup Integration Tests', () => {
         // Attempt to leave
         client.leaveRoom(roomID);
         
-        expect(window.confirm).toHaveBeenCalled();
+        expect(harness.runtime.confirm).toHaveBeenCalled();
         // Should send /forfeit and /leave
         expect(sendSpy).toHaveBeenCalledWith(`${roomID}|/forfeit`);
         expect(sendSpy).toHaveBeenCalledWith(`|/leave ${roomID}`);
@@ -90,7 +90,7 @@ describe('Battle Cleanup Integration Tests', () => {
         
         client.leaveRoom(roomID);
         
-        expect(window.confirm).not.toHaveBeenCalled();
+        expect(harness.runtime.confirm).not.toHaveBeenCalled();
         expect(sendSpy).toHaveBeenCalledWith(`|/leave ${roomID}`);
     });
 
@@ -107,7 +107,7 @@ describe('Battle Cleanup Integration Tests', () => {
         
         client.leaveRoom(roomID);
         
-        expect(window.confirm).not.toHaveBeenCalled();
+        expect(harness.runtime.confirm).not.toHaveBeenCalled();
         expect(sendSpy).toHaveBeenCalledWith(`|/leave ${roomID}`);
     });
 

@@ -21,7 +21,7 @@ describe('Client Integration Tests', () => {
 
     describe('Connection Lifecycle', () => {
         it('should connect to WebSocket on initialization', () => {
-            expect(global.WebSocket).toHaveBeenCalled();
+            expect(harness.runtime.createWebSocket).toHaveBeenCalled();
         });
 
         it('should receive and parse challstr', () => {

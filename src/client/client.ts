@@ -26,6 +26,29 @@ type ClientConstructor = {
     loginserver_url?: string;
     autoLogin?: boolean;
     skipVitestCheck?: boolean;
+    runtime?: ClientRuntime;
+};
+
+export interface ClientRuntime {
+    createWebSocket: (url: string) => WebSocket;
+    addWindowEventListener: (
+        event: 'focus' | 'beforeunload',
+        listener: EventListenerOrEventListenerObject,
+    ) => void;
+    removeWindowEventListener: (
+        event: 'focus' | 'beforeunload',
+        listener: EventListenerOrEventListenerObject,
+    ) => void;
+    confirm: (message: string) => boolean;
+    reloadWindow: () => void;
+}
+
+const defaultClientRuntime: ClientRuntime = {
+    createWebSocket: (url: string) => new WebSocket(url),
+    addWindowEventListener: (event, listener) => window.addEventListener(event, listener),
+    removeWindowEventListener: (event, listener) => window.removeEventListener(event, listener),
+    confirm: (message: string) => window.confirm(message),
+    reloadWindow: () => window.location.reload(),
 };
 
 import { enableMapSet } from 'immer';
@@ -52,6 +75,9 @@ export class Client {
     private pendingRoomJoins: string[] = [];
     private queryHandlers: QueryHandlers;
     private protocolParser: SocketProtocolParser;
+    private readonly runtime: ClientRuntime;
+    private readonly skipVitestCheck: boolean;
+    private started = false;
     private readonly boundNotificationsListener = this.notificationsListener.bind(this);
     private readonly boundCleanupBeforeUnload = this.cleanupBeforeUnload.bind(this);
 
@@ -78,29 +104,8 @@ export class Client {
     }
 
     constructor(options?: ClientConstructor) {
-        if (import.meta.env.VITEST && !options?.skipVitestCheck) {
-            console.debug('Running tests, skipping client initialization');
-            this.authManager = new AuthenticationManager(this.settings, {
-                sendMessage: () => {},
-                setUsername: () => {},
-            });
-            this.queryHandlers = new QueryHandlers(this.settings, {
-                send: () => {},
-            });
-            this.protocolParser = new SocketProtocolParser(
-                this.settings,
-                {
-                    getRoom: this.room.bind(this),
-                    getRooms: () => this.rooms,
-                    getSelectedRoom: () => this.selectedRoom,
-                    removeRoom: this._removeRoom.bind(this),
-                    setUsername: this.setUsername.bind(this),
-                    forceHighlightMsg: this.forceHighlightMsg.bind(this),
-                },
-                this.queryHandlers
-            );
-            return;
-        }
+        this.runtime = options?.runtime ?? defaultClientRuntime;
+        this.skipVitestCheck = options?.skipVitestCheck ?? false;
 
         const authCallbacks: AuthenticationCallbacks = {
             sendMessage: (message: string) => this.__send(message, false),
@@ -136,22 +141,40 @@ export class Client {
             this.queryHandlers
         );
 
+        if (options?.autoLogin !== undefined) {
+            this.authManager.setShouldAutoLogin(options.autoLogin);
+        }
+    }
+
+    start() {
+        if (this.started) {
+            return;
+        }
+        if (import.meta.env.VITEST && !this.skipVitestCheck) {
+            console.debug('Running tests, skipping client start');
+            return;
+        }
+
         try {
-            if (options?.autoLogin !== undefined) {
-                this.authManager.setShouldAutoLogin(options.autoLogin);
-            }
             this.__createPermanentRooms();
-            this.socket = new WebSocket(this.settings.serverURL);
+            this.socket = this.runtime.createWebSocket(this.settings.serverURL);
             this.__setupSocketListeners();
             this.selectRoom('home');
-            window.addEventListener('focus', this.boundNotificationsListener);
-            window.addEventListener('beforeunload', this.boundCleanupBeforeUnload);
+            this.runtime.addWindowEventListener(
+                'focus',
+                this.boundNotificationsListener as EventListener,
+            );
+            this.runtime.addWindowEventListener(
+                'beforeunload',
+                this.boundCleanupBeforeUnload as EventListener,
+            );
+            this.started = true;
         } catch (error) {
             if (error instanceof DOMException) {
                 console.warn('DOMException: ', error);
                 this.settings.serverURL = Settings.defaultServerURL;
                 this.settings.loginServerURL = Settings.defaultLoginServerURL;
-                window.location.reload();
+                this.runtime.reloadWindow();
             }
             console.error(error);
         }
@@ -309,7 +332,7 @@ export class Client {
         }
 
         if (room instanceof BattleRoom && room.isPlayer && !room.battleEnded) {
-            if (window.confirm('You are currently playing in this battle. Do you want to forfeit?')) {
+            if (this.runtime.confirm('You are currently playing in this battle. Do you want to forfeit?')) {
                 this.__send('/forfeit', roomID);
                 this.__send(`/leave ${roomID}`, false);
             }
@@ -378,9 +401,15 @@ export class Client {
         await this.authManager.login();
     }
 
-    destroy() {
-        window.removeEventListener('focus', this.boundNotificationsListener);
-        window.removeEventListener('beforeunload', this.boundCleanupBeforeUnload);
+    stop() {
+        this.runtime.removeWindowEventListener(
+            'focus',
+            this.boundNotificationsListener as EventListener,
+        );
+        this.runtime.removeWindowEventListener(
+            'beforeunload',
+            this.boundCleanupBeforeUnload as EventListener,
+        );
 
         if (this.socket && this.socket.readyState < 2) {
             this.socket.close();
@@ -388,6 +417,12 @@ export class Client {
 
         this.socket = undefined;
         this.onOpen = [];
+        this.started = false;
+        useAppStore.getState().setConnected(false);
+    }
+
+    destroy() {
+        this.stop();
     }
 
 
@@ -480,4 +515,3 @@ export class Client {
 
 
 export const client = new Client();
-window.client = client;
