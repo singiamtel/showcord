@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { Room } from '../room/room';
+import type { Room } from '../room/room';
 
 interface RoomStoreState {
     rooms: Map<Room['ID'], Room>;
