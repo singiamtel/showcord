@@ -7,14 +7,27 @@ export function BattleSearch() {
     const formats = useBattleStore(state => state.formats);
     const search = useBattleStore(state => state.search);
     const [selectedFormat, setSelectedFormat] = useState<string>('');
+    const categories = formats?.categories.map((category) => {
+        const seenFormatIds = new Set<string>();
+        return {
+            ...category,
+            formats: category.formats.filter((format) => {
+                if (seenFormatIds.has(format.ID)) {
+                    return false;
+                }
+                seenFormatIds.add(format.ID);
+                return true;
+            }),
+        };
+    }) ?? [];
+    const allFormats = categories.flatMap(category => category.formats);
 
     // Pre-select a popular format if available, or first one
     useEffect(() => {
-        if (!selectedFormat && formats?.categories) {
+        if (!selectedFormat && categories.length) {
             // Try to find a common format like Gen 9 Random Battle or OU
             const preferred = ['gen9randombattle', 'gen9ou'];
             let found = null;
-            const allFormats = formats.categories.flatMap(c => c.formats);
 
             for (const pref of preferred) {
                 found = allFormats.find(f => f.ID === pref);
@@ -24,11 +37,11 @@ export function BattleSearch() {
             if (found) {
                 setSelectedFormat(found.ID);
             } else {
-                const first = formats.categories[0]?.formats[0];
+                const first = categories[0]?.formats[0];
                 if (first) setSelectedFormat(first.ID);
             }
         }
-    }, [formats, selectedFormat]);
+    }, [allFormats, categories, selectedFormat]);
 
     const searchingFormats = search.searching || [];
     const isSearching = searchingFormats.length > 0;
@@ -51,7 +64,7 @@ export function BattleSearch() {
                 <div className="flex flex-col gap-2">
                     <div className="text-xs text-muted-foreground text-center truncate px-1">
                         Searching: {searchingFormats.map(f => {
-                            const fmt = formats.categories.flatMap(c => c.formats).find(x => x.ID === f);
+                            const fmt = allFormats.find(x => x.ID === f);
                             return fmt ? fmt.name : f;
                         }).join(', ')}
                     </div>
@@ -66,10 +79,10 @@ export function BattleSearch() {
                         value={selectedFormat}
                         onChange={(e) => setSelectedFormat(e.target.value)}
                     >
-                        {formats.categories.map((category) => (
+                        {categories.map((category) => (
                             <optgroup key={category.name} label={category.name}>
                                 {category.formats.map((format) => (
-                                    <option key={format.ID} value={format.ID}>
+                                    <option key={`${category.name}-${format.ID}`} value={format.ID}>
                                         {format.name}
                                     </option>
                                 ))}
