@@ -504,7 +504,8 @@ export class Client {
                         msg,
                         room,
                         this.selectedRoom,
-                        this.settings.username
+                        this.settings.username,
+                        this.selectRoom.bind(this)
                     );
                 },
             }

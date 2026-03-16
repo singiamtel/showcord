@@ -1,7 +1,6 @@
 import { ToastAction } from '@/components/ui/toast';
 import { toast } from '@/components/ui/use-toast';
 import { createElement } from 'react';
-import { client } from '@/client/singleton';
 
 export type RoomNotification = {
     mentions: number;
@@ -34,6 +33,7 @@ class NotificationsEngine {
     sendNotification(
         notification: clientNotification,
         selectedRoom?: string,
+        selectRoom?: (room: string) => void,
     ) {
         if (document.hasFocus()) {
             notification.user = notification.user.trim();
@@ -46,7 +46,7 @@ class NotificationsEngine {
                     description: limitString(notification.message, 150),
                     // action: <ToastAction altText="Try again">Try again</ToastAction>,
                     action: createElement(ToastAction, { altText: 'View', onClick: () => {
-                        client.selectRoom(notification.room);
+                        selectRoom?.(notification.room);
                     } }, 'View') as any,
                 });
             }

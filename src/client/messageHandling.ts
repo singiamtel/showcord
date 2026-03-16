@@ -45,7 +45,8 @@ export function addMessageToRoom(
     message: Message,
     room: Room | undefined,
     selectedRoom: string,
-    username: string | undefined
+    username: string | undefined,
+    selectRoom?: (room: string) => void,
 ) {
     if (!room) {
         console.warn('addMessageToRoom: room (' + roomID + ') is unknown. Message:', message);
@@ -69,7 +70,7 @@ export function addMessageToRoom(
             message: message.content,
             room: roomID,
             roomType: room.type,
-        });
+        }, selectedRoom, selectRoom);
         useNotificationStore.getState().addMention(roomID);
     }
 }
