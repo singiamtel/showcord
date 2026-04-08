@@ -33,18 +33,25 @@ export class AuthenticationManager {
         return this.loggedIn;
     }
 
+    private waitForChallstr(): Promise<string> {
+        const current = useUserStore.getState().challstr;
+        if (current) return Promise.resolve(current);
+
+        return new Promise((resolve) => {
+            const unsub = useUserStore.subscribe((state) => {
+                if (state.challstr) {
+                    unsub();
+                    resolve(state.challstr);
+                }
+            });
+        });
+    }
+
     async login(): Promise<void> {
         // Reset manual logout flag when user explicitly logs in
         this.hasManuallyLoggedOut = false;
 
-        // Wait for challstr
-        while (!useUserStore.getState().challstr) {
-            console.log('Waiting for challstr...');
-            await new Promise((resolve) => setTimeout(resolve, 100));
-        }
-
-        // OAuth login method
-        const challstr = useUserStore.getState().challstr;
+        const challstr = await this.waitForChallstr();
         const url = `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${this.client_id}&challenge=${challstr}`;
         const nWindow = (window as any).n = open(
             url,
@@ -87,9 +94,7 @@ export class AuthenticationManager {
             return;
         }
 
-        while (!useUserStore.getState().challstr) {
-            await new Promise((resolve) => setTimeout(resolve, 500));
-        }
+        await this.waitForChallstr();
 
         const urlParams = new URLSearchParams(window.location.search);
         const assertion = urlParams.get('assertion');
