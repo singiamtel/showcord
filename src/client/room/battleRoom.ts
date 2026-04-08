@@ -34,25 +34,29 @@ export class BattleRoom extends Room {
         };
 
         // Load the real room dynamically
-        import('./RealBattleRoom').then(({ RealBattleRoom }) => {
-            // Create the heavy instance
-            this.realRoom = new RealBattleRoom(args);
+        (async () => {
+            try {
+                const { RealBattleRoom } = await import('./RealBattleRoom');
 
-            // Sync mutable properties that might have changed before load
-            this.realRoom.perspective = this.perspective;
-            this.realRoom.isPlayer = this.isPlayer;
-            this.realRoom.battleEnded = this.battleEnded;
+                // Create the heavy instance
+                this.realRoom = new RealBattleRoom(args);
 
-            // Replace stubs with real objects
-            this.battle = this.realRoom.battle;
-            this.formatter = this.realRoom.formatter;
+                // Sync mutable properties that might have changed before load
+                this.realRoom.perspective = this.perspective;
+                this.realRoom.isPlayer = this.isPlayer;
+                this.realRoom.battleEnded = this.battleEnded;
 
-            // Replay any queued actions
-            this.queue.forEach(fn => fn());
-            this.queue = [];
-        }).catch(err => {
-            console.error('Failed to load RealBattleRoom', err);
-        });
+                // Replace stubs with real objects
+                this.battle = this.realRoom.battle;
+                this.formatter = this.realRoom.formatter;
+
+                // Replay any queued actions
+                this.queue.forEach(fn => fn());
+                this.queue = [];
+            } catch (err) {
+                console.error('Failed to load RealBattleRoom', err);
+            }
+        })();
     }
 
     setFormatter(perspective: any) {

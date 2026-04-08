@@ -22,11 +22,9 @@ function limitString(str: string, limit: number) {
 class NotificationsEngine {
     private permission = Notification.permission;
 
-    askPermission() {
+    async askPermission() {
         if (this.permission === 'default') {
-            Notification.requestPermission().then((permission) => {
-                this.permission = permission;
-            });
+            this.permission = await Notification.requestPermission();
         }
     }
 

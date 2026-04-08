@@ -44,10 +44,10 @@ export class QueryHandlers {
         if (this.news) {
             return callback(this.news);
         }
-        fetch(Settings.defaultNewsURL).then((res) => res.json()).then((json) => {
-            this.news = json;
-            callback(json);
-        });
+        const res = await fetch(Settings.defaultNewsURL);
+        const json = await res.json();
+        this.news = json;
+        callback(json);
     }
 
     handleUserDetailsResponse(json: any) {

@@ -35,7 +35,7 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
             const elHeight = ref.current.offsetHeight / 2;
             ref.current.scrollTop = ref.current.scrollHeight - elHeight;
         }
-    }, [ref.current]);
+    }, []);
 
     useLayoutEffect(() => {
         if (isIntersecting) {
