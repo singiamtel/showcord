@@ -142,17 +142,35 @@ export function BattleSearch() {
             ) : (
                 <div className="flex flex-col gap-1.5">
                     <div ref={comboboxRef} className="relative">
-                        <input
-                            type="text"
-                            value={displayValue}
-                            onChange={handleInputChange}
-                            onFocus={handleInputFocus}
-                            onKeyDown={handleKeyDown}
-                            placeholder="Search format…"
-                            spellCheck={false}
-                            autoComplete="off"
-                            className="w-full h-8 px-3 text-sm rounded-md border border-input bg-background dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-ring"
-                        />
+                        {isOpen ? (
+                            <input
+                                autoFocus
+                                type="text"
+                                value={displayValue}
+                                onChange={handleInputChange}
+                                onKeyDown={handleKeyDown}
+                                placeholder="Search format…"
+                                spellCheck={false}
+                                autoComplete="off"
+                                className="w-full h-8 px-3 text-sm rounded-md border border-input bg-background dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-ring"
+                            />
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={handleInputFocus}
+                                className="w-full h-8 px-3 text-sm rounded-md border border-input bg-background dark:bg-gray-800 dark:text-white flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+                            >
+                                <span className={selectedFormat ? 'text-gray-900 dark:text-gray-100' : 'text-muted-foreground'}>
+                                    {(() => {
+                                        const fmt = allFormats.find(f => f.ID === selectedFormat);
+                                        return fmt ? `[Gen ${fmt.gen}] ${fmt.name}` : (selectedFormat || 'Select format…');
+                                    })()}
+                                </span>
+                                <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+                        )}
                         {isOpen && (
                             <div className="absolute left-0 right-0 bottom-[calc(100%+4px)] z-50 bg-white dark:bg-[#111] border border-gray-200 dark:border-gray-700 rounded-xl shadow-2xl max-h-60 overflow-y-auto py-1.5">
                                 {flatFiltered.length === 0 ? (
@@ -172,7 +190,7 @@ export function BattleSearch() {
                                                         onMouseDown={(e) => { e.preventDefault(); selectFormat(format); }}
                                                         className={`w-full text-left px-2.5 py-1.5 rounded-lg flex flex-col gap-0.5 transition-colors ${idx === activeIndex ? 'bg-teal-500/20' : 'hover:bg-teal-500/10'}`}
                                                     >
-                                                        <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">{format.name}</span>
+                                                        <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">[Gen {format.gen}] {format.name}</span>
                                                         <span className="text-[10px] text-gray-400 dark:text-gray-500">{format.ID}</span>
                                                     </button>
                                                 );
@@ -184,7 +202,7 @@ export function BattleSearch() {
                         )}
                     </div>
                     <Button
-                        className="w-full h-8 bg-red-600 hover:bg-red-700 text-white font-bold"
+                        className="w-full h-8 font-bold bg-teal-500 hover:bg-teal-600 text-white border-0"
                         onClick={handleSearch}
                         disabled={!selectedFormat}
                     >
