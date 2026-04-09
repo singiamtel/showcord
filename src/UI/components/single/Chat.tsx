@@ -6,6 +6,7 @@ import {
 } from 'react';
 import { useClientContext } from './useClientContext';
 import useOnScreen from '../../hooks/useOnScreen';
+import { useRoomID } from '@/UI/components/RoomContext';
 import Html from '../../chatFormatting/Html';
 import { HHMMSS } from '../../../utils/date';
 import { ErrorBoundary } from 'react-error-boundary';
@@ -23,12 +24,14 @@ import { useRoomStore, useMessageStore } from '@/client/client';
 import { FormatMsgDisplay } from '@/UI/chatFormatting/MessageParser';
 
 export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
-    const currentRoom = useRoomStore(state => state.currentRoom);
+    const roomID = useRoomID();
+    const currentRoom = useRoomStore(state => state.rooms.get(roomID));
     const messages = useMessageStore(state => state.messages);
     assert(currentRoom, 'Opening chat without a selected room');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const isIntersecting = useOnScreen(messagesEndRef);
     const ref = useRef<HTMLDivElement>(null);
+    const didScrollInitially = useRef(false);
 
     const scrollToBottom = useCallback(() => {
         if (ref.current) {
@@ -43,9 +46,13 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
         }
     }, [messages]);
 
+    // Scroll to bottom only on first mount. Activity preserves both the scroll
+    // position (DOM) and this ref, so re-activation won't force a scroll.
     useLayoutEffect(() => {
+        if (didScrollInitially.current) return;
         scrollToBottom();
-    }, [ref.current, currentRoom]);
+        didScrollInitially.current = true;
+    }, []);
 
     return (
         <div
@@ -109,8 +116,8 @@ export function ChallengeMessage(
     }>,
 ) {
     const { client } = useClientContext();
-    const currentRoom = useRoomStore(state => state.currentRoom);
-
+    const roomID = useRoomID();
+    const currentRoom = useRoomStore(state => state.rooms.get(roomID));
 
     function acceptChallenge() {
         assert(currentRoom, 'currentRoom');

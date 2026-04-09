@@ -6,6 +6,7 @@ import { Battle as VisualBattle } from '@/vendor/pokemon-showdown/battle';
 import $ from 'jquery';
 import { useRoomStore } from '@/client/client';
 import type { BattleRoom } from '@/client/room/battleRoom';
+import { useRoomID } from '@/UI/components/RoomContext';
 import { cn } from '@/lib/utils';
 
 // Set window.Dex after vendor modules are loaded (for IIFEs that check it)
@@ -26,8 +27,9 @@ const checkGlobals = () => {
 };
 
 export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
-    const room = useRoomStore(state => state.currentRoom) as BattleRoom;
-    const perspective = useRoomStore(state => (state.currentRoom as BattleRoom)?.perspective);
+    const roomID = useRoomID();
+    const room = useRoomStore(state => state.rooms.get(roomID)) as BattleRoom;
+    const perspective = useRoomStore(state => (state.rooms.get(roomID) as BattleRoom | undefined)?.perspective);
     const battleRef = useRef<HTMLDivElement>(null);
     const logRef = useRef<HTMLDivElement>(null);
     const [battleInstance, setBattleInstance] = useState<VisualBattle | null>(null);

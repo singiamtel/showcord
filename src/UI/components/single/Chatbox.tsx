@@ -13,6 +13,7 @@ import TextareaAutosize from 'react-textarea-autosize';
 import { cn } from '@/lib/utils';
 import { useClientContext } from './useClientContext';
 import { useRoomStore } from '@/client/client';
+import { useRoomID } from '@/UI/components/RoomContext';
 
 type SearchBoxOffset = {
     width: number;
@@ -35,7 +36,8 @@ export default function ChatBox(props: Readonly<HTMLAttributes<HTMLDivElement>>)
         width: 0,
         marginBottom: 0,
     });
-    const room = useRoomStore(state => state.currentRoom);
+    const roomID = useRoomID();
+    const room = useRoomStore(state => state.rooms.get(roomID));
     const { client, setRoom } = useClientContext();
     const textAreaRef = useRef<HTMLTextAreaElement>(null);
     const formRef = useRef<HTMLFormElement>(null);

@@ -11,12 +11,14 @@ import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { twMerge } from 'tailwind-merge';
 import { useClientContext } from '../components/single/useClientContext';
 import { useRoomStore } from '@/client/client';
+import { useRoomID } from '@/UI/components/RoomContext';
 
 export default function HTML(
     { message, raw }: Readonly<{ message: string; raw?: boolean }>,
 ) {
     const { client } = useClientContext();
-    const currentRoom = useRoomStore(state => state.currentRoom);
+    const roomID = useRoomID();
+    const currentRoom = useRoomStore(state => state.rooms.get(roomID));
     const parserOptions = {
         replace: (domNode: any) => {
             const { attribs, children } = domNode;

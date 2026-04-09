@@ -6,9 +6,11 @@ import { TeamRequest } from './requests/TeamRequest';
 import { SwitchRequest } from './requests/SwitchRequest';
 import { useRoomStore } from '@/client/client';
 import type { BattleRoom } from '@/client/room/battleRoom';
+import { useRoomID } from '@/UI/components/RoomContext';
 
 export default function BattleControls(_props: Readonly<HTMLAttributes<HTMLDivElement>>) {
-    const battle = useRoomStore(state => state.currentRoom) as BattleRoom;
+    const roomID = useRoomID();
+    const battle = useRoomStore(state => state.rooms.get(roomID)) as BattleRoom;
     const battleRequest = useRoomStore(state => state.battleRequest);
     assert(battle?.type === 'battle', 'Trying to render BattleWindow in a room that is not a BattleRoom');
 

@@ -4,11 +4,13 @@ import { isStaff, type User } from '../../../client/user';
 import { toID } from '@/utils/generic';
 import { cn } from '@/lib/utils';
 import { useRoomStore } from '@/client/client';
+import { useRoomID } from '@/UI/components/RoomContext';
 
 export default function UserList(props: Readonly<HTMLAttributes<HTMLDivElement> & {
     searchable?: boolean
 }>) {
-    const room = useRoomStore(state => state.currentRoom);
+    const roomID = useRoomID();
+    const room = useRoomStore(state => state.rooms.get(roomID));
     const usersUpdateCounter = useRoomStore(state => state.usersUpdateCounter);
     const [users, setUsers] = useState<User[]>([]);
     const [search, setSearch] = useState<string>('');
