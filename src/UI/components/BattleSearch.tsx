@@ -69,15 +69,14 @@ export function BattleSearch() {
         setActiveIndex(-1);
     };
 
-    const filteredCategories = searchQuery.trim()
-        ? [{
+    const filteredCategories = searchQuery.trim() ?
+        [{
             name: 'Results',
             formats: allFormats.filter(f =>
                 f.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                f.ID.toLowerCase().includes(searchQuery.toLowerCase())
-            ).slice(0, 12),
-        }]
-        : categories;
+                f.ID.toLowerCase().includes(searchQuery.toLowerCase())).slice(0, 12),
+        }] :
+        categories;
 
     const flatFiltered = filteredCategories.flatMap(c => c.formats);
 
