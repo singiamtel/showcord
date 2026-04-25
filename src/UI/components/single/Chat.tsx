@@ -26,7 +26,7 @@ import { FormatMsgDisplay } from '@/UI/chatFormatting/MessageParser';
 export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const roomID = useRoomID();
     const currentRoom = useRoomStore(state => state.rooms.get(roomID));
-    const messages = useMessageStore(state => state.messages);
+    const messages = useMessageStore(state => state.messages[roomID]);
     assert(currentRoom, 'Opening chat without a selected room');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const isIntersecting = useOnScreen(messagesEndRef);
@@ -35,8 +35,11 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
 
     const scrollToBottom = useCallback(() => {
         if (ref.current) {
-            const elHeight = ref.current.offsetHeight / 2;
-            ref.current.scrollTop = ref.current.scrollHeight - elHeight;
+            requestAnimationFrame(() => {
+                if (!ref.current) return;
+                const elHeight = ref.current.offsetHeight / 2;
+                ref.current.scrollTop = ref.current.scrollHeight - elHeight;
+            });
         }
     }, []);
 
@@ -62,8 +65,8 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
             )}
             ref={ref}
         >
-            {messages[currentRoom.ID] ? (
-                messages[currentRoom.ID].map((message, _index, arr) => (
+            {messages ? (
+                messages.map((message, _index, arr) => (
                     <ErrorBoundary
                         // eslint-disable-next-line @eslint-react/no-array-index-key
                         key={`msg-${currentRoom.ID}-${message.timestamp?.getTime() || 0}-${_index}`}

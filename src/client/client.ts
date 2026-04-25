@@ -1,3 +1,4 @@
+import { toID } from '@/utils/generic';
 import { Settings } from './settings';
 import { type Message } from './message';
 import { AuthenticationManager, type AuthenticationCallbacks } from './authentication';
@@ -73,6 +74,7 @@ export class Client {
     private onOpen: (() => void)[] = [];
     private authManager: AuthenticationManager;
     private pendingRoomJoins: string[] = [];
+    private explicitJoins: Set<string> = new Set();
     private queryHandlers: QueryHandlers;
     private protocolParser: SocketProtocolParser;
     private readonly runtime: ClientRuntime;
@@ -137,6 +139,7 @@ export class Client {
                 removeRoom: this._removeRoom.bind(this),
                 setUsername: this.setUsername.bind(this),
                 forceHighlightMsg: this.forceHighlightMsg.bind(this),
+                shouldAutoSelect: this.consumeExplicitJoin.bind(this),
             },
             this.queryHandlers
         );
@@ -316,7 +319,17 @@ export class Client {
         if (!this.socket) {
             throw new Error('Joining room(s) before socket initialization ' + room);
         }
+        this.explicitJoins.add(toID(room));
         this.__send(`/join ${room}`, false);
+    }
+
+    consumeExplicitJoin(roomID: string): boolean {
+        const id = toID(roomID);
+        if (this.explicitJoins.has(id)) {
+            this.explicitJoins.delete(id);
+            return true;
+        }
+        return false;
     }
 
     leaveRoom(roomID: string) {
@@ -436,6 +449,7 @@ export class Client {
     }
 
     private _removeRoom(roomID: string) {
+        this.explicitJoins.delete(toID(roomID));
         removeRoomInternal(
             roomID,
             this.selectedRoom,
@@ -465,7 +479,14 @@ export class Client {
 
         this.socket.onmessage = (event) => {
             console.debug('[socket-output]\n' + event.data);
-            this.protocolParser.parseSocketChunk(event.data);
+            const data = event.data;
+            if (import.meta.env.VITEST) {
+                this.protocolParser.parseSocketChunk(data);
+            } else {
+                queueMicrotask(() => {
+                    this.protocolParser.parseSocketChunk(data);
+                });
+            }
         };
         this.socket.onerror = (event) => {
             console.error(event);

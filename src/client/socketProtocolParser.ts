@@ -12,7 +12,7 @@ import { useBattleStore } from './stores/battleStore';
 import { assert } from '@/lib/utils';
 import type { Settings } from './settings';
 import { parseCMessage, parseCMessageContent, addMessageToRoom, highlightMsg } from './messageHandling';
-import { addRoom, __createPM } from './roomManagement';
+import { addRoom, selectRoom, __createPM } from './roomManagement';
 import type { QueryHandlers } from './queryHandlers';
 import formatParser, { type Formats } from './formatParser';
 
@@ -23,10 +23,13 @@ export interface ProtocolParserCallbacks {
     removeRoom: (roomID: string) => void;
     setUsername: (username: string) => void;
     forceHighlightMsg: (roomid: string, message: any) => boolean;
+    shouldAutoSelect?: (roomID: string) => boolean;
 }
 
 export class SocketProtocolParser {
     private formats: Formats | undefined;
+    private batchingMessageStoreUpdates = false;
+    private touchedRooms = new Set<string>();
 
     constructor(
         private settings: Settings,
@@ -37,6 +40,8 @@ export class SocketProtocolParser {
     parseSocketChunk(chunk: string) {
         const split = chunk.split('\n');
         const roomID = split[0].startsWith('>') ? split[0].slice(1) : 'lobby';
+        this.batchingMessageStoreUpdates = true;
+        this.touchedRooms.clear();
         for (const [idx, line] of split.entries()) {
             if (line === '') continue;
             if (idx === 0 && line.startsWith('>')) {
@@ -54,6 +59,14 @@ export class SocketProtocolParser {
                 console.error(chunk);
             }
         }
+        for (const rID of this.touchedRooms) {
+            const room = this.callbacks.getRoom(rID);
+            if (room) {
+                useMessageStore.getState().updateMessages(rID, room.messages);
+            }
+        }
+        this.batchingMessageStoreUpdates = false;
+        this.touchedRooms.clear();
     }
 
     private requiresRoom(cmd: string, roomID: string) {
@@ -96,6 +109,9 @@ export class SocketProtocolParser {
                 open: true,
             });
             addRoom(newRoom, this.settings, { getRoom: this.callbacks.getRoom });
+            if (this.callbacks.shouldAutoSelect?.(newRoom.ID)) {
+                selectRoom(newRoom.ID, this.callbacks.getRoom);
+            }
             break;
         }
         case 'title': {
@@ -590,8 +606,13 @@ export class SocketProtocolParser {
             message,
             room,
             this.callbacks.getSelectedRoom(),
-            this.settings.username
+            this.settings.username,
+            undefined,
+            this.batchingMessageStoreUpdates
         );
+        if (this.batchingMessageStoreUpdates) {
+            this.touchedRooms.add(roomID);
+        }
     }
 
     private addUsers(roomID: string, users: User[]) {

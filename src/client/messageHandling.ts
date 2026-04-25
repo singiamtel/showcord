@@ -47,6 +47,7 @@ export function addMessageToRoom(
     selectedRoom: string,
     username: string | undefined,
     selectRoom?: (room: string) => void,
+    skipStoreUpdate = false,
 ) {
     if (!room) {
         console.warn('addMessageToRoom: room (' + roomID + ') is unknown. Message:', message);
@@ -61,8 +62,9 @@ export function addMessageToRoom(
     } else {
         room.addMessage(message, settings);
     }
-    useMessageStore.getState().newMessage(roomID, message);
-    console.debug('message', message);
+    if (!skipStoreUpdate) {
+        useMessageStore.getState().newMessage(roomID, message);
+    }
 
     if (shouldNotify(room, message, selectedRoom, username)) {
         notificationsEngine.sendNotification({
