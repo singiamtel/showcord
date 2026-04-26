@@ -1,0 +1,203 @@
+/*********************************************************
+ * Isolated tooltip styles for Pokemon Showdown battles
+ *
+ * The battle itself runs inside a Shadow DOM, but the
+ * vendored tooltip code appends #tooltipwrapper to the
+ * document body. These rules restore tooltip appearance
+ * without leaking the rest of the battle stylesheet
+ * globally.
+ *********************************************************/
+
+#tooltipwrapper {
+	position: absolute;
+	top: 400px;
+	left: 100px;
+	text-align: left;
+	color: black;
+	pointer-events: none;
+	z-index: 100;
+}
+
+#tooltipwrapper .tooltipinner {
+	position: relative;
+}
+
+#tooltipwrapper .tooltip {
+	position: absolute;
+	bottom: 0;
+	left: 0;
+	width: 300px;
+	border: 1px solid #888888;
+	background: #EEEEEE;
+	background: rgba(240, 240, 240, 0.9);
+	border-radius: 5px;
+	z-index: 50;
+}
+
+#tooltipwrapper .tooltip h2 {
+	padding: 2px 4px;
+	margin: 0;
+	border-bottom: 1px solid #888888;
+	font-size: 10pt;
+	color: black;
+}
+
+#tooltipwrapper .tooltip h2 small {
+	font-weight: normal;
+}
+
+#tooltipwrapper .tooltip p {
+	padding: 2px 4px;
+	margin: 0;
+	font-size: 9pt;
+}
+
+#tooltipwrapper .tooltip p small {
+	font-size: 8pt;
+}
+
+#tooltipwrapper .tooltip p.tooltip-section {
+	border-top: 1px solid #888888;
+}
+
+#tooltipwrapper .tooltip .textaligned-typeicons img {
+	vertical-align: text-bottom;
+}
+
+#tooltipwrapper.tooltip-locked {
+	pointer-events: auto;
+}
+
+#tooltipwrapper.tooltip-locked .tooltip {
+	border: 2px solid #444444;
+	background: #DEDEDE;
+}
+
+#tooltipwrapper .tooltip-locking .tooltip {
+	position: absolute;
+	box-sizing: border-box;
+}
+
+.tooltip-locking-click .tooltip::before,
+.tooltip-locking-click .tooltip::after,
+.tooltip-locking-tap .tooltip::before,
+.tooltip-locking-tap .tooltip::after {
+	content: "";
+	position: absolute;
+	border: 2px solid transparent;
+	box-sizing: border-box;
+	border-radius: 5px;
+	animation-duration: 500ms;
+	animation-fill-mode: forwards;
+	animation-delay: 75ms;
+}
+
+.tooltip-locking-click .tooltip::after,
+.tooltip-locking-click .tooltip::before {
+	animation-duration: 700ms;
+}
+
+.tooltip-locking-click .tooltip::after,
+.tooltip-locking-tap .tooltip::after {
+	bottom: -2px;
+	left: -2px;
+	animation-name: tooltip-locking-top-left;
+}
+
+.tooltip-locking-click .tooltip::before,
+.tooltip-locking-tap .tooltip::before {
+	top: -2px;
+	right: -2px;
+	animation-name: tooltip-locking-bottom-right;
+}
+
+@keyframes tooltip-locking-top-left {
+	0% {
+		width: 0;
+		height: 0;
+		border-left: 2px solid #444444;
+	}
+	25% {
+		width: 0;
+		height: calc(100% + 4px);
+		border-left: 2px solid #444444;
+		border-top: 2px solid #444444;
+	}
+	50% {
+		width: calc(100% + 4px);
+		height: calc(100% + 4px);
+		border-left: 2px solid #444444;
+		border-top: 2px solid #444444;
+	}
+	100% {
+		width: calc(100% + 4px);
+		height: calc(100% + 4px);
+		border-left: 2px solid #444444;
+		border-top: 2px solid #444444;
+	}
+}
+
+@keyframes tooltip-locking-bottom-right {
+	0% {
+		width: 0;
+		height: 0;
+		opacity: 0;
+	}
+	50% {
+		width: 0;
+		height: 0;
+		border: 0;
+		border-right: 2px solid #444444;
+		opacity: 0;
+	}
+	50.1% {
+		opacity: 1;
+	}
+	75% {
+		width: 0;
+		height: calc(100% + 4px);
+		border: 2px solid transparent;
+		border-right: 2px solid #444444;
+		border-bottom: 2px solid #444444;
+	}
+	100% {
+		height: calc(100% + 4px);
+		width: calc(100% + 4px);
+		border-right: 2px solid #444444;
+		border-bottom: 2px solid #444444;
+	}
+}
+
+/* Image rendering for type / gender icons inside tooltips */
+.pixelated {
+	image-rendering: -moz-crisp-edges;
+	image-rendering: pixelated;
+	-ms-interpolation-mode: nearest-neighbor;
+}
+
+@media (-webkit-min-device-pixel-ratio: 1.05), (min-resolution: 1.05dppx) {
+	.pixelated {
+		image-rendering: auto;
+	}
+}
+
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 2dppx) {
+	.pixelated {
+		image-rendering: pixelated;
+	}
+}
+
+/* Stat colours used in tooltips */
+.stat-boosted {
+	color: #117911;
+}
+
+.stat-lowered {
+	color: #991111;
+	font-weight: normal;
+}
+
+/* Error text colour used in tooltips */
+.message-error {
+	color: #992222;
+}

@@ -314,18 +314,6 @@ input:focus {
   font-size: 25px;
 }
 
-a {
-  color: #05a8fc;
-}
-
-a:visited {
-  color: #c589f9;
-}
-
-.novisited:visited {
-  color: #05a8fc;
-}
-
 /* width */
 ::-webkit-scrollbar {
   background: transparent;
@@ -346,17 +334,6 @@ a:visited {
   background-clip: content-box;
 }
 
-table {
-  border-collapse: collapse;
-  /* display: block; */
-  overflow-x: auto;
-}
-
-table td,
-table th {
-  padding: 4px;
-}
-
 .result {
   display: flex;
 }
@@ -369,12 +346,40 @@ table th {
   margin: 5px;
 }
 
-span {
+/* ============================================
+   SHOWDOWN HTML SCOPED STYLES
+   Only apply to HTML received from showdown
+   ============================================ */
+
+.showdown-html a {
+  color: #05a8fc;
+}
+
+.showdown-html a:visited {
+  color: #c589f9;
+}
+
+.showdown-html .novisited:visited {
+  color: #05a8fc;
+}
+
+.showdown-html table {
+  border-collapse: collapse;
+  /* display: block; */
+  overflow-x: auto;
+}
+
+.showdown-html table td,
+.showdown-html table th {
+  padding: 4px;
+}
+
+.showdown-html span {
   line-height: 1.3;
 }
 
-h2 {
-  font-weight: bold;
-  padding-top: 10px;
-  padding-bottom: 10px;
+.showdown-html h2 {
+    font-weight: bold;
+    padding-top: 10px;
+    padding-bottom: 10px;
 }

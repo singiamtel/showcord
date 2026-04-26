@@ -8,6 +8,7 @@ import { useRoomStore } from '@/client/client';
 import type { BattleRoom } from '@/client/room/battleRoom';
 import { useRoomID } from '@/UI/components/RoomContext';
 import { cn } from '@/lib/utils';
+import './battle-tooltips.css';
 
 // Set window.Dex after vendor modules are loaded (for IIFEs that check it)
 window.Dex = Dex;
@@ -26,12 +27,36 @@ const checkGlobals = () => {
     return ready;
 };
 
+const BATTLE_CSS = '//play.pokemonshowdown.com/style/battle.css';
+const TYPES_CSS = '//play.pokemonshowdown.com/style/sim-types.css';
+
+function loadStyleInShadow(shadow: ShadowRoot, href: string): Promise<void> {
+    const existing = shadow.querySelector(`link[href="${href}"]`) as HTMLLinkElement | null;
+    if (existing) {
+        return new Promise((resolve, reject) => {
+            if (existing.sheet) {
+                resolve();
+                return;
+            }
+            existing.onload = () => resolve();
+            existing.onerror = () => reject(new Error(`Failed to load ${href}`));
+        });
+    }
+    return new Promise((resolve, reject) => {
+        const link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.href = href;
+        link.onload = () => resolve();
+        link.onerror = () => reject(new Error(`Failed to load ${href}`));
+        shadow.appendChild(link);
+    });
+}
+
 export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const roomID = useRoomID();
     const room = useRoomStore(state => state.rooms.get(roomID)) as BattleRoom;
     const perspective = useRoomStore(state => (state.rooms.get(roomID) as BattleRoom | undefined)?.perspective);
-    const battleRef = useRef<HTMLDivElement>(null);
-    const logRef = useRef<HTMLDivElement>(null);
+    const hostRef = useRef<HTMLDivElement>(null);
     const [battleInstance, setBattleInstance] = useState<VisualBattle | null>(null);
     const logIndexRef = useRef(0);
     const [isReady, setIsReady] = useState(() => checkGlobals());
@@ -50,40 +75,77 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
 
     // Initialize Battle
     useEffect(() => {
-        if (!battleRef.current || !logRef.current || !isReady) return;
+        if (!hostRef.current || !isReady) return;
 
-        const $battle = $(battleRef.current);
-        const $log = $(logRef.current);
-        const battleId = (room.ID || 'battle-view') as any; // Cast to expected ID type
-
-        console.log('Initializing VisualBattle for room', battleId);
-
-        const battle = new VisualBattle({
-            id: battleId,
-            $frame: $battle,
-            $logFrame: $log,
-        });
-
-        setBattleInstance(battle);
-
-        // Set perspective if room has one
-        if (perspective) {
-            console.log('Setting viewpoint to', perspective);
-            battle.setViewpoint(perspective);
+        const host = hostRef.current;
+        let shadow = host.shadowRoot;
+        if (!shadow) {
+            shadow = host.attachShadow({ mode: 'open' });
         }
 
-        // Feed initial log
-        if (room.log && room.log.length > 0) {
-            console.log('Feeding initial log', room.log.length, 'lines');
-            room.log.forEach(line => battle.add(line));
-            battle.seekTurn(Infinity);
-            logIndexRef.current = room.log.length;
-        }
+        let cancelled = false;
+
+        const init = async () => {
+            await Promise.all([
+                loadStyleInShadow(shadow!, BATTLE_CSS),
+                loadStyleInShadow(shadow!, TYPES_CSS),
+            ]);
+            if (cancelled) return;
+
+            let battleDiv = shadow!.querySelector('.battle') as HTMLDivElement | null;
+            let logDiv = shadow!.querySelector('.battle-log') as HTMLDivElement | null;
+
+            if (!battleDiv) {
+                battleDiv = document.createElement('div');
+                battleDiv.className = 'battle';
+                shadow!.appendChild(battleDiv);
+            }
+            if (!logDiv) {
+                logDiv = document.createElement('div');
+                logDiv.className = 'battle-log';
+                logDiv.style.display = 'none';
+                shadow!.appendChild(logDiv);
+            }
+
+            const $battle = $(battleDiv);
+            const $log = $(logDiv);
+            const battleId = (room.ID || 'battle-view') as any; // Cast to expected ID type
+
+            console.log('Initializing VisualBattle for room', battleId);
+
+            const battle = new VisualBattle({
+                id: battleId,
+                $frame: $battle,
+                $logFrame: $log,
+            });
+
+            setBattleInstance(battle);
+
+            // Set perspective if room has one
+            if (perspective) {
+                console.log('Setting viewpoint to', perspective);
+                battle.setViewpoint(perspective);
+            }
+
+            // Feed initial log
+            if (room.log && room.log.length > 0) {
+                console.log('Feeding initial log', room.log.length, 'lines');
+                room.log.forEach(line => battle.add(line));
+                battle.seekTurn(Infinity);
+                logIndexRef.current = room.log.length;
+            }
+        };
+
+        init();
+
         return () => {
+            cancelled = true;
             console.log('Destroying VisualBattle');
-            // Clean up DOM if needed, though VisualBattle usually handles its own frame
-            $battle.empty();
-            // battle.destroy() if available
+            const battleDiv = shadow!.querySelector('.battle');
+            const logDiv = shadow!.querySelector('.battle-log');
+            if (battleDiv) $(battleDiv).empty();
+            if (logDiv) $(logDiv).empty();
+            setBattleInstance(null);
         };
     }, [isReady, room.ID]);
 
@@ -127,8 +189,7 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
 
     return (
         <div className={cn(props.className, 'w-full aspect-video bg-gray-125 relative')}>
-            <div className="battle" ref={battleRef} style={{ width: '100%', height: '100%' }}></div>
-            <div className="battle-log" ref={logRef} style={{ display: 'none' }}></div>
+            <div ref={hostRef} className="w-full h-full" />
         </div>
     );
 }

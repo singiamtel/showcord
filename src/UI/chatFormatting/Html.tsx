@@ -175,16 +175,16 @@ export default function HTML(
     };
     if (raw) {
         return (
-            <>
+            <span className="showdown-html">
                 {parse(
                     sanitizeHtml(escape(message.replaceAll('\n', '<br>')), sanitizeOptions),
                     parserOptions,
                 )}
-            </>
+            </span>
         );
     }
     return (
-        <Box>
+        <Box className="showdown-html">
             {parse(
                 sanitizeHtml(escape(message.replaceAll('\n', '<br>')), sanitizeOptions),
                 parserOptions,
@@ -193,14 +193,14 @@ export default function HTML(
     );
 }
 
-export function Box(props: Readonly<React.PropsWithChildren>) {
+export function Box(props: Readonly<React.PropsWithChildren<{ className?: string }>>) {
     const child = props.children as React.ReactElement<{ className?: string }>;
     const classes = child?.props?.className || '';
     const blueStyle = classes?.includes('broadcast-blue') ? 'bg-blue-100 dark:bg-blue-600 text-white' : '';
     const redStyle = classes?.includes('broadcast-red') ? 'bg-red-400 dark:bg-red-600 text-white' : '';
     const greenStyle = classes?.includes('broadcast-green') ? 'bg-green-600 dark:bg-green-600 text-white' : '';
     return (
-        <div className={twMerge('p-2 ml-10 mr-10 m-2 border border-solid border-gray-601 dark:border-gray-border bg-gray-sidebar-light dark:bg-gray-600 rounded ', blueStyle, redStyle, greenStyle) }>
+        <div className={twMerge('p-2 ml-10 mr-10 m-2 border border-solid border-gray-601 dark:border-gray-border bg-gray-sidebar-light dark:bg-gray-600 rounded ', blueStyle, redStyle, greenStyle, props.className) }>
             {props.children}
         </div>
     );
