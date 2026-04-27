@@ -140,6 +140,7 @@ export class Client {
                 setUsername: this.setUsername.bind(this),
                 forceHighlightMsg: this.forceHighlightMsg.bind(this),
                 shouldAutoSelect: this.consumeExplicitJoin.bind(this),
+                selectRoom: this.selectRoom.bind(this),
             },
             this.queryHandlers
         );

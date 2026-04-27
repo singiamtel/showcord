@@ -24,6 +24,7 @@ export interface ProtocolParserCallbacks {
     setUsername: (username: string) => void;
     forceHighlightMsg: (roomid: string, message: any) => boolean;
     shouldAutoSelect?: (roomID: string) => boolean;
+    selectRoom: (roomID: string) => void;
 }
 
 export class SocketProtocolParser {
@@ -607,7 +608,7 @@ export class SocketProtocolParser {
             room,
             this.callbacks.getSelectedRoom(),
             this.settings.username,
-            undefined,
+            this.callbacks.selectRoom,
             this.batchingMessageStoreUpdates
         );
         if (this.batchingMessageStoreUpdates) {
