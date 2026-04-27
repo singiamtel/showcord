@@ -34,6 +34,7 @@ export function shouldNotify(
     selectedRoom: string,
     username: string | undefined
 ): boolean {
+    if (message.type === 'log') return false;
     if (selectedRoom == room.ID && document.hasFocus()) return false;
     if (room.checkMessageStaleness(message)) return false;
     if (message.hld || (room.type === 'pm' && toID(message.user) !== toID(username))) return true;
