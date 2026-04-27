@@ -10,6 +10,40 @@ import { useRoomID } from '@/UI/components/RoomContext';
 import { cn } from '@/lib/utils';
 import './battle-tooltips.css';
 
+function updateMyPokemonFromRequest(battle: VisualBattle, line: string) {
+    if (!line.startsWith('|request|')) return;
+    try {
+        const json = line.slice('|request|'.length);
+        const request = JSON.parse(json);
+        if (!request.side?.pokemon) return;
+
+        battle.myPokemon = request.side.pokemon.map((p: any) => {
+            const output = {} as any;
+            const identParts = p.ident.split(': ');
+            const pokemonid = p.ident;
+            const name = identParts.slice(1).join(': ') || identParts[0];
+
+            battle.parseDetails(name, pokemonid, p.details, output);
+            battle.parseHealth(p.condition, output);
+
+            output.active = p.active;
+            output.reviving = p.reviving || false;
+            output.stats = p.stats;
+            output.moves = p.moves;
+            output.baseAbility = p.baseAbility;
+            output.ability = p.ability;
+            output.item = p.item;
+            output.pokeball = p.pokeball;
+            output.teraType = p.teraType;
+            output.terastallized = p.terastallized;
+
+            return output;
+        });
+    } catch (e) {
+        console.error('Failed to parse request for myPokemon', e);
+    }
+}
+
 // Set window.Dex after vendor modules are loaded (for IIFEs that check it)
 window.Dex = Dex;
 window.toID = toID;
@@ -130,7 +164,10 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
             // Feed initial log
             if (room.log && room.log.length > 0) {
                 console.log('Feeding initial log', room.log.length, 'lines');
-                room.log.forEach(line => battle.add(line));
+                room.log.forEach(line => {
+                    updateMyPokemonFromRequest(battle, line);
+                    battle.add(line);
+                });
                 battle.seekTurn(Infinity);
                 logIndexRef.current = room.log.length;
             }
@@ -165,7 +202,10 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
         if (room.log.length > logIndexRef.current) {
             const newLines = room.log.slice(logIndexRef.current);
             console.log('Catching up logs', newLines.length);
-            newLines.forEach(line => battleInstance.add(line));
+            newLines.forEach(line => {
+                updateMyPokemonFromRequest(battleInstance, line);
+                battleInstance.add(line);
+            });
             battleInstance.seekTurn(Infinity);
             logIndexRef.current = room.log.length;
         }
@@ -173,6 +213,7 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
         // Subscribe to new lines
         room.onLogUpdate = (line) => {
             // console.log("Live log line:", line);
+            updateMyPokemonFromRequest(battleInstance, line);
             battleInstance.add(line);
             // battleInstance.seekTurn(Infinity);
             logIndexRef.current = room.log.length;
