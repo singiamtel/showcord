@@ -158,14 +158,14 @@ export function ChallengeMessage(
                     </strong>
                     <div className="flex justify-center items-center gap-4">
                         <Button
-                            variant="secondary"
+                            variant="default"
                             onClick={() => {
                                 acceptChallenge();
                             }}
                         >Accept</Button>
 
                         <Button
-                            variant="secondary"
+                            variant="outline"
                             onClick={() => {
                                 cancelChallenge();
                             }}
