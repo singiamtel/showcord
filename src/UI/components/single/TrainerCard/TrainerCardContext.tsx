@@ -49,7 +49,7 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
         setUsername(username);
         setPosition({ x: e.clientX, y: e.clientY });
         setUser(null);
-        client.queryUser(username, (user: any) => {
+        client.queryUser(username).then((user: any) => {
             setUser(user);
         });
     };

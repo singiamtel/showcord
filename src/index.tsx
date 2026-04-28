@@ -8,7 +8,8 @@ import '@fontsource/roboto-mono';
 import './UI/globals.css';
 import ClientContextProvider from './UI/components/single/ClientContext';
 import { Analytics } from '@vercel/analytics/react';
-import { ErrorBoundary } from './UI/components/ErrorBoundary';
+import { ErrorBoundary } from 'react-error-boundary';
+import { ErrorHandler } from './UI/components/ErrorHandler';
 
 const root = ReactDOM.createRoot(
     document.getElementById('root') as HTMLElement,
@@ -19,7 +20,7 @@ window.client = client; // Expose the client globally for debugging purposes
 
 root.render(
     <StrictMode>
-        <ErrorBoundary>
+        <ErrorBoundary FallbackComponent={ErrorHandler}>
             <Analytics/>
             <ClientContextProvider>
                 <App />

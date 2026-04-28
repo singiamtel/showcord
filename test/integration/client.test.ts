@@ -190,33 +190,31 @@ describe('Client Integration Tests', () => {
             expect(client.username).toBe('TestUser');
         });
 
-        it('should handle userdetails query response', () => {
+        it('should handle userdetails query response', async () => {
             const userDetails = {
                 userid: 'testuser',
                 name: 'TestUser',
                 avatar: 'lucas',
                 status: 'online',
             };
-            
-            const callback = vi.fn();
-            client.queryUser('testuser', callback);
+
+            const promise = client.queryUser('testuser');
             mockServer.sendQueryResponse('userdetails', userDetails);
-            
-            expect(callback).toHaveBeenCalledWith(userDetails);
+
+            await expect(promise).resolves.toEqual(userDetails);
         });
 
-        it('should handle rooms query response', () => {
+        it('should handle rooms query response', async () => {
             const roomsData = {
                 official: [{ title: 'Lobby', desc: 'Main room' }],
                 chat: [],
                 userCount: 100,
             };
-            
-            const callback = vi.fn();
-            client.queryRooms(callback);
+
+            const promise = client.queryRooms();
             mockServer.sendQueryResponse('rooms', roomsData);
-            
-            expect(callback).toHaveBeenCalledWith(roomsData);
+
+            await expect(promise).resolves.toEqual(roomsData);
         });
     });
 

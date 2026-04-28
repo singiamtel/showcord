@@ -17,37 +17,39 @@ export class QueryHandlers {
         private callbacks: QueryCallbacks
     ) {}
 
-    async queryUser(user: string, callback: (json: any) => void) {
+    queryUser(user: string): Promise<any> {
         if (this.lastQueriedUser && this.lastQueriedUser.user === user) {
-            callback(this.lastQueriedUser.json);
+            return Promise.resolve(this.lastQueriedUser.json);
         }
-        this.callbacks.send(`/cmd userdetails ${user}`, false);
-        this.userListener = callback;
-    }
-
-    queryUserInternal(user: string) {
-        this.queryUser(user, (_json) => {
-            useUserStore.setState({ user: this.settings.username, avatar: this.settings.avatar });
+        return new Promise((resolve) => {
+            this.userListener = resolve;
+            this.callbacks.send(`/cmd userdetails ${user}`, false);
         });
     }
 
-    async queryRooms(callback: (json: any) => void) {
-        if (this.roomsJSON) {
-            callback(this.roomsJSON);
-            return;
-        }
-        this.callbacks.send(`/cmd rooms`, false);
-        this.roomListener = callback;
+    async queryUserInternal(user: string) {
+        await this.queryUser(user);
+        useUserStore.setState({ user: this.settings.username, avatar: this.settings.avatar });
     }
 
-    async queryNews(callback: (json: any) => void) {
+    queryRooms(): Promise<any> {
+        if (this.roomsJSON) {
+            return Promise.resolve(this.roomsJSON);
+        }
+        return new Promise((resolve) => {
+            this.callbacks.send(`/cmd rooms`, false);
+            this.roomListener = resolve;
+        });
+    }
+
+    async queryNews(): Promise<any> {
         if (this.news) {
-            return callback(this.news);
+            return this.news;
         }
         const res = await fetch(Settings.defaultNewsURL);
         const json = await res.json();
         this.news = json;
-        callback(json);
+        return json;
     }
 
     handleUserDetailsResponse(json: any) {

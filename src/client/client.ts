@@ -295,22 +295,22 @@ export class Client {
         selectRoomInternal(roomid, this.room.bind(this));
     }
 
-    async queryUser(user: string, callback: (json: any) => void) {
+    queryUser(user: string): Promise<any> {
         if (!this.socket) {
             throw new Error('Getting user before socket initialization ' + user);
         }
-        this.queryHandlers.queryUser(user, callback);
+        return this.queryHandlers.queryUser(user);
     }
 
-    async queryRooms(callback: (json: any) => void) {
+    queryRooms(): Promise<any> {
         if (!this.socket) {
             throw new Error('Getting /cmd rooms before socket initialization');
         }
-        this.queryHandlers.queryRooms(callback);
+        return this.queryHandlers.queryRooms();
     }
 
-    async queryNews(callback: (json: any) => void) {
-        this.queryHandlers.queryNews(callback);
+    queryNews(): Promise<any> {
+        return this.queryHandlers.queryNews();
     }
 
     async join(room: string) {

@@ -58,7 +58,7 @@ function News({ className }: Readonly<{ className?: string }>) {
     const { client } = useClientContext();
     useEffect(() => {
         if (!client) return;
-        client.queryNews(setNews);
+        client.queryNews().then(setNews);
     }, [client]);
     return (
         <div
@@ -88,7 +88,7 @@ function RoomList({ className }: Readonly<{ className?: string }>) {
 
     useEffect(() => {
         if (!client) return;
-        client.queryRooms(setRoomsJSON);
+        client.queryRooms().then(setRoomsJSON);
     }, [client]);
 
     useEffect(() => {

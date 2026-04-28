@@ -9,7 +9,7 @@ import Home from '../../Home';
 import SettingsPage from '../../SettingsPage';
 import { cn } from '@/lib/utils';
 import { useRoomStore } from '@/client/client';
-import { ErrorBoundary } from '../ErrorBoundary';
+import { ErrorBoundary } from 'react-error-boundary';
 import { InfinitySpin } from 'react-loader-spinner';
 import { RoomContext } from '../RoomContext';
 import type { Room } from '@/client/room/room';
@@ -52,10 +52,10 @@ export default function BigPanel(props: Readonly<HTMLAttributes<'div'>>) {
                 <Activity key={room.ID} mode={room.ID === selectedRoomID ? 'visible' : 'hidden'}>
                     <RoomContext value={room.ID}>
                         <ErrorBoundary
-                            fallback={(error) => (
+                            fallbackRender={({ error }) => (
                                 <div className={cn(props.className, 'flex flex-col justify-center items-center')}>
                                     <h2 className='text-xl font-bold mb-2'>Error in room: {room.ID}</h2>
-                                    <p className='text-sm text-gray-600 dark:text-gray-400'>{error.message}</p>
+                                    <p className='text-sm text-gray-600 dark:text-gray-400'>{(error as Error).message}</p>
                                 </div>
                             )}
                         >
