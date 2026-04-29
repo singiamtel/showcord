@@ -6,6 +6,30 @@ import { ChoiceBuilder } from '@pkmn/view';
 import { useEffect, useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Icons } from '@pkmn/img';
+import { Dex } from '@/vendor/pokemon-showdown/battle-dex';
+
+const TYPE_COLORS: Record<string, string> = {
+    Normal: 'bg-stone-200 text-stone-900',
+    Fighting: 'bg-orange-700 text-white',
+    Flying: 'bg-indigo-300 text-gray-800',
+    Poison: 'bg-purple-500 text-white',
+    Ground: 'bg-amber-600 text-white',
+    Rock: 'bg-yellow-700 text-white',
+    Bug: 'bg-lime-600 text-white',
+    Ghost: 'bg-purple-800 text-white',
+    Steel: 'bg-slate-400 text-gray-800',
+    Fire: 'bg-orange-500 text-white',
+    Water: 'bg-blue-500 text-white',
+    Grass: 'bg-green-500 text-white',
+    Electric: 'bg-yellow-400 text-gray-800',
+    Psychic: 'bg-pink-500 text-white',
+    Ice: 'bg-cyan-300 text-gray-800',
+    Dragon: 'bg-indigo-600 text-white',
+    Dark: 'bg-gray-700 text-white',
+    Fairy: 'bg-pink-300 text-gray-800',
+    Stellar: 'bg-teal-400 text-gray-800',
+    '???': 'bg-gray-400 text-gray-800',
+};
 
 function PokemonIcon({ species, fainted }: Readonly<{ species: string; fainted?: boolean }>) {
     const icon = Icons.getPokemon(species, { fainted });
@@ -21,9 +45,25 @@ function PokemonIcon({ species, fainted }: Readonly<{ species: string; fainted?:
 }
 
 function MoveButton({ move, index, onClick }: Readonly<{ move: Protocol.Request.ActivePokemon['moves'][number]; index: number; onClick: () => void; }>) {
+    const moveData = move.id && move.id !== 'recharge' ? Dex.moves.get(move.id) : null;
+    const type = moveData?.type || '???';
+    const typeColor = TYPE_COLORS[type] || TYPE_COLORS['???'];
+    const category = moveData?.category || 'Status';
+    const basePower = moveData?.basePower ?? '—';
+    const accuracy = moveData?.accuracy === true ? '—' : (moveData?.accuracy ?? '—');
+    const currentPP = 'pp' in move ? move.pp : undefined;
+    const maxPP = 'maxpp' in move ? move.maxpp : undefined;
+    const isDisabled = 'disabled' in move && move.disabled;
+
     return <motion.button
         type="button"
-        className='bg-blue-pastel hover:bg-blue-100 dark:bg-blue-dark hover:dark:bg-blue-darkest p-2 rounded-md transition-colors text-gray-700 dark:text-white text-sm'
+        className={cn(
+            'relative p-1.5 rounded-md transition-colors text-left overflow-hidden flex flex-col justify-between',
+            isDisabled ?
+                'opacity-50 cursor-not-allowed bg-gray-200 dark:bg-gray-700' :
+                'hover:brightness-95 dark:hover:brightness-110 bg-gray-100 dark:bg-gray-800'
+        )}
+        style={{ borderLeft: `4px solid ${getTypeBorderColor(type)}` }}
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{
@@ -32,10 +72,54 @@ function MoveButton({ move, index, onClick }: Readonly<{ move: Protocol.Request.
             damping: 20,
             delay: index * 0.05,
         }}
-        whileHover={{ scale: 1.05, y: -2 }}
-        whileTap={{ scale: 0.95 }}
+        whileHover={isDisabled ? undefined : { scale: 1.03 }}
+        whileTap={isDisabled ? undefined : { scale: 0.97 }}
         onClick={onClick}
-    >{move.name}</motion.button>;
+        disabled={isDisabled}
+    >
+        <div className="flex items-center justify-between gap-1">
+            <span className={cn('text-[10px] font-bold px-1 py-0.5 rounded uppercase leading-none', typeColor)}>
+                {type}
+            </span>
+            <span className="text-[9px] text-gray-500 dark:text-gray-400 uppercase leading-none">{category}</span>
+        </div>
+        <div className="text-xs font-semibold text-gray-800 dark:text-gray-100 truncate leading-tight mt-0.5">
+            {move.name}
+        </div>
+        <div className="flex items-center gap-1.5 text-[10px] text-gray-500 dark:text-gray-400 mt-0.5 leading-none">
+            {currentPP !== undefined && maxPP !== undefined && (
+                <span>PP {currentPP}/{maxPP}</span>
+            )}
+            <span>Pow {basePower}</span>
+            <span>Acc {accuracy}{typeof accuracy === 'number' ? '%' : ''}</span>
+        </div>
+    </motion.button>;
+}
+
+function getTypeBorderColor(type: string): string {
+    const colors: Record<string, string> = {
+        Normal: '#9CA3AF',
+        Fighting: '#C2410C',
+        Flying: '#818CF8',
+        Poison: '#A855F7',
+        Ground: '#D97706',
+        Rock: '#A16207',
+        Bug: '#65A30D',
+        Ghost: '#6B21A8',
+        Steel: '#94A3B8',
+        Fire: '#F97316',
+        Water: '#3B82F6',
+        Grass: '#22C55E',
+        Electric: '#EAB308',
+        Psychic: '#EC4899',
+        Ice: '#67E8F9',
+        Dragon: '#4F46E5',
+        Dark: '#374151',
+        Fairy: '#F9A8D4',
+        Stellar: '#2DD4BF',
+        '???': '#9CA3AF',
+    };
+    return colors[type] || colors['???'];
 }
 
 
