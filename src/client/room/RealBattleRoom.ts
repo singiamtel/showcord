@@ -7,6 +7,7 @@ import { Protocol } from '@pkmn/protocol';
 import { Room, type RoomType } from './room';
 import newMessage from '../message';
 import { useMessageStore } from '../stores/messageStore';
+import { toast } from '@/components/ui/use-toast';
 
 
 export class RealBattleRoom extends Room {
@@ -17,6 +18,12 @@ export class RealBattleRoom extends Room {
     perspective: SideID = 'p1';
     isPlayer = false;
     battleEnded = false;
+
+    timerActive = false;
+    timerStartValue = 0;
+    timerTotal = 300;
+    timerStartedAt = 0;
+    onTimerUpdate: ((data: { startValue: number; total: number; active: boolean }) => void) | null = null;
     constructor(
         { ID, name, type, connected, open }: {
             ID: string;
@@ -47,8 +54,55 @@ export class RealBattleRoom extends Room {
     /**
      * Returns whether a new message was added to the battle.
      */
+    private parseTimer(line: string) {
+        if (line.startsWith('|inactive|')) {
+            const data = line.slice('|inactive|'.length);
+            if (data.startsWith('Time left: ')) {
+                const parts = data.split(' | ');
+                const timeMatch = parts[0].match(/\d+/);
+                const totalMatch = parts[1]?.match(/\d+/);
+                const time = timeMatch ? parseInt(timeMatch[0], 10) : 0;
+                const totalTime = totalMatch ? parseInt(totalMatch[0], 10) : 600;
+                this.timerStartValue = time || 0;
+                this.timerTotal = totalTime || 300;
+                this.timerActive = true;
+                this.timerStartedAt = Date.now();
+                this.onTimerUpdate?.({
+                    startValue: this.timerStartValue,
+                    total: this.timerTotal,
+                    active: true,
+                });
+            } else if (data.includes(' has ') && data.includes(' seconds left')) {
+                const match = data.match(/(\d+)\s*seconds\s*left/);
+                if (match) {
+                    const time = parseInt(match[1], 10);
+                    this.timerStartValue = time || 0;
+                    this.timerActive = true;
+                    this.timerStartedAt = Date.now();
+                    this.onTimerUpdate?.({
+                        startValue: this.timerStartValue,
+                        total: this.timerTotal,
+                        active: true,
+                    });
+                }
+            }
+        } else if (line.startsWith('|inactiveoff')) {
+            this.timerActive = false;
+            this.timerStartValue = 0;
+            this.onTimerUpdate?.({ startValue: 0, total: 0, active: false });
+            const reason = line.slice('|inactiveoff'.length);
+            if (reason.startsWith('|')) {
+                const msg = reason.slice(1);
+                if (msg && msg !== 'Battle timer is now OFF.') {
+                    toast({ title: 'Timer', description: msg });
+                }
+            }
+        }
+    }
+
     feedBattle(line: string): boolean {
         this.log.push(line);
+        this.parseTimer(line);
         if (this.onLogUpdate) this.onLogUpdate(line);
 
         const { args, kwArgs } = Protocol.parseBattleLine(line);

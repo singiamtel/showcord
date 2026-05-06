@@ -34,6 +34,11 @@ const cmds = {
             },
         ],
     },
+    'timer': {
+        description: 'Toggle the battle timer on or off',
+        core: true,
+        clientSide: false,
+    },
 } as const;
 
 export default cmds;

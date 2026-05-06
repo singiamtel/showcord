@@ -11,6 +11,12 @@ export class BattleRoom extends Room {
     isPlayer = false;
     battleEnded = false;
 
+    timerActive = false;
+    timerStartValue = 0;
+    timerTotal = 300;
+    timerStartedAt = 0;
+    onTimerUpdate: ((data: { startValue: number; total: number; active: boolean }) => void) | null = null;
+
     private realRoom: any | null = null;
     private queue: Array<() => void> = [];
 
@@ -50,6 +56,9 @@ export class BattleRoom extends Room {
                 this.battle = this.realRoom.battle;
                 this.formatter = this.realRoom.formatter;
 
+                // Sync pending callbacks to the real room
+                this.realRoom.onTimerUpdate = this.onTimerUpdate;
+
                 // Replay any queued actions
                 this.queue.forEach(fn => fn());
                 this.queue = [];
@@ -83,7 +92,13 @@ export class BattleRoom extends Room {
         if (this.onLogUpdate) this.onLogUpdate(line);
 
         if (this.realRoom) {
-            return this.realRoom.feedBattle(line);
+            this.realRoom.onTimerUpdate = this.onTimerUpdate;
+            const result = this.realRoom.feedBattle(line);
+            this.timerActive = this.realRoom.timerActive;
+            this.timerStartValue = this.realRoom.timerStartValue;
+            this.timerTotal = this.realRoom.timerTotal;
+            this.timerStartedAt = this.realRoom.timerStartedAt;
+            return result;
         } else {
             this.queue.push(() => {
                 if (this.realRoom) this.realRoom.feedBattle(line);
