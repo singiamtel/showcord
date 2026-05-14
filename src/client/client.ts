@@ -479,13 +479,12 @@ export class Client {
         };
 
         this.socket.onmessage = (event) => {
-            console.debug('[socket-output]\n' + event.data);
-            const data = event.data;
+            console.debug('[socket-output]', event.data);
             if (import.meta.env.VITEST) {
-                this.protocolParser.parseSocketChunk(data);
+                this.protocolParser.parseSocketChunk(event.data);
             } else {
                 queueMicrotask(() => {
-                    this.protocolParser.parseSocketChunk(data);
+                    this.protocolParser.parseSocketChunk(event.data);
                 });
             }
         };
