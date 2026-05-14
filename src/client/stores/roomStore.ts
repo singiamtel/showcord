@@ -62,8 +62,8 @@ export const useRoomStore = create<RoomStore>()((set) => ({
             );
             if (!hasChanges) return state;
 
-            Object.assign(room, updates);
-            return { rooms: new Map(state.rooms).set(roomID, room) };
+            const updatedRoom = Object.assign(Object.create(Object.getPrototypeOf(room)), room, updates);
+            return { rooms: new Map(state.rooms).set(roomID, updatedRoom) };
         });
     },
 

@@ -29,6 +29,6 @@ export const useMessageStore = create<MessageStore>()((set) => ({
     },
 
     updateMessages: (roomID: string, messages: Message[]) => {
-        set((state) => ({ messages: { ...state.messages, [roomID]: messages } }));
+        set((state) => ({ messages: { ...state.messages, [roomID]: [...messages] } }));
     },
 }));

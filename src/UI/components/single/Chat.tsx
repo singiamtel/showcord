@@ -1,5 +1,6 @@
 import {
     type HTMLAttributes,
+    memo,
     useCallback,
     useLayoutEffect,
     useRef,
@@ -9,10 +10,9 @@ import useOnScreen from '../../hooks/useOnScreen';
 import { useRoomID } from '@/UI/components/RoomContext';
 import Html from '../../chatFormatting/Html';
 import { HHMMSS } from '../../../utils/date';
-import { ErrorBoundary } from 'react-error-boundary';
 
 import Linkify from 'linkify-react';
-import type { Message, MessageType } from '../../../client/message';
+import type { MessageType } from '../../../client/message';
 import Code from '../../chatFormatting/code';
 import { Username } from '../Username';
 
@@ -32,6 +32,7 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const isIntersecting = useOnScreen(messagesEndRef);
     const ref = useRef<HTMLDivElement>(null);
     const didScrollInitially = useRef(false);
+    const messageCountRef = useRef(messages?.length ?? 0);
 
     const scrollToBottom = useCallback(() => {
         if (ref.current) {
@@ -44,10 +45,12 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     }, []);
 
     useLayoutEffect(() => {
-        if (isIntersecting) {
+        const count = messages?.length ?? 0;
+        if (count !== messageCountRef.current && isIntersecting) {
+            messageCountRef.current = count;
             scrollToBottom();
         }
-    }, [messages]);
+    }, [messages?.length, isIntersecting, scrollToBottom]);
 
     // Scroll to bottom only on first mount. Activity preserves both the scroll
     // position (DOM) and this ref, so re-activation won't force a scroll.
@@ -66,27 +69,21 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
             ref={ref}
         >
             {messages ? (
-                messages.map((message, _index, arr) => (
-                    <ErrorBoundary
-                        // eslint-disable-next-line @eslint-react/no-array-index-key
-                        key={`msg-${currentRoom.ID}-${message.timestamp?.getTime() || 0}-${_index}`}
-                        fallbackRender={({ error: e }) => {
-                            const errorName = e instanceof Error ? e.name : 'UnknownError';
-                            console.error(errorName, message.content, e);
-                            return <div className="text-red-400">Error displaying message</div>;
-                        }}
-                    >
+                messages.map((message, _index, arr) => {
+                    const wasPrevCode = _index > 0 && arr[_index - 1]?.content.startsWith('!code');
+                    return (
                         <MessageComponent
+                            key={`msg-${currentRoom.ID}-${message.timestamp?.getTime() || 0}-${_index}`}
                             time={message.timestamp}
                             user={message.user || ''}
                             message={message.content}
                             type={message.type}
                             hld={message.hld}
-                            prev={arr[_index - 1]}
+                            wasPrevCode={wasPrevCode}
                             cancelled={message.cancelled}
                         />
-                    </ErrorBoundary>
-                ))
+                    );
+                })
             ) : null}
             <div className="relative h-0 w-0">
                 {/* invisible div to scroll to */}
@@ -177,14 +174,14 @@ export function ChallengeMessage(
     );
 }
 
-export function MessageComponent(
-    { message, user, type, time, hld, prev, cancelled }: Readonly<{
+export const MessageComponent = memo(function MessageComponent(
+    { message, user, type, time, hld, wasPrevCode, cancelled }: Readonly<{
         message: string;
         user: string;
         type: MessageType;
         time?: Date;
         hld?: boolean | null;
-        prev?: Message;
+        wasPrevCode?: boolean;
         cancelled?: boolean;
     }>,
 ) {
@@ -192,7 +189,7 @@ export function MessageComponent(
         return <Html message={message} />;
     }
     if (type === 'rawHTML') {
-        if (prev?.content.startsWith('!code')) {
+        if (wasPrevCode) {
             return <Code message={message} />;
         }
         return <span className='pt-0.5'><Html message={message} raw /></span>;
@@ -276,4 +273,4 @@ export function MessageComponent(
             </span>
         </div>
     );
-}
+});
