@@ -3,12 +3,21 @@ import React, { useEffect, useRef, useState, type HTMLAttributes } from 'react';
 import '../../../../utils/showdown-globals';
 import { Dex, toID } from '@/vendor/pokemon-showdown/battle-dex';
 import { Battle as VisualBattle } from '@/vendor/pokemon-showdown/battle';
+import { BattleTooltips } from '@/vendor/pokemon-showdown/battle-tooltips';
 import $ from 'jquery';
 import { useRoomStore } from '@/client/client';
 import type { BattleRoom } from '@/client/room/battleRoom';
 import { useRoomID } from '@/UI/components/RoomContext';
 import { cn } from '@/lib/utils';
 import './battle-tooltips.css';
+
+// Guard against tooltip crash when side.pokemon[index] is undefined
+// (vendored showPokemonTooltip assumes at least one arg is non-null but doesn't check)
+const origShowPokemonTooltip = BattleTooltips.prototype.showPokemonTooltip;
+BattleTooltips.prototype.showPokemonTooltip = function (...args) {
+    if (!args[0] && !args[1]) return '';
+    return origShowPokemonTooltip.apply(this, args);
+};
 
 function updateMyPokemonFromRequest(battle: VisualBattle, line: string) {
     if (!line.startsWith('|request|')) return;
