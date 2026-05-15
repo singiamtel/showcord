@@ -63,7 +63,7 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     return (
         <div
             className={cn(
-                'p-8 flex flex-col overflow-auto overflow-x-hidden wrap-break-word overflow-y-scroll h-full relative',
+                'p-8 flex flex-col overflow-x-hidden wrap-break-word overflow-y-auto h-full relative',
                 props.className,
             )}
             ref={ref}
