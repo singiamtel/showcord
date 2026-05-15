@@ -68,6 +68,7 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
             )}
             ref={ref}
         >
+            <div className="grow" />
             {messages ? (
                 messages.map((message, _index, arr) => {
                     const wasPrevCode = _index > 0 && arr[_index - 1]?.content.startsWith('!code');
