@@ -14,7 +14,7 @@ function ThemePillSelector({ value, onChange }: { value: ThemeOption; onChange: 
     ];
 
     return (
-        <div className="inline-flex rounded-md border border-gray-200 dark:border-gray-700 p-1 bg-gray-50 dark:bg-gray-800">
+        <div className="inline-flex rounded-md border border-gray-200 dark:border-gray-700 p-1 bg-gray-100 dark:bg-gray-600">
             {options.map((option) => (
                 <button
                     type="button"
@@ -24,7 +24,7 @@ function ThemePillSelector({ value, onChange }: { value: ThemeOption; onChange: 
                         'px-3 py-1 text-sm font-medium rounded transition-colors',
                         value === option.value ?
                             'bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 shadow-sm' :
-                            'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                            'text-gray-500 dark:text-gray-150 hover:text-gray-700 dark:hover:text-gray-100'
                     )}
                 >
                     {option.label}
