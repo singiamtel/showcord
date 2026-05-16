@@ -6,8 +6,8 @@ import { cn } from '@/lib/utils';
 
 export default function HighlightingSettings(props: Readonly<HTMLAttributes<'div'>>) {
     const { client } = useClientContext();
-    const [highlightWords, setHighlightWords] = useState(client.settings.getHighlightWordsMap());
-    const [hlOnSelf, setHlOnSelf] = useState(client.settings.getHighlightOnSelf());
+    const [highlightWords, setHighlightWords] = useState(() => client.settings.getHighlightWordsMap());
+    const [hlOnSelf, setHlOnSelf] = useState(() => client.settings.getHighlightOnSelf());
     // global goes first
     const rooms = Object.keys(highlightWords).sort((a, b) => {
         if (a === 'global') {

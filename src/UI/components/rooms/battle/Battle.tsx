@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, type HTMLAttributes } from 'react';
+import React, { useEffect, useRef, type HTMLAttributes } from 'react';
 // showdown-globals must be imported before vendor modules to set window.Config etc.
 import '../../../../utils/showdown-globals';
 import { Dex, toID } from '@/vendor/pokemon-showdown/battle-dex';
@@ -100,25 +100,25 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
     const room = useRoomStore(state => state.rooms.get(roomID)) as BattleRoom;
     const perspective = useRoomStore(state => (state.rooms.get(roomID) as BattleRoom | undefined)?.perspective);
     const hostRef = useRef<HTMLDivElement>(null);
-    const [battleInstance, setBattleInstance] = useState<VisualBattle | null>(null);
+    const battleInstanceRef = useRef<VisualBattle | null>(null);
     const logIndexRef = useRef(0);
-    const [isReady, setIsReady] = useState(() => checkGlobals());
+    const isReadyRef = useRef(checkGlobals());
 
     // Poll for globals if not ready
     useEffect(() => {
-        if (isReady) return;
+        if (isReadyRef.current) return;
         const interval = setInterval(() => {
             if (checkGlobals()) {
-                setIsReady(true);
+                isReadyRef.current = true;
                 clearInterval(interval);
             }
         }, 100);
         return () => clearInterval(interval);
-    }, [isReady]);
+    }, []);
 
     // Initialize Battle
     useEffect(() => {
-        if (!hostRef.current || !isReady) return;
+        if (!hostRef.current || !isReadyRef.current) return;
 
         const host = hostRef.current;
         let shadow = host.shadowRoot;
@@ -162,7 +162,7 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
                 $logFrame: $log,
             });
 
-            setBattleInstance(battle);
+            battleInstanceRef.current = battle;
 
             // Set perspective if room has one
             if (perspective) {
@@ -191,49 +191,50 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
             const logDiv = shadow!.querySelector('.battle-log');
             if (battleDiv) $(battleDiv).empty();
             if (logDiv) $(logDiv).empty();
-            setBattleInstance(null);
+            battleInstanceRef.current = null;
         };
-    }, [isReady, room.ID]);
+    }, [room.ID]);
 
     // Update perspective
     useEffect(() => {
-        if (battleInstance && perspective) {
+        if (battleInstanceRef.current && perspective) {
             console.log('Updating viewpoint to', perspective);
-            battleInstance.setViewpoint(perspective);
+            battleInstanceRef.current.setViewpoint(perspective);
         }
-    }, [battleInstance, perspective]);
+    }, [perspective]);
 
     // Update log
     useEffect(() => {
-        if (!battleInstance) return;
+        const battle = battleInstanceRef.current;
+        if (!battle) return;
 
         // Catch up on any missed lines (race condition handling)
         if (room.log.length > logIndexRef.current) {
             const newLines = room.log.slice(logIndexRef.current);
             console.log('Catching up logs', newLines.length);
             newLines.forEach(line => {
-                updateMyPokemonFromRequest(battleInstance, line);
-                battleInstance.add(line);
+                updateMyPokemonFromRequest(battle, line);
+                battle.add(line);
             });
-            battleInstance.seekTurn(Infinity);
+            battle.seekTurn(Infinity);
             logIndexRef.current = room.log.length;
         }
 
         // Subscribe to new lines
         room.onLogUpdate = (line) => {
             // console.log("Live log line:", line);
-            updateMyPokemonFromRequest(battleInstance, line);
-            battleInstance.add(line);
-            // battleInstance.seekTurn(Infinity);
+            updateMyPokemonFromRequest(battle, line);
+            battle.add(line);
+            // battle.seekTurn(Infinity);
             logIndexRef.current = room.log.length;
         };
 
         return () => {
             room.onLogUpdate = null;
         };
-    }, [battleInstance, room]);
+    }, [room]);
 
-    if (!isReady) {
+    if (!isReadyRef.current) {
         return <div className={cn(props.className, 'flex items-center justify-center')}>Loading Battle Engine...</div>;
     }
 

@@ -58,8 +58,11 @@ function findCycles(graph: Map<string, string[]>): string[][] {
         for (const dep of graph.get(node) ?? []) {
             if (!color.has(dep)) continue;
             if (color.get(dep) === 'gray') {
-                const cycleStart = path.indexOf(dep);
-                cycles.push(path.slice(cycleStart).map(f => relative(PROJECT_ROOT, f)));
+    const pathSet = new Set(path);
+    const cycleStart = path.indexOf(dep);
+    if (cycleStart !== -1) {
+        cycles.push(path.slice(cycleStart).map(f => relative(PROJECT_ROOT, f)));
+    }
             } else if (color.get(dep) === 'white') {
                 dfs(dep);
             }

@@ -53,29 +53,29 @@ export function createClientHarness(options: ClientHarnessOptions = {}) {
     };
 
     const flush = async (ticks = 2) => {
+        const promises = [];
         for (let i = 0; i < ticks; i++) {
-            await Promise.resolve();
-            await new Promise((resolve) => setTimeout(resolve, 0));
+            promises.push(Promise.resolve());
+            promises.push(new Promise((resolve) => setTimeout(resolve, 0)));
         }
+        await Promise.all(promises);
     };
 
     const waitForBattleEngine = async (roomID: string, timeoutMs = 1_000) => {
         const startedAt = Date.now();
 
-        for (;;) {
+        while (Date.now() - startedAt <= timeoutMs) {
             const battleRoom = room<BattleRoom | undefined>(roomID);
             if (battleRoom && battleRoom.formatter) {
                 return battleRoom;
             }
 
-            if (Date.now() - startedAt > timeoutMs) {
-                throw new Error(
-                    `Battle engine did not initialize for room "${roomID}" within ${timeoutMs}ms.`,
-                );
-            }
-
             await flush(1);
         }
+
+        throw new Error(
+            `Battle engine did not initialize for room "${roomID}" within ${timeoutMs}ms.`,
+        );
     };
 
     const cleanup = () => {

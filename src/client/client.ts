@@ -118,7 +118,11 @@ export class Client {
                     this.pendingRoomJoins = [];
                 }
                 const savedRooms = this.settings.rooms;
-                this.autojoin(savedRooms.filter((e) => e.open).map((e) => e.ID), true);
+                const openRoomIds = [];
+                for (const e of savedRooms) {
+                    if (e.open) openRoomIds.push(e.ID);
+                }
+                this.autojoin(openRoomIds, true);
             },
             onLoginFailure: (error: string) => {
                 console.error('Login failed:', error);

@@ -21,7 +21,7 @@ export default function UserList(props: Readonly<HTMLAttributes<HTMLDivElement> 
     useLayoutEffect(() => {
         if (!room) return;
         const newUsers = [...room.users];
-        const usersChanged = prevUsersRef.current.length !== newUsers.length || !prevUsersRef.current.every((u, i) => u === newUsers[i]);
+        const usersChanged = prevUsersRef.current.length !== newUsers.length || (prevUsersRef.current.length === newUsers.length && !prevUsersRef.current.every((u, i) => u === newUsers[i]));
         if (usersChanged) {
             prevUsersRef.current = newUsers;
             setUsers(newUsers);

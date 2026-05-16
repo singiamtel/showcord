@@ -15,14 +15,15 @@ export function BattleSearch() {
 
     const categories = (formats?.categories.map((category) => {
         const seenFormatIds = new Set<string>();
+        const filteredFormats = category.formats.filter((format) => {
+            if (!format.settings.searchShow) return false;
+            if (seenFormatIds.has(format.ID)) return false;
+            seenFormatIds.add(format.ID);
+            return true;
+        });
         return {
             ...category,
-            formats: category.formats.filter((format) => {
-                if (!format.settings.searchShow) return false;
-                if (seenFormatIds.has(format.ID)) return false;
-                seenFormatIds.add(format.ID);
-                return true;
-            }),
+            formats: filteredFormats,
         };
     }).filter(category => category.formats.length > 0)) ?? [];
     const allFormats = categories.flatMap(category => category.formats);
@@ -30,9 +31,10 @@ export function BattleSearch() {
     useEffect(() => {
         if (!selectedFormat && categories.length) {
             const preferred = ['gen9randombattle', 'gen9ou'];
+            const formatMap = new Map(allFormats.map(f => [f.ID, f]));
             let found = null;
             for (const pref of preferred) {
-                found = allFormats.find(f => f.ID === pref);
+                found = formatMap.get(pref);
                 if (found) break;
             }
             if (!found) found = categories[0]?.formats[0];
