@@ -3,10 +3,6 @@ import react from '@vitejs/plugin-react-swc';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import tailwindcss from '@tailwindcss/vite';
 
-/**
- * Fix circular dependency in vendored Pokemon Showdown files.
- * Isn't it crazy that vite lets you do this? :D
- */
 function fixPsCircularDep(): Plugin {
     return {
         name: 'fix-ps-circular-dep',
@@ -15,7 +11,6 @@ function fixPsCircularDep(): Plugin {
 
             let transformed = code;
 
-            // battle-dex-data.ts: uses Dex.sanitizeName in constructors
             if (id.includes('battle-dex-data.ts')) {
                 transformed = transformed.replace(
                     /import\s*\{\s*Dex\s*,\s*toID\s*\}\s*from\s*["']\.\/battle-dex["'];?/,
@@ -24,19 +19,13 @@ function fixPsCircularDep(): Plugin {
                 transformed = transformed.replace(/Dex\.sanitizeName/g, 'window.Dex.sanitizeName');
             }
 
-            // battle-animations.ts: IIFE at module level uses Dex.fxPrefix
             if (id.includes('battle-animations.ts')) {
-                // Fix the IIFE that runs at load time (line ~3205)
-                // Change: if (!window.Dex || !Dex.resourcePrefix) return;
-                // To:     if (!window.Dex || !window.Dex.resourcePrefix) return;
                 transformed = transformed.replace(
                     /if\s*\(\s*!window\.Dex\s*\|\|\s*!Dex\.resourcePrefix\s*\)/g,
                     'if (!window.Dex || !window.Dex.resourcePrefix)'
                 );
-                // Change: BattleEffects[id].url = Dex.fxPrefix + ...
-                // To:     BattleEffects[id].url = window.Dex.fxPrefix + ...
                 transformed = transformed.replace(
-                    /=\s*Dex\.fxPrefix\s*\+/g,
+                    /[=]\s*Dex\.fxPrefix\s*\+/g,
                     '= window.Dex.fxPrefix +'
                 );
             }
@@ -49,7 +38,7 @@ function fixPsCircularDep(): Plugin {
 export default defineConfig(() => ({
     base: `${process.env.PUBLIC_URL ?? ''}/`,
     server: {
-        allowedHosts: true,
+        allowedHosts: true as const,
     },
     resolve: {
         alias: {
@@ -58,4 +47,28 @@ export default defineConfig(() => ({
         },
     },
     plugins: [fixPsCircularDep(), tailwindcss(), react(), tsconfigPaths()],
+    test: {
+        globals: true,
+        environment: 'happy-dom',
+        setupFiles: ['./test/setupTests.ts'],
+        retry: 2,
+        maxConcurrency: 4,
+        include: ['test/**/*.test.ts', 'test/**/*.test.tsx'],
+        coverage: {
+            provider: 'v8',
+            reporter: ['text', 'html', 'json-summary'],
+            thresholds: {
+                statements: 58,
+                branches: 50,
+                functions: 53,
+                lines: 59,
+            },
+            exclude: [
+                '**/vendor/**',
+                '**/test/**',
+                '**/*.d.ts',
+                '**/node_modules/**',
+            ],
+        },
+    },
 }));

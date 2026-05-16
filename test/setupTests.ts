@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, vi } from 'vitest';
+import { afterEach, beforeEach, vi, type MockInstance } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom/vitest';
 import { enableMapSet } from 'immer';
@@ -23,14 +23,21 @@ Object.defineProperty(globalThis, 'WebSocket', {
     })),
 });
 
-const localStorageMock = (() => {
-    let store = {};
+interface LocalStorageMock {
+    getItem: (key: string) => string | null;
+    setItem: (key: string, value: string) => void;
+    removeItem: (key: string) => void;
+    clear: () => void;
+}
+
+const localStorageMock: LocalStorageMock = (() => {
+    let store: Record<string, string> = {};
     return {
-        getItem: (key) => store[key] || null,
-        setItem: (key, value) => {
+        getItem: (key: string) => store[key] || null,
+        setItem: (key: string, value: string) => {
             store[key] = value.toString();
         },
-        removeItem: (key) => {
+        removeItem: (key: string) => {
             delete store[key];
         },
         clear: () => {
@@ -45,8 +52,8 @@ Object.defineProperty(globalThis, 'localStorage', {
     value: localStorageMock,
 });
 
-let consoleErrorSpy;
-let resetAllStores = () => {};
+let consoleErrorSpy: MockInstance;
+let resetAllStores: () => void = () => {};
 let hasLoadedStoreReset = false;
 
 async function ensureStoreResetLoaded() {

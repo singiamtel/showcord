@@ -1,14 +1,20 @@
 export class MockServer {
     private messageHandler: ((data: string) => void) | undefined;
+    public sentMessages: string[] = [];
 
     constructor(onMessage: (data: string) => void) {
         this.messageHandler = onMessage;
     }
 
     send(message: string) {
+        this.sentMessages.push(message);
         if (this.messageHandler) {
             this.messageHandler(message);
         }
+    }
+
+    clearSentMessages() {
+        this.sentMessages = [];
     }
 
     sendChallstr(challstr: string) {

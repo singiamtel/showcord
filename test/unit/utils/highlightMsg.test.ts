@@ -1,5 +1,5 @@
 import { test, expect, describe } from 'vitest';
-import { stringsToRegex, highlightMsg } from './highlightMsg';
+import { stringsToRegex, highlightMsg } from '@/utils/highlightMsg';
 
 
 describe('highlightMsg', () => {

@@ -40,8 +40,7 @@ const fadeUp = {
 
 function GettingStarted() {
     const [visible, setVisible] = useState(() => {
-        try { return !localStorage.getItem('showcord_welcomed'); }
-        catch { return true; }
+        try { return !localStorage.getItem('showcord_welcomed'); } catch { return true; }
     });
 
     const dismiss = () => {
@@ -201,9 +200,9 @@ function RoomList({ className }: Readonly<{ className?: string }>) {
         }
     };
 
-    const rooms = miniSearchResults.length > 0
-        ? miniSearchResults.sort((a: any, b: any) => b.userCount - a.userCount)
-        : roomsJSON?.chat?.sort((a: any, b: any) => b.userCount - a.userCount) ?? [];
+    const rooms = miniSearchResults.length > 0 ?
+        miniSearchResults.sort((a: any, b: any) => b.userCount - a.userCount) :
+        roomsJSON?.chat?.sort((a: any, b: any) => b.userCount - a.userCount) ?? [];
 
     return (
         <div className={twMerge('flex flex-col min-h-0 p-4 rounded-xl bg-gray-100 dark:bg-gray-600', className)}>
