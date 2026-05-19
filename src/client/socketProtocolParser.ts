@@ -335,18 +335,20 @@ export class SocketProtocolParser {
                 console.error('Received |pagehtml| from untracked room', roomID);
                 return false;
             }
+            const message = newMessage({
+                name: 'pagehtml',
+                user: '',
+                type: 'rawHTML',
+                content,
+            });
             room.addUHTML(
-                newMessage({
-                    name: 'pagehtml',
-                    user: '',
-                    type: 'rawHTML',
-                    content,
-                }),
+                message,
                 {
                     selected: this.callbacks.getSelectedRoom() === roomID,
                     selfSent: false,
                 },
             );
+            useMessageStore.getState().updateMessages(roomID, room.messages);
             break;
         }
         case 'uhtmlchange':{
