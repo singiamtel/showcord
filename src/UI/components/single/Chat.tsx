@@ -34,6 +34,8 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const didScrollInitially = useRef(false);
     const messageCountRef = useRef(messages?.length ?? 0);
 
+    const isHtmlRoom = messages?.some(m => m.name === 'pagehtml') ?? false;
+
     const scrollToBottom = useCallback(() => {
         if (ref.current) {
             requestAnimationFrame(() => {
@@ -46,19 +48,19 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
 
     useLayoutEffect(() => {
         const count = messages?.length ?? 0;
-        if (count !== messageCountRef.current && isIntersecting) {
+        if (!isHtmlRoom && count !== messageCountRef.current && isIntersecting) {
             messageCountRef.current = count;
             scrollToBottom();
         }
-    }, [messages?.length, isIntersecting, scrollToBottom]);
+    }, [messages?.length, isIntersecting, scrollToBottom, isHtmlRoom]);
 
-    // Scroll to bottom only on first mount. Activity preserves both the scroll
-    // position (DOM) and this ref, so re-activation won't force a scroll.
     useLayoutEffect(() => {
         if (didScrollInitially.current) return;
-        scrollToBottom();
+        if (!isHtmlRoom) {
+            scrollToBottom();
+        }
         didScrollInitially.current = true;
-    }, []);
+    }, [isHtmlRoom, scrollToBottom]);
 
     return (
         <div
@@ -68,7 +70,7 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
             )}
             ref={ref}
         >
-            <div className="grow" />
+            {!isHtmlRoom && <div className="grow" />}
             {messages ? (
                 messages.map((message, _index, arr) => {
                     const wasPrevCode = _index > 0 && arr[_index - 1]?.content.startsWith('!code');
