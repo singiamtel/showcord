@@ -9,6 +9,7 @@ import { useAppStore } from '@/client/client';
 import { Toaster } from '@/components/ui/toaster';
 import { useMediaQuery } from './hooks/useMediaQuery';
 import { SeoMetadata } from './components/SeoMetadata';
+import { RoomSwitcher } from './components/RoomSwitcher';
 
 library.add(faBarChart, faPieChart);
 
@@ -52,6 +53,7 @@ export default function App() {
                 </TrainerCardProvider>
             </div>
             <Toaster />
+            <RoomSwitcher />
         </div>
     );
 }
