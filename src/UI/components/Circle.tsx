@@ -7,7 +7,7 @@ export default function Circle({ children, className }: Readonly<{ children: any
             <motion.div
                 key={String(children)}
                 className={'relative w-4 h-4 bg-red-400 rounded-full flex justify-center items-center text-center p-2 shadow-xl ' + className}
-                initial={{ scale: 0.95, opacity: 0 }}
+                initial={{ scale: 0.8, opacity: 0 }}
                 animate={{
                     scale: [0.95, 1.3, 1],
                     opacity: 1,
