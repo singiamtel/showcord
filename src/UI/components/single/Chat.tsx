@@ -4,7 +4,9 @@ import {
     useCallback,
     useLayoutEffect,
     useRef,
+    useState,
 } from 'react';
+import { FaChevronDown } from 'react-icons/fa';
 import { useClientContext } from './useClientContext';
 import useOnScreen from '../../hooks/useOnScreen';
 import { useRoomID } from '@/UI/components/RoomContext';
@@ -35,6 +37,14 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const messageCountRef = useRef(messages?.length ?? 0);
 
     const isHtmlRoom = messages?.some(m => m.name === 'pagehtml') ?? false;
+    const [showScrollButton, setShowScrollButton] = useState(false);
+
+    const handleScroll = useCallback(() => {
+        const el = ref.current;
+        if (!el) return;
+        const distanceFromBottom = el.scrollHeight - el.scrollTop - el.clientHeight;
+        setShowScrollButton(distanceFromBottom > 100);
+    }, []);
 
     const scrollToBottom = useCallback(() => {
         if (ref.current) {
@@ -63,40 +73,55 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     }, [isHtmlRoom, scrollToBottom]);
 
     return (
-        <div
-            className={cn(
-                'p-8 flex flex-col overflow-x-hidden wrap-break-word overflow-y-auto h-full relative',
-                props.className,
-            )}
-            ref={ref}
-        >
-            {!isHtmlRoom && <div className="grow" />}
-            {messages ? (
-                messages.map((message, _index, arr) => {
-                    const wasPrevCode = _index > 0 && arr[_index - 1]?.content.startsWith('!code');
-                    return (
-                        <MessageComponent
-                            key={`msg-${currentRoom.ID}-${message.timestamp?.getTime() || 0}-${_index}`}
-                            time={message.timestamp}
-                            user={message.user || ''}
-                            message={message.content}
-                            type={message.type}
-                            hld={message.hld}
-                            wasPrevCode={wasPrevCode}
-                            cancelled={message.cancelled}
-                        />
-                    );
-                })
-            ) : null}
-            <div className="relative h-0 w-0">
-                {/* invisible div to scroll to */}
-                <div
-                    id="msg_end"
-                    ref={messagesEndRef}
-                    className="absolute right-0 top-0 h-4 w-4"
-                >
+        <div className="relative h-full">
+            <div
+                className={cn(
+                    'p-8 flex flex-col overflow-x-hidden wrap-break-word overflow-y-auto h-full',
+                    props.className,
+                )}
+                ref={ref}
+                onScroll={handleScroll}
+            >
+                {!isHtmlRoom && <div className="grow" />}
+                {messages ? (
+                    messages.map((message, _index, arr) => {
+                        const wasPrevCode = _index > 0 && arr[_index - 1]?.content.startsWith('!code');
+                        return (
+                            <MessageComponent
+                                key={`msg-${currentRoom.ID}-${message.timestamp?.getTime() || 0}-${_index}`}
+                                time={message.timestamp}
+                                user={message.user || ''}
+                                message={message.content}
+                                type={message.type}
+                                hld={message.hld}
+                                wasPrevCode={wasPrevCode}
+                                cancelled={message.cancelled}
+                            />
+                        );
+                    })
+                ) : null}
+                <div className="relative h-0 w-0">
+                    {/* invisible div to scroll to */}
+                    <div
+                        id="msg_end"
+                        ref={messagesEndRef}
+                        className="absolute right-0 top-0 h-4 w-4"
+                    >
+                    </div>
                 </div>
             </div>
+            {showScrollButton && (
+                <div className="absolute bottom-4 right-6 z-10">
+                    <Button
+                        variant="secondary"
+                        size="icon"
+                        className="rounded-full shadow-lg"
+                        onClick={scrollToBottom}
+                    >
+                        <FaChevronDown className="h-4 w-4" />
+                    </Button>
+                </div>
+            )}
         </div>
     );
 }
