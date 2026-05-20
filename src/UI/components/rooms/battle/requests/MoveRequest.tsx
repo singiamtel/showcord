@@ -3,7 +3,7 @@ import type { BattleRoom } from '@/client/room/battleRoom';
 import { cn } from '@/lib/utils';
 import type { Protocol } from '@pkmn/protocol';
 import { ChoiceBuilder } from '@pkmn/view';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Icons } from '@pkmn/img';
 import { Dex } from '@/vendor/pokemon-showdown/battle-dex';
@@ -170,11 +170,6 @@ export function MoveRequest({ req, battle }: Readonly<{ req: Protocol.MoveReques
         builder.choices.length = 0;
         setSelected(null);
     };
-
-    useEffect(() => {
-        builder.choices.length = 0;
-        setSelected(null);
-    }, [active, builder]);
 
     if (!active[0]) {
         return null;

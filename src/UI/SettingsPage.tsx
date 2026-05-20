@@ -1,4 +1,4 @@
-import { type HTMLAttributes, useEffect, useState } from 'react';
+import { type HTMLAttributes } from 'react';
 import AppearanceSettings from './settings/Appearance';
 import DeveloperSettings from './settings/Developer';
 import HighlightingSettings from './settings/Highlighting';
@@ -22,16 +22,12 @@ const settingsTabs = {
 } as const;
 
 export default function SettingsPage(props: Readonly<HTMLAttributes<'div'>>) {
-    const [page, setPage] = useState<keyof typeof settingsTabs>('appearance');
     const settingsSection = useAppStore(s => s.settingsSection);
     const setSettingsSection = useAppStore(s => s.setSettingsSection);
 
-    useEffect(() => {
-        if (settingsSection && settingsSection in settingsTabs) {
-            setPage(settingsSection as keyof typeof settingsTabs);
-            setSettingsSection(undefined);
-        }
-    }, [settingsSection, setSettingsSection]);
+    const page = settingsSection && settingsSection in settingsTabs ?
+        settingsSection as keyof typeof settingsTabs :
+        'appearance';
 
     return (
         <div className={cn('grid grid-cols-4', props.className)}>
@@ -40,18 +36,18 @@ export default function SettingsPage(props: Readonly<HTMLAttributes<'div'>>) {
                 <div className="font-bold text-sm text-gray-250 mb-2 ml-2 dark:text-gray-251">
                   GENERAL SETTINGS
                 </div>
-                <SettingsButton onClick={() => { setPage('appearance'); }} active={page === 'appearance'}>
+                <SettingsButton onClick={() => { setSettingsSection('appearance'); }} active={page === 'appearance'}>
                   Appearance
                 </SettingsButton>
-                <SettingsButton onClick={() => { setPage('highlighting'); }} active={page === 'highlighting'}>
+                <SettingsButton onClick={() => { setSettingsSection('highlighting'); }} active={page === 'highlighting'}>
                   Highlighting
                 </SettingsButton>
 
-                <SettingsButton onClick={() => { setPage('developer'); }} active={page === 'developer'}>
+                <SettingsButton onClick={() => { setSettingsSection('developer'); }} active={page === 'developer'}>
                   Developer settings
                 </SettingsButton>
 
-                <SettingsButton onClick={() => { setPage('account'); }} active={page === 'account'}>
+                <SettingsButton onClick={() => { setSettingsSection('account'); }} active={page === 'account'}>
                   Account
                 </SettingsButton>
             </div>

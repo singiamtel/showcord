@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import TrainerCard from './TrainerCard';
 import useClickOutside from '@/UI/hooks/useClickOutside';
 import { useClientContext } from '../useClientContext';
@@ -13,19 +13,16 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
     const [user, setUser] = useState<any | null>(null);
     const [username, setUsername] = useState<string | null>(null);
     const [position, setPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
-    const wrapperRef = useRef<any>(null);
     const clickedElementRef = useRef<HTMLElement | null>(null);
 
     const closeWindow = useCallback(() => {
         setUser(null);
-
         setUsername(null);
-
         setPosition({ x: 0, y: 0 });
         clickedElementRef.current = null;
     }, []);
 
-    const { isOutside: clickedOutside } = useClickOutside(wrapperRef);
+    const wrapperRef = useClickOutside(closeWindow);
 
     const clickUsername = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         if (!e) return;
@@ -53,12 +50,6 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
             setUser(user);
         });
     };
-
-    useEffect(() => {
-        if (!clickedOutside) return;
-        closeWindow();
-    }, [clickedOutside, closeWindow]);
-
 
     const contextValue = useMemo(() => ({ isOpen, openCard, closeCard, clickUsername }), [isOpen, clickUsername]);
 

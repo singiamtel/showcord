@@ -145,10 +145,6 @@ export function RoomSwitcher() {
         if (open) inputRef.current?.focus();
     }, [open]);
 
-    useEffect(() => {
-        setSelectedIndex(0);
-    }, [query]);
-
     const setSettingsSection = useAppStore(s => s.setSettingsSection);
 
     const openSettings = useCallback((section: string) => {
@@ -194,7 +190,10 @@ export function RoomSwitcher() {
                     ref={inputRef}
                     type="text"
                     value={query}
-                    onChange={e => setQuery(e.target.value)}
+                    onChange={e => {
+                        setQuery(e.target.value);
+                        setSelectedIndex(0);
+                    }}
                     placeholder="Go to room..."
                     className="w-full px-4 py-3 text-base text-text dark:text-text-dark bg-transparent border-b border-gray-351 dark:border-gray-250 outline-none placeholder:text-gray-125"
                 />

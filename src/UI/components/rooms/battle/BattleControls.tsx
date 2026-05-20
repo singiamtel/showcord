@@ -37,7 +37,7 @@ export default function BattleControls(_props: Readonly<HTMLAttributes<HTMLDivEl
         if (!requestType) { return null; }
         switch (requestType) {
         case 'move':
-            return <MoveRequest req={req} battle={battle} />;
+            return <MoveRequest key={req.rqid} req={req} battle={battle} />;
         case 'switch':
             return <SwitchRequest req={req} battle={battle} />;
         case 'team':

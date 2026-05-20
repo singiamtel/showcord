@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useBattleStore } from '@/client/stores/battleStore';
 import { client } from '@/client/singleton';
 import { Button } from '@/components/ui/button';
@@ -28,22 +28,21 @@ export function BattleSearch() {
     }).filter(category => category.formats.length > 0)) ?? [];
     const allFormats = categories.flatMap(category => category.formats);
 
-    useEffect(() => {
-        if (!selectedFormat && categories.length) {
-            const preferred = ['gen9randombattle', 'gen9ou'];
-            const formatMap = new Map(allFormats.map(f => [f.ID, f]));
-            let found = null;
-            for (const pref of preferred) {
-                found = formatMap.get(pref);
-                if (found) break;
-            }
-            if (!found) found = categories[0]?.formats[0];
-            if (found) {
-                setSelectedFormat(found.ID);
-                setDisplayValue(found.name);
-            }
+    const defaultFormat = useMemo(() => {
+        if (selectedFormat || !categories.length) return null;
+        const preferred = ['gen9randombattle', 'gen9ou'];
+        const formatMap = new Map(allFormats.map(f => [f.ID, f]));
+        for (const pref of preferred) {
+            const found = formatMap.get(pref);
+            if (found) return found;
         }
+        return categories[0]?.formats[0] ?? null;
     }, [allFormats, categories, selectedFormat]);
+
+    if (defaultFormat) {
+        setSelectedFormat(defaultFormat.ID);
+        setDisplayValue(defaultFormat.name);
+    }
 
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {

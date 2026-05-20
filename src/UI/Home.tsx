@@ -23,6 +23,18 @@ import FAQ from './assets/FAQ.png';
 import { twMerge } from 'tailwind-merge';
 import { useClientContext } from './components/single/useClientContext';
 
+function useClientQuery<T>(query: (client: NonNullable<ReturnType<typeof useClientContext>['client']>) => Promise<T>, defaultValue: T): T {
+    const { client } = useClientContext();
+    const [data, setData] = useState<T>(defaultValue);
+
+    useEffect(() => {
+        if (!client) return;
+        query(client).then(setData);
+    }, [client]);
+
+    return data;
+}
+
 const minisearch = new MiniSearch({
     fields: ['title', 'desc'],
     storeFields: ['title', 'desc', 'userCount', 'section'],
@@ -126,13 +138,7 @@ function Hero() {
 }
 
 function News({ className }: Readonly<{ className?: string }>) {
-    const [news, setNews] = useState<any[]>([]);
-    const { client } = useClientContext();
-
-    useEffect(() => {
-        if (!client) return;
-        client.queryNews().then(setNews);
-    }, [client]);
+    const news = useClientQuery<any[]>(client => client.queryNews(), []);
 
     return (
         <div className={twMerge('flex flex-col min-h-0 p-4 rounded-xl bg-gray-100 dark:bg-gray-600', className)}>
@@ -152,17 +158,12 @@ function News({ className }: Readonly<{ className?: string }>) {
 }
 
 function RoomList({ className }: Readonly<{ className?: string }>) {
+    const roomsJSON = useClientQuery<any>(client => client.queryRooms(), {});
     const { client, setRoom } = useClientContext();
-    const [roomsJSON, setRoomsJSON] = useState<any>({});
     const [input, setInput] = useState<string>('');
 
     const formRef = useRef<HTMLFormElement>(null);
     const inputRef = useRef<HTMLInputElement>(null);
-
-    useEffect(() => {
-        if (!client) return;
-        client.queryRooms().then(setRoomsJSON);
-    }, [client]);
 
     useEffect(() => {
         if (!roomsJSON?.chat) return;

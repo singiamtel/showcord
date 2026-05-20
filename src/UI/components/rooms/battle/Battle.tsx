@@ -184,8 +184,16 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
 
         init();
 
+        const unsubPerspective = useRoomStore.subscribe((state) => {
+            const p = (state.rooms.get(roomID) as BattleRoom | undefined)?.perspective;
+            if (p && battleInstanceRef.current) {
+                battleInstanceRef.current.setViewpoint(p);
+            }
+        });
+
         return () => {
             cancelled = true;
+            unsubPerspective();
             console.log('Destroying VisualBattle');
             const battleDiv = shadow!.querySelector('.battle');
             const logDiv = shadow!.querySelector('.battle-log');
@@ -194,14 +202,6 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
             battleInstanceRef.current = null;
         };
     }, [room.ID]);
-
-    // Update perspective
-    useEffect(() => {
-        if (battleInstanceRef.current && perspective) {
-            console.log('Updating viewpoint to', perspective);
-            battleInstanceRef.current.setViewpoint(perspective);
-        }
-    }, [perspective]);
 
     // Update log
     useEffect(() => {
