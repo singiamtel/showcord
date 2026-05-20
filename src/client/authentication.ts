@@ -53,7 +53,7 @@ export class AuthenticationManager {
 
         const challstr = await this.waitForChallstr();
         const url = `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${this.client_id}&challenge=${challstr}`;
-        const nWindow = (window as any).n = open(
+        const nWindow = window.open(
             url,
             undefined,
             'popup=1,width=700,height=700',

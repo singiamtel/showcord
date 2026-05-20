@@ -3,6 +3,7 @@ import TrainerCard from './TrainerCard';
 import useClickOutside from '@/UI/hooks/useClickOutside';
 import { useClientContext } from '../useClientContext';
 import { TrainerCardContext } from './TrainerCardContext.types';
+import type { UserDetails } from '@/client/queryHandlers';
 
 export function TrainerCardProvider({ children }: Readonly<{ children: React.ReactNode }>) {
     const { client } = useClientContext();
@@ -10,7 +11,7 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
     const openCard = () => setIsOpen(true);
     const closeCard = () => setIsOpen(false);
 
-    const [user, setUser] = useState<any | null>(null);
+    const [user, setUser] = useState<UserDetails | null>(null);
     const [username, setUsername] = useState<string | null>(null);
     const [position, setPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
     const clickedElementRef = useRef<HTMLElement | null>(null);
@@ -46,7 +47,7 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
         setUsername(username);
         setPosition({ x: e.clientX, y: e.clientY });
         setUser(null);
-        client.queryUser(username).then((user: any) => {
+        client.queryUser(username).then((user: UserDetails) => {
             setUser(user);
         });
     };

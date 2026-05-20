@@ -45,7 +45,7 @@ class NotificationsEngine {
                     // action: <ToastAction altText="Try again">Try again</ToastAction>,
                     action: createElement(ToastAction, { altText: 'View', onClick: () => {
                         selectRoom?.(notification.room);
-                    } }, 'View') as any,
+                    } }, 'View') as unknown as React.JSX.Element,
                 });
             }
         } else {

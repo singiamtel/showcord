@@ -176,7 +176,7 @@ export function MoveRequest({ req, battle }: Readonly<{ req: Protocol.MoveReques
     }
 
     const sideIndex = battle.perspective === 'p1' ? 0 : 1;
-    const pokemonName = battle.battle?.sides[sideIndex]?.active[0]?.name;
+    const pokemonName = 'sides' in battle.battle ? battle.battle.sides[sideIndex]?.active[0]?.name : undefined;
 
     if (selected) {
         return <div className='flex flex-col items-center justify-center gap-2 w-full h-full p-2'>

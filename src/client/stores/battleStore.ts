@@ -6,7 +6,7 @@ interface BattleStoreState {
     formats: Formats | undefined;
     search: {
         searching: string[];
-        games: any;
+        games: Record<string, unknown> | undefined;
     };
 }
 

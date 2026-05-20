@@ -1,19 +1,21 @@
 import {
     type FormEvent,
     type HTMLAttributes,
+    type KeyboardEvent,
     type KeyboardEventHandler,
     useEffect,
     useRef,
     useState,
 } from 'react';
-import RoomCard from './components/RoomCard';
+import RoomCard, { type RoomQuery } from './components/RoomCard';
 import { InfinitySpin } from 'react-loader-spinner';
 import MiniSearch from 'minisearch';
-import NewsCard from './components/NewsCard';
+import NewsCard, { type News } from './components/NewsCard';
 import { Sprites } from '@pkmn/img';
 import { Username } from './components/Username';
 import { rankOrder } from '@/client/user';
 import { motion } from 'framer-motion';
+import type { UserDetails } from '@/client/queryHandlers';
 
 import targetFaceCluster from './assets/cluster_target_face_nobg.webp';
 import github from './assets/github.png';
@@ -138,7 +140,7 @@ function Hero() {
 }
 
 function News({ className }: Readonly<{ className?: string }>) {
-    const news = useClientQuery<any[]>(client => client.queryNews(), []);
+    const news = useClientQuery<News[]>(client => client.queryNews(), []);
 
     return (
         <div className={twMerge('flex flex-col min-h-0 p-4 rounded-xl bg-gray-100 dark:bg-gray-600', className)}>
@@ -158,7 +160,7 @@ function News({ className }: Readonly<{ className?: string }>) {
 }
 
 function RoomList({ className }: Readonly<{ className?: string }>) {
-    const roomsJSON = useClientQuery<any>(client => client.queryRooms(), {});
+    const roomsJSON = useClientQuery<{ chat: RoomQuery[] }>(client => client.queryRooms(), { chat: [] });
     const { client, setRoom } = useClientContext();
     const [input, setInput] = useState<string>('');
 
@@ -194,7 +196,7 @@ function RoomList({ className }: Readonly<{ className?: string }>) {
         client.join(str);
     };
 
-    const onKeyDown: KeyboardEventHandler = (e: any) => {
+    const onKeyDown: KeyboardEventHandler = (e: KeyboardEvent<HTMLInputElement>) => {
         if ((e.key === 'Tab' && !e.shiftKey) || e.key === 'ArrowRight') {
             if (!formRef.current?.textContent) { setRoom(1); e.preventDefault(); return; }
         }
@@ -203,9 +205,9 @@ function RoomList({ className }: Readonly<{ className?: string }>) {
         }
     };
 
-    const rooms = miniSearchResults.length > 0 ?
-        miniSearchResults.sort((a: any, b: any) => b.userCount - a.userCount) :
-        roomsJSON?.chat?.sort((a: any, b: any) => b.userCount - a.userCount) ?? [];
+    const rooms: RoomQuery[] = miniSearchResults.length > 0 ?
+        (miniSearchResults as unknown as RoomQuery[]).sort((a: RoomQuery, b: RoomQuery) => b.userCount - a.userCount) :
+        (roomsJSON?.chat ?? []).sort((a: RoomQuery, b: RoomQuery) => b.userCount - a.userCount);
 
     return (
         <div className={twMerge('flex flex-col min-h-0 p-4 rounded-xl bg-gray-100 dark:bg-gray-600', className)}>
@@ -229,7 +231,7 @@ function RoomList({ className }: Readonly<{ className?: string }>) {
                         <InfinitySpin width="200" color="#4fa94d" />
                     </div>
                 )}
-                {rooms.map((room: any, idx: number) => (
+                {rooms.map((room: RoomQuery, idx: number) => (
                     <RoomCard onClick={manageRoomCardClick} key={room.title} room={room} index={idx} />
                 ))}
             </div>
@@ -240,7 +242,7 @@ function RoomList({ className }: Readonly<{ className?: string }>) {
 function UserSearch({ className }: Readonly<{ className?: string }>) {
     const { client, setRoom } = useClientContext();
     const [input, setInput] = useState('');
-    const [user, setUser] = useState<any | null>(null);
+    const [user, setUser] = useState<UserDetails | null>(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState<string | null>(null);
     const inputRef = useRef<HTMLInputElement>(null);
@@ -254,7 +256,7 @@ function UserSearch({ className }: Readonly<{ className?: string }>) {
         setError(null);
         setUser(null);
         client.queryUser(trimmed)
-            .then((result: any) => {
+            .then((result: UserDetails) => {
                 if (result?.userid) setUser(result);
                 else setError('User not found');
             })
@@ -262,7 +264,7 @@ function UserSearch({ className }: Readonly<{ className?: string }>) {
             .finally(() => setLoading(false));
     };
 
-    const onKeyDown: KeyboardEventHandler = (e: any) => {
+    const onKeyDown: KeyboardEventHandler = (e: KeyboardEvent<HTMLInputElement>) => {
         if ((e.key === 'Tab' && !e.shiftKey) || e.key === 'ArrowRight') {
             if (!formRef.current?.textContent) { setRoom(1); e.preventDefault(); }
         }
@@ -322,7 +324,7 @@ function UserSearch({ className }: Readonly<{ className?: string }>) {
                     {rooms.length > 0 && (
                         <div className="text-xs mt-3 text-gray-125 dark:text-gray-100 leading-relaxed">
                             <span className="font-semibold text-gray-600 dark:text-white">Rooms: </span>
-                            {rooms.map(([room, _]: [string, any], idx: number) => {
+                            {rooms.map(([room, _]: [string, { isPrivate: boolean }], idx: number) => {
                                 const firstChar = room.charAt(0);
                                 const hasRank = rankOrder[firstChar as keyof typeof rankOrder] !== undefined;
                                 return (

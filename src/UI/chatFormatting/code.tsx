@@ -10,7 +10,7 @@ const brRegex = /<br\s*\/?>/gi;
 const summaryOpenRegex = /<summary\s*>/gi;
 const summaryCloseRegex = /<\/summary\s*>/gi;
 
-export default function Code({ message }: any) {
+export default function Code({ message }: { message: string }) {
     const msg = message.replace(brRegex, '\n').replace(summaryCloseRegex, '\n')
         .replace(summaryOpenRegex, '');
     const str = HTMLtoPlain(msg);

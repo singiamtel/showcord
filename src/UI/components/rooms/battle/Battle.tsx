@@ -1,8 +1,8 @@
 import React, { useEffect, useRef, type HTMLAttributes } from 'react';
 // showdown-globals must be imported before vendor modules to set window.Config etc.
 import '../../../../utils/showdown-globals';
-import { Dex, toID } from '@/vendor/pokemon-showdown/battle-dex';
-import { Battle as VisualBattle } from '@/vendor/pokemon-showdown/battle';
+import { Dex, toID, type ID } from '@/vendor/pokemon-showdown/battle-dex';
+import { Battle as VisualBattle, type PokemonDetails, type PokemonHealth } from '@/vendor/pokemon-showdown/battle';
 import { BattleTooltips } from '@/vendor/pokemon-showdown/battle-tooltips';
 import $ from 'jquery';
 import { useRoomStore } from '@/client/client';
@@ -26,14 +26,30 @@ function updateMyPokemonFromRequest(battle: VisualBattle, line: string) {
         const request = JSON.parse(json);
         if (!request.side?.pokemon) return;
 
-        battle.myPokemon = request.side.pokemon.map((p: any) => {
-            const output = {} as any;
+        type RequestPokemon = {
+            ident: string;
+            details: string;
+            condition: string;
+            active: boolean;
+            reviving?: boolean;
+            stats: Record<string, number>;
+            moves: unknown[];
+            baseAbility: string;
+            ability: string;
+            item: string;
+            pokeball: string;
+            teraType: string;
+            terastallized: string;
+        };
+        type ParsedPokemon = Partial<PokemonDetails & PokemonHealth> & Record<string, unknown>;
+        battle.myPokemon = request.side.pokemon.map((p: RequestPokemon) => {
+            const output: ParsedPokemon = {};
             const identParts = p.ident.split(': ');
             const pokemonid = p.ident;
             const name = identParts.slice(1).join(': ') || identParts[0];
 
-            battle.parseDetails(name, pokemonid, p.details, output);
-            battle.parseHealth(p.condition, output);
+            battle.parseDetails(name, pokemonid, p.details, output as PokemonDetails);
+            battle.parseHealth(p.condition, output as PokemonHealth);
 
             output.active = p.active;
             output.reviving = p.reviving || false;
@@ -46,7 +62,7 @@ function updateMyPokemonFromRequest(battle: VisualBattle, line: string) {
             output.teraType = p.teraType;
             output.terastallized = p.terastallized;
 
-            return output;
+            return output as unknown as NonNullable<typeof battle['myPokemon']>[number];
         });
     } catch (e) {
         console.error('Failed to parse request for myPokemon', e);
@@ -152,7 +168,7 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
 
             const $battle = $(battleDiv);
             const $log = $(logDiv);
-            const battleId = (room.ID || 'battle-view') as any; // Cast to expected ID type
+            const battleId = (room.ID || 'battle-view') as ID;
 
             console.log('Initializing VisualBattle for room', battleId);
 

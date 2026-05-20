@@ -1,7 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
+import type { ReactNode } from 'react';
 
 // Circle around text, used for notification bubbles
-export default function Circle({ children, className }: Readonly<{ children: any, className?: string }>) {
+export default function Circle({ children, className }: Readonly<{ children: ReactNode, className?: string }>) {
     return (
         <AnimatePresence mode="wait">
             <motion.div

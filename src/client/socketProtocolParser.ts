@@ -21,7 +21,7 @@ export interface ProtocolParserCallbacks {
     getSelectedRoom: () => string;
     removeRoom: (roomID: string) => void;
     setUsername: (username: string) => void;
-    forceHighlightMsg: (roomid: string, message: any) => boolean;
+    forceHighlightMsg: (roomid: string, message: Message) => boolean;
     shouldAutoSelect?: (roomID: string) => boolean;
     selectRoom: (roomID: string) => void;
     addMessage: (roomID: string, message: Message) => void;
@@ -475,7 +475,7 @@ export class SocketProtocolParser {
                 if (toID(playerName) === this.settings.userID) {
                     room.setFormatter(perspective);
                     room.isPlayer = true;
-                    useRoomStore.getState().updateRoom(roomID, { isPlayer: true, perspective: perspective } as any);
+                    useRoomStore.getState().updateRoom(roomID, { isPlayer: true, perspective } as Record<string, unknown>);
                 }
             }
             break;
@@ -518,6 +518,7 @@ export class SocketProtocolParser {
         case '-sideend':
         case '-start':
         case '-resisted':
+        case '--resisted':
         case '-damage':
         case 'done':
         case 'faint':
@@ -538,6 +539,7 @@ export class SocketProtocolParser {
         case 'gametype':
         case 'gen':
         case 'tier':
+        case 'badge':
         case 'sentchoice':
         case 'rated':
         case 'seed':
@@ -617,7 +619,7 @@ export class SocketProtocolParser {
         return true;
     }
 
-    private addMessageToRoom(roomID: string, message: any) {
+    private addMessageToRoom(roomID: string, message: Message) {
         highlightMsg(roomID, message, this.settings);
         this.callbacks.addMessage(roomID, message);
     }

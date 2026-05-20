@@ -19,10 +19,11 @@ import {
     getNotifications as getNotificationsInternal,
     clearNotifications as clearNotificationsInternal,
 } from './roomManagement';
-import { QueryHandlers } from './queryHandlers';
+import { QueryHandlers, type UserDetails, type RoomsResponse } from './queryHandlers';
 import { SocketProtocolParser } from './socketProtocolParser';
 import { parseHighlightCommand } from './commands/highlightCommands';
 import { BattleRoom } from './room/battleRoom';
+import type { News } from '@/UI/components/NewsCard';
 
 type ClientConstructor = {
     server_url?: string;
@@ -353,21 +354,21 @@ export class Client {
         selectRoomInternal(roomid, this.room.bind(this));
     }
 
-    queryUser(user: string): Promise<any> {
+    queryUser(user: string): Promise<UserDetails> {
         if (!this.socket) {
             throw new Error('Getting user before socket initialization ' + user);
         }
         return this.queryHandlers.queryUser(user);
     }
 
-    queryRooms(): Promise<any> {
+    queryRooms(): Promise<RoomsResponse> {
         if (!this.socket) {
             throw new Error('Getting /cmd rooms before socket initialization');
         }
         return this.queryHandlers.queryRooms();
     }
 
-    queryNews(): Promise<any> {
+    queryNews(): Promise<News[]> {
         return this.queryHandlers.queryNews();
     }
 
@@ -417,7 +418,7 @@ export class Client {
 
         if (room.connected) {
             this.__send(`/leave ${roomID}`, false);
-        } else if (Client.permanentRooms.map((e) => e.ID).includes(roomID as any)) {
+        } else if ((Client.permanentRooms.map((e) => e.ID) as string[]).includes(roomID)) {
             this._closeRoom(roomID);
         } else { this._removeRoom(roomID); }
     }

@@ -5,7 +5,7 @@ interface RoomStoreState {
     rooms: Map<Room['ID'], Room>;
     selectedRoomID: string;
     currentRoom: Room | undefined;
-    battleRequest: { roomID: string; request: any } | undefined;
+    battleRequest: { roomID: string; request: unknown } | undefined;
     usersUpdateCounter: number;
 }
 
@@ -16,7 +16,7 @@ interface RoomStoreActions {
     updateRoom: (roomID: Room['ID'], updates: Partial<Room>) => void;
     setCurrentRoom: (room: Room) => void;
     selectRoom: (roomID: string, room: Room | undefined) => void;
-    setBattleRequest: (roomID: string, request: any) => void;
+    setBattleRequest: (roomID: string, request: unknown) => void;
     notifyUsersUpdate: () => void;
 }
 
@@ -75,7 +75,7 @@ export const useRoomStore = create<RoomStore>()((set) => ({
         set({ currentRoom: room, selectedRoomID: roomID });
     },
 
-    setBattleRequest: (roomID: string, request: any) => {
+    setBattleRequest: (roomID: string, request: unknown) => {
         set({ battleRequest: { roomID, request } });
     },
 

@@ -1,3 +1,4 @@
+import type { Protocol } from '@pkmn/protocol';
 import { assert } from '@/lib/utils';
 import { type HTMLAttributes } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
@@ -12,6 +13,8 @@ import type { BattleRoom } from '@/client/room/battleRoom';
 import { useRoomID } from '@/UI/components/RoomContext';
 import { TimerDisplay } from './TimerDisplay';
 
+type BattleRequest = Protocol.MoveRequest | Protocol.SwitchRequest | Protocol.TeamRequest | Protocol.WaitRequest;
+
 export default function BattleControls(_props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const roomID = useRoomID();
     const battle = useRoomStore(state => state.rooms.get(roomID)) as BattleRoom;
@@ -19,9 +22,9 @@ export default function BattleControls(_props: Readonly<HTMLAttributes<HTMLDivEl
     const { client } = useClientContext();
     assert(battle?.type === 'battle', 'Trying to render BattleWindow in a room that is not a BattleRoom');
 
-    const req = (battleRequest?.roomID === battle.ID && battleRequest.request) ?
-        battleRequest.request :
-        battle.battle.request;
+    const req: BattleRequest | undefined = (battleRequest?.roomID === battle.ID && battleRequest.request) ?
+        battleRequest.request as BattleRequest :
+        battle.battle.request as BattleRequest | undefined;
 
     const handleToggleTimer = () => {
         const command = battle.timerActive ? '/timer off' : '/timer on';

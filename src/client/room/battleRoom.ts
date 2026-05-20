@@ -1,14 +1,25 @@
+import type { Battle } from '@pkmn/client';
+import type { LogFormatter } from '@pkmn/view';
+import type { SideID } from '@pkmn/dex';
 import type { Message } from '../message';
 import { Room, type RoomType } from './room';
+import type { RealBattleRoom } from './RealBattleRoom';
+
+export interface BattleRoomStub {
+    request: unknown;
+    getPokemon: (name: string) => unknown;
+    add: (...args: unknown[]) => void;
+    update: (request: unknown) => void;
+}
 
 // Defines a proxy that loads the heavy BattleRoom implementation lazily.
 export class BattleRoom extends Room {
     // Stub properties to match RealBattleRoom interface
-    battle: any;
+    battle: BattleRoomStub | Battle;
     log: string[] = [];
     onLogUpdate: ((line: string) => void) | null = null;
-    formatter: any = null;
-    perspective: any = 'p1';
+    formatter: LogFormatter | null = null;
+    perspective: SideID = 'p1';
     isPlayer = false;
     battleEnded = false;
 
@@ -18,7 +29,7 @@ export class BattleRoom extends Room {
     timerStartedAt = 0;
     onTimerUpdate: ((data: { startValue: number; total: number; active: boolean }) => void) | null = null;
 
-    private realRoom: any | null = null;
+    private realRoom: RealBattleRoom | null = null;
     private queue: Array<() => void> = [];
 
     constructor(
@@ -69,7 +80,7 @@ export class BattleRoom extends Room {
         })();
     }
 
-    setFormatter(perspective: any) {
+    setFormatter(perspective: SideID) {
         this.perspective = perspective;
         if (this.realRoom) {
             this.realRoom.setFormatter(perspective);

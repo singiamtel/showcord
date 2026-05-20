@@ -20,8 +20,9 @@ export default function HTML(
     const roomID = useRoomID();
     const currentRoom = useRoomStore(state => state.rooms.get(roomID));
     const parserOptions = {
-        replace: (domNode: any) => {
-            const { attribs, children } = domNode;
+        replace: (domNode: unknown) => {
+            if (!domNode || typeof domNode !== 'object' || !('attribs' in domNode)) return;
+            const { attribs, children, name } = domNode as { attribs: Record<string, string>; children: unknown[]; name: string };
             if (!attribs) {
                 return;
             }
@@ -33,11 +34,11 @@ export default function HTML(
                         onClick={(e) => manageURL(e, client) }
                         className="novisited cursor-pointer text-blue-500 underline"
                     >
-                        {domToReact(children, parserOptions)}
+                        {(domToReact as (nodes: unknown[], options?: unknown) => React.ReactNode)(children, parserOptions)}
                     </a>
                 );
             }
-            if (domNode.name === 'button' && attribs.value) {
+            if (name === 'button' && attribs.value) {
                 return (
                     <button
                         type="button"
@@ -47,18 +48,18 @@ export default function HTML(
                         className="border border-gray-601 dark:border-gray-border font-bold p-1 m-1 rounded text-sm"
                         data-parsed="true"
                     >
-                        {domToReact(children, parserOptions)}
+                        {(domToReact as (nodes: unknown[], options?: unknown) => React.ReactNode)(children, parserOptions)}
                     </button>
                 );
             }
-            if (domNode.name === 'summary') {
+            if (name === 'summary') {
                 return (
                     <>
-                        {domToReact(children, parserOptions)}
+                        {(domToReact as (nodes: unknown[], options?: unknown) => React.ReactNode)(children, parserOptions)}
                     </>
                 );
             }
-            if (domNode.name === 'psicon') {
+            if (name === 'psicon') {
                 if (attribs.pokemon) {
                     const pokemon = Icons.getPokemon(attribs.pokemon, { protocol: 'https', domain: 'cdn.crob.at' });
                     return (
@@ -76,7 +77,7 @@ export default function HTML(
                                 }}
                             >
                             </span>
-                            {domToReact(children, parserOptions)}
+                            {(domToReact as (nodes: unknown[], options?: unknown) => React.ReactNode)(children, parserOptions)}
                         </span>
                     );
                 } else if (attribs.item) {
@@ -96,20 +97,22 @@ export default function HTML(
                                 }}
                             >
                             </span>
-                            {domToReact(children, parserOptions)}
+                            {(domToReact as (nodes: unknown[], options?: unknown) => React.ReactNode)(children, parserOptions)}
                         </span>
                     );
                 }
             }
-            if (domNode.name === 'username') {
-                return <Username bold user={' ' + domNode.children[0].data} />;
+            if (name === 'username') {
+                const firstChild = children[0];
+                const text = (firstChild as { data?: string })?.data ?? '';
+                return <Username bold user={' ' + text} />;
             }
             // Parse fa icons into react components
-            if (domNode.name === 'i' && attribs.class) {
+            if (name === 'i' && attribs.class) {
                 const classes = attribs.class.split(' ');
                 const fa = classes.find((e:string) => e.startsWith('fa-'));
                 if (fa) {
-                    return <FontAwesomeIcon icon={fa} style={{ padding: '0 0.25rem' }} />;
+                    return <FontAwesomeIcon icon={fa as import('@fortawesome/fontawesome-svg-core').IconProp} style={{ padding: '0 0.25rem' }} />;
                 }
             }
         },

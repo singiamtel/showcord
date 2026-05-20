@@ -1,9 +1,9 @@
-import newMessage from '../message';
+import newMessage, { type Message } from '../message';
 import type { Settings } from '../settings';
 
 export interface HighlightCommandCallbacks {
     getSelectedRoom: () => string;
-    addMessageToRoom: (roomID: string, message: any) => void;
+    addMessageToRoom: (roomID: string, message: Message) => void;
 }
 
 const HELP_TEXT = [

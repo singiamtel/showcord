@@ -1,24 +1,32 @@
 import $ from 'jquery';
 
+interface ShowdownConfig {
+    server: { id: string; protocol: string; host: string; port: number; prefix: string };
+    routes: { root: string; client: string; dex: string; replays: string; users: string; teams: string };
+    whitelist: string[];
+    customcolors: Record<string, unknown>;
+    testclient: boolean;
+}
+
 declare global {
     interface Window {
         $: JQueryStatic;
         jQuery: JQueryStatic;
-        Config: any;
-        Dex: any;
-        toID: any;
-        BattleTeambuilderTable: any;
-        BattlePokedex: any;
-        BattleMovedex: any;
-        BattleAbilities: any;
-        BattleItems: any;
-        BattleAliases: any;
-        BattleStatuses: any;
-        BattleTypeChart: any;
-        BattlePokemonSprites: any;
-        BattlePokemonSpritesBW: any;
-        BattlePokemonIconIndexes: any;
-        BattlePokemonIconIndexesLeft: any;
+        Config: ShowdownConfig;
+        Dex: unknown;
+        toID: (text: unknown) => string;
+        BattleTeambuilderTable: Record<string, unknown>;
+        BattlePokedex: Record<string, unknown>;
+        BattleMovedex: Record<string, unknown>;
+        BattleAbilities: Record<string, unknown>;
+        BattleItems: Record<string, unknown>;
+        BattleAliases: Record<string, string>;
+        BattleStatuses: Record<string, unknown>;
+        BattleTypeChart: Record<string, unknown>;
+        BattlePokemonSprites: Record<string, unknown>;
+        BattlePokemonSpritesBW: Record<string, unknown>;
+        BattlePokemonIconIndexes: Record<string, unknown>;
+        BattlePokemonIconIndexesLeft: Record<string, unknown>;
     }
 }
 
@@ -59,7 +67,7 @@ window.Dex = {
     resourcePrefix: `${protocol}//${clientHost}/`,
     fxPrefix: `${protocol}//${clientHost}/fx/`,
     // sanitizeName is called by battle-dex-data.ts constructors
-    sanitizeName(name: any) {
+    sanitizeName(name: unknown) {
         if (!name) return '';
         return ('' + name)
             .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;')

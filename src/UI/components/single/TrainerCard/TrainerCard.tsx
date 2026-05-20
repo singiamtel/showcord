@@ -2,7 +2,6 @@ import { Sprites } from '@pkmn/img';
 import {
     Fragment,
     type MouseEventHandler,
-    type MutableRefObject,
     type ReactNode,
     useEffect,
 } from 'react';
@@ -17,24 +16,26 @@ import { PiSwordBold } from 'react-icons/pi';
 import manageURL from '../../../../utils/manageURL';
 import { rankOrder } from '../../../../client/user';
 import { useClientContext } from '../useClientContext';
+import type { UserDetails } from '@/client/queryHandlers';
+import type { Client } from '@/client/client';
 
 const margin = 15;
 
 export default function TrainerCard(
     { user, name, position, forwardRef, close }: Readonly<{
-        user: any;
+        user: UserDetails | null;
         name: string | null;
         position: { x: number; y: number };
-        forwardRef: MutableRefObject<any>;
+        forwardRef: React.Ref<HTMLDivElement>;
         close: () => void;
     }>,
 ) {
     const { client } = useClientContext();
-    const publicRooms = user ?
-        Object.entries(user.rooms).filter((e: any) => !e[1].isPrivate) :
+    const publicRooms = user?.rooms ?
+        Object.entries(user.rooms).filter(([, v]) => !v.isPrivate) :
         [];
-    const privateRooms = user ?
-        Object.entries(user.rooms).filter((e: any) => e[1].isPrivate) :
+    const privateRooms = user?.rooms ?
+        Object.entries(user.rooms).filter(([, v]) => v.isPrivate) :
         [];
 
     useEffect(() => {
@@ -189,7 +190,7 @@ function UserCardButton({
     );
 }
 
-function roomLink(room: string, last: boolean, close: () => void, client: any, key: number) {
+function roomLink(room: string, last: boolean, close: () => void, client: Client, key: number) {
     const hasRank = rankOrder[room.charAt(0) as keyof typeof rankOrder] !== undefined;
     return (
         <Fragment key={key}>
