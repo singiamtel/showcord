@@ -1,4 +1,5 @@
 import { toID } from '@/utils/generic';
+import { logger } from '@/utils/logger';
 import { rankOrder, type RankSymbol, type User } from '../user';
 import { useRoomStore } from '../stores/roomStore';
 import { useMessageStore } from '../stores/messageStore';
@@ -93,7 +94,7 @@ export class Room {
     updateUsername(newName: string, userID: string) {
         const user = this.users.find((u) => u.ID === userID);
         if (!user) {
-            console.error(
+            logger.error(
                 `updateUsername(): Tried to update username for non-existent user ${userID} in room ${this.name}`,
             );
             return;

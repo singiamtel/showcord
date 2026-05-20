@@ -1,5 +1,6 @@
 import { Protocol } from '@pkmn/protocol';
 import { toID } from '../utils/generic';
+import { logger } from '../utils/logger';
 import newMessage, { type Message } from './message';
 import { Room } from './room/room';
 import { User } from './user';
@@ -52,7 +53,7 @@ export class SocketProtocolParser {
                     const commands = JSON.parse(line.slice('|queryresponse|cmdsearch|'.length));
                     this.queryHandlers.handleCmdsearchResponse(commands);
                 } catch (e) {
-                    console.error('Error parsing cmdsearch line', e);
+                    logger.error('Error parsing cmdsearch line', e);
                 }
                 continue;
             }
@@ -67,8 +68,8 @@ export class SocketProtocolParser {
 
             const success = this.parseSocketLine(args, kwArgs, roomID);
             if (!success) {
-                console.error('Failed to parse', line);
-                console.error(chunk);
+                logger.error('Failed to parse', line);
+                logger.error(chunk);
             }
         }
     }
@@ -76,7 +77,7 @@ export class SocketProtocolParser {
     private requiresRoom(cmd: string, roomID: string) {
         const room = this.callbacks.getRoom(roomID);
         if (!room) {
-            console.error(`requiresRoom: room is undefined for cmd ${cmd}`);
+            logger.error(`requiresRoom: room is undefined for cmd ${cmd}`);
             return false;
         }
         return room;
@@ -284,13 +285,13 @@ export class SocketProtocolParser {
                     const hadListener = this.queryHandlers.hasUserListener();
                     this.queryHandlers.handleUserDetailsResponse(tmpjson);
                     if (!hadListener && this.settings.username) {
-                        console.warn(
+                        logger.warn(
                             'received queryresponse|userdetails but nobody asked for it',
                             args,
                         );
                     }
                 } catch (_e) {
-                    console.error('Error parsing userdetails', args);
+                    logger.error('Error parsing userdetails', args);
                 }
                 break;
             case 'rooms':
@@ -298,7 +299,7 @@ export class SocketProtocolParser {
                     const tmpjson = JSON.parse(args[2]);
                     this.queryHandlers.handleRoomsResponse(tmpjson);
                 } catch (e) {
-                    console.error('Error parsing roomsdetails', args, e);
+                    logger.error('Error parsing roomsdetails', args, e);
                 }
                 break;
             case 'roomlist':
@@ -309,7 +310,7 @@ export class SocketProtocolParser {
                 break;
             default:
                 queryType satisfies never;
-                console.error('Unknown queryresponse', args);
+                logger.error('Unknown queryresponse', args);
                 break;
             }
             break;
@@ -328,11 +329,11 @@ export class SocketProtocolParser {
                 break;
             }
             case 'rename':
-                console.warn('Currently unhandled noinit', args);
+                logger.warn('Currently unhandled noinit', args);
                 break;
             default:
                 reason satisfies never;
-                console.error('Bug in pkmn/protocol, noinit', args);
+                logger.error('Bug in pkmn/protocol, noinit', args);
             }
             break;
         }
@@ -356,7 +357,7 @@ export class SocketProtocolParser {
             const content = args[1];
             const room = this.callbacks.getRoom(roomID);
             if (!room) {
-                console.error('Received |pagehtml| from untracked room', roomID);
+                logger.error('Received |pagehtml| from untracked room', roomID);
                 return false;
             }
             this.callbacks.addUHTML(
@@ -451,7 +452,7 @@ export class SocketProtocolParser {
                 const json = JSON.parse(args[1]);
                 useBattleStore.getState().updateSearch(json);
             } catch (e) {
-                console.error('Failed to parse updatesearch', e);
+                logger.error('Failed to parse updatesearch', e);
             }
         }
             break;
@@ -461,13 +462,13 @@ export class SocketProtocolParser {
         case 'customgroups':
         case 'notify':
         case 'nametaken':
-            console.error('Currently unhandled cmd', args);
+            logger.error('Currently unhandled cmd', args);
             break;
         case 'player':
             {
                 const room = this.requiresRoom('player', roomID);
                 if (!(room instanceof BattleRoom)) {
-                    console.error('Received |player| from non-battle room', roomID);
+                    logger.error('Received |player| from non-battle room', roomID);
                     return false;
                 }
                 const perspective = args[1];
@@ -483,7 +484,7 @@ export class SocketProtocolParser {
             const room = this.requiresRoom('request', roomID);
             if (!room) return false;
             if (!(room instanceof BattleRoom)) {
-                console.error('Received |request| from non-battle room', roomID);
+                logger.error('Received |request| from non-battle room', roomID);
                 return false;
             }
             useRoomStore.getState().setBattleRequest(roomID, room.battle.request);
@@ -611,7 +612,7 @@ export class SocketProtocolParser {
             break;
         default:
         {
-            console.error('Bug in pkmn/protocol, unknown cmd', args[0], args);
+            logger.error('Bug in pkmn/protocol, unknown cmd', args[0], args);
             args[0] satisfies never;
             return false;
         }
@@ -630,7 +631,7 @@ export class SocketProtocolParser {
             room.addUsers(users);
             return;
         }
-        console.warn('addUsers: room (' + roomID + ') is unknown. Users:', users);
+        logger.warn('addUsers: room (' + roomID + ') is unknown. Users:', users);
     }
 
     private removeUser(roomID: string, user: string) {
@@ -639,7 +640,7 @@ export class SocketProtocolParser {
             room.removeUser(user);
             return;
         }
-        console.warn('removeUsers: room (' + roomID + ') is unknown');
+        logger.warn('removeUsers: room (' + roomID + ') is unknown');
     }
 
     private updateUsername(roomID: string, newName: string, userID: string) {
@@ -648,7 +649,7 @@ export class SocketProtocolParser {
             room.updateUsername(newName, userID);
             return;
         }
-        console.warn('updateUsername: room (' + roomID + ') is unknown');
+        logger.warn('updateUsername: room (' + roomID + ') is unknown');
     }
 
     getFormats(): Formats | undefined {

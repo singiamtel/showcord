@@ -41,25 +41,6 @@ class Logger {
             console.error(this.formatMessage('error', message, fullContext));
         }
     }
-
-    // Legacy console methods for gradual migration
-    legacyLog(message: string, ...args: any[]): void {
-        if (this.isDevelopment && !this.isTest) {
-            console.log(message, ...args);
-        }
-    }
-
-    legacyWarn(message: string, ...args: any[]): void {
-        if (!this.isTest) {
-            console.warn(message, ...args);
-        }
-    }
-
-    legacyError(message: string, ...args: any[]): void {
-        if (!this.isTest) {
-            console.error(message, ...args);
-        }
-    }
 }
 
 export const logger = new Logger();

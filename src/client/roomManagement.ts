@@ -1,4 +1,5 @@
 import { toID } from '../utils/generic';
+import { logger } from '../utils/logger';
 import { Room } from './room/room';
 import { useRoomStore } from './stores/roomStore';
 import { useMessageStore } from './stores/messageStore';
@@ -38,7 +39,7 @@ export function openRoom(
         settings.changeRooms(getRooms());
         return;
     }
-    console.warn('openRoom: room (' + roomID + ') is unknown');
+    logger.warn('openRoom: room (' + roomID + ') is unknown');
 }
 
 export function removeRoom(
@@ -62,7 +63,7 @@ export function closeRoom(
 ) {
     const room = getRoom(roomID);
     if (!room) {
-        console.warn('Trying to close non-existent room', roomID);
+        logger.warn('Trying to close non-existent room', roomID);
         return;
     }
     useRoomStore.getState().updateRoom(roomID, { open: false });

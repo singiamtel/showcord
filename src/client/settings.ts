@@ -1,4 +1,5 @@
 import { toID } from '@/utils/generic';
+import { logger } from '@/utils/logger';
 import { highlightMsg, stringsToRegex } from '../utils/highlightMsg';
 import type { Room } from './room/room';
 
@@ -153,7 +154,7 @@ export class Settings {
                 }
             }
         } catch (e) {
-            console.error('Corrupted settings, removing...', e, settingsRaw);
+            logger.error('Corrupted settings, removing...', e, settingsRaw);
             localStorage.removeItem('settings');
         }
     }
@@ -174,7 +175,7 @@ export class Settings {
         try {
             localStorage.setItem('settings', JSON.stringify(savedSettings));
         } catch (e) {
-            console.error('Error saving settings', e, savedSettings);
+            logger.error('Error saving settings', e, savedSettings);
         }
         localStorage.setItem('theme', this.theme);
     }
@@ -228,13 +229,13 @@ export class Settings {
 
     removeHighlightWord(roomid: string, word: string) {
         if (!this.userDefinedSettings.highlightWords[roomid]) {
-            console.warn('removeHighlightWord', 'roomid not found', roomid);
+            logger.warn('removeHighlightWord', 'roomid not found', roomid);
             return;
         }
         const words = this.userDefinedSettings.highlightWords[roomid];
         const index = words?.findIndex((w) => w === word);
         if (index === undefined || index === -1) {
-            console.warn('removeHighlightWord', 'word not found', word);
+            logger.warn('removeHighlightWord', 'word not found', word);
         } else {
             // delete words[index];
             this.setHighlightWords(roomid, words.filter((w) => w !== word));
@@ -246,7 +247,7 @@ export class Settings {
 
     clearHighlightWords(roomid: string) {
         if (!this.userDefinedSettings.highlightWords[roomid]) {
-            console.warn('clearHighlightWords', 'roomid not found', roomid);
+            logger.warn('clearHighlightWords', 'roomid not found', roomid);
             return;
         }
         this.userDefinedSettings.highlightWords[roomid] = [];

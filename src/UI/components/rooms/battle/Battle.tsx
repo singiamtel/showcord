@@ -9,6 +9,7 @@ import { useRoomStore } from '@/client/client';
 import type { BattleRoom } from '@/client/room/battleRoom';
 import { useRoomID } from '@/UI/components/RoomContext';
 import { cn } from '@/lib/utils';
+import { logger } from '@/utils/logger';
 import './battle-tooltips.css';
 
 // Guard against tooltip crash when side.pokemon[index] is undefined
@@ -65,7 +66,7 @@ function updateMyPokemonFromRequest(battle: VisualBattle, line: string) {
             return output as unknown as NonNullable<typeof battle['myPokemon']>[number];
         });
     } catch (e) {
-        console.error('Failed to parse request for myPokemon', e);
+        logger.error('Failed to parse request for myPokemon', e);
     }
 }
 
@@ -77,7 +78,7 @@ window.toID = toID;
 const checkGlobals = () => {
     const ready = !!(window.BattlePokedex && window.BattleMovedex && window.BattleTeambuilderTable);
     if (!ready) {
-        console.log('Waiting for globals...', {
+        logger.debug('Waiting for globals...', {
             BattlePokedex: !!window.BattlePokedex,
             BattleMovedex: !!window.BattleMovedex,
             BattleTeambuilderTable: !!window.BattleTeambuilderTable,
@@ -170,7 +171,7 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
             const $log = $(logDiv);
             const battleId = (room.ID || 'battle-view') as ID;
 
-            console.log('Initializing VisualBattle for room', battleId);
+            logger.debug('Initializing VisualBattle for room', battleId);
 
             const battle = new VisualBattle({
                 id: battleId,
@@ -182,13 +183,13 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
 
             // Set perspective if room has one
             if (perspective) {
-                console.log('Setting viewpoint to', perspective);
+                logger.debug('Setting viewpoint to', perspective);
                 battle.setViewpoint(perspective);
             }
 
             // Feed initial log
             if (room.log && room.log.length > 0) {
-                console.log('Feeding initial log', room.log.length, 'lines');
+                logger.debug('Feeding initial log', room.log.length, 'lines');
                 room.log.forEach(line => {
                     updateMyPokemonFromRequest(battle, line);
                     battle.add(line);
@@ -210,7 +211,7 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
         return () => {
             cancelled = true;
             unsubPerspective();
-            console.log('Destroying VisualBattle');
+            logger.debug('Destroying VisualBattle');
             const battleDiv = shadow!.querySelector('.battle');
             const logDiv = shadow!.querySelector('.battle-log');
             if (battleDiv) $(battleDiv).empty();
@@ -227,7 +228,7 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
         // Catch up on any missed lines (race condition handling)
         if (room.log.length > logIndexRef.current) {
             const newLines = room.log.slice(logIndexRef.current);
-            console.log('Catching up logs', newLines.length);
+            logger.debug('Catching up logs', newLines.length);
             newLines.forEach(line => {
                 updateMyPokemonFromRequest(battle, line);
                 battle.add(line);

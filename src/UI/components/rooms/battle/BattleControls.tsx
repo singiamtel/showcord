@@ -1,5 +1,6 @@
 import type { Protocol } from '@pkmn/protocol';
 import { assert } from '@/lib/utils';
+import { logger } from '@/utils/logger';
 import { type HTMLAttributes } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faClock } from '@fortawesome/free-solid-svg-icons';
@@ -48,7 +49,7 @@ export default function BattleControls(_props: Readonly<HTMLAttributes<HTMLDivEl
         case 'wait':
             return <WaitRequest req={req} battle={battle} />;
         default:
-            console.error('Bug in BattleControls, unexpected request type', requestType);
+            logger.error('Bug in BattleControls, unexpected request type', requestType);
             return null;
         }
     };

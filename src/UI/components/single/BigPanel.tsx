@@ -8,6 +8,7 @@ import {
 import Home from '../../Home';
 import SettingsPage from '../../SettingsPage';
 import { cn } from '@/lib/utils';
+import { logger } from '@/utils/logger';
 import { useRoomStore } from '@/client/client';
 import { ErrorBoundary } from 'react-error-boundary';
 import { InfinitySpin } from 'react-loader-spinner';
@@ -35,7 +36,7 @@ function RoomContent({ room, className }: Readonly<{ room: Room; className?: str
     if (type === 'html') return <HtmlRoom className={className} />;
     if (type === 'pm') return <PmRoom className={className} />;
 
-    console.error('Unknown room type:', type);
+    logger.error('Unknown room type:', type);
     return null;
 }
 

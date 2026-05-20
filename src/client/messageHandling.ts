@@ -1,4 +1,5 @@
 import { toID } from '../utils/generic';
+import { logger } from '../utils/logger';
 import newMessage, { type Message } from './message';
 import { type Room } from './room/room';
 import { notificationsEngine } from './notifications';
@@ -55,7 +56,7 @@ export function addMessageToRoom(
     selectRoom?: (room: string) => void,
 ) {
     if (!room) {
-        console.warn('addMessageToRoom: room (' + roomID + ') is unknown. Message:', message);
+        logger.warn('addMessageToRoom: room (' + roomID + ') is unknown. Message:', message);
         return;
     }
     const opts = {

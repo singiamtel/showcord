@@ -4,6 +4,7 @@ import { Generations } from '@pkmn/data';
 import { Dex, type SideID } from '@pkmn/dex';
 import { Protocol } from '@pkmn/protocol';
 
+import { logger } from '../../utils/logger';
 import { Room, type RoomType } from './room';
 import newMessage, { type Message } from '../message';
 import { toast } from '@/components/ui/use-toast';
@@ -106,7 +107,7 @@ export class RealBattleRoom extends Room {
         try {
             this.battle.add(args, kwArgs);
         } catch (e) {
-            console.error('this.battle.add error', line, e);
+            logger.error('this.battle.add error', line, e);
         }
 
         if (this.battle.request) {

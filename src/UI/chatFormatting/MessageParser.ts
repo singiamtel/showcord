@@ -3,6 +3,7 @@ import { Fragment, createElement, type ReactElement } from 'react';
 import { Bold, FakeCommand, Greentext, InlineCode, Italic, Link, Spoiler, Strikethrough, Subscript, Superscript } from './chat';
 import { options } from './constants';
 import { RoomLink } from './RoomLink';
+import { logger } from '../../utils/logger';
 
 const tokens = {
     '`': 'code',
@@ -63,7 +64,7 @@ const cleanTag = (input: string, tag: keyof typeof elements) => {
         return input.replace(elements.roomlink.pattern, '$1');
     default:
         tag satisfies never;
-        console.error('Bug in chatFormatting/MessageParser, cleanTag: unknown tag', tag);
+        logger.error('Bug in chatFormatting/MessageParser, cleanTag: unknown tag', tag);
         return '';
     }
 };

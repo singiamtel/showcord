@@ -1,6 +1,7 @@
 import { useRoomStore, useMessageStore, useAppStore } from '../../../client/client';
 import { client } from '../../../client/singleton';
 import { Room } from '../../../client/room/room';
+import { logger } from '../../../utils/logger';
 import { loadCustomColors } from '../../../utils/namecolour';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
@@ -53,7 +54,7 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
             setCurrentRoom(roomObj);
             client.selectRoom(newRoom);
         } else {
-            console.warn('Trying to set room that does not exist (' + newRoom + ')');
+            logger.warn('Trying to set room that does not exist (' + newRoom + ')');
         }
     }, [setCurrentRoom, rooms, previousRooms, currentRoom]);
 
@@ -62,7 +63,7 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
         const unsubscribe = useAppStore.subscribe((state) => {
             const error = state.error;
             if (error && error !== previousError) {
-                console.warn('Received error from socket', error);
+                logger.warn('Received error from socket', error);
                 toast({
                     variant: 'destructive',
                     title: 'Error',

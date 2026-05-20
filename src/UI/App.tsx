@@ -12,6 +12,7 @@ import { useMediaQuery } from './hooks/useMediaQuery';
 import { SeoMetadata } from './components/SeoMetadata';
 import { RoomSwitcher } from './components/RoomSwitcher';
 import { Popup } from './components/Popup';
+import { logger } from '@/utils/logger';
 
 library.add(faBarChart, faPieChart);
 
@@ -29,9 +30,9 @@ export default function App() {
                 await import('@/client/room/RealBattleRoom');
                 // Prefetch the UI
                 await import('./components/rooms/BattleRoom');
-                console.debug('Battle resources prefetched successfully');
+                logger.debug('Battle resources prefetched successfully');
             } catch (e) {
-                console.warn('Failed to prefetch battle resources', e);
+                logger.warn('Failed to prefetch battle resources', e);
             }
         };
 

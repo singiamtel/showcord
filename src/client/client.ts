@@ -1,4 +1,5 @@
 import { toID } from '@/utils/generic';
+import { logger } from '@/utils/logger';
 import { Settings } from './settings';
 import { type Message } from './message';
 import { AuthenticationManager, type AuthenticationCallbacks } from './authentication';
@@ -128,7 +129,7 @@ export class Client {
                 this.autojoin(openRoomIds, true);
             },
             onLoginFailure: (error: string) => {
-                console.error('Login failed:', error);
+                logger.error('Login failed:', error);
             },
         };
         this.authManager = new AuthenticationManager(this.settings, authCallbacks);
@@ -166,7 +167,7 @@ export class Client {
             return;
         }
         if (import.meta.env.VITEST && !this.skipVitestCheck) {
-            console.debug('Running tests, skipping client start');
+            logger.debug('Running tests, skipping client start');
             return;
         }
 
@@ -186,12 +187,12 @@ export class Client {
             this.started = true;
         } catch (error) {
             if (error instanceof DOMException) {
-                console.warn('DOMException: ', error);
+                logger.warn('DOMException: ', error);
                 this.settings.serverURL = Settings.defaultServerURL;
                 this.settings.loginServerURL = Settings.defaultLoginServerURL;
                 this.runtime.reloadWindow();
             }
-            console.error(error);
+            logger.error(error);
         }
     }
 
@@ -232,11 +233,11 @@ export class Client {
                     message = `${roomObj.ID}|${message}`;
                 }
             } else {
-                console.warn('Sending message to non-existent room', room);
+                logger.warn('Sending message to non-existent room', room);
             }
         }
 
-        console.debug('[socket-input]\n', message);
+        logger.debug('[socket-input]\n', message);
         try {
             if (this.__parseSendMsg(ogMessage, raw)) return;
             this.socket.send(`${message}`);
@@ -337,7 +338,7 @@ export class Client {
                     this.socket.send(message);
                 }
             } catch (e) {
-                console.error('Failed to leave battle on cleanup:', battle.ID, e);
+                logger.error('Failed to leave battle on cleanup:', battle.ID, e);
             }
         }
     }
@@ -402,7 +403,7 @@ export class Client {
         }
         const room = this.room(roomID);
         if (!room) {
-            console.warn('Trying to leave non-existent room', roomID);
+            logger.warn('Trying to leave non-existent room', roomID);
             const error = `Trying to leave non-existent room ${roomID}`;
             useAppStore.getState().setError(error);
             return;
@@ -547,7 +548,7 @@ export class Client {
         };
 
         this.socket.onmessage = (event) => {
-            console.debug('[socket-output]', event.data);
+            logger.debug('[socket-output]', event.data);
             if (import.meta.env.VITEST) {
                 this.protocolParser.parseSocketChunk(event.data);
             } else {
@@ -557,10 +558,10 @@ export class Client {
             }
         };
         this.socket.onerror = (event) => {
-            console.error(event);
+            logger.error(event);
         };
         this.socket.onclose = (_) => {
-            console.warn('Socket closed, dispatching disconnect');
+            logger.warn('Socket closed, dispatching disconnect');
             useAppStore.getState().setConnected(false);
         };
     }
@@ -575,7 +576,7 @@ export class Client {
     ): boolean {
         if (message.startsWith('/inject ')) {
             const injectedData = message.slice(8);
-            console.debug('[inject] Injecting message:', injectedData);
+            logger.debug('[inject] Injecting message:', injectedData);
             this.protocolParser.parseSocketChunk(injectedData);
             return true;
         }

@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import TrainerCard from './TrainerCard';
+import { logger } from '@/utils/logger';
 import useClickOutside from '@/UI/hooks/useClickOutside';
 import { useClientContext } from '../useClientContext';
 import { TrainerCardContext } from './TrainerCardContext.types';
@@ -40,7 +41,7 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
             'data-username',
         )?.trim();
         if (!username) {
-            console.error('clickUsername: no username');
+            logger.error('clickUsername: no username');
             return;
         }
         clickedElementRef.current = clickedElement;

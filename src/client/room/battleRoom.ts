@@ -2,6 +2,7 @@ import type { Battle } from '@pkmn/client';
 import type { LogFormatter } from '@pkmn/view';
 import type { SideID } from '@pkmn/dex';
 import type { Message } from '../message';
+import { logger } from '../../utils/logger';
 import { Room, type RoomType } from './room';
 import type { RealBattleRoom } from './RealBattleRoom';
 
@@ -75,7 +76,7 @@ export class BattleRoom extends Room {
                 this.queue.forEach(fn => fn());
                 this.queue = [];
             } catch (err) {
-                console.error('Failed to load RealBattleRoom', err);
+                logger.error('Failed to load RealBattleRoom', err);
             }
         })();
     }

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { logger } from '@/utils/logger';
 import type { Room } from '../room/room';
 
 interface RoomStoreState {
@@ -53,7 +54,7 @@ export const useRoomStore = create<RoomStore>()((set) => ({
         set((state) => {
             const room = state.rooms.get(roomID);
             if (!room) {
-                console.warn(`updateRoom: room ${roomID} not found`);
+                logger.warn(`updateRoom: room ${roomID} not found`);
                 return state;
             }
 
