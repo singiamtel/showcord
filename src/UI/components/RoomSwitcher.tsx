@@ -69,9 +69,9 @@ function HighlightedName({ name, highlights }: Readonly<{ name: string; highligh
     return (
         <>
             {name.split('').map((char, i) => (
-                highlights[i]
-                    ? <mark key={i} className="bg-transparent text-blue-300 font-semibold">{char}</mark>
-                    : <span key={i}>{char}</span>
+                highlights[i] ?
+                    <mark key={i} className="bg-transparent text-blue-300 font-semibold">{char}</mark> :
+                    <span key={i}>{char}</span>
             ))}
         </>
     );
@@ -194,31 +194,35 @@ export function RoomSwitcher() {
                             selected ? 'bg-gray-451 dark:bg-gray-450' : 'hover:bg-gray-376 dark:hover:bg-gray-350'
                         }`;
 
-                        if (action.kind === 'room') return (
-                            <li key={action.room.ID} className={rowClass}
-                                onMouseEnter={() => setSelectedIndex(i)}
-                                onClick={() => activate(action)}
-                            >
-                                <span className="w-4 flex justify-center text-gray-175">
-                                    <RoomIcon type={action.room.type} id={action.room.ID} />
-                                </span>
-                                <span className="truncate">
-                                    <HighlightedName name={action.room.name} highlights={action.highlights} />
-                                </span>
-                            </li>
-                        );
+                        if (action.kind === 'room') {
+                            return (
+                                <li key={action.room.ID} className={rowClass}
+                                    onMouseEnter={() => setSelectedIndex(i)}
+                                    onClick={() => activate(action)}
+                                >
+                                    <span className="w-4 flex justify-center text-gray-175">
+                                        <RoomIcon type={action.room.type} id={action.room.ID} />
+                                    </span>
+                                    <span className="truncate">
+                                        <HighlightedName name={action.room.name} highlights={action.highlights} />
+                                    </span>
+                                </li>
+                            );
+                        }
 
-                        if (action.kind === 'join') return (
-                            <li key="__join" className={rowClass}
-                                onMouseEnter={() => setSelectedIndex(i)}
-                                onClick={() => activate(action)}
-                            >
-                                <span className="w-4 flex justify-center text-green-500">
-                                    <FontAwesomeIcon icon={faArrowRightToBracket} />
-                                </span>
-                                <span>Join <span className="font-semibold">{action.query}</span></span>
-                            </li>
-                        );
+                        if (action.kind === 'join') {
+                            return (
+                                <li key="__join" className={rowClass}
+                                    onMouseEnter={() => setSelectedIndex(i)}
+                                    onClick={() => activate(action)}
+                                >
+                                    <span className="w-4 flex justify-center text-green-500">
+                                        <FontAwesomeIcon icon={faArrowRightToBracket} />
+                                    </span>
+                                    <span>Join <span className="font-semibold">{action.query}</span></span>
+                                </li>
+                            );
+                        }
 
                         return (
                             <li key="__pm" className={rowClass}

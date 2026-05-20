@@ -27,7 +27,7 @@ const cmdsearchCache = new Map<string, string[]>();
 const LOCAL_COMMANDS = ['/part', '/join', '/me', '/highlight', '/hl', '/timer'];
 const SUBCOMMANDS: Record<string, string[]> = {
     '/highlight': ['add', 'roomadd', 'delete', 'roomdelete', 'list', 'roomlist', 'clear', 'roomclear'],
-    '/hl':        ['add', 'roomadd', 'delete', 'roomdelete', 'list', 'roomlist', 'clear', 'roomclear'],
+    '/hl': ['add', 'roomadd', 'delete', 'roomdelete', 'list', 'roomlist', 'clear', 'roomclear'],
 };
 
 // Returns the subcommand prefix if the input is in subcommand context, else null.
@@ -89,11 +89,11 @@ export default function ChatBox(props: Readonly<HTMLAttributes<HTMLDivElement>>)
     const formRef = useRef<HTMLFormElement>(null);
     const prevOffsetRef = useRef<SearchBoxOffset>({ width: 0, marginBottom: 0 });
 
-    const filtered = cmdSuggestions.length > 0
-        ? subCmdPrefix !== null
-            ? filterSubcmds(cmdSuggestions, input.slice(subCmdPrefix.length))
-            : filterCmds(cmdSuggestions, input)
-        : [];
+    const filtered = cmdSuggestions.length > 0 ?
+        subCmdPrefix !== null ?
+            filterSubcmds(cmdSuggestions, input.slice(subCmdPrefix.length)) :
+            filterCmds(cmdSuggestions, input) :
+        [];
 
     const clearSuggestions = useCallback(() => {
         setCmdSuggestions([]);
