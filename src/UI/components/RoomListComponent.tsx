@@ -37,7 +37,7 @@ export function RoomListComponent(
 
     return (
         <div
-            className="relative flex w-full cursor-pointer"
+            className="group relative flex w-full cursor-pointer"
         >
             <div
                 className={'flex flex-row hover-color w-full overflow-clip ' + (
@@ -87,11 +87,11 @@ export function RoomListComponent(
     );
 }
 
-function ClosingButton({ room, current }: Readonly<{ room: string, current: boolean }>) {
+function ClosingButton({ room }: Readonly<{ room: string, current: boolean }>) {
     const { client } = useClientContext();
     return (
         <button type="button" className="p-1" onClick={() => client.leaveRoom(room)}>
-            <AiOutlineClose className='hover:text-red-600 hover:opacity-100' opacity={current ? 0.8 : 0.2} />
+            <AiOutlineClose className='opacity-0 group-hover:opacity-100 hover:text-red-600' />
         </button>
     );
 }
