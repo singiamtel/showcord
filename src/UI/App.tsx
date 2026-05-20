@@ -48,7 +48,7 @@ export default function App() {
             <div className={`${isDark ? 'dark' : ''}`}>
                 <SeoMetadata />
                 <div
-                    className={`grid grid-cols-7 grid-rows-1 md:h-screen text-text dark:text-text-dark dark:bg-gray-300 w-screen dark:scheme-dark max-md:overflow-auto overflow-hidden`}
+                    className={`grid grid-cols-7 grid-rows-1 h-screen text-text dark:text-text-dark dark:bg-gray-300 w-screen dark:scheme-dark max-md:overflow-auto overflow-hidden`}
                 >
                     <TrainerCardProvider>
                         <Sidebar className="md:col-span-1 col-span-7 flex max-md:hidden" />
