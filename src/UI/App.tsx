@@ -1,6 +1,7 @@
 import { library } from '@fortawesome/fontawesome-svg-core';
 import { faBarChart, faPieChart } from '@fortawesome/free-solid-svg-icons';
 import { useEffect } from 'react';
+import { MotionConfig } from 'framer-motion';
 
 import Sidebar from './components/single/Sidebar';
 import BigPanel from './components/single/BigPanel';
@@ -42,18 +43,20 @@ export default function App() {
     }, []);
 
     return (
-        <div className={`${isDark ? 'dark' : ''}`}>
-            <SeoMetadata />
-            <div
-                className={`grid grid-cols-7 grid-rows-1 md:h-screen text-text dark:text-text-dark dark:bg-gray-300 w-screen dark:scheme-dark max-md:overflow-auto overflow-hidden`}
-            >
-                <TrainerCardProvider>
-                    <Sidebar className="md:col-span-1 col-span-7 flex max-md:hidden" />
-                    <BigPanel className="md:col-span-6 col-span-7" />
-                </TrainerCardProvider>
+        <MotionConfig reducedMotion="user">
+            <div className={`${isDark ? 'dark' : ''}`}>
+                <SeoMetadata />
+                <div
+                    className={`grid grid-cols-7 grid-rows-1 md:h-screen text-text dark:text-text-dark dark:bg-gray-300 w-screen dark:scheme-dark max-md:overflow-auto overflow-hidden`}
+                >
+                    <TrainerCardProvider>
+                        <Sidebar className="md:col-span-1 col-span-7 flex max-md:hidden" />
+                        <BigPanel className="md:col-span-6 col-span-7" />
+                    </TrainerCardProvider>
+                </div>
+                <Toaster />
+                <RoomSwitcher />
             </div>
-            <Toaster />
-            <RoomSwitcher />
-        </div>
+        </MotionConfig>
     );
 }
