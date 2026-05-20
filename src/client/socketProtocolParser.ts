@@ -455,9 +455,11 @@ export class SocketProtocolParser {
             }
         }
             break;
+        case 'popup':
+            useAppStore.getState().setPopup(args.slice(1).join('|'));
+            break;
         case 'customgroups':
         case 'notify':
-        case 'popup':
         case 'nametaken':
             console.error('Currently unhandled cmd', args);
             break;

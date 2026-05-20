@@ -10,7 +10,8 @@ export type MessageType =
   | 'error'
   | 'roleplay'
   | 'uhtmlchange'
-  | 'challenge';
+  | 'challenge'
+  | 'popup';
 
 export type Message = {
     content: string;
