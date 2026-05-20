@@ -203,7 +203,7 @@ export class Settings {
             if (e[1].type === 'chat') {
                 result.push({
                     ID: e[1].ID,
-                    lastReadTime: e[1].lastReadTime,
+                    lastReadTime: new Date(),
                     open: e[1].open,
                 });
             }

@@ -19,6 +19,18 @@ function createParser(): SocketProtocolParser {
         forceHighlightMsg: () => false,
         shouldAutoSelect: () => false,
         selectRoom: vi.fn(),
+        addMessage: (roomID, message) => {
+            useMessageStore.getState().addMessage(roomID, message, { selected: false, selfSent: false, roomType: 'chat' });
+        },
+        addUHTML: (roomID, message) => {
+            useMessageStore.getState().addUHTML(roomID, message, { selected: false, selfSent: false });
+        },
+        changeUHTML: (roomID, message) => {
+            useMessageStore.getState().changeUHTML(roomID, message);
+        },
+        endChallenge: (roomID) => {
+            useMessageStore.getState().endChallenge(roomID);
+        },
     };
 
     const queryHandlers = new QueryHandlers(settings, { send: vi.fn() });

@@ -1,4 +1,4 @@
-import { type MouseEventHandler, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import TrainerCard from './TrainerCard';
 import useClickOutside from '@/UI/hooks/useClickOutside';
 import { useClientContext } from '../useClientContext';
@@ -27,7 +27,7 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
 
     const { isOutside: clickedOutside } = useClickOutside(wrapperRef);
 
-    const clickUsername: MouseEventHandler<HTMLAnchorElement> = (e) => {
+    const clickUsername = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         if (!e) return;
         if (!(e.target instanceof HTMLElement)) return;
         const clickedElement = e.target;

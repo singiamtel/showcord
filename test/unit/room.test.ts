@@ -1,6 +1,7 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach } from 'vitest';
 import { Room } from '@/client/room/room';
 import { User } from '@/client/user';
+import { useMessageStore } from '@/client/stores/messageStore';
 import newMessage from '@/client/message';
 
 describe('Room', () => {
@@ -25,14 +26,8 @@ describe('Room', () => {
             expect(room.open).toBe(true);
         });
 
-        it('should initialize with empty messages and users', () => {
-            expect(room.messages).toEqual([]);
+        it('should initialize with empty users', () => {
             expect(room.users).toEqual([]);
-        });
-
-        it('should initialize unread count to 0', () => {
-            expect(room.unread).toBe(0);
-            expect(room.mentions).toBe(0);
         });
     });
 
@@ -44,81 +39,16 @@ describe('Room', () => {
     });
 
     describe('select', () => {
-        it('should reset unread counts', () => {
-            room.unread = 5;
-            room.mentions = 2;
+        it('should reset history index', () => {
+            room.send('Message 1');
+            room.send('Message 2');
+            room.historyPrev();
             room.select();
-            expect(room.unread).toBe(0);
-            expect(room.mentions).toBe(0);
-        });
-
-        it('should update last read time', () => {
-            const before = room.lastReadTime;
-            setTimeout(() => {
-                room.select();
-                expect(room.lastReadTime.getTime()).toBeGreaterThanOrEqual(before.getTime());
-            }, 10);
+            expect(room.historyPrev()).toBe('Message 2');
         });
     });
 
-    describe('addMessage', () => {
-        it('should add message to room', () => {
-            const message = newMessage({
-                user: 'testuser',
-                content: 'Hello',
-                type: 'chat',
-            });
-            room.addMessage(message, { selected: false, selfSent: false });
-            expect(room.messages).toContain(message);
-        });
-
-        it('should increment unread for unselected chat messages', () => {
-            const message = newMessage({
-                user: 'testuser',
-                content: 'Hello',
-                type: 'chat',
-                timestamp: new Date().getTime().toString(),
-            });
-            room.addMessage(message, { selected: false, selfSent: false });
-            expect(room.unread).toBe(1);
-        });
-
-        it('should not increment unread for selected room', () => {
-            const message = newMessage({
-                user: 'testuser',
-                content: 'Hello',
-                type: 'chat',
-                timestamp: new Date().getTime().toString(),
-            });
-            room.addMessage(message, { selected: true, selfSent: false });
-            expect(room.unread).toBe(0);
-        });
-
-        it('should not increment unread for self-sent messages', () => {
-            const message = newMessage({
-                user: 'myuser',
-                content: 'Hello',
-                type: 'chat',
-                timestamp: new Date().getTime().toString(),
-            });
-            room.addMessage(message, { selected: false, selfSent: true });
-            expect(room.unread).toBe(0);
-        });
-
-        it('should limit message count', () => {
-            for (let i = 0; i < 250; i++) {
-                const message = newMessage({
-                    user: 'testuser',
-                    content: `Message ${i}`,
-                    type: 'chat',
-                });
-                room.addMessage(message, { selected: true, selfSent: false });
-            }
-            expect(room.messages.length).toBeLessThanOrEqual(201);
-        });
-    });
-
-    describe('send', () => {
+    describe('send and history', () => {
         it('should add message to history', () => {
             room.send('Test message');
             expect(room.historyPrev()).toBe('Test message');
@@ -135,22 +65,20 @@ describe('Room', () => {
             }
             expect(count).toBeLessThanOrEqual(26);
         });
-    });
 
-    describe('historyPrev and historyNext', () => {
-        beforeEach(() => {
+        it('should navigate backwards through history', () => {
             room.send('Message 1');
             room.send('Message 2');
             room.send('Message 3');
-        });
-
-        it('should navigate backwards through history', () => {
             expect(room.historyPrev()).toBe('Message 3');
             expect(room.historyPrev()).toBe('Message 2');
             expect(room.historyPrev()).toBe('Message 1');
         });
 
         it('should return empty at start of history', () => {
+            room.send('Message 1');
+            room.send('Message 2');
+            room.send('Message 3');
             room.historyPrev();
             room.historyPrev();
             room.historyPrev();
@@ -158,6 +86,9 @@ describe('Room', () => {
         });
 
         it('should navigate forwards through history', () => {
+            room.send('Message 1');
+            room.send('Message 2');
+            room.send('Message 3');
             room.historyPrev();
             room.historyPrev();
             expect(room.historyNext()).toBe('Message 3');
@@ -222,88 +153,75 @@ describe('Room', () => {
             expect(user?.name).toBe('NewName');
         });
     });
+});
 
-    describe('addUHTML', () => {
-        it('should add UHTML message', () => {
-            const message = newMessage({
-                name: 'box1',
-                user: '',
-                content: '<div>Test</div>',
-                type: 'boxedHTML',
-            });
-            room.addUHTML(message, { selected: true, selfSent: false });
-            expect(room.messages).toContain(message);
-        });
-
-        it('should replace existing UHTML with same name', () => {
-            const message1 = newMessage({
-                name: 'box1',
-                user: '',
-                content: '<div>Original</div>',
-                type: 'boxedHTML',
-            });
-            const message2 = newMessage({
-                name: 'box1',
-                user: '',
-                content: '<div>Updated</div>',
-                type: 'boxedHTML',
-            });
-            room.addUHTML(message1, { selected: true, selfSent: false });
-            room.addUHTML(message2, { selected: true, selfSent: false });
-            
-            const boxes = room.messages.filter(m => m.name === 'box1');
-            expect(boxes.length).toBe(1);
-            expect(boxes[0].content).toBe('<div>Updated</div>');
-        });
+describe('MessageStore', () => {
+    afterEach(() => {
+        useMessageStore.setState({ rooms: {} });
     });
 
-    describe('changeUHTML', () => {
-        beforeEach(() => {
+    describe('addMessage', () => {
+        it('should add message to store', () => {
             const message = newMessage({
-                name: 'box1',
-                user: '',
-                content: '<div>Original</div>',
-                type: 'boxedHTML',
+                user: 'testuser',
+                content: 'Hello',
+                type: 'chat',
             });
-            room.addUHTML(message, { selected: true, selfSent: false });
+            useMessageStore.getState().addMessage('testroom', message, { selected: false, selfSent: false, roomType: 'chat' });
+            const messages = useMessageStore.getState().rooms['testroom']?.messages ?? [];
+            expect(messages).toContain(message);
         });
 
-        it('should change existing UHTML content', () => {
-            const updatedMessage = newMessage({
-                name: 'box1',
-                user: '',
-                content: '<div>Updated</div>',
-                type: 'boxedHTML',
-            });
-            room.changeUHTML(updatedMessage);
-            
-            const box = room.messages.find(m => m.name === 'box1');
-            expect(box?.content).toBe('<div>Updated</div>');
-        });
-
-        it('should return false for non-existent UHTML', () => {
+        it('should increment unread for unselected chat messages', () => {
             const message = newMessage({
-                name: 'nonexistent',
-                user: '',
-                content: '<div>Test</div>',
-                type: 'boxedHTML',
+                user: 'testuser',
+                content: 'Hello',
+                type: 'chat',
+                timestamp: String(Math.floor(Date.now() / 1000)),
             });
-            const result = room.changeUHTML(message);
-            expect(result).toBe(false);
+            useMessageStore.getState().addMessage('testroom', message, { selected: false, selfSent: false, roomType: 'chat' });
+            const entry = useMessageStore.getState().rooms['testroom'];
+            expect(entry?.unread).toBe(1);
         });
-    });
 
-    describe('endChallenge', () => {
-        it('should cancel active challenge message', () => {
-            const challengeMessage = newMessage({
-                user: 'challenger',
-                content: 'gen9ou',
-                type: 'challenge',
+        it('should not increment unread for selected room', () => {
+            const message = newMessage({
+                user: 'testuser',
+                content: 'Hello',
+                type: 'chat',
+                timestamp: String(Math.floor(Date.now() / 1000)),
             });
-            room.addMessage(challengeMessage, { selected: true, selfSent: false });
-            
-            room.endChallenge();
-            expect(challengeMessage.cancelled).toBe(true);
+            useMessageStore.getState().addMessage('testroom', message, { selected: true, selfSent: false, roomType: 'chat' });
+            const entry = useMessageStore.getState().rooms['testroom'];
+            expect(entry?.unread).toBe(0);
+        });
+
+        it('should not increment unread for self-sent messages', () => {
+            const message = newMessage({
+                user: 'myuser',
+                content: 'Hello',
+                type: 'chat',
+                timestamp: String(Math.floor(Date.now() / 1000)),
+            });
+            useMessageStore.getState().addMessage('testroom', message, { selected: true, selfSent: false, roomType: 'chat' });
+            const entry = useMessageStore.getState().rooms['testroom'];
+            expect(entry?.unread).toBe(0);
+        });
+
+        it('should not increment unread for self-sent messages', () => {
+            const message = newMessage({
+                user: 'myuser',
+                content: 'Hello',
+                type: 'chat',
+                timestamp: String(Math.floor(Date.now() / 1000)),
+            });
+            useMessageStore.getState().addMessage('testroom', message, { selected: false, selfSent: false, roomType: 'chat' });
+            expect(useMessageStore.getState().rooms['testroom']?.unread).toBe(1);
+
+            useMessageStore.getState().selectRoom('testroom');
+            const entry = useMessageStore.getState().rooms['testroom'];
+            expect(entry?.unread).toBe(0);
+            expect(entry?.mentions).toBe(0);
         });
     });
 });

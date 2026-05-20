@@ -1,3 +1,4 @@
+import type { Message } from '../message';
 import { Room, type RoomType } from './room';
 
 // Defines a proxy that loads the heavy BattleRoom implementation lazily.
@@ -87,7 +88,7 @@ export class BattleRoom extends Room {
     /**
      * Returns whether a new message was added to the battle.
      */
-    feedBattle(line: string): boolean {
+    feedBattle(line: string): Message | null {
         this.log.push(line);
         if (this.onLogUpdate) this.onLogUpdate(line);
 
@@ -103,7 +104,7 @@ export class BattleRoom extends Room {
             this.queue.push(() => {
                 if (this.realRoom) this.realRoom.feedBattle(line);
             });
-            return false;
+            return null;
         }
     }
 }

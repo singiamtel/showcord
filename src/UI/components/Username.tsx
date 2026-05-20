@@ -11,7 +11,7 @@ export function Username(
         bold?: boolean;
         colorless?: boolean;
         className?: string;
-        onClick?: () => void;
+        onClick?: (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => void;
     }>,
 ) {
     const { clickUsername } = useTrainerCard();

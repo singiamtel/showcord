@@ -1,6 +1,7 @@
 import { toID } from '../utils/generic';
 import { Room } from './room/room';
 import { useRoomStore } from './stores/roomStore';
+import { useMessageStore } from './stores/messageStore';
 import { useNotificationStore, type RoomNotification as RoomNotifications } from './stores/notificationStore';
 import type { Settings } from './settings';
 
@@ -94,6 +95,7 @@ export function __createPM(user: string, getRoom: (roomID: string) => Room | und
 export function selectRoom(roomid: string, getRoom: (roomID: string) => Room | undefined) {
     getRoom(roomid)?.select();
     useRoomStore.getState().selectRoom(roomid, getRoom(roomid));
+    useMessageStore.getState().selectRoom(roomid);
     useNotificationStore.getState().clearNotifications(roomid);
 }
 
@@ -117,8 +119,12 @@ export function createPermanentRooms(permanentRooms: readonly { ID: string; name
 }
 
 export function getNotifications(getRooms: () => Map<Room['ID'], Room>): Map<string, RoomNotifications> {
+    const messageRooms = useMessageStore.getState().rooms;
     return new Map(
-        [...getRooms()].map(([roomID, room]) => [roomID, { unread: room.unread, mentions: room.mentions }]),
+        [...getRooms()].map(([roomID, _room]) => {
+            const entry = messageRooms[roomID];
+            return [roomID, { unread: entry?.unread ?? 0, mentions: entry?.mentions ?? 0 }];
+        }),
     );
 }
 

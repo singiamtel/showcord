@@ -1,7 +1,7 @@
 import { toID } from '@/utils/generic';
-import type { Message } from '../message';
 import { rankOrder, type RankSymbol, type User } from '../user';
 import { useRoomStore } from '../stores/roomStore';
+import { useMessageStore } from '../stores/messageStore';
 
 export const roomTypes = ['chat', 'battle', 'pm', 'permanent', 'html'] as const;
 export type RoomType = typeof roomTypes[number];
@@ -10,18 +10,13 @@ export class Room {
     type: RoomType;
     ID: string;
     name: string;
-    lastReadTime: Date = new Date();
-    lastReadTimeMargin = 1000; // 1 second
-    unread = 0;
-    mentions = 0;
     connected = false;
     open = false;
-    messages: Message[] = [];
     users: User[] = [];
-    private readonly messageLimit = 200;
     private lastSentMessages: string[] = [];
     private readonly lastSentMessageLimit = 25;
     private prevIndex = 0;
+
     constructor(
         { ID, name, type, connected, open }: {
             ID: string;
@@ -51,46 +46,9 @@ export class Room {
         }
         return this.lastSentMessages[++this.prevIndex];
     }
+
     select() {
-        this.lastReadTime = new Date();
-        this.mentions = 0;
-        this.unread = 0;
         this.prevIndex = this.lastSentMessages.length;
-    }
-
-    endChallenge() {
-        const challengeMessage = this.messages.find((m) => m.type === 'challenge' && !m.cancelled);
-        if (!challengeMessage) {
-            console.warn(
-                `endChallenge(): Tried to end non-existent challenge message for room ${this.name}`,
-            );
-            return;
-        }
-        // this.messages.splice(this.messages.indexOf(challengeMessage), 1);
-        challengeMessage.cancelled = true;
-    }
-
-    addMessage(
-        message: Message,
-        { selected, selfSent }: { selected: boolean; selfSent: boolean },
-    ): void {
-        if (this.messages.length > this.messageLimit) {
-            this.messages.shift();
-        }
-        if (selected) {
-            const date = new Date();
-            this.lastReadTime = date;
-        }
-        if (
-            ['chat', 'pm'].includes(message.type) &&
-            !selfSent &&
-            !selected &&
-            message.timestamp &&
-            message.timestamp > new Date(this.lastReadTime.getTime() - this.lastReadTimeMargin)
-        ) {
-            this.unread++;
-        }
-        this.messages.push(message);
     }
 
     send(message: string) {
@@ -110,39 +68,7 @@ export class Room {
         this.name = name;
     }
 
-    addUHTML(
-        message: Message,
-        { selected, selfSent }: { selected: boolean; selfSent: boolean },
-    ) {
-        const previousMessage = this.messages.find((m) => m.name === message.name);
-        if (previousMessage) {
-            this.messages.splice(this.messages.indexOf(previousMessage), 1);
-        }
-        this.addMessage(message, { selected, selfSent });
-    }
-
-    changeUHTML(
-        message: Message,
-    ) {
-        if (!message.name) {
-            console.warn(
-                `changeUHTML(): Received unnamed UHTML for room ${this.name}`,
-            );
-            return false;
-        }
-        const prevMsg = this.messages.find((m) => m.name === message.name);
-        if (!prevMsg) {
-            console.warn(
-                `changeUHTML(): Tried to change non-existent uhtml message named ${message.name} for room ${this.name}`,
-            );
-            return false;
-        }
-        prevMsg.content = message.content;
-        return true;
-    }
-
     private rankSorter = (a: User, b: User) => {
-    // the symbols should go first, then the spaces, then the interrobangs
         const aSymbol = a.name.charAt(0) as RankSymbol;
         const bSymbol = b.name.charAt(0) as RankSymbol;
         if (rankOrder[aSymbol] !== rankOrder[bSymbol]) {
@@ -151,7 +77,7 @@ export class Room {
                 return result;
             }
         }
-        return a.name.localeCompare(b.name, 'en', { sensitivity: 'base' }); // TODO: This fucks up custom ranks, like emojis made with /forcepromote
+        return a.name.localeCompare(b.name, 'en', { sensitivity: 'base' });
     };
 
     addUser(user: User) {
@@ -180,20 +106,7 @@ export class Room {
         useRoomStore.getState().notifyUsersUpdate();
     }
 
-    runHighlight(callback: (roomID: string, content: Message) => boolean): void {
-        for (const message of this.messages) {
-            if (message.type === 'chat') {
-                callback(this.ID, message);
-            }
-        }
-    }
-
     clearNotifications() {
-        this.unread = 0;
-        this.mentions = 0;
-    }
-
-    checkMessageStaleness(message: Message): boolean {
-        return message.timestamp ? message.timestamp < new Date(this.lastReadTime.getTime() - this.lastReadTimeMargin) : true;
+        useMessageStore.getState().selectRoom(this.ID);
     }
 }

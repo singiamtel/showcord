@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
-import { Client, useAppStore } from '@/client/client';
+import { Client, useAppStore, useMessageStore } from '@/client/client';
 import { createClientHarness, type ClientHarness } from '../harness/clientHarness';
 
 describe('Client Integration Tests', () => {
@@ -31,7 +31,7 @@ describe('Client Integration Tests', () => {
 
         it('should handle socket close event', () => {
             mockWebSocket.triggerClose();
-            
+
             expect(useAppStore.getState().isConnected).toBe(false);
         });
     });
@@ -39,7 +39,7 @@ describe('Client Integration Tests', () => {
     describe('Room Operations', () => {
         it('should create room on |init| message', () => {
             mockServer.joinRoom('lobby', 'chat');
-            
+
             const room = client.room('lobby');
             expect(room).toBeDefined();
             expect(room?.ID).toBe('lobby');
@@ -49,7 +49,7 @@ describe('Client Integration Tests', () => {
         it('should set room title on |title| message', () => {
             mockServer.joinRoom('lobby', 'chat');
             mockServer.setRoomTitle('lobby', 'Test Lobby');
-            
+
             const room = client.room('lobby');
             expect(room?.name).toBe('Test Lobby');
         });
@@ -57,7 +57,7 @@ describe('Client Integration Tests', () => {
         it('should add users to room on |users| message', () => {
             mockServer.joinRoom('lobby', 'chat');
             mockServer.sendUserList('lobby', [' user1', '+user2', '@user3']);
-            
+
             const room = client.room('lobby');
             expect(room?.users.length).toBe(3);
         });
@@ -65,7 +65,7 @@ describe('Client Integration Tests', () => {
         it('should handle user join', () => {
             mockServer.joinRoom('lobby', 'chat');
             mockServer.userJoin('lobby', ' newuser');
-            
+
             const room = client.room('lobby');
             expect(room?.users.some(u => u.ID === 'newuser')).toBe(true);
         });
@@ -74,7 +74,7 @@ describe('Client Integration Tests', () => {
             mockServer.joinRoom('lobby', 'chat');
             mockServer.sendUserList('lobby', [' testuser']);
             mockServer.userLeave('lobby', ' testuser');
-            
+
             const room = client.room('lobby');
             expect(room?.users.some(u => u.ID === 'testuser')).toBe(false);
         });
@@ -82,7 +82,7 @@ describe('Client Integration Tests', () => {
         it('should remove room on |deinit| message', () => {
             mockServer.joinRoom('testroom', 'chat');
             expect(client.room('testroom')).toBeDefined();
-            
+
             mockServer.deinitRoom('testroom');
             expect(client.room('testroom')).toBeUndefined();
         });
@@ -94,7 +94,7 @@ describe('Client Integration Tests', () => {
         it('should remove room on noinit with nonexistent', () => {
             mockServer.joinRoom('fakeroom', 'chat');
             mockServer.sendNoInit('fakeroom', 'nonexistent', 'Room does not exist');
-            
+
             expect(client.room('fakeroom')).toBeUndefined();
         });
     });
@@ -107,45 +107,45 @@ describe('Client Integration Tests', () => {
         it('should handle timestamped chat messages', () => {
             const timestamp = Math.floor(Date.now() / 1000).toString();
             mockServer.sendChat('lobby', 'testuser', 'Hello world!', timestamp);
-            
-            const room = client.room('lobby');
-            expect(room?.messages.length).toBeGreaterThan(0);
-            
-            const lastMessage = room?.messages[room.messages.length - 1];
+
+            const messages = useMessageStore.getState().rooms['lobby']?.messages ?? [];
+            expect(messages.length).toBeGreaterThan(0);
+
+            const lastMessage = messages[messages.length - 1];
             expect(lastMessage?.user).toBe('testuser');
             expect(lastMessage?.content).toBe('Hello world!');
         });
 
         it('should handle non-timestamped chat messages', () => {
             mockServer.sendChat('lobby', 'testuser', 'Hello!');
-            
-            const room = client.room('lobby');
-            const lastMessage = room?.messages[room.messages.length - 1];
+
+            const messages = useMessageStore.getState().rooms['lobby']?.messages ?? [];
+            const lastMessage = messages[messages.length - 1];
             expect(lastMessage?.user).toBe('testuser');
         });
 
         it('should handle raw HTML messages', () => {
             mockServer.sendRaw('lobby', '<div>Test HTML</div>');
-            
-            const room = client.room('lobby');
-            const lastMessage = room?.messages[room.messages.length - 1];
+
+            const messages = useMessageStore.getState().rooms['lobby']?.messages ?? [];
+            const lastMessage = messages[messages.length - 1];
             expect(lastMessage?.type).toBe('rawHTML');
             expect(lastMessage?.content).toBe('<div>Test HTML</div>');
         });
 
         it('should handle error messages', () => {
             mockServer.sendError('lobby', 'Test error message');
-            
-            const room = client.room('lobby');
-            const lastMessage = room?.messages[room.messages.length - 1];
+
+            const messages = useMessageStore.getState().rooms['lobby']?.messages ?? [];
+            const lastMessage = messages[messages.length - 1];
             expect(lastMessage?.type).toBe('error');
         });
 
         it('should handle uhtml messages', () => {
             mockServer.sendUHTML('lobby', 'testbox', '<div>Test Box</div>');
-            
-            const room = client.room('lobby');
-            const lastMessage = room?.messages[room.messages.length - 1];
+
+            const messages = useMessageStore.getState().rooms['lobby']?.messages ?? [];
+            const lastMessage = messages[messages.length - 1];
             expect(lastMessage?.name).toBe('testbox');
             expect(lastMessage?.type).toBe('boxedHTML');
         });
@@ -153,9 +153,9 @@ describe('Client Integration Tests', () => {
         it('should handle uhtmlchange messages', () => {
             mockServer.sendUHTML('lobby', 'testbox', '<div>Original</div>');
             mockServer.sendUHTMLChange('lobby', 'testbox', '<div>Updated</div>');
-            
-            const room = client.room('lobby');
-            const boxMessage = room?.messages.find(m => m.name === 'testbox');
+
+            const messages = useMessageStore.getState().rooms['lobby']?.messages ?? [];
+            const boxMessage = messages.find(m => m.name === 'testbox');
             expect(boxMessage?.content).toBe('<div>Updated</div>');
         });
     });
@@ -164,7 +164,7 @@ describe('Client Integration Tests', () => {
         it('should create PM room on incoming PM', () => {
             mockServer.updateUser('testuser', '1', 'lucas');
             mockServer.sendPM('sender', 'testuser', 'Hey there!');
-            
+
             const pmRoom = client.room('pm-sender');
             expect(pmRoom).toBeDefined();
             expect(pmRoom?.type).toBe('pm');
@@ -173,7 +173,7 @@ describe('Client Integration Tests', () => {
         it('should route outgoing PM correctly', () => {
             mockServer.updateUser('testuser', '1', 'lucas');
             mockServer.sendPM('testuser', 'receiver', 'Hello!');
-            
+
             const pmRoom = client.room('pm-receiver');
             expect(pmRoom).toBeDefined();
         });
@@ -225,7 +225,7 @@ describe('Client Integration Tests', () => {
                 ',1,Random Battle',
                 'gen9randombattle,[Gen 9] Random Battle',
             ];
-            
+
             mockServer.sendFormats(formats);
         });
     });

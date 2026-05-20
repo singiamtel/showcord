@@ -5,7 +5,9 @@ import { AuthenticationManager, type AuthenticationCallbacks } from './authentic
 import { useRoomStore } from './stores/roomStore';
 import { useAppStore } from './stores/appStore';
 import { useNotificationStore, type RoomNotification as RoomNotifications } from './stores/notificationStore';
-import { highlightMsg, addMessageToRoom as addMsgToRoom } from './messageHandling';
+import { highlightMsg, shouldNotify } from './messageHandling';
+import { notificationsEngine } from './notifications';
+import { useMessageStore } from './stores/messageStore';
 import {
     openRoom as openRoomInternal,
     removeRoom as removeRoomInternal,
@@ -145,6 +147,10 @@ export class Client {
                 forceHighlightMsg: this.forceHighlightMsg.bind(this),
                 shouldAutoSelect: this.consumeExplicitJoin.bind(this),
                 selectRoom: this.selectRoom.bind(this),
+                addMessage: (roomID, msg) => this.addMessage(roomID, msg),
+                addUHTML: (roomID, msg) => this.addUHTML(roomID, msg),
+                changeUHTML: (roomID, msg) => this.changeUHTML(roomID, msg),
+                endChallenge: (roomID) => this.endChallenge(roomID),
             },
             this.queryHandlers
         );
@@ -244,6 +250,54 @@ export class Client {
 
     room(roomID: string) {
         return this.rooms.get(roomID);
+    }
+
+    getMessages(roomID: string): Message[] {
+        return useMessageStore.getState().rooms[roomID]?.messages ?? [];
+    }
+
+    addMessage(roomID: string, message: Message, opts?: { selfSent?: boolean }) {
+        const room = this.room(roomID);
+        highlightMsg(roomID, message, this.settings);
+        const selected = this.selectedRoom === roomID;
+        const selfSent = opts?.selfSent ?? toID(this.settings.username) === toID(message.user);
+        const msgOpts = {
+            selected,
+            selfSent,
+            roomType: room?.type ?? 'chat',
+        };
+
+        if (message.name) {
+            useMessageStore.getState().addUHTML(roomID, message, msgOpts);
+        } else {
+            useMessageStore.getState().addMessage(roomID, message, msgOpts);
+        }
+
+        if (room && shouldNotify(roomID, room.type, message, this.selectedRoom, this.settings.username)) {
+            notificationsEngine.sendNotification({
+                user: message.user ?? '',
+                message: message.content,
+                room: roomID,
+                roomType: room.type,
+            }, this.selectedRoom, this.selectRoom.bind(this));
+            useNotificationStore.getState().addMention(roomID);
+        }
+    }
+
+    addUHTML(roomID: string, message: Message) {
+        const selected = this.selectedRoom === roomID;
+        useMessageStore.getState().addUHTML(roomID, message, {
+            selected,
+            selfSent: false,
+        });
+    }
+
+    changeUHTML(roomID: string, message: Message) {
+        useMessageStore.getState().changeUHTML(roomID, message);
+    }
+
+    endChallenge(roomID: string) {
+        useMessageStore.getState().endChallenge(roomID);
     }
 
     setTheme(theme: 'light' | 'dark' | 'system') {
@@ -469,9 +523,14 @@ export class Client {
 
     private setUsername(username: string) {
         this.settings.username = username;
-        this.rooms.forEach(async (room) => {
-            room.runHighlight(this.forceHighlightMsg.bind(this));
-        });
+        const messagesMap = useMessageStore.getState().rooms;
+        for (const [roomID, entry] of Object.entries(messagesMap)) {
+            for (const message of entry.messages) {
+                if (message.type === 'chat') {
+                    this.forceHighlightMsg(roomID, message);
+                }
+            }
+        }
     }
 
     private __setupSocketListeners() {
@@ -526,16 +585,7 @@ export class Client {
             {
                 getSelectedRoom: () => this.selectedRoom,
                 addMessageToRoom: (roomID: string, msg: Message) => {
-                    highlightMsg(roomID, msg, this.settings);
-                    const room = this.room(roomID);
-                    addMsgToRoom(
-                        roomID,
-                        msg,
-                        room,
-                        this.selectedRoom,
-                        this.settings.username,
-                        this.selectRoom.bind(this)
-                    );
+                    this.addMessage(roomID, msg);
                 },
             }
         );

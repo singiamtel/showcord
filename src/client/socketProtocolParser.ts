@@ -1,17 +1,16 @@
 import { Protocol } from '@pkmn/protocol';
 import { toID } from '../utils/generic';
-import newMessage from './message';
+import newMessage, { type Message } from './message';
 import { Room } from './room/room';
 import { User } from './user';
 import { BattleRoom } from './room/battleRoom';
 import { useRoomStore } from './stores/roomStore';
 import { useUserStore } from './stores/userStore';
-import { useMessageStore } from './stores/messageStore';
 import { useAppStore } from './stores/appStore';
 import { useBattleStore } from './stores/battleStore';
 import { assert } from '@/lib/utils';
 import type { Settings } from './settings';
-import { parseCMessage, parseCMessageContent, addMessageToRoom, highlightMsg } from './messageHandling';
+import { parseCMessage, parseCMessageContent, highlightMsg } from './messageHandling';
 import { addRoom, selectRoom, __createPM } from './roomManagement';
 import type { QueryHandlers } from './queryHandlers';
 import formatParser, { type Formats } from './formatParser';
@@ -25,12 +24,14 @@ export interface ProtocolParserCallbacks {
     forceHighlightMsg: (roomid: string, message: any) => boolean;
     shouldAutoSelect?: (roomID: string) => boolean;
     selectRoom: (roomID: string) => void;
+    addMessage: (roomID: string, message: Message) => void;
+    addUHTML: (roomID: string, message: Message) => void;
+    changeUHTML: (roomID: string, message: Message) => void;
+    endChallenge: (roomID: string) => void;
 }
 
 export class SocketProtocolParser {
     private formats: Formats | undefined;
-    private batchingMessageStoreUpdates = false;
-    private touchedRooms = new Set<string>();
 
     constructor(
         private settings: Settings,
@@ -41,15 +42,11 @@ export class SocketProtocolParser {
     parseSocketChunk(chunk: string) {
         const split = chunk.split('\n');
         const roomID = split[0].startsWith('>') ? split[0].slice(1) : 'lobby';
-        this.batchingMessageStoreUpdates = true;
-        this.touchedRooms.clear();
         for (const [idx, line] of split.entries()) {
             if (line === '') continue;
             if (idx === 0 && line.startsWith('>')) {
                 continue;
             }
-            // parseBattleLine strips JSON arrays starting with '[' as kwArgs,
-            // so intercept cmdsearch before it reaches the parser.
             if (line.startsWith('|queryresponse|cmdsearch|')) {
                 try {
                     const commands = JSON.parse(line.slice('|queryresponse|cmdsearch|'.length));
@@ -62,7 +59,10 @@ export class SocketProtocolParser {
             const { args, kwArgs } = Protocol.parseBattleLine(line);
             const room = this.callbacks.getRoom(roomID);
             if (room instanceof BattleRoom) {
-                room.feedBattle(line);
+                const battleMsg = room.feedBattle(line);
+                if (battleMsg) {
+                    this.callbacks.addMessage(roomID, battleMsg);
+                }
             }
 
             const success = this.parseSocketLine(args, kwArgs, roomID);
@@ -71,14 +71,6 @@ export class SocketProtocolParser {
                 console.error(chunk);
             }
         }
-        for (const rID of this.touchedRooms) {
-            const room = this.callbacks.getRoom(rID);
-            if (room) {
-                useMessageStore.getState().updateMessages(rID, room.messages);
-            }
-        }
-        this.batchingMessageStoreUpdates = false;
-        this.touchedRooms.clear();
     }
 
     private requiresRoom(cmd: string, roomID: string) {
@@ -169,8 +161,20 @@ export class SocketProtocolParser {
             const messageContent = args[2];
             const room = this.requiresRoom('chat', roomID);
             if (!room) return false;
-            const chatMessage = parseCMessage(messageContent, username, undefined, room, roomID);
+            const chatMessage = parseCMessage(messageContent, username, undefined);
             if (!chatMessage) {
+                const { content, type, UHTMLName } = parseCMessageContent(messageContent);
+                if (type === 'uhtmlchange' && UHTMLName) {
+                    this.callbacks.changeUHTML(
+                        roomID,
+                        newMessage({
+                            name: UHTMLName,
+                            user: '',
+                            type: 'boxedHTML',
+                            content,
+                        }),
+                    );
+                }
                 return false;
             }
             this.addMessageToRoom(room.ID, chatMessage);
@@ -182,8 +186,20 @@ export class SocketProtocolParser {
             const messageContent = args[3];
             const room = this.requiresRoom('c:', roomID);
             if (!room) return false;
-            const chatMessage = parseCMessage(messageContent, username, timestamp, room, roomID);
+            const chatMessage = parseCMessage(messageContent, username, timestamp);
             if (!chatMessage) {
+                const { content, type, UHTMLName } = parseCMessageContent(messageContent);
+                if (type === 'uhtmlchange' && UHTMLName) {
+                    this.callbacks.changeUHTML(
+                        roomID,
+                        newMessage({
+                            name: UHTMLName,
+                            user: '',
+                            type: 'boxedHTML',
+                            content,
+                        }),
+                    );
+                }
                 break;
             }
             this.addMessageToRoom(room.ID, chatMessage);
@@ -209,10 +225,7 @@ export class SocketProtocolParser {
 
                 if (type === 'challenge') {
                     if (!content.trim()) {
-                        const room = this.requiresRoom('pm', inferredRoomid);
-                        if (!room) return false;
-                        room.endChallenge();
-                        useMessageStore.getState().updateMessages(room.ID, room.messages);
+                        this.callbacks.endChallenge(inferredRoomid);
                     } else {
                         this.addMessageToRoom(
                             inferredRoomid,
@@ -346,20 +359,15 @@ export class SocketProtocolParser {
                 console.error('Received |pagehtml| from untracked room', roomID);
                 return false;
             }
-            const message = newMessage({
-                name: 'pagehtml',
-                user: '',
-                type: 'rawHTML',
-                content,
-            });
-            room.addUHTML(
-                message,
-                {
-                    selected: this.callbacks.getSelectedRoom() === roomID,
-                    selfSent: false,
-                },
+            this.callbacks.addUHTML(
+                roomID,
+                newMessage({
+                    name: 'pagehtml',
+                    user: '',
+                    type: 'rawHTML',
+                    content,
+                }),
             );
-            useMessageStore.getState().updateMessages(roomID, room.messages);
             break;
         }
         case 'uhtmlchange':{
@@ -367,7 +375,8 @@ export class SocketProtocolParser {
             const uhtml = args[2];
             const room = this.requiresRoom('uhtmlchange', roomID);
             if (!room) return false;
-            room.changeUHTML(
+            this.callbacks.changeUHTML(
+                roomID,
                 newMessage({
                     name,
                     user: '',
@@ -375,7 +384,6 @@ export class SocketProtocolParser {
                     content: uhtml,
                 }),
             );
-            useMessageStore.getState().updateMessages(roomID, room.messages);
             break;
         }
         case 'uhtml':
@@ -384,19 +392,15 @@ export class SocketProtocolParser {
                 const uhtml = args[2];
                 const room = this.requiresRoom('uhtml', roomID);
                 if (!room) return false;
-                room.addUHTML(
+                this.callbacks.addUHTML(
+                    roomID,
                     newMessage({
                         name,
                         user: '',
                         type: 'boxedHTML',
                         content: uhtml,
                     }),
-                    {
-                        selected: this.callbacks.getSelectedRoom() === room.ID,
-                        selfSent: false,
-                    },
                 );
-                useMessageStore.getState().updateMessages(roomID, room.messages);
             }
             break;
         case 'html':
@@ -404,19 +408,15 @@ export class SocketProtocolParser {
                 const uhtml = args[1];
                 const room = this.requiresRoom('html', roomID);
                 if (!room) return false;
-                room.addUHTML(
+                this.callbacks.addUHTML(
+                    roomID,
                     newMessage({
                         name: '',
                         user: '',
                         type: 'boxedHTML',
                         content: uhtml,
                     }),
-                    {
-                        selected: this.callbacks.getSelectedRoom() === room.ID,
-                        selfSent: false,
-                    },
                 );
-                useMessageStore.getState().updateMessages(roomID, room.messages);
             }
             break;
         case 'raw': {
@@ -617,19 +617,7 @@ export class SocketProtocolParser {
 
     private addMessageToRoom(roomID: string, message: any) {
         highlightMsg(roomID, message, this.settings);
-        const room = this.callbacks.getRoom(roomID);
-        addMessageToRoom(
-            roomID,
-            message,
-            room,
-            this.callbacks.getSelectedRoom(),
-            this.settings.username,
-            this.callbacks.selectRoom,
-            this.batchingMessageStoreUpdates
-        );
-        if (this.batchingMessageStoreUpdates) {
-            this.touchedRooms.add(roomID);
-        }
+        this.callbacks.addMessage(roomID, message);
     }
 
     private addUsers(roomID: string, users: User[]) {

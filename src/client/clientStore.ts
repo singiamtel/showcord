@@ -75,7 +75,7 @@ export const useClientStore = create<UseClientStoreType>((set) => ({
     },
     updateMessages: (room: Room) => {
         set((state) => ({
-            messages: { ...state.messages, [room.ID]: [...room.messages] },
+            messages: { ...state.messages, [room.ID]: [...(state.messages[room.ID] ?? [])] },
         }));
     },
     notifications: {},

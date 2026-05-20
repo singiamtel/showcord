@@ -28,7 +28,7 @@ import { FormatMsgDisplay } from '@/UI/chatFormatting/MessageParser';
 export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const roomID = useRoomID();
     const currentRoom = useRoomStore(state => state.rooms.get(roomID));
-    const messages = useMessageStore(state => state.messages[roomID]);
+    const messages = useMessageStore(state => state.rooms[roomID]?.messages);
     assert(currentRoom, 'Opening chat without a selected room');
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const isIntersecting = useOnScreen(messagesEndRef);

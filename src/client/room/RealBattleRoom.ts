@@ -5,8 +5,7 @@ import { Dex, type SideID } from '@pkmn/dex';
 import { Protocol } from '@pkmn/protocol';
 
 import { Room, type RoomType } from './room';
-import newMessage from '../message';
-import { useMessageStore } from '../stores/messageStore';
+import newMessage, { type Message } from '../message';
 import { toast } from '@/components/ui/use-toast';
 
 
@@ -51,9 +50,6 @@ export class RealBattleRoom extends Room {
         return this.battle.getPokemon(this.perspective);
     }
 
-    /**
-     * Returns whether a new message was added to the battle.
-     */
     private parseTimer(line: string) {
         if (line.startsWith('|inactive|')) {
             const data = line.slice('|inactive|'.length);
@@ -100,7 +96,7 @@ export class RealBattleRoom extends Room {
         }
     }
 
-    feedBattle(line: string): boolean {
+    feedBattle(line: string): Message | null {
         this.log.push(line);
         this.parseTimer(line);
         if (this.onLogUpdate) this.onLogUpdate(line);
@@ -108,11 +104,7 @@ export class RealBattleRoom extends Room {
         const { args, kwArgs } = Protocol.parseBattleLine(line);
 
         try {
-            // pre handler
-            //   add(pre, key, args, kwArgs);
             this.battle.add(args, kwArgs);
-            // post handler
-            //   add(post, key, args, kwArgs);
         } catch (e) {
             console.error('this.battle.add error', line, e);
         }
@@ -124,20 +116,14 @@ export class RealBattleRoom extends Room {
         if (this.formatter) {
             const html = this.formatter.formatHTML(args, kwArgs);
             if (html) {
-                const message = newMessage({
+                return newMessage({
                     type: 'rawHTML',
                     name: '',
                     content: html,
                     hld: false,
                 });
-                this.addMessage(
-                    message,
-                    { selected: true, selfSent: false },
-                );
-                useMessageStore.getState().newMessage(this.ID, message);
-                return true;
             }
         }
-        return false;
+        return null;
     }
 }

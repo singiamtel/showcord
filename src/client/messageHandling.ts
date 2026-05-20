@@ -29,15 +29,20 @@ export function highlightMsg(
 }
 
 export function shouldNotify(
-    room: Room,
+    roomID: string,
+    roomType: Room['type'],
     message: Message,
     selectedRoom: string,
-    username: string | undefined
+    username: string | undefined,
 ): boolean {
     if (message.type === 'log') return false;
-    if (selectedRoom == room.ID && document.hasFocus()) return false;
-    if (room.checkMessageStaleness(message)) return false;
-    if (message.hld || (room.type === 'pm' && toID(message.user) !== toID(username))) return true;
+    if (selectedRoom === roomID && document.hasFocus()) return false;
+
+    const lastReadTime = useMessageStore.getState().rooms[roomID]?.lastReadTime ?? 0;
+    const margin = 1000;
+    if (message.timestamp && message.timestamp.getTime() < lastReadTime - margin) return false;
+
+    if (message.hld || (roomType === 'pm' && toID(message.user) !== toID(username))) return true;
     return false;
 }
 
@@ -48,26 +53,24 @@ export function addMessageToRoom(
     selectedRoom: string,
     username: string | undefined,
     selectRoom?: (room: string) => void,
-    skipStoreUpdate = false,
 ) {
     if (!room) {
         console.warn('addMessageToRoom: room (' + roomID + ') is unknown. Message:', message);
         return;
     }
-    const settings = {
+    const opts = {
         selected: selectedRoom === roomID,
         selfSent: toID(username) === toID(message.user),
+        roomType: room.type,
     };
+
     if (message.name) {
-        room.addUHTML(message, settings);
+        useMessageStore.getState().addUHTML(roomID, message, opts);
     } else {
-        room.addMessage(message, settings);
-    }
-    if (!skipStoreUpdate) {
-        useMessageStore.getState().newMessage(roomID, message);
+        useMessageStore.getState().addMessage(roomID, message, opts);
     }
 
-    if (shouldNotify(room, message, selectedRoom, username)) {
+    if (shouldNotify(roomID, room.type, message, selectedRoom, username)) {
         notificationsEngine.sendNotification({
             user: message.user ?? '',
             message: message.content,
@@ -82,29 +85,10 @@ export function parseCMessage(
     message: string,
     user: string,
     timestamp: string | undefined,
-    room: Room,
-    roomID: string,
 ): Message | undefined {
     const { content, type, UHTMLName } = parseCMessageContent(message);
 
     if (type === 'uhtmlchange') {
-        if (!room) {
-            console.error(
-                'Received |uhtmlchange| from untracked room',
-                room,
-            );
-            return;
-        }
-        room.changeUHTML(
-            newMessage({
-                name: UHTMLName,
-                user: '',
-                type: 'boxedHTML',
-                content,
-            }),
-        );
-        useMessageStore.getState().updateMessages(roomID, room.messages);
-
         return;
     }
 
