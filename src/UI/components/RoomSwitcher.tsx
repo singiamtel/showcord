@@ -149,9 +149,9 @@ export function RoomSwitcher() {
     }, [query]);
 
     const openSettings = useCallback(() => {
-        setRoom('settings');
+        client.openSettings();
         close();
-    }, [setRoom, close]);
+    }, [client, close]);
 
     const activate = useCallback((action: ActionItem) => {
         if (action.kind === 'room') navigate(action.room);
