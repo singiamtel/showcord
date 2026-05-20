@@ -82,7 +82,8 @@ export function parseCMessage(
     message: string,
     user: string,
     timestamp: string | undefined,
-    room: Room
+    room: Room,
+    roomID: string,
 ): Message | undefined {
     const { content, type, UHTMLName } = parseCMessageContent(message);
 
@@ -102,6 +103,7 @@ export function parseCMessage(
                 content,
             }),
         );
+        useMessageStore.getState().updateMessages(roomID, room.messages);
 
         return;
     }

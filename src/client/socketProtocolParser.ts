@@ -169,7 +169,7 @@ export class SocketProtocolParser {
             const messageContent = args[2];
             const room = this.requiresRoom('chat', roomID);
             if (!room) return false;
-            const chatMessage = parseCMessage(messageContent, username, undefined, room);
+            const chatMessage = parseCMessage(messageContent, username, undefined, room, roomID);
             if (!chatMessage) {
                 return false;
             }
@@ -182,7 +182,7 @@ export class SocketProtocolParser {
             const messageContent = args[3];
             const room = this.requiresRoom('c:', roomID);
             if (!room) return false;
-            const chatMessage = parseCMessage(messageContent, username, timestamp, room);
+            const chatMessage = parseCMessage(messageContent, username, timestamp, room, roomID);
             if (!chatMessage) {
                 break;
             }
@@ -375,6 +375,7 @@ export class SocketProtocolParser {
                     content: uhtml,
                 }),
             );
+            useMessageStore.getState().updateMessages(roomID, room.messages);
             break;
         }
         case 'uhtml':
@@ -395,6 +396,7 @@ export class SocketProtocolParser {
                         selfSent: false,
                     },
                 );
+                useMessageStore.getState().updateMessages(roomID, room.messages);
             }
             break;
         case 'html':
@@ -414,6 +416,7 @@ export class SocketProtocolParser {
                         selfSent: false,
                     },
                 );
+                useMessageStore.getState().updateMessages(roomID, room.messages);
             }
             break;
         case 'raw': {
