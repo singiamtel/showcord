@@ -37,14 +37,15 @@ export default function BattleRoom(props: Readonly<HTMLAttributes<HTMLDivElement
             </div>
 
             <div className="w-1/4 flex flex-col bg-gray-sidebar-light dark:bg-gray-600">
-                <div
+                <button
+                    type="button"
                     className="border bg-gray-251 dark:bg-gray-250 z-10 p-2 m-1 rounded-xl w-10 h-10 flex justify-center items-center cursor-pointer"
                     onClick={() => {
                         setUserListOpen(!userListOpen);
                     }}
                 >
                     <FontAwesomeIcon icon={faUsers} height={16} width={16} className={userListOpen ? 'text-blue-200' : 'text-gray-400'}/>
-                </div>
+                </button>
                 <div
                     className="dark:bg-gray-300 flex flex-col min-h-0 h-full w-full max-w-full"
                 >

@@ -27,19 +27,20 @@ export function Username(
             >
                 {rankDisplay}
             </span>
-            <a
+            <button
+                type="button"
                 onClick={onClick ?? clickUsername}
                 style={{
                     color: colorless ? '' : idle ? '#888888' : userColor(user),
                 }}
-                className={cn('text-black dark:text-white hover:underline hover:cursor-pointer ',
+                className={cn('bg-transparent border-none text-black dark:text-white hover:underline hover:cursor-pointer ',
                     (bold ? 'font-bold ' : ''), className)}
                 data-message="true"
                 data-username={user.slice(1)}
             >
                 {user.slice(1)}
                 {colon && ':'}
-            </a>
+            </button>
 
         </>
     );

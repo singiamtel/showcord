@@ -29,7 +29,7 @@ export default function HighlightingSettings(props: Readonly<HTMLAttributes<'div
             </h2>
 
             <div id="theme" className="mt-4">
-                <div className="ml-2 flex items-center" onClick={() => {}} >
+                <div className="ml-2 flex items-center">
                     <span className='pr-4 flex items-center'>
                         <Switch checked={hlOnSelf} onCheckedChange={() => {
                             client.settings.setHighlightOnSelf(!hlOnSelf);
