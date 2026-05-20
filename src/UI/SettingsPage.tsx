@@ -1,8 +1,9 @@
-import { type HTMLAttributes, useState } from 'react';
+import { type HTMLAttributes, useEffect, useState } from 'react';
 import AppearanceSettings from './settings/Appearance';
 import DeveloperSettings from './settings/Developer';
 import HighlightingSettings from './settings/Highlighting';
 import { cn } from '@/lib/utils';
+import { useAppStore } from '@/client/stores/appStore';
 import AccountSettings from './settings/Account';
 
 function SettingsButton(props: Readonly<HTMLAttributes<'button'> & { onClick: () => void, active?: boolean }>) {
@@ -22,6 +23,16 @@ const settingsTabs = {
 
 export default function SettingsPage(props: Readonly<HTMLAttributes<'div'>>) {
     const [page, setPage] = useState<keyof typeof settingsTabs>('appearance');
+    const settingsSection = useAppStore(s => s.settingsSection);
+    const setSettingsSection = useAppStore(s => s.setSettingsSection);
+
+    useEffect(() => {
+        if (settingsSection && settingsSection in settingsTabs) {
+            setPage(settingsSection as keyof typeof settingsTabs);
+            setSettingsSection(undefined);
+        }
+    }, [settingsSection, setSettingsSection]);
+
     return (
         <div className={cn('grid grid-cols-4', props.className)}>
             <div className="col-span-1 bg-gray-100 dark:bg-gray-75 p-8 flex flex-col border-r-2" id="settings-sidebar">

@@ -4,6 +4,7 @@ import { faCog, faHome, faUser, faArrowRightToBracket } from '@fortawesome/free-
 import { GiBattleAxe } from 'react-icons/gi';
 import HashtagIcon from '../assets/hashtag';
 import { useClientContext } from './single/useClientContext';
+import { useAppStore } from '@/client/stores/appStore';
 import type { Room } from '@/client/room/room';
 
 function RoomIcon({ type, id }: Readonly<{ type: string; id: string }>) {
@@ -148,16 +149,19 @@ export function RoomSwitcher() {
         setSelectedIndex(0);
     }, [query]);
 
-    const openSettings = useCallback(() => {
+    const setSettingsSection = useAppStore(s => s.setSettingsSection);
+
+    const openSettings = useCallback((section: string) => {
+        setSettingsSection(section);
         client.openSettings();
         close();
-    }, [client, close]);
+    }, [client, close, setSettingsSection]);
 
     const activate = useCallback((action: ActionItem) => {
         if (action.kind === 'room') navigate(action.room);
         else if (action.kind === 'join') joinRoom(action.query);
         else if (action.kind === 'pm') openPM(action.query);
-        else openSettings();
+        else openSettings(action.section);
     }, [navigate, joinRoom, openPM, openSettings]);
 
     if (!open) return null;
