@@ -105,6 +105,8 @@ function Hero() {
             <img
                 src={targetFaceCluster}
                 alt="Showcord Mascot"
+                width="1024"
+                height="1024"
                 className="absolute right-0 top-0 h-full w-auto object-contain object-right opacity-80 dark:opacity-60 pointer-events-none select-none"
             />
             <div className="relative z-10 flex flex-col justify-center h-full px-8 py-8 max-w-xs md:max-w-sm">

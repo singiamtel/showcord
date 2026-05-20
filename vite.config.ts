@@ -46,6 +46,42 @@ function fixPsCircularDep(): Plugin {
     };
 }
 
+/**
+ * Preload woff2 font files discovered in the build output.
+ */
+function fontPreloadPlugin(): Plugin {
+    return {
+        name: 'showcord-font-preload',
+        enforce: 'post',
+        transformIndexHtml: {
+            order: 'post',
+            handler(_html: string, ctx: { bundle?: Record<string, { fileName?: string }> }) {
+                if (!ctx.bundle) return [];
+
+                const tags: { tag: string; attrs: Record<string, string | boolean>; injectTo: string }[] = [];
+
+                for (const [key, asset] of Object.entries(ctx.bundle)) {
+                    if (key.endsWith('.woff2')) {
+                        tags.push({
+                            tag: 'link',
+                            attrs: {
+                                rel: 'preload',
+                                href: `/${asset.fileName!}`,
+                                as: 'font',
+                                type: 'font/woff2',
+                                crossorigin: true,
+                            },
+                            injectTo: 'head-prepend',
+                        });
+                    }
+                }
+
+                return tags;
+            },
+        },
+    };
+}
+
 export default defineConfig(() => ({
     base: `${process.env.PUBLIC_URL ?? ''}/`,
     server: {
@@ -57,5 +93,19 @@ export default defineConfig(() => ({
             buffer: 'buffer',
         },
     },
-    plugins: [fixPsCircularDep(), tailwindcss(), react(), tsconfigPaths()],
+    build: {
+        rollupOptions: {
+            output: {
+                manualChunks: {
+                    'pkmn-vendor': ['@pkmn/dex', '@pkmn/data', '@pkmn/client', '@pkmn/view'],
+                    'framer-motion': ['framer-motion'],
+                    'sanitize': ['sanitize-html-react', 'html-react-parser'],
+                    'fortawesome': ['@fortawesome/fontawesome-svg-core', '@fortawesome/free-solid-svg-icons'],
+                    'highlight': ['highlight.js'],
+                    'vendor-utils': ['immer', 'axios', 'minisearch', 'linkifyjs', 'linkify-react'],
+                },
+            },
+        },
+    },
+    plugins: [fontPreloadPlugin(), fixPsCircularDep(), tailwindcss(), react(), tsconfigPaths()],
 }));

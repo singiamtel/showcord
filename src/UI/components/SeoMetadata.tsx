@@ -7,7 +7,7 @@ const softwareApplicationSchema = {
     url: 'https://showcord.com/',
     description:
         'Showcord is a modern Pokemon Showdown client for battles, room chat, and private messages.',
-    image: 'https://showcord.com/assets/pokeball_galaxy.png',
+    image: 'https://showcord.com/assets/pokeball_galaxy.webp',
     author: {
         '@type': 'Organization',
         name: 'Showcord',
@@ -36,7 +36,7 @@ export function SeoMetadata() {
                 property="og:description"
                 content="Showcord is a modern Pokemon Showdown client. Join battles, chat rooms, and private messages with a streamlined interface."
             />
-            <meta property="og:image" content="https://showcord.com/assets/pokeball_galaxy.png" />
+            <meta property="og:image" content="https://showcord.com/assets/pokeball_galaxy.webp" />
 
             <meta name="twitter:card" content="summary_large_image" />
             <meta name="twitter:url" content="https://showcord.com/" />
@@ -45,7 +45,7 @@ export function SeoMetadata() {
                 name="twitter:description"
                 content="Showcord is a modern Pokemon Showdown client. Join battles, chat rooms, and private messages with a streamlined interface."
             />
-            <meta name="twitter:image" content="https://showcord.com/assets/pokeball_galaxy.png" />
+            <meta name="twitter:image" content="https://showcord.com/assets/pokeball_galaxy.webp" />
 
             <script type="application/ld+json">{JSON.stringify(softwareApplicationSchema)}</script>
         </>

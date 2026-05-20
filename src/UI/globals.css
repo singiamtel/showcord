@@ -7,8 +7,8 @@
 
 @theme {
   /* Font families */
-  --font-sans: Inter, sans-serif;
-  --font-serif: Inter, sans-serif;
+  --font-sans: ui-sans-serif, system-ui, sans-serif;
+  --font-serif: ui-sans-serif, system-ui, sans-serif;
   --font-mono: 'Roboto Mono', sans-serif;
 
   /* Primary colors */
