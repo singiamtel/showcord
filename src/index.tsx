@@ -4,7 +4,7 @@ import App from './UI/App';
 import { StrictMode } from 'react';
 import { client } from './client/singleton';
 
-import '@fontsource/roboto-mono';
+import '@fontsource/roboto-mono/index.css';
 import './UI/globals.css';
 import ClientContextProvider from './UI/components/single/ClientContext';
 import { Analytics } from '@vercel/analytics/react';

@@ -189,7 +189,7 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
 
             // Feed initial log
             if (room.log && room.log.length > 0) {
-                logger.debug('Feeding initial log', room.log.length, 'lines');
+                logger.debug('Feeding initial log', { length: room.log.length });
                 room.log.forEach(line => {
                     updateMyPokemonFromRequest(battle, line);
                     battle.add(line);

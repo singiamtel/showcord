@@ -229,13 +229,13 @@ export class Settings {
 
     removeHighlightWord(roomid: string, word: string) {
         if (!this.userDefinedSettings.highlightWords[roomid]) {
-            logger.warn('removeHighlightWord', 'roomid not found', roomid);
+            logger.warn('removeHighlightWord', { roomid });
             return;
         }
         const words = this.userDefinedSettings.highlightWords[roomid];
         const index = words?.findIndex((w) => w === word);
         if (index === undefined || index === -1) {
-            logger.warn('removeHighlightWord', 'word not found', word);
+            logger.warn('removeHighlightWord', { word });
         } else {
             // delete words[index];
             this.setHighlightWords(roomid, words.filter((w) => w !== word));
@@ -247,7 +247,7 @@ export class Settings {
 
     clearHighlightWords(roomid: string) {
         if (!this.userDefinedSettings.highlightWords[roomid]) {
-            logger.warn('clearHighlightWords', 'roomid not found', roomid);
+            logger.warn('clearHighlightWords', { roomid });
             return;
         }
         this.userDefinedSettings.highlightWords[roomid] = [];

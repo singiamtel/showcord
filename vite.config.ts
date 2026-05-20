@@ -96,13 +96,14 @@ export default defineConfig(() => ({
     build: {
         rollupOptions: {
             output: {
-                manualChunks: {
-                    'pkmn-vendor': ['@pkmn/dex', '@pkmn/data', '@pkmn/client', '@pkmn/view'],
-                    'framer-motion': ['framer-motion'],
-                    'sanitize': ['sanitize-html-react', 'html-react-parser'],
-                    'fortawesome': ['@fortawesome/fontawesome-svg-core', '@fortawesome/free-solid-svg-icons'],
-                    'highlight': ['highlight.js'],
-                    'vendor-utils': ['immer', 'axios', 'minisearch', 'linkifyjs', 'linkify-react'],
+                manualChunks(id: string) {
+                    if (id.includes('@pkmn/dex') || id.includes('@pkmn/data') || id.includes('@pkmn/client') || id.includes('@pkmn/view')) return 'pkmn-vendor';
+                    if (id.includes('framer-motion')) return 'framer-motion';
+                    if (id.includes('sanitize-html-react') || id.includes('html-react-parser')) return 'sanitize';
+                    if (id.includes('@fortawesome/fontawesome-svg-core') || id.includes('@fortawesome/free-solid-svg-icons')) return 'fortawesome';
+                    if (id.includes('highlight.js')) return 'highlight';
+                    if (id.includes('immer') || id.includes('axios') || id.includes('minisearch') || id.includes('linkifyjs') || id.includes('linkify-react')) return 'vendor-utils';
+                    return undefined;
                 },
             },
         },

@@ -192,7 +192,7 @@ export class Client {
                 this.settings.loginServerURL = Settings.defaultLoginServerURL;
                 this.runtime.reloadWindow();
             }
-            logger.error(error);
+            logger.error('Unhandled error', error);
         }
     }
 
@@ -558,7 +558,7 @@ export class Client {
             }
         };
         this.socket.onerror = (event) => {
-            logger.error(event);
+            logger.error('WebSocket error', event);
         };
         this.socket.onclose = (_) => {
             logger.warn('Socket closed, dispatching disconnect');

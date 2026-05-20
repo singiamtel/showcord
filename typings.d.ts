@@ -1,6 +1,7 @@
 import { Client } from './src/client/client';
 
 declare module 'namecolour';
+declare module '@fontsource/roboto-mono';
 
 // add "client" to the "window" object
 declare global {

@@ -61,7 +61,7 @@ export class AuthenticationManager {
 
         const checkIfUpdated = async (): Promise<void> => {
             try {
-                logger.debug(nWindow?.location.href);
+                logger.debug('nWindow.location.href', nWindow?.location.href);
                 if (nWindow?.location.host === location.host) {
                     const url = new URL(nWindow.location.href);
                     const assertion = url.searchParams.get('assertion');
