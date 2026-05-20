@@ -80,7 +80,8 @@ function HighlightedName({ name, highlights }: Readonly<{ name: string; highligh
 type ActionItem =
     | { kind: 'room'; room: Room; highlights: boolean[] }
     | { kind: 'join'; query: string }
-    | { kind: 'pm'; query: string };
+    | { kind: 'pm'; query: string }
+    | { kind: 'settings'; section: string };
 
 export function RoomSwitcher() {
     const [open, setOpen] = useState(false);
@@ -90,12 +91,15 @@ export function RoomSwitcher() {
     const inputRef = useRef<HTMLInputElement>(null);
 
     const fuzzyResults = fuzzyFilter(rooms, query);
+    const settingsSections = ['appearance', 'highlighting', 'developer', 'account'] as const;
+
     const actions: ActionItem[] = [
         ...fuzzyResults.map(r => ({ kind: 'room' as const, ...r })),
         ...(query.trim() ? [
             { kind: 'join' as const, query: query.trim() },
             { kind: 'pm' as const, query: query.trim() },
         ] : []),
+        ...settingsSections.map(section => ({ kind: 'settings' as const, section })),
     ];
 
     const close = useCallback(() => {
@@ -144,11 +148,17 @@ export function RoomSwitcher() {
         setSelectedIndex(0);
     }, [query]);
 
+    const openSettings = useCallback(() => {
+        setRoom('settings');
+        close();
+    }, [setRoom, close]);
+
     const activate = useCallback((action: ActionItem) => {
         if (action.kind === 'room') navigate(action.room);
         else if (action.kind === 'join') joinRoom(action.query);
-        else openPM(action.query);
-    }, [navigate, joinRoom, openPM]);
+        else if (action.kind === 'pm') openPM(action.query);
+        else openSettings();
+    }, [navigate, joinRoom, openPM, openSettings]);
 
     if (!open) return null;
 
@@ -224,15 +234,29 @@ export function RoomSwitcher() {
                             );
                         }
 
+                        if (action.kind === 'pm') {
+                            return (
+                                <li key="__pm" className={rowClass}
+                                    onMouseEnter={() => setSelectedIndex(i)}
+                                    onClick={() => activate(action)}
+                                >
+                                    <span className="w-4 flex justify-center text-blue-300">
+                                        <FontAwesomeIcon icon={faUser} />
+                                    </span>
+                                    <span>Message <span className="font-semibold">{action.query}</span></span>
+                                </li>
+                            );
+                        }
+
                         return (
-                            <li key="__pm" className={rowClass}
+                            <li key={`__settings-${action.section}`} className={rowClass}
                                 onMouseEnter={() => setSelectedIndex(i)}
                                 onClick={() => activate(action)}
                             >
-                                <span className="w-4 flex justify-center text-blue-300">
-                                    <FontAwesomeIcon icon={faUser} />
+                                <span className="w-4 flex justify-center text-gray-175">
+                                    <FontAwesomeIcon icon={faCog} />
                                 </span>
-                                <span>Message <span className="font-semibold">{action.query}</span></span>
+                                <span>Settings: <span className="font-semibold">{action.section}</span></span>
                             </li>
                         );
                     })}
