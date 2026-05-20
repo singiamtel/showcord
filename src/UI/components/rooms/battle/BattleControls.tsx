@@ -66,7 +66,7 @@ export default function BattleControls(_props: Readonly<HTMLAttributes<HTMLDivEl
             <div className="flex-1 overflow-hidden">
                 {req ? renderRequest() : (
                     <div className="w-full h-full flex items-center justify-center text-gray-500">
-                        Loading...
+                        Loading…
                     </div>
                 )}
             </div>

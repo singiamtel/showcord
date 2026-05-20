@@ -235,7 +235,7 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
     }, [room]);
 
     if (!isReadyRef.current) {
-        return <div className={cn(props.className, 'flex items-center justify-center')}>Loading Battle Engine...</div>;
+        return <div className={cn(props.className, 'flex items-center justify-center')}>Loading Battle Engine…</div>;
     }
 
     return (
