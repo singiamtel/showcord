@@ -14,6 +14,11 @@ function SettingsButton(props: Readonly<HTMLAttributes<'button'> & { onClick: ()
     );
 }
 
+function DynamicPage({ page }: { page: keyof typeof settingsTabs }) {
+    const Page = settingsTabs[page];
+    return <Page />;
+}
+
 const settingsTabs = {
     'appearance': AppearanceSettings,
     'highlighting': HighlightingSettings,
@@ -53,12 +58,7 @@ export default function SettingsPage(props: Readonly<HTMLAttributes<'div'>>) {
             </div>
 
             <div className="col-span-3 bg-gray-100 dark:bg-gray-450 p-8">
-                {
-                    (() => {
-                        const Page = settingsTabs[page];
-                        return <Page />;
-                    })()
-                }
+                <DynamicPage page={page} />
             </div>
         </div>
     );

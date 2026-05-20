@@ -3,6 +3,11 @@ import { useBattleStore } from '@/client/stores/battleStore';
 import { client } from '@/client/singleton';
 import { Button } from '@/components/ui/button';
 
+function formatLabel(selectedFormat: string | null, allFormats: Array<{ ID: string; gen: string; name: string }>) {
+    const fmt = allFormats.find(f => f.ID === selectedFormat);
+    return fmt ? `[Gen ${fmt.gen}] ${fmt.name}` : (selectedFormat || 'Select format…');
+}
+
 export function BattleSearch() {
     const formats = useBattleStore(state => state.formats);
     const search = useBattleStore(state => state.search);
@@ -161,10 +166,7 @@ export function BattleSearch() {
                                 className="w-full h-8 px-3 text-sm rounded-md border border-input bg-background dark:bg-gray-800 dark:text-white flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
                             >
                                 <span className={selectedFormat ? 'text-gray-900 dark:text-gray-100' : 'text-muted-foreground'}>
-                                    {(() => {
-                                        const fmt = allFormats.find(f => f.ID === selectedFormat);
-                                        return fmt ? `[Gen ${fmt.gen}] ${fmt.name}` : (selectedFormat || 'Select format…');
-                                    })()}
+                                    {formatLabel(selectedFormat, allFormats)}
                                 </span>
                                 <svg className="w-3.5 h-3.5 text-gray-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />

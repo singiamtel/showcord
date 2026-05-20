@@ -210,7 +210,7 @@ export class SocketProtocolParser {
             {
                 const sender = toID(args[1]);
                 const receiver = toID(args[2]);
-                let inferredRoomid = '';
+                let inferredRoomid: string;
                 if (sender === toID(this.settings.username)) {
                     inferredRoomid = `pm-${receiver}`;
                 } else {
