@@ -48,6 +48,17 @@ export class SocketProtocolParser {
             if (idx === 0 && line.startsWith('>')) {
                 continue;
             }
+            // parseBattleLine strips JSON arrays starting with '[' as kwArgs,
+            // so intercept cmdsearch before it reaches the parser.
+            if (line.startsWith('|queryresponse|cmdsearch|')) {
+                try {
+                    const commands = JSON.parse(line.slice('|queryresponse|cmdsearch|'.length));
+                    this.queryHandlers.handleCmdsearchResponse(commands);
+                } catch (e) {
+                    console.error('Error parsing cmdsearch line', e);
+                }
+                continue;
+            }
             const { args, kwArgs } = Protocol.parseBattleLine(line);
             const room = this.callbacks.getRoom(roomID);
             if (room instanceof BattleRoom) {

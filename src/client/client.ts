@@ -317,6 +317,10 @@ export class Client {
         return this.queryHandlers.queryNews();
     }
 
+    queryCmdsearch(prefix: string): Promise<string[]> {
+        return this.queryHandlers.queryCmdsearch(prefix);
+    }
+
     async join(room: string) {
         if (!room) {
             console.trace('Trying to join empty string room');

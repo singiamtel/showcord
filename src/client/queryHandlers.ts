@@ -8,6 +8,7 @@ export interface QueryCallbacks {
 export class QueryHandlers {
     private userListener: ((json: any) => any) | undefined;
     private roomListener: ((json: any) => any) | undefined;
+    private cmdsearchListener: ((commands: string[]) => void) | undefined;
     private roomsJSON: any = undefined;
     private news: any = undefined;
     private lastQueriedUser: { user: string; json: any } | undefined;
@@ -65,6 +66,20 @@ export class QueryHandlers {
         if (this.roomListener) {
             this.roomListener(json);
             this.roomListener = undefined;
+        }
+    }
+
+    queryCmdsearch(prefix: string): Promise<string[]> {
+        return new Promise((resolve) => {
+            this.cmdsearchListener = resolve;
+            this.callbacks.send(`/crq cmdsearch ${prefix}`, false);
+        });
+    }
+
+    handleCmdsearchResponse(commands: string[]) {
+        if (this.cmdsearchListener) {
+            this.cmdsearchListener(commands);
+            this.cmdsearchListener = undefined;
         }
     }
 
