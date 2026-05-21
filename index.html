@@ -26,7 +26,15 @@
       content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"
     />
     <link rel="canonical" href="https://showcord.com/" />
-    
+
+    <!-- Preconnect to third-party origins -->
+    <link rel="dns-prefetch" href="https://play.pokemonshowdown.com">
+    <link rel="preconnect" href="https://play.pokemonshowdown.com" crossorigin>
+    <link rel="dns-prefetch" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+    <link rel="dns-prefetch" href="https://code.jquery.com">
+    <link rel="preconnect" href="https://code.jquery.com" crossorigin>
+
     <!-- Open Graph / Facebook -->
     <meta property="og:type" content="website" />
     <meta property="og:url" content="https://showcord.com/" />
@@ -72,7 +80,6 @@
     <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
 
     <!-- Pokemon Showdown Data -->
-    <link rel="preconnect" href="//play.pokemonshowdown.com" crossorigin>
     <script src="//play.pokemonshowdown.com/data/pokedex-mini.js" defer></script>
     <script src="//play.pokemonshowdown.com/data/pokedex.js" defer></script>
     <script src="//play.pokemonshowdown.com/data/moves.js" defer></script>
