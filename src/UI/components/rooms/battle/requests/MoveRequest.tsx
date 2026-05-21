@@ -6,7 +6,7 @@ import { ChoiceBuilder } from '@pkmn/view';
 import { useMemo, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Icons } from '@pkmn/img';
-import { Dex } from '@/vendor/pokemon-showdown/battle-dex';
+// Dex is provided via window.Dex after vendor modules are loaded by Battle.tsx
 
 const TYPE_COLORS: Record<string, string> = {
     Normal: 'bg-stone-200 text-stone-900',
@@ -45,6 +45,7 @@ function PokemonIcon({ species, fainted }: Readonly<{ species: string; fainted?:
 }
 
 function MoveButton({ move, index, onClick }: Readonly<{ move: Protocol.Request.ActivePokemon['moves'][number]; index: number; onClick: () => void; }>) {
+    const Dex = window.Dex as any;
     const moveData = move.id && move.id !== 'recharge' ? Dex.moves.get(move.id) : null;
     const type = moveData?.type || '???';
     const typeColor = TYPE_COLORS[type] || TYPE_COLORS['???'];

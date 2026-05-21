@@ -1,9 +1,4 @@
-import React, { useEffect, useRef, type HTMLAttributes } from 'react';
-// showdown-globals must be imported before vendor modules to set window.Config etc.
-import '../../../../utils/showdown-globals';
-import { Dex, toID, type ID } from '@/vendor/pokemon-showdown/battle-dex';
-import { Battle as VisualBattle, type PokemonDetails, type PokemonHealth } from '@/vendor/pokemon-showdown/battle';
-import { BattleTooltips } from '@/vendor/pokemon-showdown/battle-tooltips';
+import React, { useEffect, useRef, useState, type HTMLAttributes } from 'react';
 import $ from 'jquery';
 import { useRoomStore } from '@/client/client';
 import type { BattleRoom } from '@/client/room/battleRoom';
@@ -12,15 +7,7 @@ import { cn } from '@/lib/utils';
 import { logger } from '@/utils/logger';
 import './battle-tooltips.css';
 
-// Guard against tooltip crash when side.pokemon[index] is undefined
-// (vendored showPokemonTooltip assumes at least one arg is non-null but doesn't check)
-const origShowPokemonTooltip = BattleTooltips.prototype.showPokemonTooltip;
-BattleTooltips.prototype.showPokemonTooltip = function (...args) {
-    if (!args[0] && !args[1]) return '';
-    return origShowPokemonTooltip.apply(this, args);
-};
-
-function updateMyPokemonFromRequest(battle: VisualBattle, line: string) {
+function updateMyPokemonFromRequest(battle: any, line: string) {
     if (!line.startsWith('|request|')) return;
     try {
         const json = line.slice('|request|'.length);
@@ -42,15 +29,14 @@ function updateMyPokemonFromRequest(battle: VisualBattle, line: string) {
             teraType: string;
             terastallized: string;
         };
-        type ParsedPokemon = Partial<PokemonDetails & PokemonHealth> & Record<string, unknown>;
         battle.myPokemon = request.side.pokemon.map((p: RequestPokemon) => {
-            const output: ParsedPokemon = {};
+            const output: Record<string, unknown> = {};
             const identParts = p.ident.split(': ');
             const pokemonid = p.ident;
             const name = identParts.slice(1).join(': ') || identParts[0];
 
-            battle.parseDetails(name, pokemonid, p.details, output as PokemonDetails);
-            battle.parseHealth(p.condition, output as PokemonHealth);
+            battle.parseDetails(name, pokemonid, p.details, output);
+            battle.parseHealth(p.condition, output);
 
             output.active = p.active;
             output.reviving = p.reviving || false;
@@ -63,29 +49,12 @@ function updateMyPokemonFromRequest(battle: VisualBattle, line: string) {
             output.teraType = p.teraType;
             output.terastallized = p.terastallized;
 
-            return output as unknown as NonNullable<typeof battle['myPokemon']>[number];
+            return output;
         });
     } catch (e) {
         logger.error('Failed to parse request for myPokemon', e);
     }
 }
-
-// Set window.Dex after vendor modules are loaded (for IIFEs that check it)
-window.Dex = Dex;
-window.toID = toID;
-
-// Helper to check if PS globals are loaded
-const checkGlobals = () => {
-    const ready = !!(window.BattlePokedex && window.BattleMovedex && window.BattleTeambuilderTable);
-    if (!ready) {
-        logger.debug('Waiting for globals...', {
-            BattlePokedex: !!window.BattlePokedex,
-            BattleMovedex: !!window.BattleMovedex,
-            BattleTeambuilderTable: !!window.BattleTeambuilderTable,
-        });
-    }
-    return ready;
-};
 
 const BATTLE_CSS = '//play.pokemonshowdown.com/style/battle.css';
 const TYPES_CSS = '//play.pokemonshowdown.com/style/sim-types.css';
@@ -117,25 +86,54 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
     const room = useRoomStore(state => state.rooms.get(roomID)) as BattleRoom;
     const perspective = useRoomStore(state => (state.rooms.get(roomID) as BattleRoom | undefined)?.perspective);
     const hostRef = useRef<HTMLDivElement>(null);
-    const battleInstanceRef = useRef<VisualBattle | null>(null);
+    const battleInstanceRef = useRef<any>(null);
     const logIndexRef = useRef(0);
-    const isReadyRef = useRef(checkGlobals());
+    const [vendorLoaded, setVendorLoaded] = useState(false);
+    const vendorRef = useRef<{
+        VisualBattle: any;
+    } | null>(null);
 
-    // Poll for globals if not ready
+    // Dynamically load vendor modules
     useEffect(() => {
-        if (isReadyRef.current) return;
-        const interval = setInterval(() => {
-            if (checkGlobals()) {
-                isReadyRef.current = true;
-                clearInterval(interval);
-            }
-        }, 100);
-        return () => clearInterval(interval);
+        let cancelled = false;
+
+        const load = async () => {
+            await import('../../../../utils/showdown-globals');
+            if (cancelled) return;
+
+            const [dexMod, battleMod, tipsMod] = await Promise.all([
+                import('@/vendor/pokemon-showdown/battle-dex'),
+                import('@/vendor/pokemon-showdown/battle'),
+                import('@/vendor/pokemon-showdown/battle-tooltips'),
+            ]);
+            if (cancelled) return;
+
+            const { Dex, toID } = dexMod;
+            const VisualBattle = battleMod.Battle;
+            const BattleTooltips = tipsMod.BattleTooltips;
+
+            // Set globals that vendor IIFEs and MoveRequest depend on
+            window.Dex = Dex;
+            window.toID = toID;
+
+            // Guard against tooltip crash when side.pokemon[index] is undefined
+            const origShowPokemonTooltip = BattleTooltips.prototype.showPokemonTooltip;
+            BattleTooltips.prototype.showPokemonTooltip = function (...args: [any, any]) {
+                if (!args[0] && !args[1]) return '';
+                return origShowPokemonTooltip.apply(this, args);
+            };
+
+            vendorRef.current = { VisualBattle };
+            setVendorLoaded(true);
+        };
+
+        load();
+        return () => { cancelled = true; };
     }, []);
 
     // Initialize Battle
     useEffect(() => {
-        if (!hostRef.current || !isReadyRef.current) return;
+        if (!hostRef.current || !vendorLoaded || !vendorRef.current) return;
 
         const host = hostRef.current;
         let shadow = host.shadowRoot;
@@ -144,6 +142,7 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
         }
 
         let cancelled = false;
+        const { VisualBattle } = vendorRef.current;
 
         const init = async () => {
             await Promise.all([
@@ -169,7 +168,7 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
 
             const $battle = $(battleDiv);
             const $log = $(logDiv);
-            const battleId = (room.ID || 'battle-view') as ID;
+            const battleId = (room.ID || 'battle-view');
 
             logger.debug('Initializing VisualBattle for room', battleId);
 
@@ -218,7 +217,7 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
             if (logDiv) $(logDiv).empty();
             battleInstanceRef.current = null;
         };
-    }, [room.ID]);
+    }, [room.ID, vendorLoaded]);
 
     // Update log
     useEffect(() => {
@@ -239,10 +238,8 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
 
         // Subscribe to new lines
         room.onLogUpdate = (line) => {
-            // console.log("Live log line:", line);
             updateMyPokemonFromRequest(battle, line);
             battle.add(line);
-            // battle.seekTurn(Infinity);
             logIndexRef.current = room.log.length;
         };
 
@@ -251,7 +248,7 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
         };
     }, [room]);
 
-    if (!isReadyRef.current) {
+    if (!vendorLoaded) {
         return <div className={cn(props.className, 'flex items-center justify-center')}>Loading Battle Engine…</div>;
     }
 
