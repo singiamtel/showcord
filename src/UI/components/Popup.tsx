@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useAppStore } from '@/client/client';
 import { Button } from '@/components/ui/button';
+import { FormatMsgDisplay } from '@/UI/chatFormatting/MessageParser';
 
 export function Popup() {
     const popup = useAppStore(state => state.popup);
@@ -43,7 +44,7 @@ export function Popup() {
                 onClick={e => e.stopPropagation()}
             >
                 <div className="mb-4 whitespace-pre-wrap text-sm text-gray-800">
-                    {popup}
+                    <FormatMsgDisplay msg={popup.replace(/\|\|/g, '\n')} />
                 </div>
                 <div className="flex justify-end">
                     <Button ref={buttonRef} variant="outline" onClick={handleClose}>
