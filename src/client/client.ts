@@ -235,6 +235,17 @@ export class Client {
                     this.socket.send('|/utm null');
                 }
             }
+        } else if (ogMessage === '/accept' && room) {
+            const roomMsgs = useMessageStore.getState().rooms[room]?.messages ?? [];
+            for (const msg of roomMsgs) {
+                if (msg.type === 'challenge') {
+                    const formatID = toID(msg.content.split('|')[0]);
+                    if (formatID && this.formatAllowsTeam(formatID) === false) {
+                        this.socket.send('|/utm null');
+                    }
+                    break;
+                }
+            }
         }
         let message = ogMessage;
         if (!room) {

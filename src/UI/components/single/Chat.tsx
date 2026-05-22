@@ -149,6 +149,10 @@ export function ChallengeMessage(
 
     function acceptChallenge() {
         assert(currentRoom, 'currentRoom');
+        const fmt = client.formatName(formatID);
+        if (fmt && !fmt.settings.team) {
+            client.send('/utm null', false);
+        }
         client.send('/accept', currentRoom.ID);
     }
 
