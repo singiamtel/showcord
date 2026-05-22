@@ -103,10 +103,16 @@ export class Client {
         return useRoomStore.getState().selectedRoomID;
     }
 
+    private allFormats() {
+        return this.protocolParser.getFormats()?.categories.flatMap((c) => c.formats) ?? [];
+    }
+
     formatName(formatID: string) {
-        const allFormats = this.protocolParser.getFormats()?.categories.flatMap((c) => c.formats);
-        const format = allFormats?.find((f) => f.ID === formatID);
-        return format;
+        return this.allFormats().find((f) => f.ID === formatID);
+    }
+
+    private formatAllowsTeam(formatID: string): boolean | undefined {
+        return this.allFormats().find((f) => f.ID === toID(formatID))?.settings.team;
     }
 
     constructor(options?: ClientConstructor) {
@@ -220,6 +226,15 @@ export class Client {
             throw new Error(
                 `Sending message before socket initialization ${room} ${ogMessage}`,
             );
+        }
+        if (ogMessage.startsWith('/challenge ')) {
+            const parts = ogMessage.split(',');
+            if (parts.length >= 2) {
+                const formatID = toID(parts[1]);
+                if (formatID && this.formatAllowsTeam(formatID) === false) {
+                    this.socket.send('|/utm null');
+                }
+            }
         }
         let message = ogMessage;
         if (!room) {
