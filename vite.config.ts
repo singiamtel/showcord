@@ -1,6 +1,6 @@
 import { defineConfig, type Plugin } from 'vite';
-import react from '@vitejs/plugin-react-swc';
-import tsconfigPaths from 'vite-tsconfig-paths';
+import react from '@vitejs/plugin-react';
+
 import tailwindcss from '@tailwindcss/vite';
 import { VitePWA } from 'vite-plugin-pwa';
 
@@ -93,6 +93,7 @@ export default defineConfig(() => ({
             events: 'rollup-plugin-node-polyfills/polyfills/events',
             buffer: 'buffer',
         },
+        tsconfigPaths: true,
     },
     build: {
         rollupOptions: {
@@ -114,7 +115,6 @@ export default defineConfig(() => ({
         fixPsCircularDep(),
         tailwindcss(),
         react(),
-        tsconfigPaths(),
         VitePWA({
             registerType: 'autoUpdate',
             includeAssets: ['assets/**/*', 'icons/**/*'],
