@@ -121,7 +121,13 @@ export function BattleSearch() {
     const isSearching = searchingFormats.length > 0;
 
     const handleSearch = () => {
-        if (selectedFormat) client.send(`/search ${selectedFormat}`, false);
+        if (selectedFormat) {
+            const fmt = allFormats.find(f => f.ID === selectedFormat);
+            if (fmt && !fmt.settings.team) {
+                client.send('/utm null', false);
+            }
+            client.send(`/search ${selectedFormat}`, false);
+        }
     };
 
     const handleCancel = () => {
