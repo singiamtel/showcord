@@ -44,7 +44,10 @@ export function Popup() {
                 onClick={e => e.stopPropagation()}
             >
                 <div className="mb-4 whitespace-pre-wrap text-sm text-gray-800">
-                    <FormatMsgDisplay msg={popup.replace(/\|\|/g, '\n')} />
+                    {popup.startsWith('|html|') ?
+                        popup.slice(6) :
+                        <FormatMsgDisplay msg={popup.replace(/\|\|/g, '\n')} />
+                    }
                 </div>
                 <div className="flex justify-end">
                     <Button ref={buttonRef} variant="outline" onClick={handleClose}>
