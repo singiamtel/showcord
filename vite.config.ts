@@ -118,6 +118,9 @@ export default defineConfig(() => ({
         VitePWA({
             registerType: 'autoUpdate',
             includeAssets: ['assets/**/*', 'icons/**/*'],
+            devOptions: {
+                enabled: true,
+            },
             manifest: {
                 name: 'Showcord',
                 short_name: 'Showcord',
