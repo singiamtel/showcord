@@ -187,6 +187,14 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
                 battle.setViewpoint(perspective);
             }
 
+            // Subscribe to new log lines BEFORE feeding initial log,
+            // to avoid missing lines that arrive during async init
+            room.onLogUpdate = (line) => {
+                updateMyPokemonFromRequest(battle, line);
+                battle.add(line);
+                logIndexRef.current = room.log.length;
+            };
+
             // Feed initial log
             if (room.log && room.log.length > 0) {
                 logger.debug('Feeding initial log', { length: room.log.length });
@@ -212,6 +220,7 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
             cancelled = true;
             unsubPerspective();
             logger.debug('Destroying VisualBattle');
+            room.onLogUpdate = null;
             const battleDiv = shadow!.querySelector('.battle');
             const logDiv = shadow!.querySelector('.battle-log');
             if (battleDiv) $(battleDiv).empty();
@@ -220,41 +229,12 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
         };
     }, [room.ID, vendorLoaded]);
 
-    // Update log
-    useEffect(() => {
-        const battle = battleInstanceRef.current;
-        if (!battle) return;
-
-        // Catch up on any missed lines (race condition handling)
-        if (room.log.length > logIndexRef.current) {
-            const newLines = room.log.slice(logIndexRef.current);
-            logger.debug('Catching up logs', newLines.length);
-            newLines.forEach(line => {
-                updateMyPokemonFromRequest(battle, line);
-                battle.add(line);
-            });
-            battle.seekTurn(Infinity);
-            logIndexRef.current = room.log.length;
-        }
-
-        // Subscribe to new lines
-        room.onLogUpdate = (line) => {
-            updateMyPokemonFromRequest(battle, line);
-            battle.add(line);
-            logIndexRef.current = room.log.length;
-        };
-
-        return () => {
-            room.onLogUpdate = null;
-        };
-    }, [room]);
-
     if (!vendorLoaded) {
         return <div className={cn(props.className, 'flex items-center justify-center')}>Loading Battle Engine…</div>;
     }
 
     return (
-        <div className={cn(props.className, 'w-full aspect-video bg-gray-125 relative')}>
+        <div className={cn(props.className, 'w-full max-h-full aspect-video bg-gray-125 relative')}>
             <div ref={hostRef} className="w-full h-full" />
         </div>
     );

@@ -206,9 +206,9 @@ export function MoveRequest({ req, battle }: Readonly<{ req: Protocol.MoveReques
 
     return <div className='flex flex-col gap-2 w-full h-full p-2'>
         {/* Moves section */}
-        <div className='flex-1 flex flex-col'>
+        <div className='flex flex-col'>
             <h3 className='text-xs font-semibold text-gray-500 dark:text-gray-400 mb-1 italic'>Attack</h3>
-            <div className='grid grid-cols-2 grid-rows-2 gap-1.5 flex-1'>
+            <div className='grid grid-cols-2 grid-rows-2 gap-1.5'>
                 {active[0].moves.map((move, idx: number) => (
                     <MoveButton
                         key={move.id || `move-${idx}`}
