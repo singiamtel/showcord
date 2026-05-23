@@ -44,3 +44,4 @@ local/
 .env.sentry-build-plugin
 
 pokemon-showdown-client/
+dev-dist/
