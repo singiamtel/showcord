@@ -115,6 +115,7 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
             // Set globals that vendor IIFEs and MoveRequest depend on
             window.Dex = Dex;
             window.toID = toID;
+            useRoomStore.getState().markDexLoaded();
 
             // Guard against tooltip crash when side.pokemon[index] is undefined
             const origShowPokemonTooltip = BattleTooltips.prototype.showPokemonTooltip;

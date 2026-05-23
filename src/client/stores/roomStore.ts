@@ -8,6 +8,7 @@ interface RoomStoreState {
     currentRoom: Room | undefined;
     battleRequest: { roomID: string; request: unknown } | undefined;
     usersUpdateCounter: number;
+    dexLoaded: number;
 }
 
 interface RoomStoreActions {
@@ -19,6 +20,7 @@ interface RoomStoreActions {
     selectRoom: (roomID: string, room: Room | undefined) => void;
     setBattleRequest: (roomID: string, request: unknown) => void;
     notifyUsersUpdate: () => void;
+    markDexLoaded: () => void;
 }
 
 export type RoomStore = RoomStoreState & RoomStoreActions;
@@ -29,6 +31,7 @@ export const useRoomStore = create<RoomStore>()((set) => ({
     currentRoom: undefined,
     battleRequest: undefined,
     usersUpdateCounter: 0,
+    dexLoaded: 0,
 
     setRooms: (rooms: Map<Room['ID'], Room>) => {
         set({ rooms: new Map(rooms) });
@@ -83,6 +86,12 @@ export const useRoomStore = create<RoomStore>()((set) => ({
     notifyUsersUpdate: () => {
         set((state) => ({
             usersUpdateCounter: state.usersUpdateCounter + 1,
+        }));
+    },
+
+    markDexLoaded: () => {
+        set((state) => ({
+            dexLoaded: state.dexLoaded + 1,
         }));
     },
 }));

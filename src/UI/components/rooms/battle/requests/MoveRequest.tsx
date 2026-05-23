@@ -1,4 +1,5 @@
 import { useClientContext } from '@/UI/components/single/useClientContext';
+import { useRoomStore } from '@/client/client';
 import type { BattleRoom } from '@/client/room/battleRoom';
 import { cn } from '@/lib/utils';
 import type { Protocol } from '@pkmn/protocol';
@@ -46,7 +47,7 @@ function PokemonIcon({ species, fainted }: Readonly<{ species: string; fainted?:
 
 function MoveButton({ move, index, onClick }: Readonly<{ move: Protocol.Request.ActivePokemon['moves'][number]; index: number; onClick: () => void; }>) {
     const Dex = window.Dex as any;
-    const moveData = move.id && move.id !== 'recharge' ? Dex.moves.get(move.id) : null;
+    const moveData = move.id && move.id !== 'recharge' && Dex ? Dex.moves.get(move.id) : null;
     const type = moveData?.type || '???';
     const typeColor = TYPE_COLORS[type] || TYPE_COLORS['???'];
     const category = moveData?.category || 'Status';
@@ -149,6 +150,7 @@ export function MoveRequest({ req, battle }: Readonly<{ req: Protocol.MoveReques
     const active = req.active;
     const side = req.side;
     const { client } = useClientContext();
+    const dexLoaded = useRoomStore(state => state.dexLoaded);
     const builder = useMemo(() => new ChoiceBuilder(req), [req]);
     const [selected, setSelected] = useState<string | null>(null);
 
@@ -174,6 +176,14 @@ export function MoveRequest({ req, battle }: Readonly<{ req: Protocol.MoveReques
 
     if (!active[0]) {
         return null;
+    }
+
+    if (!dexLoaded) {
+        return (
+            <div className='flex flex-col items-center justify-center w-full h-full p-2'>
+                <span className='text-gray-500 dark:text-gray-400 text-sm'>Loading move data…</span>
+            </div>
+        );
     }
 
     const sideIndex = battle.perspective === 'p1' ? 0 : 1;
