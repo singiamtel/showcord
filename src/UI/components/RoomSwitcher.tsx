@@ -100,7 +100,12 @@ export function RoomSwitcher() {
             { kind: 'join' as const, query: query.trim() },
             { kind: 'pm' as const, query: query.trim() },
         ] : []),
-        ...settingsSections.map(section => ({ kind: 'settings' as const, section })),
+        ...settingsSections
+            .filter(section => {
+                if (!query.trim()) return true;
+                return fuzzyMatch(section, query) ?? fuzzyMatch(`settings: ${section}`, query);
+            })
+            .map(section => ({ kind: 'settings' as const, section })),
     ];
 
     const close = useCallback(() => {
