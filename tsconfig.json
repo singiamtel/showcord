@@ -29,5 +29,5 @@
       ]
     }
   },
-  "include": ["src/**/*", "typings.d.ts", "test/**/*", "vitest.config.ts"]
+  "include": ["src/**/*", "typings.d.ts", "test/**/*", "vitest.config.ts", "playwright.config.ts"]
 }
