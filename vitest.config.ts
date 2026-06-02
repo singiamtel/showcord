@@ -55,6 +55,7 @@ export default defineConfig(() => ({
         retry: 2,
         maxConcurrency: 4,
         include: ['test/**/*.test.ts', 'test/**/*.test.tsx'],
+        exclude: ['test/e2e/**', '**/node_modules/**'],
         coverage: {
             provider: 'v8',
             reporter: ['text', 'html', 'json-summary'],
