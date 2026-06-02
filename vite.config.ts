@@ -85,6 +85,9 @@ function fontPreloadPlugin(): Plugin {
 
 export default defineConfig(() => ({
     base: `${process.env.PUBLIC_URL ?? ''}/`,
+    define: {
+        global: 'globalThis',
+    },
     server: {
         allowedHosts: true,
     },
