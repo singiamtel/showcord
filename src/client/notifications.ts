@@ -19,10 +19,13 @@ function limitString(str: string, limit: number) {
     return `${str.slice(0, limit - 3)}...`;
 }
 
+const notificationSupported = typeof Notification !== 'undefined';
+
 class NotificationsEngine {
-    private permission = Notification.permission;
+    private permission: NotificationPermission = notificationSupported ? Notification.permission : 'denied';
 
     async askPermission() {
+        if (!notificationSupported) return;
         if (this.permission === 'default') {
             this.permission = await Notification.requestPermission();
         }
@@ -49,7 +52,7 @@ class NotificationsEngine {
                 });
             }
         } else {
-            if (this.permission !== 'granted') return;
+            if (!notificationSupported || this.permission !== 'granted') return;
             const title = notification.roomType === 'pm' ?
                 `PM from ${notification.user.trim()}` :
                 `${notification.room} - ${notification.user}`;
