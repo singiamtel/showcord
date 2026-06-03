@@ -201,7 +201,6 @@ export function BattleSearch() {
                                                         className={`w-full text-left px-2.5 py-1.5 rounded-lg flex flex-col gap-0.5 transition-colors ${idx === activeIndex ? 'bg-teal-500/20' : 'hover:bg-teal-500/10'}`}
                                                     >
                                                         <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">[Gen {format.gen}] {format.name}</span>
-                                                        <span className="text-[10px] text-gray-400 dark:text-gray-500">{format.ID}</span>
                                                     </button>
                                                 );
                                             })}
