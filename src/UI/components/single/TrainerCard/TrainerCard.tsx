@@ -48,7 +48,7 @@ export default function TrainerCard(
         return () => {
             window.removeEventListener('keydown', onKeyDown);
         };
-    }, []);
+    }, [close]);
 
     if (!name) return null;
 

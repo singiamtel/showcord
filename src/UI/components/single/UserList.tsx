@@ -1,4 +1,4 @@
-import { type HTMLAttributes, useLayoutEffect, useRef, useState } from 'react';
+import { type HTMLAttributes, useMemo, useRef, useState } from 'react';
 import { Username } from '../Username';
 import { isStaff, type User } from '../../../client/user';
 import { toID } from '@/utils/generic';
@@ -12,21 +12,22 @@ export default function UserList(props: Readonly<HTMLAttributes<HTMLDivElement> 
     const roomID = useRoomID();
     const room = useRoomStore(state => state.rooms.get(roomID));
     const usersUpdateCounter = useRoomStore(state => state.usersUpdateCounter);
-    const [users, setUsers] = useState<User[]>([]);
     const [search, setSearch] = useState<string>('');
     const prevUsersRef = useRef<User[]>([]);
 
-    const filteredUsers = users.filter((user) => toID(user.name).includes(toID(search)));
-
-    useLayoutEffect(() => {
-        if (!room) return;
-        const newUsers = [...room.users];
-        const usersChanged = prevUsersRef.current.length !== newUsers.length || (prevUsersRef.current.length === newUsers.length && !prevUsersRef.current.every((u, i) => u === newUsers[i]));
-        if (usersChanged) {
-            prevUsersRef.current = newUsers;
-            setUsers(newUsers);
-        }
+    const users = useMemo(() => {
+        // usersUpdateCounter is used to trigger re-computation when users change,
+        // even though the room reference may not change
+        void usersUpdateCounter;
+        const newUsers = room ? [...room.users] : prevUsersRef.current;
+        const prev = prevUsersRef.current;
+        const changed = prev.length !== newUsers.length ||
+            (prev.length === newUsers.length && !prev.every((u, i) => u === newUsers[i]));
+        if (changed) prevUsersRef.current = newUsers;
+        return prevUsersRef.current;
     }, [room, usersUpdateCounter]);
+
+    const filteredUsers = users.filter((user) => toID(user.name).includes(toID(search)));
 
     // separate users into staff and regular users
     const staff = filteredUsers.filter((user) => isStaff(user.name));

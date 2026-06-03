@@ -33,7 +33,7 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const isIntersecting = useOnScreen(messagesEndRef);
     const ref = useRef<HTMLDivElement>(null);
-    const didScrollInitially = useRef(false);
+    const didScrollInitiallyRef = useRef(false);
     const messageCountRef = useRef(messages?.length ?? 0);
 
     const isHtmlRoom = messages?.some(m => m.name === 'pagehtml') ?? false;
@@ -65,11 +65,11 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     }, [messages?.length, isIntersecting, scrollToBottom, isHtmlRoom]);
 
     useLayoutEffect(() => {
-        if (didScrollInitially.current) return;
+        if (didScrollInitiallyRef.current) return;
         if (!isHtmlRoom) {
             scrollToBottom();
         }
-        didScrollInitially.current = true;
+        didScrollInitiallyRef.current = true;
     }, [isHtmlRoom, scrollToBottom]);
 
     return (
@@ -86,9 +86,10 @@ export default function Chat(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
                 {messages ? (
                     messages.map((message, _index, arr) => {
                         const wasPrevCode = _index > 0 && arr[_index - 1]?.content.startsWith('!code');
+                        const msgKey = `${message.timestamp?.getTime() || _index}-${message.user || ''}-${message.content.substring(0, 16)}`;
                         return (
                             <MessageComponent
-                                key={`msg-${currentRoom.ID}-${message.timestamp?.getTime() || 0}-${_index}`}
+                                key={msgKey}
                                 time={message.timestamp}
                                 user={message.user || ''}
                                 message={message.content}

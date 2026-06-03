@@ -66,14 +66,17 @@ function fuzzyFilter(rooms: Room[], query: string): FuzzyResult[] {
         .sort((a, b) => b.score - a.score);
 }
 
-function HighlightedName({ name, highlights }: Readonly<{ name: string; highlights: boolean[] }>) {
+export function HighlightedName({ name, highlights }: Readonly<{ name: string; highlights: boolean[] }>) {
+    const keyCounterRef = useRef(0);
     return (
         <>
-            {name.split('').map((char, i) => (
-                highlights[i] ?
-                    <mark key={i} className="bg-transparent text-blue-300 font-semibold">{char}</mark> :
-                    <span key={i}>{char}</span>
-            ))}
+            {name.split('').map((char, i) => {
+                keyCounterRef.current += 1;
+                const key = `hl-${keyCounterRef.current}`;
+                return highlights[i] ?
+                    <mark key={key} className="bg-transparent text-blue-300 font-semibold">{char}</mark> :
+                    <span key={key}>{char}</span>;
+            })}
         </>
     );
 }

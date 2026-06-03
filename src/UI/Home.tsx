@@ -32,7 +32,7 @@ function useClientQuery<T>(query: (client: NonNullable<ReturnType<typeof useClie
     useEffect(() => {
         if (!client) return;
         query(client).then(setData);
-    }, [client]);
+    }, [client, query]);
 
     return data;
 }

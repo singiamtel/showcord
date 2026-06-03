@@ -21,7 +21,7 @@ export function TimerDisplay() {
         active: room?.timerActive ?? false,
         startedAt: room?.timerStartedAt ?? 0,
     });
-    const [now, setNow] = useState(Date.now());
+    const [now, setNow] = useState(() => Date.now());
 
     useEffect(() => {
         if (!room) return;

@@ -17,7 +17,10 @@ export default function ClientContextProvider(props: Readonly<React.PropsWithChi
     const messagesMap = useMessageStore((state) => state.rooms);
 
     const rooms = Array.from(roomsMap.values()).filter((r) => r.open);
-    const messages = currentRoom ? messagesMap[currentRoom.ID]?.messages ?? [] : [];
+    const messages = useMemo(
+        () => currentRoom ? messagesMap[currentRoom.ID]?.messages ?? [] : [],
+        [currentRoom, messagesMap],
+    );
 
     /* --- Room handling --- */
 

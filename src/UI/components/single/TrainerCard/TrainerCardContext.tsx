@@ -26,7 +26,7 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
 
     const wrapperRef = useClickOutside(closeWindow);
 
-    const clickUsername = (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    const clickUsername = useCallback((e: React.MouseEvent<HTMLElement, MouseEvent>) => {
         if (!e) return;
         if (!(e.target instanceof HTMLElement)) return;
         const clickedElement = e.target;
@@ -51,7 +51,7 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
         client.queryUser(username).then((user: UserDetails) => {
             setUser(user);
         });
-    };
+    }, [client, closeWindow]);
 
     const contextValue = useMemo(() => ({ isOpen, openCard, closeCard, clickUsername }), [isOpen, clickUsername]);
 

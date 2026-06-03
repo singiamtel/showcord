@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useMemo, useRef } from 'react';
 import { useBattleStore } from '@/client/stores/battleStore';
 import { client } from '@/client/singleton';
 import { Button } from '@/components/ui/button';
@@ -18,19 +18,21 @@ export function BattleSearch() {
     const [activeIndex, setActiveIndex] = useState(-1);
     const comboboxRef = useRef<HTMLDivElement>(null);
 
-    const categories = (formats?.categories.map((category) => {
-        const seenFormatIds = new Set<string>();
-        const filteredFormats = category.formats.filter((format) => {
-            if (!format.settings.searchShow) return false;
-            if (seenFormatIds.has(format.ID)) return false;
-            seenFormatIds.add(format.ID);
-            return true;
-        });
-        return {
-            ...category,
-            formats: filteredFormats,
-        };
-    }).filter(category => category.formats.length > 0)) ?? [];
+    const categories = useMemo(() =>
+        (formats?.categories.map((category) => {
+            const seenFormatIds = new Set<string>();
+            const filteredFormats = category.formats.filter((format) => {
+                if (!format.settings.searchShow) return false;
+                if (seenFormatIds.has(format.ID)) return false;
+                seenFormatIds.add(format.ID);
+                return true;
+            });
+            return {
+                ...category,
+                formats: filteredFormats,
+            };
+        }).filter(category => category.formats.length > 0)) ?? [],
+    [formats]);
     const allFormats = categories.flatMap(category => category.formats);
 
     const defaultFormat = useMemo(() => {
@@ -49,6 +51,14 @@ export function BattleSearch() {
         setDisplayValue(defaultFormat.name);
     }
 
+    const closeDropdown = useCallback(() => {
+        setIsOpen(false);
+        setSearchQuery('');
+        const fmt = allFormats.find(f => f.ID === selectedFormat);
+        setDisplayValue(fmt?.name ?? '');
+        setActiveIndex(-1);
+    }, [allFormats, selectedFormat]);
+
     useEffect(() => {
         const handleClickOutside = (e: MouseEvent) => {
             if (comboboxRef.current && !comboboxRef.current.contains(e.target as Node)) {
@@ -57,15 +67,7 @@ export function BattleSearch() {
         };
         document.addEventListener('mousedown', handleClickOutside);
         return () => document.removeEventListener('mousedown', handleClickOutside);
-    }, [selectedFormat, allFormats]);
-
-    const closeDropdown = () => {
-        setIsOpen(false);
-        setSearchQuery('');
-        const fmt = allFormats.find(f => f.ID === selectedFormat);
-        setDisplayValue(fmt?.name ?? '');
-        setActiveIndex(-1);
-    };
+    }, [closeDropdown]);
 
     const selectFormat = (format: { ID: string; name: string }) => {
         setSelectedFormat(format.ID);

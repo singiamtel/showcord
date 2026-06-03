@@ -1,4 +1,5 @@
 import hljs from 'highlight.js';
+import { useRef, useLayoutEffect } from 'react';
 
 export function HTMLtoPlain(html: string) {
     const tmp = document.createElement('DIV');
@@ -17,6 +18,13 @@ export default function Code({ message }: { message: string }) {
     const result = hljs.highlightAuto(str);
     const threshold = 5;
     const shouldHighlight = result.relevance >= threshold;
+    const codeRef = useRef<HTMLElement>(null);
+
+    useLayoutEffect(() => {
+        if (shouldHighlight && codeRef.current) {
+            codeRef.current.innerHTML = result.value;
+        }
+    }, [shouldHighlight, result.value]);
 
     return (
         <div
@@ -28,8 +36,8 @@ export default function Code({ message }: { message: string }) {
                         className={'whitespace-pre-wrap text-sm '}
                     >
                         <code
+                            ref={codeRef}
                             className="hljs"
-                            dangerouslySetInnerHTML={{ __html: result.value }}
                         />
                     </pre>
                 ) :

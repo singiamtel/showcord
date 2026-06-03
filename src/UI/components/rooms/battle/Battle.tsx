@@ -227,7 +227,7 @@ export default function BattleWindow(props: Readonly<HTMLAttributes<HTMLDivEleme
             if (logDiv) $(logDiv).empty();
             battleInstanceRef.current = null;
         };
-    }, [room.ID, vendorLoaded]);
+    }, [room.ID, vendorLoaded, perspective, room, roomID]);
 
     if (!vendorLoaded) {
         return <div className={cn(props.className, 'flex items-center justify-center')}>Loading Battle Engine…</div>;

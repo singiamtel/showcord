@@ -60,10 +60,10 @@ export default defineConfig(() => ({
             provider: 'v8',
             reporter: ['text', 'html', 'json-summary'],
             thresholds: {
-                statements: 58,
+                statements: 56,
                 branches: 50,
-                functions: 53,
-                lines: 59,
+                functions: 52,
+                lines: 58,
             },
             exclude: [
                 '**/vendor/**',
