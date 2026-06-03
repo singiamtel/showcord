@@ -239,7 +239,7 @@ export const MessageComponent = memo(function MessageComponent(
     if (type === 'error') {
         return (
             <div className="pt-0.5 text-red-400">
-                <span className="text-gray-125 text-xs">
+                <span className="text-gray-125 text-xs font-mono tracking-tighter">
                     {time ? HHMMSS(time) : ''}
 
           &nbsp;
@@ -254,7 +254,7 @@ export const MessageComponent = memo(function MessageComponent(
     if (type === 'log') {
         return (
             <div className="pt-0.5 ">
-                <span className="text-gray-125 text-xs">
+                <span className="text-gray-125 text-xs font-mono tracking-tighter">
                     {time ? HHMMSS(time) : ''}
                 </span>
                 <Linkify options={options}>
@@ -268,7 +268,7 @@ export const MessageComponent = memo(function MessageComponent(
             className={cn('px-1',
                 (hld ? 'bg-yellow-hl-body-light dark:bg-yellow-hl-body' : ''))}
         >
-            <span className="text-gray-125 text-xs">
+            <span className="text-gray-125 text-xs font-mono tracking-tighter">
                 {time ? HHMMSS(time) : ''}
             </span>
             <span className="wrap-break-word">
