@@ -165,13 +165,13 @@ export function BattleSearch() {
                                 placeholder="Search format…"
                                 spellCheck={false}
                                 autoComplete="off"
-                                className="w-full h-8 px-3 text-sm rounded-md border border-input bg-background dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-ring"
+                                className="w-full h-9 px-3 text-sm rounded-md border border-input bg-background dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-ring"
                             />
                         ) : (
                             <button
                                 type="button"
                                 onClick={handleInputFocus}
-                                className="w-full h-8 px-3 text-sm rounded-md border border-input bg-background dark:bg-gray-800 dark:text-white flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
+                                className="w-full h-9 px-3 text-sm rounded-md border border-input bg-background dark:bg-gray-800 dark:text-white flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-750 transition-colors"
                             >
                                 <span className={selectedFormat ? 'text-gray-900 dark:text-gray-100' : 'text-muted-foreground'}>
                                     {formatLabel(selectedFormat, allFormats)}
@@ -198,9 +198,9 @@ export function BattleSearch() {
                                                         key={format.ID}
                                                         type="button"
                                                         onMouseDown={(e) => { e.preventDefault(); selectFormat(format); }}
-                                                        className={`w-full text-left px-2.5 py-1.5 rounded-lg flex flex-col gap-0.5 transition-colors ${idx === activeIndex ? 'bg-teal-500/20' : 'hover:bg-teal-500/10'}`}
+                                                        className={`w-full text-left px-3 py-2 rounded-lg flex flex-col gap-0.5 transition-colors ${idx === activeIndex ? 'bg-teal-500/20' : 'hover:bg-teal-500/10'}`}
                                                     >
-                                                        <span className="text-xs font-semibold text-gray-900 dark:text-gray-100">[Gen {format.gen}] {format.name}</span>
+                                                        <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">[Gen {format.gen}] {format.name}</span>
                                                     </button>
                                                 );
                                             })}
@@ -211,7 +211,7 @@ export function BattleSearch() {
                         )}
                     </div>
                     <Button
-                        className="w-full h-8 font-bold bg-teal-500 hover:bg-teal-600 text-white border-0"
+                        className="w-full h-9 font-bold text-sm bg-teal-500 hover:bg-teal-600 text-white border-0"
                         onClick={handleSearch}
                         disabled={!selectedFormat}
                     >
