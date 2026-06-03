@@ -1,4 +1,5 @@
 export const rankOrder = {
+    '~': 9,
     '&': 9,
     '#': 8,
     '\u00a7': 7,
