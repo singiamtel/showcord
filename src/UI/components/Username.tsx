@@ -36,6 +36,7 @@ export function Username(
                 className={cn('bg-transparent border-none text-black dark:text-white hover:underline hover:cursor-pointer ',
                     (bold ? 'font-bold ' : ''), className)}
                 data-message="true"
+                data-rank={rank}
                 data-username={user.slice(1)}
             >
                 {user.slice(1)}

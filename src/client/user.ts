@@ -14,6 +14,20 @@ export const rankOrder = {
 
 export type RankSymbol = keyof typeof rankOrder;
 
+export const rankNames: Record<RankSymbol, string> = {
+    '~': 'Owner',
+    '&': 'Leader',
+    '#': 'Admin',
+    '\u00a7': 'Section Leader',
+    '@': 'Moderator',
+    '%': 'Driver',
+    '*': 'Bot',
+    '+': 'Voice',
+    '^': 'Prized',
+    ' ': 'Regular',
+    '‽': 'Locked',
+} as const;
+
 export function isStaff(username: string): boolean {
     const rank = username.charAt(0) as RankSymbol;
     return rankOrder[rank] >= rankOrder['%'];

@@ -14,7 +14,7 @@ import {
 import { FaCommentAlt, FaUserPlus } from 'react-icons/fa';
 import { PiSwordBold } from 'react-icons/pi';
 import manageURL from '../../../../utils/manageURL';
-import { rankOrder } from '../../../../client/user';
+import { rankOrder, rankNames, type RankSymbol } from '../../../../client/user';
 import { useClientContext } from '../useClientContext';
 import type { UserDetails } from '@/client/queryHandlers';
 import type { Client } from '@/client/client';
@@ -22,9 +22,11 @@ import type { Client } from '@/client/client';
 const margin = 15;
 
 export default function TrainerCard(
-    { user, name, position, forwardRef, close }: Readonly<{
+    { user, name, localRank, globalRank, position, forwardRef, close }: Readonly<{
         user: UserDetails | null;
         name: string | null;
+        localRank: string | null;
+        globalRank: string | null;
         position: { x: number; y: number };
         forwardRef: React.Ref<HTMLDivElement>;
         close: () => void;
@@ -84,6 +86,7 @@ export default function TrainerCard(
                         <div className="text-xs dark:text-gray-100">
                             {parseStatus(user?.status)}
                         </div>
+                        <RanksDisplay localRank={localRank} globalRank={globalRank} />
                     </div>
                     <div
                         id="usercard-action-buttons"
@@ -221,4 +224,34 @@ function parseStatus(status: string | undefined): string {
         return status.slice(1);
     }
     return status;
+}
+
+function rankLabel(rank: string | null): string {
+    if (!rank) return '';
+    if (rank === ' ') return 'Regular';
+    const name = rankNames[rank as RankSymbol];
+    return name ? `${rank} ${name}` : '';
+}
+
+function RanksDisplay({ localRank, globalRank }: Readonly<{ localRank: string | null; globalRank: string | null }>) {
+    const hasLocal = !!localRank;
+    const hasGlobal = !!globalRank;
+    if (!hasLocal && !hasGlobal) return null;
+    return (
+        <div className="text-xs mt-1">
+            {hasLocal && (
+                <span className="text-[#9D9488] whitespace-pre font-mono">
+                    Local: {rankLabel(localRank)}
+                </span>
+            )}
+            {hasLocal && hasGlobal && (
+                <span className="text-gray-500 mx-1">|</span>
+            )}
+            {hasGlobal && (
+                <span className="text-[#9D9488] whitespace-pre font-mono">
+                    Global: {rankLabel(globalRank)}
+                </span>
+            )}
+        </div>
+    );
 }

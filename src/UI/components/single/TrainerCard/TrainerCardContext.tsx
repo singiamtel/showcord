@@ -1,8 +1,10 @@
 import { useCallback, useMemo, useRef, useState } from 'react';
 import TrainerCard from './TrainerCard';
 import { logger } from '@/utils/logger';
+import { toID } from '@/utils/generic';
 import useClickOutside from '@/UI/hooks/useClickOutside';
 import { useClientContext } from '../useClientContext';
+import { useRoomStore } from '@/client/client';
 import { TrainerCardContext } from './TrainerCardContext.types';
 import type { UserDetails } from '@/client/queryHandlers';
 
@@ -15,12 +17,16 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
     const [user, setUser] = useState<UserDetails | null>(null);
     const [username, setUsername] = useState<string | null>(null);
     const [position, setPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
+    const [localRank, setLocalRank] = useState<string | null>(null);
+    const [globalRank, setGlobalRank] = useState<string | null>(null);
     const clickedElementRef = useRef<HTMLElement | null>(null);
 
     const closeWindow = useCallback(() => {
         setUser(null);
         setUsername(null);
         setPosition({ x: 0, y: 0 });
+        setLocalRank(null);
+        setGlobalRank(null);
         clickedElementRef.current = null;
     }, []);
 
@@ -31,7 +37,6 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
         if (!(e.target instanceof HTMLElement)) return;
         const clickedElement = e.target;
 
-        // If clicking on the same element that opened the popup, close it
         if (clickedElementRef.current === clickedElement) {
             closeWindow();
             return;
@@ -44,8 +49,21 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
             logger.error('clickUsername: no username');
             return;
         }
+
+        const rank = clickedElement.getAttribute('data-rank') ?? null;
+        const userID = toID(username);
+
+        let globalRankSymbol: string | null = null;
+        const lobbyRoom = useRoomStore.getState().rooms.get('lobby');
+        if (lobbyRoom) {
+            const lobbyUser = lobbyRoom.users.find((u) => u.ID === userID);
+            globalRankSymbol = lobbyUser?.name.charAt(0) ?? null;
+        }
+
         clickedElementRef.current = clickedElement;
         setUsername(username);
+        setLocalRank(rank);
+        setGlobalRank(globalRankSymbol);
         setPosition({ x: e.clientX, y: e.clientY });
         setUser(null);
         client.queryUser(username).then((user: UserDetails) => {
@@ -60,6 +78,8 @@ export function TrainerCardProvider({ children }: Readonly<{ children: React.Rea
             <TrainerCard
                 user={user}
                 name={username}
+                localRank={localRank}
+                globalRank={globalRank}
                 position={position}
                 forwardRef={wrapperRef}
                 close={closeWindow}
