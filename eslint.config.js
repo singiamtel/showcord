@@ -6,9 +6,12 @@ import reactRefresh from 'eslint-plugin-react-refresh';
 import reactHooks from 'eslint-plugin-react-hooks';
 import regexpPlugin from 'eslint-plugin-regexp';
 
-export default tseslint.config({
+export default tseslint.config(
+    {
+        ignores: ['node_modules/**', 'dist/**', 'coverage/**', 'dev-dist/**', 'src/utils/namecolour.js', '.next/**', 'eslint.config.js', 'test/**', 'e2e/**', 'vite.config.ts', 'tailwind.config.js', 'src/vendor/**'],
+    },
+    {
     files: ["**/*.{js,jsx,ts,tsx}"],
-    ignores: ['node_modules/**', 'dist/**', 'coverage/**', 'src/utils/namecolour.js', '.next/**', 'eslint.config.js', 'test/**', 'e2e/**', 'vite.config.ts', 'tailwind.config.js', 'src/vendor/**'],
 
     // Extend recommended rule sets from:
     // 1. ESLint JS's recommended rules
@@ -141,4 +144,5 @@ export default tseslint.config({
 
             // General JavaScript
         },
-});
+    },
+);
