@@ -27,12 +27,24 @@ function Disconnected() {
         </span>
     );
 }
+
+function Reconnecting() {
+    return (
+        <span className="rounded px-2 py-1 w-full text-yellow-400 font-bold">
+            Reconnecting...
+        </span>
+    );
+}
+
 function RenderUserContent() {
     const isConnected = useAppStore(state => state.isConnected);
+    const isReconnecting = useAppStore(state => state.isReconnecting);
     const user = useUserStore(state => state.user);
     const avatar = useUserStore(state => state.avatar);
 
-    if (!isConnected) {
+    if (isReconnecting) {
+        return <Reconnecting />;
+    } else if (!isConnected) {
         return <Disconnected />;
     } else if (user) {
         return <UserDetails border user={user} avatar={avatar} />;

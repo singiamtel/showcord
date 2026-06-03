@@ -9,6 +9,8 @@ import { useNotificationStore, type RoomNotification as RoomNotifications } from
 import { highlightMsg, shouldNotify } from './messageHandling';
 import { notificationsEngine } from './notifications';
 import { useMessageStore } from './stores/messageStore';
+import { useUserStore } from './stores/userStore';
+import { useBattleStore } from './stores/battleStore';
 import {
     openRoom as openRoomInternal,
     removeRoom as removeRoomInternal,
@@ -56,6 +58,10 @@ const defaultClientRuntime: ClientRuntime = {
     reloadWindow: () => window.location.reload(),
 };
 
+const RECONNECT_INITIAL_DELAY = 1000;
+const RECONNECT_MAX_DELAY = 30000;
+const RECONNECT_FACTOR = 2;
+
 import { enableMapSet } from 'immer';
 
 enableMapSet();
@@ -86,6 +92,9 @@ export class Client {
     private started = false;
     private readonly boundNotificationsListener = this.notificationsListener.bind(this);
     private readonly boundCleanupBeforeUnload = this.cleanupBeforeUnload.bind(this);
+    private deliberateClose = false;
+    private reconnectRetryCount = 0;
+    private reconnectTimer: ReturnType<typeof setTimeout> | undefined;
 
     get username() {
         return this.settings.username;
@@ -506,6 +515,11 @@ export class Client {
     }
 
     stop() {
+        this.deliberateClose = true;
+        if (this.reconnectTimer !== undefined) {
+            clearTimeout(this.reconnectTimer);
+            this.reconnectTimer = undefined;
+        }
         this.runtime.removeWindowEventListener(
             'focus',
             this.boundNotificationsListener as EventListener,
@@ -523,6 +537,7 @@ export class Client {
         this.onOpen = [];
         this.started = false;
         useAppStore.getState().setConnected(false);
+        useAppStore.getState().setReconnecting(false);
     }
 
     destroy() {
@@ -566,11 +581,7 @@ export class Client {
             throw new Error('__setupSocketListeners: Socket not initialized');
         }
         this.socket.onopen = () => {
-            for (const cb of this.onOpen) {
-                cb();
-            }
-            useAppStore.getState().setConnected(true);
-            this.authManager.tryLogin();
+            this._handleSocketOpen();
         };
 
         this.socket.onmessage = (event) => {
@@ -587,9 +598,58 @@ export class Client {
             logger.error('WebSocket error', event);
         };
         this.socket.onclose = (_) => {
-            logger.warn('Socket closed, dispatching disconnect');
+            if (this.deliberateClose) {
+                logger.warn('Socket closed intentionally');
+                return;
+            }
+            logger.warn('Socket closed unexpectedly, starting reconnection');
             useAppStore.getState().setConnected(false);
+            this._startReconnect();
         };
+    }
+
+    private _handleSocketOpen() {
+        for (const cb of this.onOpen) {
+            cb();
+        }
+        const wasReconnecting = useAppStore.getState().isReconnecting;
+        useAppStore.getState().setConnected(true);
+        useAppStore.getState().setReconnecting(false);
+        this.reconnectRetryCount = 0;
+        if (wasReconnecting) {
+            logger.info('Reconnected successfully');
+        }
+        this.authManager.tryLogin();
+    }
+
+    private _startReconnect() {
+        useAppStore.getState().setReconnecting(true);
+        useUserStore.getState().setChallstr('');
+        useBattleStore.setState({ formats: undefined });
+        this._scheduleReconnect();
+    }
+
+    private _scheduleReconnect() {
+        const delay = Math.min(
+            RECONNECT_INITIAL_DELAY * Math.pow(RECONNECT_FACTOR, this.reconnectRetryCount),
+            RECONNECT_MAX_DELAY,
+        );
+        this.reconnectRetryCount++;
+        logger.info(`Reconnecting in ${delay}ms (attempt ${this.reconnectRetryCount})`);
+        this.reconnectTimer = setTimeout(() => this._attemptReconnect(), delay);
+    }
+
+    private _attemptReconnect() {
+        this.reconnectTimer = undefined;
+        try {
+            this.socket = this.runtime.createWebSocket(this.settings.serverURL);
+            this.__setupSocketListeners();
+        } catch (error) {
+            logger.error('Reconnection attempt failed', error);
+            if (!this.deliberateClose) {
+                this._scheduleReconnect();
+            }
+        }
     }
 
     private __createPermanentRooms() {
