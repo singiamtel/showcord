@@ -20,6 +20,10 @@ export function highlightMsg(
     force = false
 ): boolean {
     if (message.hld !== null && !force) return message.hld;
+    if (message.type === 'rawHTML' || message.type === 'boxedHTML') {
+        message.hld = false;
+        return false;
+    }
     if (toID(message.user) === (settings.username)) {
         message.hld = false;
         return false;
@@ -36,7 +40,7 @@ export function shouldNotify(
     selectedRoom: string,
     username: string | undefined,
 ): boolean {
-    if (message.type === 'log') return false;
+    if (message.type === 'log' || message.type === 'rawHTML' || message.type === 'boxedHTML') return false;
     if (selectedRoom === roomID && document.hasFocus()) return false;
 
     const lastReadTime = useMessageStore.getState().rooms[roomID]?.lastReadTime ?? 0;
