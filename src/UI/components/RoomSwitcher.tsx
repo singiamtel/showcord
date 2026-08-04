@@ -186,6 +186,10 @@ export function RoomSwitcher() {
             e.preventDefault();
             setSelectedIndex(i => Math.max(i - 1, 0));
         } else if (e.key === 'Enter' && actions[selectedIndex]) {
+            // Without this, the switcher can close and hand focus to the chatbox
+            // textarea before the browser's default Enter action (newline insertion)
+            // has fired, landing a stray "\n" in whatever the switcher navigated to.
+            e.preventDefault();
             activate(actions[selectedIndex]);
         }
     };
