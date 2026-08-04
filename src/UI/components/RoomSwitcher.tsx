@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faCog, faHome, faUser, faArrowRightToBracket } from '@fortawesome/free-solid-svg-icons';
 import { GiBattleAxe } from 'react-icons/gi';
@@ -87,6 +87,8 @@ type ActionItem =
     | { kind: 'pm'; query: string }
     | { kind: 'settings'; section: string };
 
+const SETTINGS_SECTIONS = ['appearance', 'highlighting', 'developer', 'account'] as const;
+
 export function RoomSwitcher() {
     const [open, setOpen] = useState(false);
     const [query, setQuery] = useState('');
@@ -94,22 +96,26 @@ export function RoomSwitcher() {
     const { rooms, setRoom, client } = useClientContext();
     const inputRef = useRef<HTMLInputElement>(null);
 
-    const fuzzyResults = fuzzyFilter(rooms, query);
-    const settingsSections = ['appearance', 'highlighting', 'developer', 'account'] as const;
-
-    const actions: ActionItem[] = [
-        ...fuzzyResults.map(r => ({ kind: 'room' as const, ...r })),
-        ...(query.trim() ? [
-            { kind: 'join' as const, query: query.trim() },
-            { kind: 'pm' as const, query: query.trim() },
-        ] : []),
-        ...settingsSections
-            .filter(section => {
-                if (!query.trim()) return true;
-                return fuzzyMatch(section, query) ?? fuzzyMatch(`settings: ${section}`, query);
-            })
-            .map(section => ({ kind: 'settings' as const, section })),
-    ];
+    // Skip the fuzzy filtering work entirely while the switcher is closed - `rooms`
+    // changes reference whenever any room opens/closes, which would otherwise re-run
+    // this on every such update even with the palette hidden.
+    const actions: ActionItem[] = useMemo(() => {
+        if (!open) return [];
+        const fuzzyResults = fuzzyFilter(rooms, query);
+        return [
+            ...fuzzyResults.map(r => ({ kind: 'room' as const, ...r })),
+            ...(query.trim() ? [
+                { kind: 'join' as const, query: query.trim() },
+                { kind: 'pm' as const, query: query.trim() },
+            ] : []),
+            ...SETTINGS_SECTIONS
+                .filter(section => {
+                    if (!query.trim()) return true;
+                    return fuzzyMatch(section, query) ?? fuzzyMatch(`settings: ${section}`, query);
+                })
+                .map(section => ({ kind: 'settings' as const, section })),
+        ];
+    }, [open, rooms, query]);
 
     const close = useCallback(() => {
         setOpen(false);

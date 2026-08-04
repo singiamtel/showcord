@@ -5,22 +5,28 @@ import { logger } from '../../../utils/logger';
 import { loadCustomColors } from '../../../utils/namecolour';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { toast } from '@/components/ui/use-toast';
-import { ClientContext } from './ClientContext.types';
+import { ClientContext, type ClientContextType } from './ClientContext.types';
 
 let didInitColors = false;
+const EMPTY_MESSAGES: ClientContextType['messages'] = [];
 
 export default function ClientContextProvider(props: Readonly<React.PropsWithChildren>) {
     const [previousRooms, setPreviousRooms] = useState<string[]>(['home']);
     const roomsMap = useRoomStore((state) => state.rooms);
     const currentRoom = useRoomStore((state) => state.currentRoom);
     const setCurrentRoom = useRoomStore((state) => state.setCurrentRoom);
-    const messagesMap = useMessageStore((state) => state.rooms);
-
-    const rooms = Array.from(roomsMap.values()).filter((r) => r.open);
-    const messages = useMemo(
-        () => currentRoom ? messagesMap[currentRoom.ID]?.messages ?? [] : [],
-        [currentRoom, messagesMap],
+    // Selecting only the active room's entry (instead of the whole messages map) means
+    // this provider - and everything consuming useClientContext() - only re-renders when
+    // the currently open room's messages change, not on every socket message app-wide.
+    const currentRoomMessages = useMessageStore(
+        (state) => currentRoom ? state.rooms[currentRoom.ID]?.messages : undefined,
     );
+
+    const rooms = useMemo(
+        () => Array.from(roomsMap.values()).filter((r) => r.open),
+        [roomsMap],
+    );
+    const messages = currentRoomMessages ?? EMPTY_MESSAGES;
 
     /* --- Room handling --- */
 
