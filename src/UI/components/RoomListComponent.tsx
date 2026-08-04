@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { useClientContext } from './single/useClientContext';
 import HashtagIcon from '../assets/hashtag';
 import Circle from './Circle';
@@ -14,7 +15,7 @@ const customIcons = {
 };
 
 
-export function RoomListComponent(
+export const RoomListComponent = memo(function RoomListComponent(
     { name, ID, type }: Readonly<{
         name: string;
         ID: string;
@@ -85,7 +86,7 @@ export function RoomListComponent(
             </div>
         </div>
     );
-}
+});
 
 function ClosingButton({ room }: Readonly<{ room: string, current: boolean }>) {
     const { client } = useClientContext();
