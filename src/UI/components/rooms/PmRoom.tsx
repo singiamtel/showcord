@@ -2,8 +2,10 @@ import ChatBox from '../single/Chatbox';
 import Chat from '../single/Chat';
 import { cn } from '@/lib/utils';
 import type { HTMLAttributes } from 'react';
+import useFocusChatboxOnClick from '@/UI/hooks/useFocusChatboxOnClick';
 
 export default function PmRoom(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
+    const { containerRef, onMouseUp } = useFocusChatboxOnClick<HTMLDivElement>();
     return (
         <div
             id="big-panel"
@@ -12,8 +14,8 @@ export default function PmRoom(props: Readonly<HTMLAttributes<HTMLDivElement>>) 
                 'flex break-normal h-screen',
             )}
         >
-            <div className={'dark:bg-gray-300 flex flex-col w-full max-w-full'}>
-                <div className="h-[90%] max-h-[90%] grow shrink min-h-0">
+            <div className={'dark:bg-gray-300 flex flex-col w-full max-w-full'} ref={containerRef}>
+                <div className="h-[90%] max-h-[90%] grow shrink min-h-0" onMouseUp={onMouseUp}>
                     <Chat
                     />
                 </div>

@@ -11,13 +11,13 @@ import {
     removeFirstCharacterIfNotLetter,
     toID,
 } from '../../../../utils/generic';
-import { FaCommentAlt, FaUserPlus } from 'react-icons/fa';
+import { FaCommentAlt, FaDoorOpen, FaUserPlus } from 'react-icons/fa';
 import { PiSwordBold } from 'react-icons/pi';
 import manageURL from '../../../../utils/manageURL';
 import { rankOrder, rankNames, type RankSymbol } from '../../../../client/user';
 import { useClientContext } from '../useClientContext';
+import { useRoomStore, type Client } from '@/client/client';
 import type { UserDetails } from '@/client/queryHandlers';
-import type { Client } from '@/client/client';
 
 const margin = 15;
 
@@ -33,6 +33,8 @@ export default function TrainerCard(
     }>,
 ) {
     const { client } = useClientContext();
+    const currentRoom = useRoomStore((state) => state.rooms.get(state.selectedRoomID));
+    const canInvite = !!currentRoom && (currentRoom.type === 'chat' || currentRoom.type === 'battle');
     const publicRooms = user?.rooms ?
         Object.entries(user.rooms).filter(([, v]) => !v.isPrivate) :
         [];
@@ -107,6 +109,17 @@ export default function TrainerCard(
                             icon={<PiSwordBold height={15} width={15} />}
                             onClick={() => {}}
                             disabled
+                        />
+                        <UserCardButton
+                            name="Invite"
+                            alt={canInvite ? `Invite this user to ${currentRoom?.name}` : 'Invite this user to the current room'}
+                            icon={<FaDoorOpen height={15} width={15} />}
+                            onClick={() => {
+                                if (!canInvite || !currentRoom) return;
+                                client.send(`/invite ${name}`, currentRoom.ID);
+                                close();
+                            }}
+                            disabled={!canInvite}
                         />
                         <UserCardButton
                             name="Friend"

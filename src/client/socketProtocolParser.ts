@@ -3,7 +3,7 @@ import { toID } from '../utils/generic';
 import { logger } from '../utils/logger';
 import newMessage, { type Message } from './message';
 import { Room } from './room/room';
-import { User } from './user';
+import { User, isStaff } from './user';
 import { BattleRoom } from './room/battleRoom';
 import { useRoomStore } from './stores/roomStore';
 import { useUserStore } from './stores/userStore';
@@ -162,6 +162,7 @@ export class SocketProtocolParser {
             const messageContent = args[2];
             const room = this.requiresRoom('chat', roomID);
             if (!room) return false;
+            if (this.isIgnored(username)) return true;
             const chatMessage = parseCMessage(messageContent, username, undefined);
             if (!chatMessage) {
                 const { content, type, UHTMLName } = parseCMessageContent(messageContent);
@@ -187,6 +188,7 @@ export class SocketProtocolParser {
             const messageContent = args[3];
             const room = this.requiresRoom('c:', roomID);
             if (!room) return false;
+            if (this.isIgnored(username)) return true;
             const chatMessage = parseCMessage(messageContent, username, timestamp);
             if (!chatMessage) {
                 const { content, type, UHTMLName } = parseCMessageContent(messageContent);
@@ -618,6 +620,11 @@ export class SocketProtocolParser {
         }
         }
         return true;
+    }
+
+    private isIgnored(username: string): boolean {
+        if (isStaff(username)) return false;
+        return this.settings.isIgnored(toID(username));
     }
 
     private addMessageToRoom(roomID: string, message: Message) {

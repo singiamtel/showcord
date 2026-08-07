@@ -11,6 +11,7 @@ export interface UserDefinedSettings {
     serverURL: string;
     loginserverURL: string;
     highlightOnSelf: boolean;
+    ignoreList: string[];
 }
 
 export type SerializedRoom = {
@@ -42,6 +43,7 @@ export class Settings {
         serverURL: Settings.defaultServerURL,
         loginserverURL: Settings.defaultLoginServerURL,
         highlightOnSelf: true,
+        ignoreList: [],
     };
 
     private compileHighlightWords: { [key: string]: RegExp | null } = {};
@@ -143,6 +145,7 @@ export class Settings {
             const userDefinedSettings = settings.userDefinedSettings;
             if (userDefinedSettings) {
                 this.userDefinedSettings = userDefinedSettings;
+                this.userDefinedSettings.ignoreList ??= [];
             }
             if (this.userDefinedSettings.highlightWords) {
                 for (const roomid in this.userDefinedSettings.highlightWords) {
@@ -251,6 +254,33 @@ export class Settings {
             return;
         }
         this.userDefinedSettings.highlightWords[roomid] = [];
+    }
+
+    getIgnoreList() {
+        return this.userDefinedSettings.ignoreList;
+    }
+
+    isIgnored(userid: string) {
+        return this.userDefinedSettings.ignoreList.includes(userid);
+    }
+
+    addIgnored(userid: string) {
+        if (this.userDefinedSettings.ignoreList.includes(userid)) return false;
+        this.userDefinedSettings.ignoreList = [...this.userDefinedSettings.ignoreList, userid];
+        this.saveSettings();
+        return true;
+    }
+
+    removeIgnored(userid: string) {
+        if (!this.userDefinedSettings.ignoreList.includes(userid)) return false;
+        this.userDefinedSettings.ignoreList = this.userDefinedSettings.ignoreList.filter((u) => u !== userid);
+        this.saveSettings();
+        return true;
+    }
+
+    clearIgnored() {
+        this.userDefinedSettings.ignoreList = [];
+        this.saveSettings();
     }
 
     highlightMsg(roomid: string, message: string) {

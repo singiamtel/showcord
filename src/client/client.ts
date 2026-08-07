@@ -25,6 +25,8 @@ import {
 import { QueryHandlers, type UserDetails, type RoomsResponse } from './queryHandlers';
 import { SocketProtocolParser } from './socketProtocolParser';
 import { parseHighlightCommand } from './commands/highlightCommands';
+import { parseIgnoreCommand } from './commands/ignoreCommands';
+import { parseRankCommand } from './commands/rankCommands';
 import { BattleRoom } from './room/battleRoom';
 import type { News } from '@/UI/components/NewsCard';
 
@@ -677,6 +679,29 @@ export class Client {
                 },
             }
         );
-        return handled;
+        if (handled) return true;
+
+        if (parseIgnoreCommand(
+            message,
+            this.settings,
+            {
+                getSelectedRoom: () => this.selectedRoom,
+                addMessageToRoom: (roomID: string, msg: Message) => {
+                    this.addMessage(roomID, msg);
+                },
+            }
+        )) return true;
+
+        return parseRankCommand(
+            message,
+            {
+                getSelectedRoom: () => this.selectedRoom,
+                getUsername: () => this.settings.username,
+                addMessageToRoom: (roomID: string, msg: Message) => {
+                    this.addMessage(roomID, msg);
+                },
+                formatName: (formatID: string) => this.formatName(formatID),
+            }
+        );
     }
 }

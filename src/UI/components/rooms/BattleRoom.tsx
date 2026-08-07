@@ -11,9 +11,11 @@ import BattleWindow from './battle/Battle';
 import BattleControls from './battle/BattleControls';
 import { ErrorBoundary } from 'react-error-boundary';
 import { ErrorHandler } from '../ErrorHandler';
+import useFocusChatboxOnClick from '@/UI/hooks/useFocusChatboxOnClick';
 
 export default function BattleRoom(props: Readonly<HTMLAttributes<HTMLDivElement>>) {
     const [userListOpen, setUserListOpen] = useState(false);
+    const { containerRef, onMouseUp } = useFocusChatboxOnClick<HTMLDivElement>();
 
     return (
         <div
@@ -48,6 +50,7 @@ export default function BattleRoom(props: Readonly<HTMLAttributes<HTMLDivElement
                 </button>
                 <div
                     className="dark:bg-gray-300 flex flex-col min-h-0 h-full w-full max-w-full"
+                    ref={containerRef}
                 >
                     <AnimatePresence initial={false} mode="wait">
                         {userListOpen &&
@@ -90,7 +93,9 @@ export default function BattleRoom(props: Readonly<HTMLAttributes<HTMLDivElement
                         </motion.div>
                         }
                     </AnimatePresence>
-                    <Chat className='p-2 h-full'/>
+                    <div className="grow shrink min-h-0" onMouseUp={onMouseUp}>
+                        <Chat className='p-2 h-full'/>
+                    </div>
                     <ChatBox className='p-2 grow'/>
                 </div>
 

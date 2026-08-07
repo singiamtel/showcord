@@ -25,7 +25,12 @@ type SearchBoxOffset = {
 const cmdsearchCache = new Map<string, string[]>();
 
 // Local commands with optional subcommands. These are merged with server results.
-const LOCAL_COMMANDS = ['/part', '/join', '/me', '/highlight', '/hl', '/timer'];
+const LOCAL_COMMANDS = [
+    '/part', '/join', '/me', '/highlight', '/hl', '/timer',
+    '/ignore', '/unignore', '/ignorelist', '/clearignore',
+    '/rank', '/ranking', '/rating', '/ladder',
+    '/invite',
+];
 const SUBCOMMANDS: Record<string, string[]> = {
     '/highlight': ['add', 'roomadd', 'delete', 'roomdelete', 'list', 'roomlist', 'clear', 'roomclear'],
     '/hl': ['add', 'roomadd', 'delete', 'roomdelete', 'list', 'roomlist', 'clear', 'roomclear'],
