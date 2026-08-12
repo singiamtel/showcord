@@ -33,6 +33,11 @@ export class AuthenticationManager {
         return this.loggedIn;
     }
 
+    private loginServerURL(path: string): URL {
+        const base = this.settings.loginServerURL;
+        return new URL(path, base.endsWith('/') ? base : `${base}/`);
+    }
+
     private waitForChallstr(): Promise<string> {
         const current = useUserStore.getState().challstr;
         if (current) return Promise.resolve(current);
@@ -52,9 +57,12 @@ export class AuthenticationManager {
         this.hasManuallyLoggedOut = false;
 
         const challstr = await this.waitForChallstr();
-        const url = `https://play.pokemonshowdown.com/api/oauth/authorize?redirect_uri=${location.origin}&client_id=${this.client_id}&challenge=${challstr}`;
+        const url = this.loginServerURL('oauth/authorize');
+        url.searchParams.set('redirect_uri', location.origin);
+        url.searchParams.set('client_id', this.client_id);
+        url.searchParams.set('challenge', challstr);
         const nWindow = window.open(
-            url,
+            url.toString(),
             undefined,
             'popup=1,width=700,height=700',
         );
@@ -176,9 +184,11 @@ export class AuthenticationManager {
             return false;
         }
         try {
-            const response = await fetch(
-                `${this.settings.loginServerURL}oauth/api/getassertion?challenge=${challstr}&token=${token}&client_id=${this.client_id}`,
-            );
+            const url = this.loginServerURL('oauth/api/getassertion');
+            url.searchParams.set('challenge', challstr);
+            url.searchParams.set('token', token);
+            url.searchParams.set('client_id', this.client_id);
+            const response = await fetch(url);
             return await this.parseLoginserverResponse(response);
         } catch (error) {
             logger.error('Error getting assertion from token', error);
@@ -192,9 +202,10 @@ export class AuthenticationManager {
             return false;
         }
         try {
-            const response = await fetch(
-                `${this.settings.loginServerURL}oauth/api/refreshtoken?token=${token}&client_id=${this.client_id}`,
-            );
+            const url = this.loginServerURL('oauth/api/refreshtoken');
+            url.searchParams.set('token', token);
+            url.searchParams.set('client_id', this.client_id);
+            const response = await fetch(url);
             const result = await this.parseLoginserverResponse(response);
             if (result) {
                 localStorage.setItem('ps-token', result);
