@@ -13,6 +13,19 @@ import { useClientContext } from '../components/single/useClientContext';
 import { useRoomStore } from '@/client/client';
 import { useRoomID } from '@/UI/components/RoomContext';
 
+function getServerButtonClass(value: string): string {
+    if (/^\/poll (?:vote|(?:de)?select) \d+$/.test(value)) {
+        return 'showdown-poll-option';
+    }
+    if (value === '/poll submit') {
+        return 'showdown-poll-submit';
+    }
+    if (value === '/poll results') {
+        return 'showdown-poll-results';
+    }
+    return 'border border-gray-601 dark:border-gray-border font-bold p-1 m-1 rounded text-sm';
+}
+
 export default function HTML(
     { message, raw }: Readonly<{ message: string; raw?: boolean }>,
 ) {
@@ -45,7 +58,8 @@ export default function HTML(
                         onClick={() => {
                             client.send(attribs.value, currentRoom?.ID || '');
                         }}
-                        className="border border-gray-601 dark:border-gray-border font-bold p-1 m-1 rounded text-sm"
+                        className={getServerButtonClass(attribs.value)}
+                        title={attribs.title}
                         data-parsed="true"
                     >
                         {(domToReact as (nodes: unknown[], options?: unknown) => React.ReactNode)(children, parserOptions)}
@@ -154,7 +168,7 @@ export default function HTML(
         allowedAttributes: {
             'img': ['src', 'height', 'width'],
             'video': ['src', 'height', 'width', 'controls'],
-            'button': ['value'],
+            'button': ['value', 'title'],
             'a': ['href'],
             '*': ['style', 'class'],
         },
