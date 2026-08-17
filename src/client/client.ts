@@ -32,7 +32,6 @@ import type { News } from '@/UI/components/NewsCard';
 
 type ClientConstructor = {
     server_url?: string;
-    loginserver_url?: string;
     autoLogin?: boolean;
     skipVitestCheck?: boolean;
     runtime?: ClientRuntime;
@@ -206,7 +205,6 @@ export class Client {
             if (error instanceof DOMException) {
                 logger.warn('DOMException: ', error);
                 this.settings.serverURL = Settings.defaultServerURL;
-                this.settings.loginServerURL = Settings.defaultLoginServerURL;
                 this.runtime.reloadWindow();
             }
             logger.error('Unhandled error', error);

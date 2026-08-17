@@ -9,7 +9,6 @@ export interface UserDefinedSettings {
     chatStyle: 'compact' | 'normal'; // TODO: implement normal style
     avatar: string;
     serverURL: string;
-    loginserverURL: string;
     highlightOnSelf: boolean;
     ignoreList: string[];
 }
@@ -30,7 +29,6 @@ export type SavedSettings = {
 export class Settings {
     static readonly defaultRooms = [];
     static readonly defaultServerURL = 'wss://sim3.psim.us:443/showdown/websocket';
-    static readonly defaultLoginServerURL = 'https://play.pokemonshowdown.com/api/';
     static readonly defaultNewsURL = 'https://pokemonshowdown.com/news.json';
 
     readonly version = 2; // used to invalidate settings when the format changes
@@ -41,7 +39,6 @@ export class Settings {
         chatStyle: 'normal',
         avatar: '',
         serverURL: Settings.defaultServerURL,
-        loginserverURL: Settings.defaultLoginServerURL,
         highlightOnSelf: true,
         ignoreList: [],
     };
@@ -82,15 +79,6 @@ export class Settings {
 
     set serverURL(serverURL: string) {
         this.userDefinedSettings.serverURL = serverURL;
-        this.saveSettings();
-    }
-
-    get loginServerURL() {
-        return this.userDefinedSettings.loginserverURL || Settings.defaultLoginServerURL;
-    }
-
-    set loginServerURL(loginServerURL: string) {
-        this.userDefinedSettings.loginserverURL = loginServerURL;
         this.saveSettings();
     }
 
@@ -144,7 +132,11 @@ export class Settings {
             this.name = settings.username;
             const userDefinedSettings = settings.userDefinedSettings;
             if (userDefinedSettings) {
-                this.userDefinedSettings = userDefinedSettings;
+                const {
+                    loginserverURL: _legacyLoginserverURL,
+                    ...currentSettings
+                } = userDefinedSettings as UserDefinedSettings & { loginserverURL?: string };
+                this.userDefinedSettings = { ...this.userDefinedSettings, ...currentSettings };
                 this.userDefinedSettings.ignoreList ??= [];
             }
             if (this.userDefinedSettings.highlightWords) {

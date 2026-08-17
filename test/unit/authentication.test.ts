@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { AuthenticationManager } from '@/client/authentication';
 import { useUserStore } from '@/client/stores/userStore';
 import type { Settings } from '@/client/settings';
@@ -19,7 +19,6 @@ describe('Authentication Manager', () => {
 
         mockSettings = {
             username: 'TestUser',
-            loginServerURL: 'https://play.pokemonshowdown.com/',
             logout: vi.fn(),
         } as any;
 
@@ -29,6 +28,11 @@ describe('Authentication Manager', () => {
             onLoginSuccess: mockOnLoginSuccess as () => void,
             onLoginFailure: mockOnLoginFailure as (error: string) => void,
         });
+    });
+
+    afterEach(() => {
+        vi.unstubAllEnvs();
+        vi.restoreAllMocks();
     });
 
     describe('isLoggedIn', () => {
@@ -48,6 +52,27 @@ describe('Authentication Manager', () => {
         it('should update auto-login preference', () => {
             authManager.setShouldAutoLogin(false);
             authManager.setShouldAutoLogin(true);
+        });
+    });
+
+    describe('login', () => {
+        it('should use the configured login server and OAuth client ID', async () => {
+            vi.stubEnv('VITE_LOGINSERVER_URL', 'https://login.example.test/custom/');
+            vi.stubEnv('VITE_OAUTH_CLIENTID', 'test-client-id');
+            const openSpy = vi.spyOn(window, 'open').mockReturnValue(null);
+            const configuredAuthManager = new AuthenticationManager(mockSettings, {
+                sendMessage: mockSendMessage as (message: string) => void,
+                setUsername: mockSetUsername as (username: string) => void,
+            });
+            configuredAuthManager.setChallstr('test-challenge');
+
+            await configuredAuthManager.login();
+
+            const loginURL = new URL(openSpy.mock.calls[0][0] as string);
+            expect(loginURL.origin).toBe('https://login.example.test');
+            expect(loginURL.pathname).toBe('/custom/oauth/authorize');
+            expect(loginURL.searchParams.get('client_id')).toBe('test-client-id');
+            expect(loginURL.searchParams.get('challenge')).toBe('test-challenge');
         });
     });
 

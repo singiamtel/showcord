@@ -10,8 +10,11 @@ export interface AuthenticationCallbacks {
     onLoginFailure?: (error: string) => void;
 }
 
+const DEFAULT_LOGIN_SERVER_URL = 'https://play.pokemonshowdown.com/api/';
+
 export class AuthenticationManager {
-    private client_id = import.meta.env.VITE_OAUTH_CLIENTID;
+    private readonly clientId = import.meta.env.VITE_OAUTH_CLIENTID;
+    private readonly loginServerBaseURL = import.meta.env.VITE_LOGINSERVER_URL || DEFAULT_LOGIN_SERVER_URL;
     private shouldAutoLogin: boolean = true;
     private loggedIn: boolean = false;
     private hasManuallyLoggedOut: boolean = false;
@@ -34,7 +37,7 @@ export class AuthenticationManager {
     }
 
     private loginServerURL(path: string): URL {
-        const base = this.settings.loginServerURL;
+        const base = this.loginServerBaseURL;
         return new URL(path, base.endsWith('/') ? base : `${base}/`);
     }
 
@@ -59,7 +62,7 @@ export class AuthenticationManager {
         const challstr = await this.waitForChallstr();
         const url = this.loginServerURL('oauth/authorize');
         url.searchParams.set('redirect_uri', location.origin);
-        url.searchParams.set('client_id', this.client_id);
+        url.searchParams.set('client_id', this.clientId);
         url.searchParams.set('challenge', challstr);
         const nWindow = window.open(
             url.toString(),
@@ -187,7 +190,7 @@ export class AuthenticationManager {
             const url = this.loginServerURL('oauth/api/getassertion');
             url.searchParams.set('challenge', challstr);
             url.searchParams.set('token', token);
-            url.searchParams.set('client_id', this.client_id);
+            url.searchParams.set('client_id', this.clientId);
             const response = await fetch(url);
             return await this.parseLoginserverResponse(response);
         } catch (error) {
@@ -204,7 +207,7 @@ export class AuthenticationManager {
         try {
             const url = this.loginServerURL('oauth/api/refreshtoken');
             url.searchParams.set('token', token);
-            url.searchParams.set('client_id', this.client_id);
+            url.searchParams.set('client_id', this.clientId);
             const response = await fetch(url);
             const result = await this.parseLoginserverResponse(response);
             if (result) {
