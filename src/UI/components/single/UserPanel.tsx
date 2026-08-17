@@ -4,19 +4,20 @@ import { faCog } from '@fortawesome/free-solid-svg-icons';
 import { UserDetails } from '../UserDetails';
 import { client } from '@/client/singleton';
 import { useUserStore, useAppStore } from '@/client/client';
+import { Button } from '@/components/ui/button';
 
 function LoginButton() {
     return (
-        <button
+        <Button
             type="button"
             onClick={() => {
                 client.login();
                 notificationsEngine.askPermission();
             }}
-            className="font-bold rounded px-2 py-1 w-full"
+            className="min-w-0 flex-1 font-bold"
         >
-        Login
-        </button>
+            Login
+        </Button>
     );
 }
 
@@ -61,9 +62,9 @@ export default function UserPanel() {
                 className={'rounded text-lg flex flex-row items-center h-auto w-full ' +
                     (user ? ' w-auto p-2 ' : 'w-full')}
             >
-                <div className="flex flex-row justify-between items-center w-full">
+                <div className="flex flex-row items-center gap-3 w-full">
                     <RenderUserContent/>
-                    <button type="button" className="flex flex-row justify-center items-center cursor-pointer hover-color" onClick={() => client.openSettings()}>
+                    <button type="button" className="shrink-0 flex flex-row justify-center items-center cursor-pointer hover-color" onClick={() => client.openSettings()}>
                         <FontAwesomeIcon icon={faCog} />
                     </button>
                 </div>
