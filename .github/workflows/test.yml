@@ -10,7 +10,7 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NODE_VERSION: "25.6.1"
+  NODE_VERSION: "26.12.1"
 
 jobs:
   lint:
