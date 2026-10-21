@@ -1,5 +1,12 @@
 import { test, expect } from '@playwright/test';
 
+test.beforeEach(async ({ page }) => {
+    // Keep this shell check independent of the external news server and its CORS policy.
+    await page.route('https://pokemonshowdown.com/news.json', route =>
+        route.fulfill({ json: [] })
+    );
+});
+
 test('page loads without JS errors', async ({ page }) => {
     const errors: string[] = [];
     page.on('pageerror', err => errors.push(err.message));
