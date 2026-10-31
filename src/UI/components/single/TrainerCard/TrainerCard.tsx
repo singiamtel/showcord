@@ -73,8 +73,8 @@ export default function TrainerCard(
                 damping: 25,
             }}
         >
-            <div id="usercard-header" className="flex flex-row justify-between">
-                <div id="usercard-user" className="w-full">
+            <div id="usercard-header" className="flex flex-row justify-between gap-4">
+                <div id="usercard-user" className="min-w-0 flex-1 break-words">
                     <div id="usercard-user-name">
                         <strong>
                             <a
@@ -90,47 +90,8 @@ export default function TrainerCard(
                         </div>
                         <RanksDisplay localRank={localRank} globalRank={globalRank} />
                     </div>
-                    <div
-                        id="usercard-action-buttons"
-                        className="p-4 flex flex-row w-full justify-between"
-                    >
-                        <UserCardButton
-                            name="Chat"
-                            alt="Chat with this user"
-                            icon={<FaCommentAlt height={15} width={15} />}
-                            onClick={() => {
-                                client.createPM(name);
-                                close();
-                            }}
-                        />
-                        <UserCardButton
-                            name="Challenge"
-                            alt="Challenge to a non-rated battle"
-                            icon={<PiSwordBold height={15} width={15} />}
-                            onClick={() => {}}
-                            disabled
-                        />
-                        <UserCardButton
-                            name="Invite"
-                            alt={canInvite ? `Invite this user to ${currentRoom?.name}` : 'Invite this user to the current room'}
-                            icon={<FaDoorOpen height={15} width={15} />}
-                            onClick={() => {
-                                if (!canInvite || !currentRoom) return;
-                                client.send(`/invite ${name}`, currentRoom.ID);
-                                close();
-                            }}
-                            disabled={!canInvite}
-                        />
-                        <UserCardButton
-                            name="Friend"
-                            alt="Add this user as a friend"
-                            icon={<FaUserPlus height={15} width={15} />}
-                            onClick={() => {}}
-                            disabled
-                        />
-                    </div>
                 </div>
-                <div id="usercard-avatar" className="w-20 h-20">
+                <div id="usercard-avatar" className="w-20 h-20 shrink-0">
                     {user ?
                         (
                             <img
@@ -138,11 +99,50 @@ export default function TrainerCard(
                                     Sprites.getAvatar(user.avatar) :
                                     Sprites.getAvatar(167)}
                                 alt="avatar"
-                                className="w-20 h-20"
+                                className="w-full h-full object-contain"
                             />
                         ) :
                         ''}
                 </div>
+            </div>
+            <div
+                id="usercard-action-buttons"
+                className="py-4 flex flex-row flex-wrap gap-2 w-full justify-between"
+            >
+                <UserCardButton
+                    name="Chat"
+                    alt="Chat with this user"
+                    icon={<FaCommentAlt height={15} width={15} />}
+                    onClick={() => {
+                        client.createPM(name);
+                        close();
+                    }}
+                />
+                <UserCardButton
+                    name="Challenge"
+                    alt="Challenge to a non-rated battle"
+                    icon={<PiSwordBold height={15} width={15} />}
+                    onClick={() => {}}
+                    disabled
+                />
+                <UserCardButton
+                    name="Invite"
+                    alt={canInvite ? `Invite this user to ${currentRoom?.name}` : 'Invite this user to the current room'}
+                    icon={<FaDoorOpen height={15} width={15} />}
+                    onClick={() => {
+                        if (!canInvite || !currentRoom) return;
+                        client.send(`/invite ${name}`, currentRoom.ID);
+                        close();
+                    }}
+                    disabled={!canInvite}
+                />
+                <UserCardButton
+                    name="Friend"
+                    alt="Add this user as a friend"
+                    icon={<FaUserPlus height={15} width={15} />}
+                    onClick={() => {}}
+                    disabled
+                />
             </div>
             {
                 <div id="usercard-rooms" className="text-sm">
