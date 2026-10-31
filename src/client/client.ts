@@ -22,7 +22,7 @@ import {
     getNotifications as getNotificationsInternal,
     clearNotifications as clearNotificationsInternal,
 } from './roomManagement';
-import { QueryHandlers, type UserDetails, type RoomsResponse } from './queryHandlers';
+import { QueryHandlers, type UserDetails, type RoomsResponse, type FriendsResponse } from './queryHandlers';
 import { SocketProtocolParser } from './socketProtocolParser';
 import { parseHighlightCommand } from './commands/highlightCommands';
 import { parseIgnoreCommand } from './commands/ignoreCommands';
@@ -408,6 +408,13 @@ export class Client {
         return this.queryHandlers.queryNews();
     }
 
+    queryFriends(): Promise<FriendsResponse> {
+        if (!this.socket || this.socket.readyState !== 1) {
+            return Promise.resolve({ status: 'unavailable' });
+        }
+        return this.queryHandlers.queryFriends();
+    }
+
     queryCmdsearch(prefix: string): Promise<string[]> {
         return this.queryHandlers.queryCmdsearch(prefix);
     }
@@ -507,6 +514,8 @@ export class Client {
     }
 
     logout() {
+        this.queryHandlers.cancelFriends();
+        useUserStore.getState().setUser(undefined);
         this.authManager.logout();
     }
 
@@ -516,6 +525,8 @@ export class Client {
 
     stop() {
         this.deliberateClose = true;
+        this.queryHandlers.cancelFriends(true);
+        useUserStore.getState().setUser(undefined);
         if (this.reconnectTimer !== undefined) {
             clearTimeout(this.reconnectTimer);
             this.reconnectTimer = undefined;
@@ -565,6 +576,10 @@ export class Client {
     }
 
     private setUsername(username: string) {
+        if (toID(username) !== this.settings.userID) {
+            this.queryHandlers.cancelFriends();
+            useUserStore.getState().setUser(undefined);
+        }
         this.settings.username = username;
         const messagesMap = useMessageStore.getState().rooms;
         for (const [roomID, entry] of Object.entries(messagesMap)) {
@@ -602,6 +617,8 @@ export class Client {
                 logger.warn('Socket closed intentionally');
                 return;
             }
+            this.queryHandlers.cancelFriends(true);
+            useUserStore.getState().setUser(undefined);
             logger.warn('Socket closed unexpectedly, starting reconnection');
             useAppStore.getState().setConnected(false);
             this._startReconnect();

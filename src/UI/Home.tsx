@@ -7,6 +7,7 @@ import {
     useRef,
     useState,
 } from 'react';
+import FriendsList from './components/FriendsList';
 import RoomCard, { type RoomQuery } from './components/RoomCard';
 import { InfinitySpin } from 'react-loader-spinner';
 import MiniSearch from 'minisearch';
@@ -433,7 +434,7 @@ export default function Home(props: Readonly<HTMLAttributes<'div'>>) {
                     <RoomList className="flex-1 md:min-h-0" />
                 </motion.div>
 
-                {/* Right sidebar — 3 cols: UserSearch + SocialLinks */}
+                {/* Right sidebar — 3 cols: UserSearch + FriendsList + SocialLinks */}
                 <motion.div
                     className="md:col-span-3 flex flex-col gap-4 md:min-h-0 order-2 md:order-none"
                     custom={3}
@@ -442,6 +443,7 @@ export default function Home(props: Readonly<HTMLAttributes<'div'>>) {
                     variants={fadeUp}
                 >
                     <UserSearch />
+                    <FriendsList />
                     <SocialLinks />
                 </motion.div>
             </div>
