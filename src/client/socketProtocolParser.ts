@@ -48,6 +48,15 @@ export class SocketProtocolParser {
             if (idx === 0 && line.startsWith('>')) {
                 continue;
             }
+            // Not yet represented by @pkmn/protocol; preserve the entire JSON payload.
+            if (line.startsWith('|queryresponse|friends|')) {
+                try {
+                    this.queryHandlers.handleFriendsResponse(JSON.parse(line.slice('|queryresponse|friends|'.length)));
+                } catch {
+                    this.queryHandlers.handleFriendsResponse(undefined);
+                }
+                continue;
+            }
             if (line.startsWith('|queryresponse|cmdsearch|')) {
                 try {
                     const commands = JSON.parse(line.slice('|queryresponse|cmdsearch|'.length));
@@ -344,6 +353,7 @@ export class SocketProtocolParser {
                 const username = args[1];
                 const named = args[2];
                 const avatar = args[3];
+                if (named !== '1') useUserStore.getState().setUser(undefined);
                 this.callbacks.setUsername(username);
                 if (!username.trim().toLowerCase().startsWith('guest')) {
                     assert(named === '1', 'Couldn\'t guard against guest');
