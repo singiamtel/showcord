@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { FaCommentAlt, FaSyncAlt } from 'react-icons/fa';
 import type { FriendsResponse } from '@/client/queryHandlers';
 import { useUserStore } from '@/client/stores/userStore';
 import { useAppStore } from '@/client/stores/appStore';
@@ -25,14 +26,16 @@ function FriendsForUser() {
         <>
             <button
                 type="button"
-                className="text-xs text-blue-300 hover:underline disabled:opacity-50 mb-2 shrink-0 self-start"
+                className="inline-flex h-8 w-8 items-center justify-center rounded text-sm text-blue-300 hover:bg-blue-300/10 focus-visible:outline-2 focus-visible:outline-blue-300 disabled:opacity-50 mb-2 shrink-0 self-start"
+                aria-label="Refresh friends"
+                title="Refresh friends"
                 disabled={!result}
                 onClick={() => {
                     setResult(undefined);
                     setRefresh(value => value + 1);
                 }}
             >
-                Refresh friends
+                <FaSyncAlt aria-hidden="true" />
             </button>
             <div aria-live="polite" className="text-xs text-gray-125 overflow-y-auto min-h-0">
                 {!result && <p>Loading friends…</p>}
@@ -53,11 +56,12 @@ function FriendsForUser() {
                                 </div>
                                 <button
                                     type="button"
-                                    className="text-blue-300 hover:underline shrink-0"
+                                    className="inline-flex h-8 w-8 items-center justify-center rounded text-sm text-blue-300 hover:bg-blue-300/10 focus-visible:outline-2 focus-visible:outline-blue-300 shrink-0"
                                     aria-label={`Message ${friend.name}`}
+                                    title={`Message ${friend.name}`}
                                     onClick={() => client.createPM(friend.userid)}
                                 >
-                                    Message
+                                    <FaCommentAlt aria-hidden="true" />
                                 </button>
                             </li>
                         ))}

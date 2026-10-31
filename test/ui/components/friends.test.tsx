@@ -41,7 +41,7 @@ describe('Friends list', () => {
         expect(screen.getByText('Loading friends…')).toBeInTheDocument();
         await screen.findByRole('button', { name: 'Bob' });
         expect(screen.getAllByRole('listitem').map(row => row.textContent)).toEqual([
-            'BobBusyMessage', 'CarolAwayMessage', 'AliceOfflineMessage',
+            'BobBusy', 'CarolAway', 'AliceOffline',
         ]);
         fireEvent.click(screen.getByRole('button', { name: 'Bob' }));
         expect(clickUsername).toHaveBeenCalledOnce();
